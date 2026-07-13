@@ -809,12 +809,12 @@ const DIET_REVIEW_PHOTOS = [
 ];
 
 const DIET_CALENDAR_WEEKDAYS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-// 2026-07-01 为周三；演示：1–20 有饮食照片，21–31 为空占位
+// 2026-07-01 为周三；部分日期无记录（无图）
 const DIET_CALENDAR_YEAR = 2026;
 const DIET_CALENDAR_MONTH = 7;
 const DIET_CALENDAR_DAYS_IN_MONTH = 31;
 const DIET_CALENDAR_START_WEEKDAY = 3; // 0=周日
-const DIET_CALENDAR_PHOTO_UNTIL = 20;
+const DIET_CALENDAR_PHOTO_DAYS = new Set([1, 2, 3, 5, 6, 8, 9, 11, 12, 13, 14, 16, 17, 19, 20, 22, 23, 25]);
 
 const DIET_TARGET_GOAL = 1237;
 const DIET_TARGET_DAYS = [
@@ -894,7 +894,7 @@ function DietMonthCalendar(){
     cells.push({key:'pad-' + i, empty:true});
   }
   for(let day = 1; day <= DIET_CALENDAR_DAYS_IN_MONTH; day++){
-    const hasPhoto = day <= DIET_CALENDAR_PHOTO_UNTIL;
+    const hasPhoto = DIET_CALENDAR_PHOTO_DAYS.has(day);
     cells.push({
       key:'day-' + day,
       day,
@@ -1057,11 +1057,11 @@ function DietTargetCard(){
         <button
           type="button"
           className="review-card-head-btn is-budget"
-          title="点击可修改推荐预算"
-          aria-label={'推荐预算 ' + DIET_TARGET_GOAL + '，点击可修改'}
+          title="点击可修改热量目标"
+          aria-label={'热量目标 ' + DIET_TARGET_GOAL + '，点击可修改'}
           onClick={(event)=>event.stopPropagation()}
         >
-          <span>推荐预算 {DIET_TARGET_GOAL}</span>
+          <span>热量目标 {DIET_TARGET_GOAL}</span>
           <i className="review-diet-budget-tip" aria-hidden="true">!</i>
         </button>
       )}
