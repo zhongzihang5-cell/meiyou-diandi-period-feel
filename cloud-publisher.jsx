@@ -90,7 +90,7 @@ function DockWavePlaceholder({show, focused}){
 
 function QuickCardFan({
   open, selected, closingToMood, onFabTap, onSelectCard, onMoodPick, onSymptomPick, onDietPick, onClose,
-  onSymptomSubmit, onWeightSubmit, onFoodSubmit, weightPickerKey, fabGuidePulse = false,
+  onSymptomSubmit, onWeightSubmit, onFoodSubmit, weightPickerKey, fabGuidePulse = false, hideFab = false,
 }){
   const QuickCardIcon = window.QuickCardIcon;
   const QuickSymptomPicker = window.QuickSymptomPicker;
@@ -201,7 +201,7 @@ function QuickCardFan({
         );
       })}
 
-      <button
+      {!hideFab ? <button
         type="button"
         className={'quick-card-fab'+(open ? ' is-open' : '')+(selected ? ' is-covered' : '')+(fabGuidePulse ? ' is-guide-pulse' : '')}
         onClick={onFabTap}
@@ -211,7 +211,7 @@ function QuickCardFan({
         {fabGuidePulse ? <span className="quick-card-fab-pulse-ring" aria-hidden="true"/> : null}
         <span className="quick-card-fab-gray" aria-hidden="true"/>
         <span className="quick-card-fab-plus" aria-hidden="true"/>
-      </button>
+      </button> : null}
     </div>
   );
 }
@@ -221,8 +221,8 @@ function DockPublisher({
   onFoodConfirm, onDietCapture,
   onVoiceDone, onPhoto, onDockExpandedChange, onCameraActiveChange, activeTab, showScheme3Bubble,
   highlightScheme3Input, dockPlaceholder, defaultInputMode = 'voice',
-  demoPhase, isDemoRunning, hideQuickFan = false,
-  feedingQuickItems = null, onFeedingQuickSelect,
+  demoPhase, isDemoRunning, hideQuickFan = false, hideQuickFab = false,
+  feedingQuickItems = null, feedingQuickLabel = '快捷记录', onFeedingQuickSelect,
   emptyPreviewGuideStep = 0, onEmptyPreviewGuideAdvance, onEmptyPreviewGuideDismiss, fabGuidePulse = false,
 }){
   const I = window.Icon;
@@ -447,6 +447,29 @@ function DockPublisher({
     if(dy > 18) setFeedingExpanded(false);
   };
 
+  const handleDockQuickItemSelect = (item)=>{
+    if(item?.action === 'weight'){
+      setWeightPickerKey(k=>k + 1);
+      setQuickOpen(false);
+      setQuickSelected('weight');
+      return;
+    }
+    if(item?.action === 'symptom'){
+      handleSymptomFanTap();
+      return;
+    }
+    if(item?.action === 'mood'){
+      handleMoodFanTap();
+      return;
+    }
+    if(item?.action === 'diet'){
+      setQuickOpen(false);
+      setQuickSelected('diet');
+      return;
+    }
+    onFeedingQuickSelect?.(item);
+  };
+
   return (
     <>
       {!hideQuickFan && (
@@ -466,6 +489,7 @@ function DockPublisher({
           onFoodSubmit={handleQuickFoodSubmit}
           weightPickerKey={weightPickerKey}
           fabGuidePulse={fabGuidePulse}
+          hideFab={hideQuickFab}
         />
       </div>
       )}
@@ -531,7 +555,7 @@ function DockPublisher({
           ) : (
           <div className={'dock-bar is-path-dock'+(showFeedingQuick ? ' has-feeding-quick' : '')}>
             {showFeedingQuick ? (
-              <div className="dock-feeding-quick" aria-label="宝宝喂养快捷记录">
+              <div className="dock-feeding-quick" aria-label={feedingQuickLabel}>
                 <button
                   type="button"
                   className="dock-feeding-handle"
@@ -547,7 +571,7 @@ function DockPublisher({
                       key={item.id}
                       type="button"
                       className="dock-feeding-quick-item"
-                      onClick={()=>onFeedingQuickSelect?.(item)}
+                      onClick={()=>handleDockQuickItemSelect(item)}
                     >
                       <span className="dock-feeding-quick-icon" aria-hidden="true">
                         {item.iconNode || item.icon || '🍼'}

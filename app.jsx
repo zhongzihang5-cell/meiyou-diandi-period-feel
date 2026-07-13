@@ -108,6 +108,17 @@ const BABY_FEEDING_QUICK_ITEMS = [
   { id: 'symptom', label: '症状', cardIcon:'⭐', iconSrc:'assets/baby-feeding-icons/other-event.png', color:'#9B6BE8', value:'无异常', text:'症状：无异常' },
 ];
 
+const PERIOD_DOCK_QUICK_ITEMS = [
+  { id:'weight', label:'体重', action:'weight', iconSrc:'assets/record-weight.png' },
+  { id:'symptom', label:'症状', action:'symptom', iconSrc:'assets/record-symptom.png' },
+  { id:'mood', label:'心情', action:'mood', iconSrc:'assets/record-mood.png' },
+  { id:'diet', label:'饮食', action:'diet', iconSrc:'assets/record-diet.png' },
+  { id:'stool', label:'便便', icon:'💩', text:'便便' },
+  { id:'water', label:'喝水', icon:'🥤', text:'喝水' },
+  { id:'exercise', label:'运动', icon:'🏃', text:'运动' },
+  { id:'account', label:'记账', icon:'💰', text:'记账' },
+];
+
 function BabyFeedingQuickIcon({type}){
   if(type === 'breast'){
     return (
@@ -274,7 +285,7 @@ function App(){
     }
     return initial.activeTab;
   });
-  const [recordLifeMode, setRecordLifeMode] = useState('育儿');
+  const [recordLifeMode, setRecordLifeMode] = useState('经期');
   const [babyVoiceSession, setBabyVoiceSession] = useState({active:false, cancel:false, textLength:0});
   const [babyVoiceSuccess, setBabyVoiceSuccess] = useState({show:false});
   const [babyVoiceCoachHidden, setBabyVoiceCoachHidden] = useState(false);
@@ -527,7 +538,7 @@ function App(){
         if(!el) return;
         const reserve = el.classList.contains('has-baby-discover')
           ? 220
-          : el.classList.contains('has-baby-feeding-strip')
+          : el.classList.contains('has-dock-quick-strip')
             ? 176
             : 28;
         const anchor = el.querySelector('.tl-rail-node.is-feed-last') || timelineEndRef.current;
@@ -1296,6 +1307,16 @@ function App(){
     setTimeout(()=>scrollTimelineToBottom('smooth'), 80);
   };
 
+  const handlePeriodDockQuickSelect = (item)=>{
+    if(!item) return;
+    submitQuickMark({
+      text:item.text || item.label,
+      label:item.label,
+      emoji:item.icon || '✓',
+    });
+    setTimeout(()=>scrollTimelineToBottom('smooth'), 80);
+  };
+
   React.useEffect(()=>{
     setTimeline(blocks=>refreshBabyFeedingLatestMarks(blocks));
   }, []);
@@ -2042,6 +2063,13 @@ function App(){
     && babyFeedingEntryActive
     && !isSearchActive
     && !voiceTranscribe;
+  const showPeriodQuickStrip = showRecordShell
+    && !showRecordEmpty
+    && !showRecordBlank
+    && recordLifeMode === '经期'
+    && !isSearchActive
+    && !voiceTranscribe;
+  const showDockQuickStrip = showBabyFeedingQuickStrip || showPeriodQuickStrip;
   const showBabyFeedingHeader = showRecordShell
     && !showRecordEmpty
     && !showRecordBlank
@@ -2056,10 +2084,17 @@ function App(){
           : <BabyFeedingQuickIcon type={item.id}/>,
       }))
     : null;
+  const periodDockQuickItems = showPeriodQuickStrip
+    ? PERIOD_DOCK_QUICK_ITEMS.map(item=>({
+        ...item,
+        iconNode:item.iconSrc ? <img src={item.iconSrc} alt="" /> : null,
+      }))
+    : null;
+  const dockQuickItems = babyFeedingDockItems || periodDockQuickItems;
 
   return (
     <>
-      <div className={'phone' + (homeDetailOpen ? ' is-home-detail-open' : '') + (showBabyFeedingQuickStrip ? ' is-baby-feeding-entry' : '')}>
+      <div className={'phone' + (homeDetailOpen ? ' is-home-detail-open' : '') + (showDockQuickStrip ? ' is-dock-quick-entry' : '')}>
         <StatusBar/>
 
       {showHome && HomePage && (
@@ -2239,7 +2274,7 @@ function App(){
           className={
             'suiji-stream'
             + (recordLifeMode === '育儿' && !isSearchActive && babyDiscoverVisible && !babyFeedingEntryActive ? ' has-baby-discover' : '')
-            + (showBabyFeedingQuickStrip ? ' has-baby-feeding-strip' : '')
+            + (showDockQuickStrip ? ' has-dock-quick-strip' : '')
           }
           ref={streamRef}
         >
@@ -2290,8 +2325,10 @@ function App(){
           activeTab={activeTab}
           defaultInputMode="voice"
           hideQuickFan={showBabyFeedingQuickStrip}
-          feedingQuickItems={babyFeedingDockItems}
-          onFeedingQuickSelect={handleBabyFeedingQuickSelect}
+          hideQuickFab={showPeriodQuickStrip}
+          feedingQuickItems={dockQuickItems}
+          feedingQuickLabel={showPeriodQuickStrip ? '经期快捷记录' : '宝宝喂养快捷记录'}
+          onFeedingQuickSelect={showPeriodQuickStrip ? handlePeriodDockQuickSelect : handleBabyFeedingQuickSelect}
           demoPhase={demoPhase}
           isDemoRunning={isDemoRunning}
         />

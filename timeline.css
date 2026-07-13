@@ -671,11 +671,11 @@
 .suiji-stream.has-baby-discover{
   padding-bottom:calc(200px + 190px + var(--my-safe-bottom));
 }
-.suiji-stream.has-baby-feeding-strip{
+.suiji-stream.has-dock-quick-strip{
   padding-bottom:calc(260px + var(--baby-feeding-strip-h, 96px) + var(--my-safe-bottom));
 }
-.phone.is-baby-feeding-entry .dock-wrap,
-.phone.is-baby-feeding-entry .dock-wrap.is-mood-expanded{
+.phone.is-dock-quick-entry .dock-wrap,
+.phone.is-dock-quick-entry .dock-wrap.is-mood-expanded{
   bottom:calc(var(--my-tabbar-h) + 12px);
   z-index:90;
 }

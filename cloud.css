@@ -1329,6 +1329,8 @@
   background:transparent;
   box-shadow:none;
   overflow:hidden;
+  font-size:28px;
+  line-height:1;
 }
 .dock-feeding-quick-icon svg,
 .dock-feeding-quick-icon img{
