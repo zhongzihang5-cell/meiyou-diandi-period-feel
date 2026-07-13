@@ -81,6 +81,268 @@
   background:rgba(255,149,0,0.12);
   color:var(--my-warning);
 }
+.review-card-icon.is-diet-photo{
+  background:rgba(180,140,220,0.14);
+  color:#9b74c4;
+}
+.review-card-icon.is-diet-target{
+  background:rgba(255,77,136,0.10);
+  color:var(--my-brand-red);
+}
+.review-card-head-btn{
+  margin-left:auto;
+  height:24px;
+  padding:0 10px;
+  border:0;
+  border-radius:12px;
+  background:rgba(0,0,0,0.04);
+  color:var(--my-text-secondary);
+  font-size:12px;
+  font-weight:500;
+  font-family:inherit;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+}
+.review-card-head-btn:active{opacity:0.72}
+.review-card-head-btn.is-budget{
+  padding-right:8px;
+}
+.review-diet-budget-tip{
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,77,136,0.12);
+  color:var(--my-brand-red);
+  font-size:10px;
+  font-weight:500;
+  font-style:normal;
+  line-height:1;
+}
+
+.review-legend-item.is-diet-meal i{
+  width:8px;
+  height:8px;
+  border-radius:2px;
+  border:0;
+}
+
+.review-card-more-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height:18px;
+  padding:0 6px;
+  margin-right:2px;
+  border-radius:4px;
+  background:linear-gradient(135deg, #ffb84d, #ff8a3d);
+  color:#fff;
+  font-size:10px;
+  font-weight:500;
+  letter-spacing:0.2px;
+  flex:0 0 auto;
+}
+
+.review-diet-calendar{
+  margin-top:4px;
+}
+.review-diet-calendar-weekdays{
+  display:grid;
+  grid-template-columns:repeat(7, 1fr);
+  gap:4px;
+  margin-bottom:6px;
+}
+.review-diet-calendar-weekdays span{
+  text-align:center;
+  font-size:11px;
+  line-height:16px;
+  color:var(--my-text-tertiary);
+}
+.review-diet-calendar-grid{
+  display:grid;
+  grid-template-columns:repeat(7, 1fr);
+  gap:4px;
+}
+.review-diet-calendar-cell{
+  position:relative;
+  aspect-ratio:1;
+  border-radius:8px;
+  overflow:hidden;
+  background:#ececef;
+}
+.review-diet-calendar-cell.is-pad{
+  background:transparent;
+}
+.review-diet-calendar-cell.has-photo{
+  background:#f1f1f3;
+}
+.review-diet-calendar-cell img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+.review-diet-calendar-day{
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  font-size:12px;
+  font-weight:500;
+  line-height:1;
+  color:rgba(255,255,255,0.92);
+  font-variant-numeric:tabular-nums;
+  pointer-events:none;
+}
+.review-diet-calendar-cell.has-photo .review-diet-calendar-day{
+  text-shadow:0 1px 2px rgba(0,0,0,0.35);
+}
+.review-diet-target{
+  margin-top:2px;
+}
+.review-diet-days-strip-wrap{
+  margin:0 -4px;
+  padding:0 4px 2px;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.review-diet-days-strip-wrap::-webkit-scrollbar{display:none}
+.review-diet-days-strip{
+  display:flex;
+  gap:4px;
+  min-width:min-content;
+  align-items:flex-end;
+  justify-content:space-between;
+  width:100%;
+}
+.review-diet-day-tile{
+  flex:1 1 0;
+  min-width:0;
+  max-width:44px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  padding:4px 0;
+  border:0;
+  border-radius:8px;
+  background:transparent;
+  cursor:pointer;
+  font-family:inherit;
+}
+.review-diet-day-tile.is-selected{
+  background:rgba(255,77,136,0.06);
+}
+.review-diet-day-tile.is-over.is-selected{
+  background:rgba(255,149,0,0.08);
+}
+.review-diet-mini-ring{
+  width:28px;
+  height:28px;
+  display:block;
+}
+.review-diet-mini-ring svg{
+  display:block;
+  width:28px;
+  height:28px;
+}
+.review-diet-day-date{
+  font-size:10px;
+  color:var(--my-text-tertiary);
+  line-height:12px;
+}
+.review-diet-day-tile.is-today .review-diet-day-date{
+  color:var(--my-brand-red);
+  font-weight:500;
+}
+.review-diet-day-tile.is-over .review-diet-day-date{
+  color:#ff9500;
+}
+.review-diet-day-tile.is-empty .review-diet-day-date{
+  color:rgba(0,0,0,0.28);
+}
+
+.review-diet-target-detail{
+  margin-top:12px;
+  display:flex;
+  align-items:center;
+  gap:18px;
+  min-height:104px;
+}
+.review-diet-target-detail.is-intake{
+  justify-content:flex-start;
+}
+.review-diet-big-ring{
+  position:relative;
+  width:104px;
+  height:104px;
+  flex:0 0 104px;
+}
+.review-diet-big-ring svg{
+  display:block;
+  width:104px;
+  height:104px;
+}
+.review-diet-big-ring-center{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+}
+.review-diet-big-ring-center.is-percent{
+  font-size:20px;
+  font-weight:600;
+  color:var(--my-brand-red);
+  font-variant-numeric:tabular-nums;
+}
+.review-diet-big-ring-center.is-percent.is-over{
+  color:#ff9500;
+}
+.review-diet-target-info{
+  flex:1;
+  min-width:0;
+}
+.review-diet-target-label{
+  font-size:13px;
+  line-height:18px;
+  color:var(--my-text-tertiary);
+}
+.review-diet-target-value{
+  margin-top:2px;
+  display:flex;
+  align-items:baseline;
+  gap:4px;
+  line-height:34px;
+}
+.review-diet-target-value b{
+  font-size:28px;
+  font-weight:600;
+  color:var(--my-text-primary);
+  letter-spacing:-0.4px;
+  font-variant-numeric:tabular-nums;
+}
+.review-diet-target-value span{
+  font-size:14px;
+  color:var(--my-text-tertiary);
+}
+.review-diet-target-desc{
+  margin-top:8px;
+  font-size:13px;
+  line-height:18px;
+  color:var(--my-text-secondary);
+}
+.review-diet-target-desc b{
+  font-weight:600;
+  color:var(--my-text-primary);
+  font-variant-numeric:tabular-nums;
+}
 .review-card-icon.is-placeholder{
   background:#f1f1f3;
   color:#9b9ba2;
@@ -120,7 +382,7 @@
 .review-chart{
   margin-top:14px;
 }
-.review-chart svg{
+.review-chart > svg{
   display:block;
   width:100%;
   height:auto;
@@ -133,6 +395,7 @@
   padding:0 2px;
   font-size:11px;
   color:var(--my-text-tertiary);
+  flex-wrap:wrap;
 }
 .review-legend-item{
   display:inline-flex;
@@ -264,6 +527,10 @@
 .review-metric-value.is-diet-trend{
   font-size:15px;
   color:var(--my-text-primary);
+}
+.review-metric-value.is-diet-up{
+  font-size:15px;
+  color:var(--my-brand-red);
 }
 .review-metric-unit{
   font-size:11px;
