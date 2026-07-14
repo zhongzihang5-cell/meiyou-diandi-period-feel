@@ -1721,3 +1721,361 @@
   line-height:21px;
   color:var(--my-text-primary);
 }
+
+/* 饮食详情：日报 + 周报 */
+.review-diet-daily-card{
+  padding-bottom:12px;
+}
+.review-diet-daily-head{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:4px;
+}
+.review-diet-daily-icon{
+  width:36px;
+  height:36px;
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 36px;
+}
+.review-diet-daily-icon.is-diet{
+  background:rgba(255,149,0,0.12);
+  color:var(--my-warning);
+}
+.review-diet-daily-icon svg{
+  width:20px;
+  height:20px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.review-diet-daily-head-copy{
+  flex:1;
+  min-width:0;
+}
+.review-diet-daily-title{
+  font-size:17px;
+  font-weight:500;
+  color:var(--my-text-primary);
+  line-height:1.19;
+}
+.review-diet-daily-sub{
+  margin-top:2px;
+  font-size:12px;
+  color:var(--my-text-tertiary);
+  line-height:1.29;
+}
+.review-diet-daily-week{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:4px;
+  margin:12px 0 12px;
+}
+.review-diet-daily-day{
+  flex:1 1 0;
+  min-width:0;
+  max-width:44px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  padding:6px 0 4px;
+  border:0;
+  border-radius:8px;
+  background:transparent;
+  cursor:pointer;
+  font-family:inherit;
+}
+.review-diet-daily-day.is-selected{
+  background:rgba(255,77,136,0.06);
+}
+.review-diet-daily-day.is-over.is-selected{
+  background:rgba(255,149,0,0.08);
+}
+.review-diet-daily-day-num{
+  font-size:15px;
+  font-weight:500;
+  color:var(--my-text-primary);
+  line-height:1;
+  font-variant-numeric:tabular-nums;
+}
+.review-diet-daily-day.is-today .review-diet-daily-day-num{
+  color:var(--my-brand-red);
+}
+.review-diet-daily-day.is-over .review-diet-daily-day-num{
+  color:#ff9500;
+}
+.review-diet-daily-day.is-empty .review-diet-daily-day-num{
+  color:rgba(0,0,0,0.28);
+}
+.review-diet-daily-ring-wrap{
+  position:relative;
+  width:28px;
+  height:28px;
+  display:block;
+}
+.review-diet-daily-ring-wrap svg{
+  display:block;
+  width:28px;
+  height:28px;
+}
+.review-diet-daily-star{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:11px;
+  line-height:1;
+  color:#f5b800;
+  pointer-events:none;
+}
+.review-diet-daily-divider{
+  height:0.5px;
+  background:rgba(0,0,0,0.06);
+  margin:16px 0;
+}
+.review-diet-daily-intake{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  margin:0;
+  min-height:64px;
+}
+.review-diet-daily-intake-ring{
+  position:relative;
+  width:64px;
+  height:64px;
+  flex:0 0 64px;
+}
+.review-diet-daily-intake-ring svg{
+  display:block;
+  width:64px;
+  height:64px;
+}
+.review-diet-daily-intake-pct{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  font-weight:500;
+  color:rgba(0,0,0,0.55);
+  font-variant-numeric:tabular-nums;
+  line-height:1;
+}
+.review-diet-daily-intake.is-over .review-diet-daily-intake-pct{
+  color:#ff9500;
+}
+.review-diet-daily-intake-meta{
+  flex:1;
+  min-width:0;
+}
+.review-diet-daily-intake-lbl{
+  font-size:12px;
+  color:rgba(0,0,0,0.45);
+  line-height:1.29;
+}
+.review-diet-daily-intake-val{
+  margin-top:4px;
+  font-size:22px;
+  font-weight:500;
+  color:rgba(0,0,0,0.8);
+  line-height:1.19;
+  font-variant-numeric:tabular-nums;
+}
+.review-diet-daily-intake-val span{
+  margin-left:4px;
+  font-size:14px;
+  font-weight:400;
+  color:rgba(0,0,0,0.45);
+}
+.review-diet-daily-intake-remain{
+  margin-top:4px;
+  font-size:12px;
+  color:var(--my-brand-red);
+  line-height:1.29;
+}
+.review-diet-daily-intake-remain b{
+  font-weight:500;
+}
+.review-diet-daily-intake.is-over .review-diet-daily-intake-remain{
+  color:#ff9500;
+}
+.review-diet-weekly-head{
+  margin-bottom:8px;
+}
+.review-diet-weekly-title-wrap{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.review-diet-weekly-title{
+  font-size:17px;
+  font-weight:500;
+  color:var(--my-text-primary);
+  line-height:1.19;
+}
+.review-nutrient-section{
+  padding-top:0;
+}
+.review-diet-weekly-divider{
+  height:0.5px;
+  background:rgba(0,0,0,0.06);
+  margin:16px 0 12px;
+}
+.review-diet-weekly-card .review-insight-body{
+  padding-top:0;
+}
+
+/* 关键营养素分析（饮食详情二级页） */
+.review-nutrient-card{
+  padding-bottom:12px;
+}
+.review-nutrient-head{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  margin-bottom:12px;
+}
+.review-nutrient-title-wrap{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.review-nutrient-title{
+  font-size:15px;
+  font-weight:500;
+  color:rgba(0,0,0,0.8);
+  line-height:1.19;
+}
+.review-nutrient-compose{
+  margin-bottom:16px;
+}
+.review-nutrient-compose-bar{
+  display:flex;
+  gap:3px;
+  height:10px;
+  border-radius:80px;
+  overflow:hidden;
+}
+.review-nutrient-compose-seg{
+  min-width:8px;
+  height:100%;
+  border-radius:80px;
+}
+.review-nutrient-compose-legend{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px 16px;
+  margin-top:12px;
+}
+.review-nutrient-compose-item{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  min-width:0;
+}
+.review-nutrient-compose-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  flex:0 0 auto;
+}
+.review-nutrient-compose-name{
+  font-size:12px;
+  color:rgba(0,0,0,0.8);
+  line-height:1.29;
+}
+.review-nutrient-compose-meta{
+  font-size:12px;
+  color:rgba(0,0,0,0.45);
+  font-variant-numeric:tabular-nums;
+  line-height:1.29;
+}
+.review-nutrient-list{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.review-nutrient-item-main{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-height:24px;
+}
+.review-nutrient-item-name{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  flex:1;
+  min-width:0;
+  font-size:14px;
+  font-weight:500;
+  color:rgba(0,0,0,0.8);
+  line-height:1.29;
+}
+.review-nutrient-item-name i{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  flex:0 0 auto;
+}
+.review-nutrient-item-value{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  flex:0 0 auto;
+  font-variant-numeric:tabular-nums;
+}
+.review-nutrient-item-value b{
+  font-size:14px;
+  font-weight:500;
+  color:rgba(0,0,0,0.8);
+}
+.review-nutrient-item-value em{
+  width:16px;
+  height:16px;
+  border-radius:50%;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-style:normal;
+  font-size:10px;
+  line-height:1;
+}
+.review-nutrient-item-value.is-ok em{
+  background:rgba(0,204,153,0.14);
+  color:#00cc99;
+}
+.review-nutrient-item-value.is-low em{
+  background:rgba(255,149,0,0.14);
+  color:#ff9500;
+}
+.review-nutrient-item-value.is-high em{
+  background:rgba(255,77,136,0.12);
+  color:#ff4d88;
+}
+.review-nutrient-item-rec{
+  flex:0 0 auto;
+  font-size:12px;
+  color:rgba(0,0,0,0.35);
+  font-variant-numeric:tabular-nums;
+  line-height:1.29;
+}
+.review-nutrient-item-tip{
+  margin:8px 0 0;
+  padding:10px 12px;
+  border-radius:8px;
+  background:#f5f5f7;
+  font-size:12px;
+  line-height:1.29;
+  color:rgba(0,0,0,0.55);
+}

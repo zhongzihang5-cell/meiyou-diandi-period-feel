@@ -371,34 +371,32 @@ function ChartCaloriePanel({compact = false}){
   const r = compact ? 22 : 28;
   const c = 2 * Math.PI * r;
   const size = r * 2 + 8;
+  const percent = Math.round(pct * 100);
   return (
-    <div style={{display:'flex', alignItems:'center', gap:14}}>
-      <div style={{position:'relative', width:size, height:size, flexShrink:0}}>
-        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-          <circle cx={size/2} cy={size/2} r={r} stroke={TL_SOFT} strokeWidth="5" fill="none"/>
+    <div className="v3-chart-cal">
+      <div className="v3-chart-cal-ring" style={{width:size, height:size}}>
+        <svg width={size} height={size} viewBox={'0 0 ' + size + ' ' + size} aria-hidden="true">
+          <circle cx={size / 2} cy={size / 2} r={r} stroke={TL_SOFT} strokeWidth="5" fill="none"/>
           <circle
-            cx={size/2} cy={size/2} r={r} stroke={TL_PRIMARY} strokeWidth="5" fill="none"
-            strokeDasharray={`${c * pct} ${c}`} strokeLinecap="round"
-            transform={`rotate(-90 ${size/2} ${size/2})`}
+            cx={size / 2}
+            cy={size / 2}
+            r={r}
+            stroke={TL_PRIMARY}
+            strokeWidth="5"
+            fill="none"
+            strokeDasharray={c * pct + ' ' + c}
+            strokeLinecap="round"
+            transform={'rotate(-90 ' + (size / 2) + ' ' + (size / 2) + ')'}
           />
         </svg>
-        <div style={{position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', flexDirection:'column'}}>
-          <div style={{fontSize:11, fontWeight:500, color:TL_TEXT, lineHeight:1}}>{Math.round(pct * 100)}%</div>
-        </div>
+        <div className="v3-chart-cal-pct">{percent}%</div>
       </div>
-      <div style={{flex:1, minWidth:0}}>
-        <div style={{fontSize:11, color:TL_MUTED, marginBottom:4}}>已摄入</div>
-        <div style={{fontSize:18, fontWeight:500, color:TL_TEXT, fontVariantNumeric:'tabular-nums'}}>
+      <div className="v3-chart-cal-meta">
+        <div className="v3-chart-cal-lbl">已摄入</div>
+        <div className="v3-chart-cal-val">
           {consumed}
-          <span style={{fontSize:11, fontWeight:400, color:TL_MUTED, marginLeft:4}}>/ {target} kcal</span>
+          <span className="v3-chart-cal-target">/ {target} kcal</span>
         </div>
-        {!compact && (
-          <div style={{marginTop:6, display:'flex', gap:2, height:5, borderRadius:3, overflow:'hidden', background:'rgba(0,0,0,0.04)'}}>
-            <div style={{flex:3.2, background:'#FF9966'}}/>
-            <div style={{flex:4.6, background:TL_PRIMARY}}/>
-            <div style={{flex:1.2, background:'#FFCBAE'}}/>
-          </div>
-        )}
       </div>
     </div>
   );
