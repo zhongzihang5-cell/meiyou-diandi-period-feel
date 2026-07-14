@@ -1030,12 +1030,12 @@ function CycleDetailPage({open, onClose}){
   const currentAnalysis = analysisCopy[range];
 
   return (
-    <section className={'review-cycle-detail' + (open ? ' is-open' : '')} aria-hidden={!open} aria-label="月经周期详情">
+    <section className={'review-cycle-detail is-cycle-ai-detail' + (open ? ' is-open' : '')} aria-hidden={!open} aria-label="月经周期详情">
       <div className="review-detail-nav">
         <button type="button" className="review-detail-back" aria-label="返回" onClick={onClose}>
           <ReviewBackIcon/>
         </button>
-        <span className="review-detail-title">月经周期</span>
+        <span className="review-detail-title">月经周期AI趋势分析</span>
       </div>
       <div className="review-detail-content">
         <div className="review-segment" role="tablist" aria-label="时间范围">
@@ -1052,6 +1052,7 @@ function CycleDetailPage({open, onClose}){
           ))}
         </div>
 
+        <div className="review-cycle-sample-area">
         <div className="review-detail-card">
           <div className="review-chart review-detail-chart"><CycleDetailChart range={range}/></div>
           <div className="review-legend">
@@ -1081,13 +1082,17 @@ function CycleDetailPage({open, onClose}){
               <p className="review-summary-text">{currentAnalysis.summary}</p>
             </div>
           </div>
-          <div className="review-ai-lock-mask">
-            <button type="button" className="review-ai-unlock-btn">
-              <span className="review-ai-unlock-vip">VIP</span>
-              <span>立即解锁</span>
-            </button>
-          </div>
         </div>
+        <div className="review-cycle-sample-mask" aria-hidden="true">
+          <span>示例数据</span>
+        </div>
+        </div>
+      </div>
+      <div className="review-ai-floating-action">
+        <button type="button" className="review-ai-unlock-btn">
+          <span className="review-ai-unlock-vip">VIP</span>
+          <span>查看分析</span>
+        </button>
       </div>
     </section>
   );
@@ -2140,24 +2145,26 @@ function ReviewPage({mode='经期', shareState, onShareStateChange, onOpenPartne
       <ReviewCard
         title={isPeriodMode ? '周期' : '月经周期'}
         icon={<ReviewDropletIcon/>}
+        headAction={(
+          <button
+            type="button"
+            className="review-cycle-expand-btn"
+            aria-label="横屏展开全部周期"
+            onKeyDown={event=>event.stopPropagation()}
+            onClick={event=>{
+              event.stopPropagation();
+              setCycleLandscapeOpen(true);
+            }}
+          >
+            <ReviewExpandIcon/>
+          </button>
+        )}
         chart={<CycleChart/>}
         legend={(
           <>
             <span className="review-legend-item is-cycle"><i></i>周期天数</span>
             <span className="review-legend-item is-trend"><i></i>趋势</span>
             <span className="review-legend-item is-warning"><i></i>偏长周期</span>
-            <button
-              type="button"
-              className="review-cycle-expand-btn"
-              aria-label="横屏展开全部周期"
-              onKeyDown={event=>event.stopPropagation()}
-              onClick={event=>{
-                event.stopPropagation();
-                setCycleLandscapeOpen(true);
-              }}
-            >
-              <ReviewExpandIcon/>
-            </button>
           </>
         )}
         metrics={(

@@ -34,17 +34,17 @@ function ReviewShareHeader({title, onBack}){
 function ReviewShareScene({onBack, onPartner, onFamily}){
   return (
     <div className="rsf-screen">
-      <ReviewShareHeader title="分享回顾" onBack={onBack}/>
+      <ReviewShareHeader title="共享回顾" onBack={onBack}/>
       <div className="rsf-scroll rsf-scene-page">
-        <p className="rsf-intro">选择要分享给谁。我们会为不同关系准备好合适的默认内容，敏感信息默认不分享。</p>
+        <p className="rsf-intro">选择要共享给谁。我们会为不同关系准备好合适的默认内容，敏感信息默认不共享。</p>
         <button type="button" className="rsf-scene-card" onClick={onPartner}>
           <span className="rsf-scene-icon is-partner"><ReviewShareHeartIcon/></span>
-          <span className="rsf-scene-copy"><b>分享给伴侣</b><small>让 TA 更懂你，一起关心经期。仅限一位伴侣。</small></span>
+          <span className="rsf-scene-copy"><b>共享给伴侣</b><small>让 TA 更懂你，一起关心经期。仅限一位伴侣。</small></span>
           <span className="rsf-chevron">›</span>
         </button>
         <button type="button" className="rsf-scene-card" onClick={onFamily}>
           <span className="rsf-scene-icon is-family">👪</span>
-          <span className="rsf-scene-copy"><b>分享给家人</b><small>一起记录、查看宝宝的喂养回顾。可添加多位家人。</small><em>本 demo 示意</em></span>
+          <span className="rsf-scene-copy"><b>共享给家人</b><small>一起记录、查看宝宝的喂养回顾。可添加多位家人。</small><em>本 demo 示意</em></span>
           <span className="rsf-chevron">›</span>
         </button>
       </div>
@@ -62,10 +62,10 @@ function ReviewShareAuthorization({modules, onToggle, onBack, onNext, editing}){
   ));
   return (
     <div className="rsf-screen">
-      <ReviewShareHeader title="分享给伴侣" onBack={onBack}/>
+      <ReviewShareHeader title="共享给伴侣" onBack={onBack}/>
       <div className="rsf-scroll rsf-auth-page">
         <div className="rsf-privacy"><ReviewShareLockIcon/><p>TA 只能看到你在下方勾选的回顾内容，<b>看不到你的点滴时间轴和任何原始记录</b>。</p></div>
-        <div className="rsf-group-label">基础关心 <em>默认分享</em></div>
+        <div className="rsf-group-label">基础关心 <em>默认共享</em></div>
         <div className="rsf-switch-list">{renderGroup('basic')}</div>
         <div className="rsf-group-label">更私密的内容 <em className="is-sensitive">需手动开启</em></div>
         <div className="rsf-switch-list">{renderGroup('private')}</div>
@@ -90,8 +90,8 @@ function ReviewShareInvite({sent, onBack, onSend, onCopy, onQr, onPreview}){
           <button type="button" onClick={onCopy}><i className="is-link">↗</i><span>复制链接</span></button>
           <button type="button" onClick={onQr}><i className="is-qr">▦</i><span>二维码</span></button>
         </div>
-        <p className="rsf-expire">邀请 7 天内有效 · 需 TA 接受后才会建立分享</p>
-        {sent ? <div className="rsf-sent"><i>✓</i><span><b>邀请已发送</b><small>等待 TA 接受后建立分享</small></span></div> : null}
+        <p className="rsf-expire">邀请 7 天内有效 · 需 TA 接受后才会建立共享</p>
+        {sent ? <div className="rsf-sent"><i>✓</i><span><b>邀请已发送</b><small>等待 TA 接受后建立共享</small></span></div> : null}
         <button type="button" className="rsf-preview-entry" onClick={onPreview}>◉ 预览 TA 接受后看到的体验</button>
       </div>
     </div>
@@ -102,16 +102,16 @@ function ReviewShareManage({shareState, enabledLabels, onBack, onEdit, onCancel}
   const accepted = shareState.status === 'accepted';
   return (
     <div className="rsf-screen">
-      <ReviewShareHeader title="分享管理" onBack={onBack}/>
+      <ReviewShareHeader title="共享管理" onBack={onBack}/>
       <div className="rsf-scroll rsf-manage-page">
-        <div className="rsf-section-title">我分享出去的</div>
+        <div className="rsf-section-title">我共享出去的</div>
         <div className="rsf-manage-card">
           <div className="rsf-member"><span className="rsf-avatar">阿泽</span><div><b>阿泽（伴侣）</b><small className={accepted ? 'is-connected' : 'is-pending'}><i></i>{accepted ? '已连接 · 今天起' : '等待接受邀请'}</small></div></div>
           <div className="rsf-visible"><span>TA 能看到：</span>{enabledLabels.join('、') || '尚未选择内容'}</div>
-          <div className="rsf-manage-actions"><button type="button" onClick={onEdit}>修改可见内容</button><button type="button" className="is-danger" onClick={onCancel}>{accepted ? '取消分享' : '取消邀请'}</button></div>
+          <div className="rsf-manage-actions"><button type="button" onClick={onEdit}>修改可见内容</button><button type="button" className="is-danger" onClick={onCancel}>{accepted ? '取消共享' : '取消邀请'}</button></div>
         </div>
-        <div className="rsf-section-title">分享给我的</div>
-        <div className="rsf-empty">还没有人把回顾分享给你</div>
+        <div className="rsf-section-title">共享给我的</div>
+        <div className="rsf-empty">还没有人把回顾共享给你</div>
       </div>
     </div>
   );
@@ -144,18 +144,18 @@ function ReviewShareFlow({open, shareState, onShareStateChange, onClose, onOpenP
   const revoke = ()=>{
     updateShare(current=>({...current, status:'idle', partnerName:'', invitedAt:''}));
     setConfirmOpen(false);
-    showToast('已取消分享');
+    showToast('已取消共享');
     window.setTimeout(()=>onClose?.(), 420);
   };
 
   return (
-    <section className={'rsf-flow' + (open ? ' is-open' : '')} aria-hidden={!open} aria-label="回顾分享流程">
+    <section className={'rsf-flow' + (open ? ' is-open' : '')} aria-hidden={!open} aria-label="回顾共享流程">
       {screen === 'scene' ? <ReviewShareScene onBack={onClose} onPartner={()=>setScreen('auth')} onFamily={()=>showToast('家人场景复用同一套框架，本 demo 聚焦伴侣流程')}/> : null}
       {screen === 'auth' ? <ReviewShareAuthorization modules={modules} onToggle={toggleModule} editing={editing} onBack={()=>{setScreen(editing ? 'manage' : 'scene');setEditing(false);}} onNext={()=>{if(editing){setEditing(false);setScreen('manage');showToast('可见内容已更新');}else setScreen('invite');}}/> : null}
       {screen === 'invite' ? <ReviewShareInvite sent={shareState?.status === 'invited' || shareState?.status === 'accepted'} onBack={()=>setScreen('auth')} onSend={()=>{markInvited();showToast('已发送给 TA，等待接受');}} onCopy={()=>showToast('链接已复制')} onQr={()=>showToast('二维码已生成')} onPreview={()=>{if(shareState?.status === 'idle') markInvited();onOpenPartnerPreview?.();}}/> : null}
       {screen === 'manage' ? <ReviewShareManage shareState={shareState} enabledLabels={enabledLabels} onBack={onClose} onEdit={()=>{setEditing(true);setScreen('auth');}} onCancel={()=>setConfirmOpen(true)}/> : null}
       <div className={'rsf-toast' + (toastText ? ' is-show' : '')} role="status">{toastText}</div>
-      {confirmOpen ? <><button type="button" className="rsf-mask" aria-label="关闭" onClick={()=>setConfirmOpen(false)}></button><div className="rsf-sheet" role="dialog" aria-modal="true"><h3>{shareState?.status === 'accepted' ? '取消对阿泽的分享？' : '取消这次邀请？'}</h3><p>{shareState?.status === 'accepted' ? '取消后 TA 会立即无法查看你的任何回顾内容。你随时可以重新邀请。' : '取消后，这条邀请将失效，你可以稍后重新发起。'}</p><div><button type="button" onClick={()=>setConfirmOpen(false)}>再想想</button><button type="button" className="is-danger" onClick={revoke}>确认取消</button></div></div></> : null}
+      {confirmOpen ? <><button type="button" className="rsf-mask" aria-label="关闭" onClick={()=>setConfirmOpen(false)}></button><div className="rsf-sheet" role="dialog" aria-modal="true"><h3>{shareState?.status === 'accepted' ? '取消对阿泽的共享？' : '取消这次邀请？'}</h3><p>{shareState?.status === 'accepted' ? '取消后 TA 会立即无法查看你的任何回顾内容。你随时可以重新邀请。' : '取消后，这条邀请将失效，你可以稍后重新发起。'}</p><div><button type="button" onClick={()=>setConfirmOpen(false)}>再想想</button><button type="button" className="is-danger" onClick={revoke}>确认取消</button></div></div></> : null}
     </section>
   );
 }

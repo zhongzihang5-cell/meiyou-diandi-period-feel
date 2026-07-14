@@ -32,20 +32,56 @@ function PartnerTimeline(){
   return <div className="partner-body"><div className="partner-day"><i></i><b>今天</b><span>周三</span></div><div className="partner-thread"><article><time>12:50</time><p>午饭和同事去吃了顿火锅，有点上头，下午得多喝水。</p><em>饮食</em></article><article><time>08:30</time><p>早上沿江跑了 3 公里，久违地出了一身汗，一整天都清醒。</p><em className="is-green">运动</em></article></div><div className="partner-day"><i className="is-muted"></i><b>昨天</b><span>周二</span></div><div className="partner-thread"><article><time>21:10</time><p>给她带了杯热的红糖姜茶，她这两天不太舒服，多陪陪她。</p><em>心情</em></article></div></div>;
 }
 
-function PartnerReview({onCare}){
-  return <div className="partner-body"><div className="partner-shared-by"><span>柚</span><div><b>小柚分享给你</b><small>一起关心她的经期 · 由她授权</small></div></div><div className="partner-care-hero"><small>她现在的状态</small><h3>经期第 2 天 <em>· 通常持续到第 6 天</em></h3><p><MeHeartIcon/>这几天她可能会有些不舒服，多点耐心和陪伴，一杯热水、一句关心都很暖。</p></div><div className="partner-predict"><span>📅</span><div><small>下次经期预计</small><b>7 月 12 日 <em>左右</em></b></div><i>提前 2 天提醒你</i></div><div className="partner-cycle"><h3>💧 她的周期规律</h3><svg viewBox="0 0 310 96" aria-label="周期趋势"><path d="M8 56 C30 32 42 44 58 39 S87 61 105 43 S132 52 149 41 S181 58 198 45 S229 51 246 42 S278 48 300 36"/><path className="is-trend" d="M8 42 L300 48"/></svg><div><span><b>28<small>天</small></b><em>最近周期</em></span><span><b>29.7<small>天</small></b><em>近一年平均</em></span><span><b className="is-good">规律</b><em>整体评价</em></span></div></div><button type="button" className="partner-primary" onClick={onCare}><MeHeartIcon/>给她送上关心</button><div className="partner-readonly"><MeLockIcon/>仅你可见 · 只读 · 由小柚授权分享</div></div>;
+function PartnerHome(){
+  return <div className="partner-body"><div className="partner-shared-by"><span>柚</span><div><b>小柚共享给你</b><small>一起关心她的经期 · 由她授权</small></div></div><div className="partner-care-hero"><small>她现在的状态</small><h3>经期第 2 天 <em>· 通常持续到第 6 天</em></h3><p><MeHeartIcon/>这几天她可能会有些不舒服，多点耐心和陪伴，一杯热水、一句关心都很暖。</p></div><div className="partner-predict"><span>📅</span><div><small>下次经期预计</small><b>7 月 12 日 <em>左右</em></b></div><i>提前 2 天提醒你</i></div></div>;
+}
+
+function PartnerReview(){
+  return (
+    <div className="partner-body partner-review-cards">
+      <ReviewCard
+        title="周期"
+        icon={<ReviewDropletIcon/>}
+        chart={<CycleChart/>}
+        legend={(
+          <>
+            <span className="review-legend-item is-cycle"><i></i>周期天数</span>
+            <span className="review-legend-item is-trend"><i></i>趋势</span>
+            <span className="review-legend-item is-warning"><i></i>偏长周期</span>
+          </>
+        )}
+        metrics={(
+          <>
+            <ReviewMetric value="28" unit="天" label="最近周期"/>
+            <ReviewMetric value="29.7" unit="天" label="近一年平均"/>
+            <ReviewMetric value="↘ 缩短" label="整体趋势" trend/>
+          </>
+        )}
+        more="查看AI趋势分析"
+        moreBadge="VIP"
+      />
+      <PeriodReviewCard/>
+    </div>
+  );
 }
 
 function PartnerMe({onOpenReview}){
-  return <div className="partner-body"><div className="partner-me-head"><span>阿泽</span><div><b>阿泽</b><small>♥ 关心中 · 小柚</small></div></div><div className="partner-relation"><div><span>柚</span><p><b>小柚（伴侣）</b><small><i></i>已连接 · 今天起</small></p></div><button type="button" onClick={onOpenReview}>查看她分享的回顾</button></div><div className="partner-me-list"><div>🎙️<span>我的点滴</span><small>已记录 5 天</small>›</div><div>📈<span>我的回顾</span>›</div><div>🔔<span>消息与提醒</span>›</div></div><div className="partner-me-list"><div>🔒<span>隐私说明</span>›</div><div>⚙️<span>设置</span>›</div></div></div>;
+  return <div className="partner-body"><div className="partner-me-head"><span>阿泽</span><div><b>阿泽</b><small>♥ 关心中 · 小柚</small></div></div><div className="partner-relation"><div><span>柚</span><p><b>小柚（伴侣）</b><small><i></i>已连接 · 今天起</small></p></div><button type="button" onClick={onOpenReview}>查看她共享的回顾</button></div><div className="partner-me-list"><div>🎙️<span>我的点滴</span><small>已记录 5 天</small>›</div><div>📈<span>我的回顾</span>›</div><div>🔔<span>消息与提醒</span>›</div></div><div className="partner-me-list"><div>🔒<span>隐私说明</span>›</div><div>⚙️<span>设置</span>›</div></div></div>;
+}
+
+function PartnerTabIcon({tab}){
+  const I = window.Icon;
+  const icons = window.TABBAR_ICONS || {};
+  if(tab === 'home') return <img src={icons.home} alt="" aria-hidden="true"/>;
+  if(tab === 'me') return <img src={icons.me} alt="" aria-hidden="true"/>;
+  return <I name={tab === 'diandi' ? 'mic' : 'line-chart'} size={24} stroke={1.7}/>;
 }
 
 function PartnerApp({shareState, onClose}){
-  const [tab, setTab] = useMeState('review');
-  const [toast, setToast] = useMeState('');
-  const title = tab === 'diandi' ? '点滴' : tab === 'review' ? '回顾' : '我';
-  const showToast = text=>{setToast(text);window.setTimeout(()=>setToast(''),1800)};
-  return <div className="partner-preview-screen partner-app"><PartnerPreviewHeader title={title} onBack={onClose}/>{tab === 'diandi' ? <PartnerTimeline/> : tab === 'review' ? <PartnerReview onCare={()=>showToast('已把你的关心送达 💗')}/> : <PartnerMe onOpenReview={()=>setTab('review')}/>}<div className="partner-tabs"><button type="button" className={tab === 'diandi' ? 'is-on' : ''} onClick={()=>setTab('diandi')}><span>🎙️</span>点滴</button><button type="button" className={tab === 'review' ? 'is-on' : ''} onClick={()=>setTab('review')}><span>📈</span>回顾</button><button type="button" className={tab === 'me' ? 'is-on' : ''} onClick={()=>setTab('me')}><span>👤</span>我</button></div><div className={'partner-toast' + (toast ? ' is-show' : '')}>{toast}</div></div>;
+  const [tab, setTab] = useMeState('home');
+  const title = tab === 'home' ? '首页' : tab === 'diandi' ? '点滴' : tab === 'review' ? '回顾' : '我';
+  const tabs = [{id:'home',label:'首页'},{id:'diandi',label:'点滴'},{id:'review',label:'回顾'},{id:'me',label:'我'}];
+  return <div className="partner-preview-screen partner-app"><PartnerPreviewHeader title={title} onBack={onClose}/>{tab === 'home' ? <PartnerHome/> : tab === 'diandi' ? <PartnerTimeline/> : tab === 'review' ? <PartnerReview/> : <PartnerMe onOpenReview={()=>setTab('review')}/>}<div className="partner-tabs">{tabs.map(item=><button type="button" key={item.id} className={tab === item.id ? 'is-on' : ''} onClick={()=>setTab(item.id)}><span className="partner-tab-icon"><PartnerTabIcon tab={item.id}/></span>{item.label}</button>)}</div></div>;
 }
 
 function PartnerPreview({open, shareState, onClose, onAccept}){

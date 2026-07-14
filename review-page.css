@@ -1094,6 +1094,20 @@
   transform:translateX(0);
   transition:transform .3s cubic-bezier(.2,0,0,1);
 }
+.review-cycle-detail.is-cycle-ai-detail{
+  position:fixed;
+  top:44px;
+  right:auto;
+  bottom:0;
+  left:50%;
+  z-index:150;
+  width:100%;
+  max-width:390px;
+  transform:translateX(50%);
+}
+.review-cycle-detail.is-cycle-ai-detail.is-open{
+  transform:translateX(-50%);
+}
 .review-detail-nav{
   height:44px;
   flex:0 0 44px;
@@ -1883,6 +1897,41 @@
   font-size:9px;
   font-weight:700;
   line-height:18px;
+}
+.review-cycle-sample-area{
+  position:relative;
+}
+.review-cycle-sample-mask{
+  position:absolute;
+  inset:0;
+  z-index:14;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(242,242,245,.64);
+  backdrop-filter:blur(3px);
+  -webkit-backdrop-filter:blur(3px);
+  pointer-events:none;
+}
+.review-cycle-sample-mask span{
+  color:#8f8f95;
+  font-size:14px;
+  font-weight:500;
+}
+.review-ai-floating-action{
+  position:absolute;
+  right:0;
+  bottom:0;
+  left:0;
+  z-index:16;
+  padding:14px 20px calc(14px + var(--my-safe-bottom, 0px));
+  display:flex;
+  justify-content:center;
+  background:linear-gradient(180deg,rgba(242,242,245,0),rgba(242,242,245,.96) 32%);
+}
+.review-ai-floating-action .review-ai-unlock-btn{
+  width:100%;
+  max-width:350px;
 }
 
 .review-cycle-landscape{
