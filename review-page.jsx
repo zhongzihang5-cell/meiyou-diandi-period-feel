@@ -1438,7 +1438,7 @@ function DietBudgetHeadAction({goal = DIET_TARGET_GOAL}){
   );
 }
 
-function DietDistributionCard({onOpen, onLandscapeOpen, title='饮食', more='查看完整饮食变化'}){
+function DietDistributionCard({onOpen, onLandscapeOpen, title='饮食', more='查看饮食付费分析'}){
   return (
     <ReviewCard
       title={title}
