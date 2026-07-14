@@ -1418,8 +1418,7 @@ const DIET_TARGET_DAYS = [
   const over = day.intake > goal;
   const empty = day.intake <= 0;
   const ratio = goal > 0 ? Math.min(day.intake / goal, 1.15) : 0;
-  const met = !over && !empty && day.intake >= goal * 0.9;
-  return {...day, goal, remain, over, ratio, empty, met};
+  return {...day, goal, remain, over, ratio, empty, met:false};
 });
 
 const DIET_DAILY_WEEK_LABEL = '7.7—7.13';
@@ -1611,6 +1610,19 @@ function getDietDailyNutrientData(dateKey){
   };
 }
 
+function dietDayMacrosBalanced(dateKey){
+  const data = DIET_DAILY_NUTRIENTS[dateKey];
+  if(!data) return false;
+  return ['carb', 'protein', 'fat'].every((key)=>{
+    const row = data.rows.find((item)=> item.key === key);
+    return row && row.status === 'ok';
+  });
+}
+
+DIET_TARGET_DAYS.forEach((day)=>{
+  day.met = dietDayMacrosBalanced(day.date);
+});
+
 function dietNutrientStatusIcon(status){
   if(status === 'ok') return '✓';
   if(status === 'high') return '↑';
@@ -1728,7 +1740,7 @@ function DietDailyWeekStrip({selectedIndex, onSelect}){
           type="button"
           key={day.date}
           className={'review-diet-daily-day' + (index === selectedIndex ? ' is-selected' : '') + (day.highlight ? ' is-today' : '') + (day.empty ? ' is-empty' : '') + (day.over ? ' is-over' : '') + (day.met ? ' is-met' : '')}
-          aria-label={day.date + (day.over ? ' 超量' : day.met ? ' 达标' : '')}
+          aria-label={day.date + (day.over ? ' 超量' : day.met ? ' 营养均衡' : '')}
           onClick={()=>onSelect(index)}
         >
           <span className="review-diet-daily-day-num">{day.date}</span>
