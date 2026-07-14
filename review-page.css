@@ -307,6 +307,12 @@
 .review-card-head-btn.is-budget{
   padding-right:8px;
 }
+.review-legend .review-card-head-btn{
+  margin-left:auto;
+}
+.review-card-head .review-cycle-expand-btn{
+  margin-left:0;
+}
 .review-diet-budget-tip{
   width:14px;
   height:14px;

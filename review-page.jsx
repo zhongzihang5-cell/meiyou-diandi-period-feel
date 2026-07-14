@@ -1662,26 +1662,26 @@ function DietDistributionCard({onOpen, onLandscapeOpen, title='饮食', more='�
       title={title}
       iconClass="is-diet"
       icon={<ReviewDietIcon/>}
-      headAction={<DietBudgetHeadAction goal={DIET_TARGET_GOAL}/>}
+      headAction={typeof onLandscapeOpen === 'function' ? (
+        <button
+          type="button"
+          className="review-cycle-expand-btn"
+          aria-label="横屏展开全部饮食热量"
+          onKeyDown={event=>event.stopPropagation()}
+          onClick={event=>{
+            event.stopPropagation();
+            onLandscapeOpen();
+          }}
+        >
+          <ReviewExpandIcon/>
+        </button>
+      ) : null}
       chart={<DietDistributionChart/>}
       legend={(
         <>
           <span className="review-legend-item is-diet"><i></i>每日热量</span>
           <span className="review-legend-item is-diet-band"><i></i>均衡参考区间</span>
-          {typeof onLandscapeOpen === 'function' ? (
-            <button
-              type="button"
-              className="review-cycle-expand-btn"
-              aria-label="横屏展开全部饮食热量"
-              onKeyDown={event=>event.stopPropagation()}
-              onClick={event=>{
-                event.stopPropagation();
-                onLandscapeOpen();
-              }}
-            >
-              <ReviewExpandIcon/>
-            </button>
-          ) : null}
+          <DietBudgetHeadAction goal={DIET_TARGET_GOAL}/>
         </>
       )}
       metrics={(
