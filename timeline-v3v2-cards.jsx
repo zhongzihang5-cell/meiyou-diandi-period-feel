@@ -275,7 +275,7 @@ function ChartWeightTrend({compact = false, data, unit = 'kg'}){
   });
 
   const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
-  const formatAxis = v => (Number.isInteger(v) ? String(v) : v.toFixed(1));
+  const formatAxis = v => Number(v).toFixed(1);
   const formatValueLabel = v => unit === 'jin' ? `${v.toFixed(1)}斤` : `${v.toFixed(1)}公斤`;
 
   return (
