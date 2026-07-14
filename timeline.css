@@ -1225,7 +1225,7 @@
   color:#ff4d88;
 }
 .stream-header.is-baby-feeding-header .stream-actions{
-  justify-self:end;
+  justify-self:start;
 }
 
 /* ============ 场景模块占位 ============ */

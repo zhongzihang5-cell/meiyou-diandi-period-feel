@@ -2249,18 +2249,6 @@ function App(){
         <div className={'stream-header' + (showBabyFeedingHeader ? ' is-baby-feeding-header' : '')}>
           {showBabyFeedingHeader ? (
             <>
-              <div className="stream-header-side"/>
-              <button
-                type="button"
-                className={'stream-filter-center' + (babyFeedingPanelMode === 'all' ? ' is-open' : '') + (searchCriteria?.personPanelFilter ? ' is-filtered' : '')}
-                aria-expanded={babyFeedingPanelMode === 'all'}
-                onClick={toggleBabyFeedingAllPanel}
-              >
-                <span>全部</span>
-                <svg className="stream-filter-chev" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
-                  <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
               <div className="stream-actions">
                 <button
                   className={'stream-action' + (babyFeedingPanelMode === 'search' ? ' is-active' : '')}
@@ -2272,11 +2260,21 @@ function App(){
                   <I name="search" size={20} stroke={1.7}/>
                 </button>
               </div>
+              <button
+                type="button"
+                className={'stream-filter-center' + (babyFeedingPanelMode === 'all' ? ' is-open' : '') + (searchCriteria?.personPanelFilter ? ' is-filtered' : '')}
+                aria-expanded={babyFeedingPanelMode === 'all'}
+                onClick={toggleBabyFeedingAllPanel}
+              >
+                <span>全部</span>
+                <svg className="stream-filter-chev" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
+                  <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              <div className="stream-header-side"/>
             </>
           ) : (
             <>
-              <div className="stream-header-side"/>
-              <h1 className="stream-title">点滴</h1>
               <div className="stream-actions">
                 <button
                   className={'stream-action' + (showSearchPage ? ' is-active' : '')}
@@ -2288,6 +2286,8 @@ function App(){
                   <I name="search" size={20} stroke={1.7}/>
                 </button>
               </div>
+              <h1 className="stream-title">点滴</h1>
+              <div className="stream-header-side"/>
             </>
           )}
         </div>

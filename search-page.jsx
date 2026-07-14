@@ -870,8 +870,244 @@ function XhsStyleSearchPage({
   );
 }
 
+// ============ 回顾内联搜索面板（独立组件，暂与点滴保持同款） ============
+const REVIEW_SEARCH_FILTER_TAGS = [
+  { id:'mine', label:'我的回顾', emoji:'👤' },
+  { id:'boyfriend', label:'男友', emoji:'👨🏻' },
+  { id:'bestie', label:'闺蜜', emoji:'👩🏻' },
+  { id:'cycle', label:'周期', emoji:'💧' },
+  { id:'period', label:'经期', emoji:'🌸' },
+  { id:'weight', label:'体重', emoji:'⚖️' },
+];
+const REVIEW_SEARCH_SUGGESTIONS = ['活动','事件','会议','比赛','展览','访问'];
+const REVIEW_IOS_KB_ROWS = [
+  ['q','w','e','r','t','y','u','i','o','p'],
+  ['a','s','d','f','g','h','j','k','l'],
+  ['z','x','c','v','b','n','m'],
+];
+
+function ReviewIosSearchKeyboard({query, onKey, onBackspace, onSpace, onSearch, onVoice, isVoiceActive}){
+  const I = window.Icon;
+  const canSearch = !!query.trim();
+  return (
+    <div className="ios-search-keyboard review-ios-search-keyboard" aria-hidden="true">
+      {query ? (
+        <div className="ios-kb-suggestions">
+          {REVIEW_SEARCH_SUGGESTIONS.map(word=>(
+            <button key={word} type="button" className="ios-kb-suggestion" onMouseDown={event=>event.preventDefault()} onClick={()=>onKey(word)}>{word}</button>
+          ))}
+        </div>
+      ) : null}
+      <div className="ios-kb-rows">
+        {REVIEW_IOS_KB_ROWS.map((row, rowIndex)=>(
+          <div key={rowIndex} className="ios-kb-row">
+            {rowIndex === 2 ? <span className="ios-kb-key ios-kb-key--wide ios-kb-key--ghost">⇧</span> : null}
+            {row.map(key=>(
+              <button key={key} type="button" className="ios-kb-key" onMouseDown={event=>event.preventDefault()} onClick={()=>onKey(key)}>{key}</button>
+            ))}
+            {rowIndex === 2 ? (
+              <button type="button" className="ios-kb-key ios-kb-key--wide ios-kb-key--ghost" onMouseDown={event=>event.preventDefault()} onClick={onBackspace} aria-label="删除">⌫</button>
+            ) : null}
+          </div>
+        ))}
+        <div className="ios-kb-row ios-kb-row--bottom">
+          <span className="ios-kb-key ios-kb-key--fn">123</span>
+          <button type="button" className="ios-kb-key ios-kb-key--space" onMouseDown={event=>event.preventDefault()} onClick={onSpace}>拼</button>
+          <button
+            type="button"
+            className={'ios-kb-key ios-kb-key--fn ios-kb-key--search' + (canSearch ? ' is-ready' : '')}
+            onMouseDown={event=>event.preventDefault()}
+            onClick={()=>{ if(canSearch) onSearch(); }}
+            aria-label="搜索"
+            disabled={!canSearch}
+          >
+            <I name="search" size={16} stroke={2.2}/>
+          </button>
+        </div>
+      </div>
+      <div className="ios-kb-accessory">
+        <span className="ios-kb-globe" aria-hidden="true">🌐</span>
+        <button
+          type="button"
+          className={'ios-kb-mic' + (isVoiceActive ? ' is-active' : '')}
+          aria-label="语音输入"
+          aria-pressed={isVoiceActive}
+          onMouseDown={event=>event.preventDefault()}
+          onClick={onVoice}
+        >
+          <I name="mic" size={18} stroke={1.8}/>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ReviewSearchOverlay({onClose}){
+  const [query, setQuery] = React.useState('');
+  const [activeFilter, setActiveFilter] = React.useState(null);
+  const [phase, setPhase] = React.useState('compose');
+  const [showKeyboard, setShowKeyboard] = React.useState(false);
+  const [voiceListening, setVoiceListening] = React.useState(false);
+  const [panelActive, setPanelActive] = React.useState(false);
+  const [panelClosing, setPanelClosing] = React.useState(false);
+  const inputRef = React.useRef(null);
+  const closeTimerRef = React.useRef(null);
+
+  const requestClose = React.useCallback(()=>{
+    if(panelClosing) return;
+    setShowKeyboard(false);
+    setVoiceListening(false);
+    setPanelActive(false);
+    setPanelClosing(true);
+    if(closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    closeTimerRef.current = setTimeout(()=>{
+      closeTimerRef.current = null;
+      setPanelClosing(false);
+      onClose?.();
+    }, SEARCH_CLOSE_MS);
+  }, [onClose, panelClosing]);
+
+  React.useLayoutEffect(()=>{
+    let raf2 = 0;
+    const raf1 = requestAnimationFrame(()=>{
+      raf2 = requestAnimationFrame(()=>setPanelActive(true));
+    });
+    const keyboardTimer = setTimeout(()=>{
+      setShowKeyboard(true);
+      requestAnimationFrame(()=>inputRef.current?.focus());
+    }, SEARCH_PANEL_OPEN_MS);
+    return ()=>{
+      cancelAnimationFrame(raf1);
+      if(raf2) cancelAnimationFrame(raf2);
+      clearTimeout(keyboardTimer);
+    };
+  }, []);
+
+  React.useEffect(()=>{
+    const handleKey = event=>{ if(event.key === 'Escape') requestClose(); };
+    window.addEventListener('keydown', handleKey);
+    return ()=>window.removeEventListener('keydown', handleKey);
+  }, [requestClose]);
+
+  React.useEffect(()=>()=>{
+    if(closeTimerRef.current) clearTimeout(closeTimerRef.current);
+  }, []);
+
+  const openKeyboard = ()=>{
+    setShowKeyboard(true);
+    requestAnimationFrame(()=>inputRef.current?.focus());
+  };
+  const appendKey = key=>{
+    setVoiceListening(false);
+    setPhase('compose');
+    setQuery(current=>current + key);
+  };
+  const handleClear = ()=>{
+    setQuery('');
+    setActiveFilter(null);
+    setPhase('compose');
+    openKeyboard();
+  };
+  const handleSubmit = ()=>{
+    if(!query.trim()) return;
+    setPhase('results');
+    setShowKeyboard(false);
+    inputRef.current?.blur();
+  };
+  const handleVoice = ()=>{
+    setVoiceListening(true);
+    setQuery('上个月体重');
+    window.setTimeout(()=>{
+      setVoiceListening(false);
+      setPhase('results');
+      setShowKeyboard(false);
+    }, 520);
+  };
+  const handleFilter = tag=>{
+    setActiveFilter(tag.id);
+    setQuery(tag.label);
+    setPhase('results');
+    setShowKeyboard(false);
+    inputRef.current?.blur();
+  };
+  const I = window.Icon;
+  const panelClass = ['ios-search-push','review-search-push',panelActive ? 'is-active' : '',panelClosing ? 'is-closing' : ''].filter(Boolean).join(' ');
+
+  return (
+    <>
+      <div className={panelClass} role="search" aria-label="回顾搜索">
+        <div className="ios-search-push-inner">
+          <div className="ios-search-sheet">
+            <div className="ios-search-bar-row">
+              <div className={'ios-search-field-wrap' + (voiceListening ? ' is-voice-active' : '')}>
+                <span className="ios-search-field-ico" aria-hidden="true"><I name="search" size={17} stroke={1.8}/></span>
+                <input
+                  ref={inputRef}
+                  className="ios-search-field"
+                  type="text"
+                  enterKeyHint="search"
+                  placeholder="试试搜「上个月体重」"
+                  value={query}
+                  onFocus={openKeyboard}
+                  onClick={openKeyboard}
+                  onChange={event=>{
+                    setVoiceListening(false);
+                    setQuery(event.target.value);
+                    setPhase('compose');
+                  }}
+                  onKeyDown={event=>{ if(event.key === 'Enter'){ event.preventDefault(); handleSubmit(); } }}
+                  aria-label="搜索"
+                />
+                {query ? (
+                  <button type="button" className="ios-search-clear" aria-label="清除" onClick={handleClear}><I name="close" size={10} stroke={2.4}/></button>
+                ) : (
+                  <button type="button" className={'ios-search-mic' + (voiceListening ? ' is-active' : '')} aria-label="语音输入" onClick={handleVoice}><I name="mic" size={18} stroke={1.7}/></button>
+                )}
+              </div>
+              <button type="button" className="ios-search-dismiss" aria-label="关闭" onClick={requestClose}><I name="close" size={14} stroke={2.2}/></button>
+            </div>
+            {phase === 'compose' ? (
+              <div className="ios-search-panel">
+                <div className="ios-search-filters" aria-label="类型筛选">
+                  <div className="ios-search-filter-tags">
+                    {REVIEW_SEARCH_FILTER_TAGS.map(tag=>(
+                      <button
+                        key={tag.id}
+                        type="button"
+                        className={'ios-search-filter-tag' + (activeFilter === tag.id ? ' is-active' : '')}
+                        aria-pressed={activeFilter === tag.id}
+                        onClick={()=>handleFilter(tag)}
+                      >
+                        {tag.icon ? <I name={tag.icon} size={14} stroke={1.8}/> : null}
+                        {tag.emoji ? <span className="ios-search-filter-emoji" aria-hidden="true">{tag.emoji}</span> : null}
+                        {tag.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </div>
+      {showKeyboard ? (
+        <ReviewIosSearchKeyboard
+          query={query}
+          onKey={appendKey}
+          onBackspace={()=>setQuery(current=>current.slice(0,-1))}
+          onSpace={()=>setQuery(current=>(current && !/\s$/.test(current) ? current + ' ' : current))}
+          onSearch={handleSubmit}
+          onVoice={handleVoice}
+          isVoiceActive={voiceListening}
+        />
+      ) : null}
+    </>
+  );
+}
+
 Object.assign(window, {
   StreamSearchOverlay,
   SearchPage: StreamSearchOverlay,
   XhsStyleSearchPage,
+  ReviewSearchOverlay,
 });

@@ -478,7 +478,12 @@ function ReviewFaceInviteIcon(){
   return <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM18 18h3v3h-3zM18 14h3M14 19v2"/></svg>;
 }
 
-function ReviewCard({title, iconClass='', icon, chart, legend, metrics, more, moreBadge, headAction, sample, onOpen}){
+const ReviewCardShareContext = React.createContext(null);
+
+function ReviewCard({title, iconClass='', icon, chart, legend, metrics, more, moreBadge, headAction, sample, onOpen, showShareAction=true}){
+  const cardShareContext = React.useContext(ReviewCardShareContext);
+  const requestCardShare = cardShareContext?.requestShare;
+  const cardShared = Boolean(cardShareContext?.sharedCards?.[title]);
   const isActionable = typeof onOpen === 'function';
   const handleKeyDown = (event)=>{
     if(!isActionable) return;
@@ -499,7 +504,37 @@ function ReviewCard({title, iconClass='', icon, chart, legend, metrics, more, mo
         <div className="review-card-head">
           <div className={'review-card-icon ' + iconClass} aria-hidden="true">{icon}</div>
           <div className="review-card-title">{title}</div>
-          {headAction}
+          <div className="review-card-head-actions">
+            {headAction}
+            {showShareAction && cardShared ? (
+              <button
+                type="button"
+                className="review-card-shared-cta"
+                aria-label={title + '已共享，点击管理'}
+                onKeyDown={event=>event.stopPropagation()}
+                onClick={event=>{
+                  event.stopPropagation();
+                  requestCardShare?.(title);
+                }}
+              >
+                <span>已共享给</span>
+                <span className="review-card-shared-avatar" aria-hidden="true">👨🏻</span>
+              </button>
+            ) : showShareAction ? (
+              <button
+                type="button"
+                className="review-card-share-cta"
+                aria-label={'共享' + title + '给TA'}
+                onKeyDown={event=>event.stopPropagation()}
+                onClick={event=>{
+                  event.stopPropagation();
+                  requestCardShare?.(title);
+                }}
+              >
+                <ReviewShareIcon/><span>共享给TA</span>
+              </button>
+            ) : null}
+          </div>
         </div>
         <div className="review-chart">{chart}</div>
         {legend ? <div className="review-legend">{legend}</div> : null}
@@ -635,7 +670,7 @@ function CycleSharePage({open, onClose, shared, onSharedChange}){
         </div>
         <div className="review-share-content is-face-invite">
           <div className="review-share-qr-wrap"><ReviewShareQr/></div>
-          <h2 className="review-share-face-title">请男友打开微信扫码</h2>
+          <h2 className="review-share-face-title">请TA打开微信扫码</h2>
           <p className="review-share-face-desc">扫码后即可接受你的月经周期数据共享邀请</p>
           <div className="review-share-expire">二维码 10 分钟内有效</div>
           <div className="review-share-privacy-note">仅共享月经日期、周期长度和周期预测</div>
@@ -652,28 +687,40 @@ function CycleSharePage({open, onClose, shared, onSharedChange}){
           <span className="review-detail-title">共享周期</span>
         </div>
         <div className="review-share-content is-shared-state">
-          <div className="review-share-hero is-connected" aria-hidden="true">
-            <span className="review-share-person is-me">我</span>
-            <span className="review-share-link"><i></i><b>♥</b><i></i></span>
-            <span className="review-share-person is-partner">👨🏻</span>
-          </div>
-          <div className={'review-share-success' + (wechatSent ? ' is-new' : '')}>
-            <span>✓</span>{wechatSent ? '邀请成功' : '已共享给男友'}
-          </div>
-          <h2 className="review-share-title">月经周期已共享给男友</h2>
-          <p className="review-share-desc">男友现在可以查看你的周期信息，在经期前后给予更多关心和陪伴。</p>
-
-          <div className="review-share-active-card">
-            <div className="review-share-active-head"><span className="review-share-live-dot"></span><b>正在共享</b></div>
-            <div className="review-share-active-items">
-              <span>月经日期</span><span>周期长度</span><span>周期预测</span>
+          <div className="review-share-manage-card">
+            <div className="review-share-manage-head">
+              <b>已共享的人</b>
+              <span className="review-share-manage-live"><i></i>共享中</span>
             </div>
-            <div className="review-share-active-private">点滴、症状、心情等私人记录不会被共享</div>
+            <div className="review-share-member-row">
+              <span className="review-share-member-avatar" aria-hidden="true">👨🏻</span>
+              <span className="review-share-member-info"><b>男友</b><small>已接受你的周期共享邀请</small></span>
+              <button type="button" className="review-share-member-close" onClick={()=>setCloseConfirmOpen(true)}>关闭共享</button>
+            </div>
+            <div className="review-share-info-block">
+              <div className="review-share-info-title">共享的信息</div>
+              <div className="review-share-active-items">
+                <span>月经日期</span><span>周期长度</span><span>周期预测</span>
+              </div>
+              <div className="review-share-active-private">点滴、症状、心情等私人记录不会被共享</div>
+            </div>
           </div>
 
-          <button type="button" className="review-share-close-btn" onClick={()=>setCloseConfirmOpen(true)}>关闭共享</button>
-          <p className="review-share-footnote">关闭后，男友将无法继续查看你的周期数据</p>
+          <div className="review-share-manage-card is-invite-more">
+            <div className="review-share-manage-head"><b>继续邀请</b></div>
+            <p className="review-share-invite-more-desc">还可以邀请闺蜜、家人，一起了解你的经期情况。</p>
+            <div className="review-share-invite-more-actions">
+              <button type="button" className="is-wechat" onClick={handleWechatInvite}>
+                <ReviewWechatIcon/><span>微信邀请</span>
+              </button>
+              <button type="button" className="is-face" onClick={()=>setFaceInviteOpen(true)}>
+                <ReviewFaceInviteIcon/><span>面对面邀请</span>
+              </button>
+            </div>
+          </div>
         </div>
+
+        <div className={'review-share-toast' + (wechatSent ? ' is-show' : '')} role="status">微信邀请已生成</div>
 
         {closeConfirmOpen ? (
           <div className="review-share-confirm-mask" role="presentation">
@@ -726,6 +773,115 @@ function CycleSharePage({open, onClose, shared, onSharedChange}){
         <p className="review-share-footnote">你可以随时停止共享</p>
       </div>
       <div className={'review-share-toast' + (wechatSent ? ' is-show' : '')} role="status">微信邀请已生成</div>
+    </section>
+  );
+}
+
+const REVIEW_CARD_SHARE_INFO = {
+  '经期':['经期日期','经期天数','经期趋势'],
+  '体重':['体重记录','体重趋势','变化分析'],
+  '症状':['症状类型','记录时间','症状趋势'],
+  '心情':['心情记录','心情趋势','变化分析'],
+  '饮食':['饮食记录','热量摄入','饮食趋势'],
+  '饮食图集':['饮食照片','记录日期','饮食回顾'],
+  '热量目标':['每日目标','摄入热量','达标情况'],
+  '便便':['记录时间','每日次数','规律趋势'],
+  '爱爱':['记录日期','记录次数','变化趋势'],
+  '喂奶':['喂奶时间','喂奶方式','喂奶量'],
+  '睡眠':['睡眠时间','睡眠时长','睡眠趋势'],
+  '换尿布':['更换时间','尿布类型','次数趋势'],
+  '辅食':['辅食时间','辅食内容','摄入量'],
+};
+
+function ReviewCardSharePage({open, onClose, title, shared, onEnable}){
+  const [toastMessage, setToastMessage] = useState('');
+  const [faceInviteOpen, setFaceInviteOpen] = useState(false);
+  const items = REVIEW_CARD_SHARE_INFO[title] || [title + '记录', title + '趋势', '变化分析'];
+
+  React.useEffect(()=>{
+    if(!open){
+      setToastMessage('');
+      setFaceInviteOpen(false);
+    }
+  }, [open, title]);
+
+  const showToast = message=>{
+    setToastMessage(message);
+    window.setTimeout(()=>setToastMessage(''), 1800);
+  };
+
+  const handleEnable = ()=>{
+    if(shared) return;
+    onEnable?.();
+    showToast('共享成功');
+  };
+
+  if(faceInviteOpen){
+    return (
+      <section className={'review-cycle-detail review-share-page' + (open ? ' is-open' : '')} aria-hidden={!open} aria-label="面对面邀请共享经期">
+        <div className="review-detail-nav review-share-nav">
+          <button type="button" className="review-detail-back" aria-label="返回" onClick={()=>setFaceInviteOpen(false)}><ReviewBackIcon/></button>
+          <span className="review-detail-title">面对面邀请</span>
+        </div>
+        <div className="review-share-content is-face-invite">
+          <div className="review-share-qr-wrap"><ReviewShareQr/></div>
+          <h2 className="review-share-face-title">请TA打开微信扫码</h2>
+          <p className="review-share-face-desc">扫码后即可接受你的经期数据共享邀请</p>
+          <div className="review-share-expire">二维码 10 分钟内有效</div>
+          <div className="review-share-privacy-note">仅共享经期日期、经期天数和经期趋势</div>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className={'review-cycle-detail review-share-page' + (open ? ' is-open' : '')} aria-hidden={!open} aria-label={title + '共享管理'}>
+      <div className="review-detail-nav review-share-nav">
+        <button type="button" className="review-detail-back" aria-label="返回" onClick={onClose}><ReviewBackIcon/></button>
+        <span className="review-detail-title">{title}共享</span>
+      </div>
+      <div className="review-share-content is-card-share-state">
+        <div className="review-share-manage-card">
+          <div className="review-share-manage-head">
+            <b>共享给</b>
+            <span className="review-share-manage-live"><i></i>周期关系已连接</span>
+          </div>
+          <div className="review-share-member-row">
+            <span className="review-share-member-avatar" aria-hidden="true">👨🏻</span>
+            <span className="review-share-member-info"><b>男友</b><small>已共享月经周期数据</small></span>
+            <button
+              type="button"
+              className={'review-share-member-enable' + (shared ? ' is-shared' : '')}
+              disabled={shared}
+              onClick={handleEnable}
+            >
+              {shared ? '已共享' : '开启共享'}
+            </button>
+          </div>
+          <div className="review-share-info-block">
+            <div className="review-share-info-title">共享的信息</div>
+            <div className="review-share-active-items">
+              {items.map(item=><span key={item}>{item}</span>)}
+            </div>
+            <div className="review-share-active-private">仅共享当前卡片的数据，其他私人记录不会被共享</div>
+          </div>
+        </div>
+        {title === '经期' && shared ? (
+          <div className="review-share-manage-card is-invite-more">
+            <div className="review-share-manage-head"><b>继续邀请</b></div>
+            <p className="review-share-invite-more-desc">还可以邀请闺蜜、家人，一起了解你的经期情况。</p>
+            <div className="review-share-invite-more-actions">
+              <button type="button" className="is-wechat" onClick={()=>showToast('微信邀请已生成')}>
+                <ReviewWechatIcon/><span>微信邀请</span>
+              </button>
+              <button type="button" className="is-face" onClick={()=>setFaceInviteOpen(true)}>
+                <ReviewFaceInviteIcon/><span>面对面邀请</span>
+              </button>
+            </div>
+          </div>
+        ) : null}
+      </div>
+      <div className={'review-share-toast' + (toastMessage ? ' is-show' : '')} role="status">{toastMessage}</div>
     </section>
   );
 }
@@ -1879,9 +2035,12 @@ function LoveReviewCard(){
 }
 
 function ReviewPage({mode='经期', cycleShared=false, onCycleSharedChange}){
+  const [reviewSearchOpen, setReviewSearchOpen] = useState(false);
   const [cycleDetailOpen, setCycleDetailOpen] = useState(false);
   const [cycleShareOpen, setCycleShareOpen] = useState(false);
   const [cycleLandscapeOpen, setCycleLandscapeOpen] = useState(false);
+  const [cardShareTarget, setCardShareTarget] = useState('');
+  const [sharedReviewCards, setSharedReviewCards] = useState({});
   const [dietDistDetailOpen, setDietDistDetailOpen] = useState(false);
   const isPeriodMode = mode === '经期';
   const cycleData = [29,34,31,30,33,31,32,36,31,30,32,30,31,29,30,31,29,30,29,31,30,30,28,28];
@@ -1890,10 +2049,36 @@ function ReviewPage({mode='经期', cycleShared=false, onCycleSharedChange}){
   const weightData = [103.3,98.2,101.4,97.6,98.6,97.5,97.9,97.3,96.5,99.4,102.0,100.6,101.6,99.9,101.0,102.1,100.7,101.3,101.9,100.6,101.5,102.0,101.4,101.1];
   const weightAvg = weightData.reduce((s, x)=>s + x, 0) / weightData.length;
   const weightDelta = weightData[weightData.length - 1] - weightData[0];
+  const I = window.Icon;
+  const ReviewSearchOverlay = window.ReviewSearchOverlay;
+  const handleReviewCardShare = React.useCallback((title)=>{
+    setCycleDetailOpen(false);
+    setCardShareTarget('');
+    if(!cycleShared){
+      setCycleShareOpen(true);
+      return;
+    }
+    setCycleShareOpen(false);
+    setCardShareTarget(title);
+  }, [cycleShared]);
+  const reviewCardShareContextValue = React.useMemo(()=>({
+    requestShare:handleReviewCardShare,
+    sharedCards:sharedReviewCards,
+  }), [handleReviewCardShare, sharedReviewCards]);
 
   return (
-    <main className="review-page" aria-label="回顾">
+    <ReviewCardShareContext.Provider value={reviewCardShareContextValue}>
+    <main className={'review-page' + (reviewSearchOpen ? ' is-review-search-open' : '')} aria-label="回顾">
       <div className="review-nav">
+        <button
+          type="button"
+          className="review-nav-search"
+          aria-label="搜索"
+          aria-pressed={reviewSearchOpen}
+          onClick={()=>setReviewSearchOpen(true)}
+        >
+          <I name="search" size={20} stroke={1.7}/>
+        </button>
         <span className="review-nav-title">回顾</span>
       </div>
       <div className="review-content">
@@ -1902,6 +2087,7 @@ function ReviewPage({mode='经期', cycleShared=false, onCycleSharedChange}){
       <ReviewCard
         title={isPeriodMode ? '周期' : '月经周期'}
         icon={<ReviewDropletIcon/>}
+        showShareAction={false}
         headAction={cycleShared ? (
           <button
             type="button"
@@ -1910,12 +2096,13 @@ function ReviewPage({mode='经期', cycleShared=false, onCycleSharedChange}){
             onKeyDown={(event)=>event.stopPropagation()}
             onClick={(event)=>{
               event.stopPropagation();
+              setCardShareTarget('');
               setCycleDetailOpen(false);
               setCycleShareOpen(true);
             }}
           >
+            <span>已共享给</span>
             <span className="review-cycle-shared-avatar" aria-hidden="true">👨🏻</span>
-            <span>已共享给男友</span>
           </button>
         ) : (
           <button
@@ -1925,6 +2112,7 @@ function ReviewPage({mode='经期', cycleShared=false, onCycleSharedChange}){
             onKeyDown={(event)=>event.stopPropagation()}
             onClick={(event)=>{
               event.stopPropagation();
+              setCardShareTarget('');
               setCycleDetailOpen(false);
               setCycleShareOpen(true);
             }}
@@ -1962,6 +2150,7 @@ function ReviewPage({mode='经期', cycleShared=false, onCycleSharedChange}){
         more="查看AI趋势分析"
         moreBadge="VIP"
         onOpen={()=>{
+          setCardShareTarget('');
           setCycleShareOpen(false);
           setCycleDetailOpen(true);
         }}
@@ -2046,9 +2235,20 @@ function ReviewPage({mode='经期', cycleShared=false, onCycleSharedChange}){
         shared={cycleShared}
         onSharedChange={onCycleSharedChange}
       />
+      <ReviewCardSharePage
+        open={Boolean(cardShareTarget)}
+        onClose={()=>setCardShareTarget('')}
+        title={cardShareTarget || '数据'}
+        shared={Boolean(sharedReviewCards[cardShareTarget])}
+        onEnable={()=>setSharedReviewCards(current=>({...current, [cardShareTarget]:true}))}
+      />
+      {reviewSearchOpen && ReviewSearchOverlay ? (
+        <ReviewSearchOverlay onClose={()=>setReviewSearchOpen(false)}/>
+      ) : null}
       <DietDistributionDetailPage open={dietDistDetailOpen} onClose={()=>setDietDistDetailOpen(false)}/>
       <CycleLandscapePage open={cycleLandscapeOpen} onClose={()=>setCycleLandscapeOpen(false)}/>
     </main>
+    </ReviewCardShareContext.Provider>
   );
 }
 
