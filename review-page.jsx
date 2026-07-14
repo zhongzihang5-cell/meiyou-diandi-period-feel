@@ -45,6 +45,22 @@ function ReviewDietTargetIcon(){
   return <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22"/></svg>;
 }
 
+function ReviewPeriodIcon(){
+  return <svg viewBox="0 0 24 24"><path d="M12 3c3 3.3 4.8 5.8 4.8 8.3A4.8 4.8 0 1 1 7.2 11.3C7.2 8.8 9 6.3 12 3z"/><path d="M9.5 16c1.4.8 3.4.8 4.8-.2"/></svg>;
+}
+
+function ReviewSymptomIcon(){
+  return <svg viewBox="0 0 24 24"><path d="M8.5 4.5a8 8 0 1 0 7 0"/><path d="M12 3v8M8 7h8"/><path d="M9 16c1.7-1.2 4.3-1.2 6 0"/></svg>;
+}
+
+function ReviewStoolIcon(){
+  return <svg viewBox="0 0 24 24"><path d="M8 10c0-2 1.4-3.5 3.4-3.5.2-2 1.5-3.2 3.2-3.2 2 0 3.4 1.6 3.4 3.8 1.8.4 3 1.8 3 3.7 0 2.2-1.7 3.8-4 3.8H8.2c-2 0-3.5-1.5-3.5-3.4S6 8 8 8"/><path d="M7 18h10"/></svg>;
+}
+
+function ReviewLoveIcon(){
+  return <svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4.2 4.2 0 0 1 7-3.1A4.2 4.2 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>;
+}
+
 function ReviewBabyIcon({kind}){
   if(kind === 'sleep') return <svg viewBox="0 0 24 24"><path d="M20 15.2A8 8 0 0 1 8.8 4 8 8 0 1 0 20 15.2z"/></svg>;
   if(kind === 'diaper') return <svg viewBox="0 0 24 24"><path d="M5 5.5h14v5.8c0 4.5-2.7 7.2-7 7.2s-7-2.7-7-7.2z"/><path d="M5 9.5c2.2.2 3.8 1.2 4.8 3M19 9.5c-2.2.2-3.8 1.2-4.8 3"/></svg>;
@@ -446,6 +462,22 @@ function ReviewBackIcon(){
   return <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>;
 }
 
+function ReviewShareIcon(){
+  return <svg viewBox="0 0 24 24"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M6 10H4.8A1.8 1.8 0 0 0 3 11.8v7.4A1.8 1.8 0 0 0 4.8 21h14.4a1.8 1.8 0 0 0 1.8-1.8v-7.4a1.8 1.8 0 0 0-1.8-1.8H18"/></svg>;
+}
+
+function ReviewExpandIcon(){
+  return <svg viewBox="0 0 24 24"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5"/><path d="M3 8l6-6M21 8l-6-6M21 16l-6 6M3 16l6 6"/></svg>;
+}
+
+function ReviewWechatIcon(){
+  return <svg viewBox="0 0 24 24"><path d="M10.2 5.2c-4 0-7.2 2.5-7.2 5.7 0 1.8 1 3.4 2.7 4.5l-.7 2.3 2.6-1.3c.8.2 1.7.3 2.6.3.4 0 .8 0 1.2-.1-.5-.7-.8-1.6-.8-2.5 0-2.9 2.7-5.3 6.2-5.3h.3c-1-2.1-3.7-3.6-6.9-3.6z"/><path d="M17 9.8c-3.3 0-6 2-6 4.6s2.7 4.6 6 4.6c.7 0 1.4-.1 2-.3l2.1 1-.5-1.9c1.5-.8 2.4-2 2.4-3.4 0-2.6-2.7-4.6-6-4.6z"/><path d="M7.5 9.5h.01M12.3 9.5h.01M15 13.7h.01M19 13.7h.01"/></svg>;
+}
+
+function ReviewFaceInviteIcon(){
+  return <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM18 18h3v3h-3zM18 14h3M14 19v2"/></svg>;
+}
+
 function ReviewCard({title, iconClass='', icon, chart, legend, metrics, more, moreBadge, headAction, sample, onOpen}){
   const isActionable = typeof onOpen === 'function';
   const handleKeyDown = (event)=>{
@@ -485,19 +517,20 @@ function ReviewCard({title, iconClass='', icon, chart, legend, metrics, more, mo
   );
 }
 
+const REVIEW_CYCLE_ALL_DATA = [
+  ['22.1',33],['22.2',32],['22.4',29],['22.5',28],['22.6',31],['22.7',33],
+  ['22.8',30],['22.9',32],['22.10',30],['22.11',33],['22.12',34],
+  ['23.1',32],['23.2',33],['23.3',30],['23.4',29],['23.6',32],['23.7',31],
+  ['23.8',33],['23.9',30],['23.10',32],['23.11',31],['23.12',33],
+  ['24.1',31],['24.3',30],['24.4',29],['24.5',28],['24.6',29],['24.7',34],
+  ['24.8',31],['24.9',30],['24.10',33],['24.11',31],['24.12',32],['25.1',36],
+  ['25.2',31],['25.3',30],['25.4',32],['25.5',30],['25.6',31],['25.7',29],
+  ['25.8',30],['25.9',31],['25.10',29],['25.11',30],['25.12',29],['26.1',31],
+  ['26.2',30],['26.3',30],['26.4',28],['26.5',28],
+];
+
 function CycleDetailChart({range}){
-  const data = [
-    ['22.1',33],['22.2',32],['22.4',29],['22.5',28],['22.6',31],['22.7',33],
-    ['22.8',30],['22.9',32],['22.10',30],['22.11',33],['22.12',34],
-    ['23.1',32],['23.2',33],['23.3',30],['23.4',29],['23.6',32],['23.7',31],
-    ['23.8',33],['23.9',30],['23.10',32],['23.11',31],['23.12',33],
-    ['24.1',31],['24.3',30],['24.4',29],['24.5',28],
-    ['24.6',29],['24.7',34],['24.8',31],['24.9',30],['24.10',33],['24.11',31],
-    ['24.12',32],['25.1',36],['25.2',31],['25.3',30],['25.4',32],['25.5',30],
-    ['25.6',31],['25.7',29],['25.8',30],['25.9',31],['25.10',29],['25.11',30],
-    ['25.12',29],['26.1',31],['26.2',30],['26.3',30],['26.4',28],['26.5',28],
-  ];
-  const slice = range === '1y' ? data.slice(-12) : (range === '3y' ? data.slice(-36) : data);
+  const slice = range === '1y' ? REVIEW_CYCLE_ALL_DATA.slice(-12) : (range === '3y' ? REVIEW_CYCLE_ALL_DATA.slice(-36) : REVIEW_CYCLE_ALL_DATA);
   const vals = slice.map(d=>d[1]);
   const n = vals.length;
   const normalMax = 35;
@@ -549,6 +582,154 @@ function CycleDetailChart({range}){
   );
 }
 
+function ReviewShareQr(){
+  const modules = [];
+  const isFinder = (x, y, ox, oy)=>x >= ox && x < ox + 7 && y >= oy && y < oy + 7;
+  const finderDark = (x, y, ox, oy)=>{
+    const dx = x - ox, dy = y - oy;
+    return dx === 0 || dx === 6 || dy === 0 || dy === 6 || (dx >= 2 && dx <= 4 && dy >= 2 && dy <= 4);
+  };
+  for(let y = 0; y < 25; y++){
+    for(let x = 0; x < 25; x++){
+      let dark = false;
+      if(isFinder(x,y,0,0)) dark = finderDark(x,y,0,0);
+      else if(isFinder(x,y,18,0)) dark = finderDark(x,y,18,0);
+      else if(isFinder(x,y,0,18)) dark = finderDark(x,y,0,18);
+      else dark = ((x * 7 + y * 11 + x * y) % 9 < 4) && !((x + y) % 7 === 0);
+      if(dark) modules.push(<rect key={x + '-' + y} x={x + 2} y={y + 2} width="1" height="1" rx="0.08"/>);
+    }
+  }
+  return <svg className="review-share-qr-svg" viewBox="0 0 29 29" role="img" aria-label="面对面邀请二维码"><rect width="29" height="29" rx="2" fill="#fff"/>{modules}</svg>;
+}
+
+function CycleSharePage({open, onClose, shared, onSharedChange}){
+  const [faceInviteOpen, setFaceInviteOpen] = useState(false);
+  const [wechatSent, setWechatSent] = useState(false);
+  const [closeConfirmOpen, setCloseConfirmOpen] = useState(false);
+
+  React.useEffect(()=>{
+    if(!open){
+      setFaceInviteOpen(false);
+      setWechatSent(false);
+      setCloseConfirmOpen(false);
+    }
+  }, [open]);
+
+  const handleWechatInvite = ()=>{
+    setWechatSent(true);
+    onSharedChange?.(true);
+    window.setTimeout(()=>setWechatSent(false), 1800);
+  };
+
+  const handleCloseSharing = ()=>{
+    onSharedChange?.(false);
+    setCloseConfirmOpen(false);
+  };
+
+  if(faceInviteOpen){
+    return (
+      <section className={'review-cycle-detail review-share-page' + (open ? ' is-open' : '')} aria-hidden={!open} aria-label="面对面邀请共享">
+        <div className="review-detail-nav review-share-nav">
+          <button type="button" className="review-detail-back" aria-label="返回" onClick={()=>setFaceInviteOpen(false)}><ReviewBackIcon/></button>
+          <span className="review-detail-title">面对面邀请</span>
+        </div>
+        <div className="review-share-content is-face-invite">
+          <div className="review-share-qr-wrap"><ReviewShareQr/></div>
+          <h2 className="review-share-face-title">请男友打开微信扫码</h2>
+          <p className="review-share-face-desc">扫码后即可接受你的月经周期数据共享邀请</p>
+          <div className="review-share-expire">二维码 10 分钟内有效</div>
+          <div className="review-share-privacy-note">仅共享月经日期、周期长度和周期预测</div>
+        </div>
+      </section>
+    );
+  }
+
+  if(shared){
+    return (
+      <section className={'review-cycle-detail review-share-page' + (open ? ' is-open' : '')} aria-hidden={!open} aria-label="共享周期管理">
+        <div className="review-detail-nav review-share-nav">
+          <button type="button" className="review-detail-back" aria-label="返回" onClick={onClose}><ReviewBackIcon/></button>
+          <span className="review-detail-title">共享周期</span>
+        </div>
+        <div className="review-share-content is-shared-state">
+          <div className="review-share-hero is-connected" aria-hidden="true">
+            <span className="review-share-person is-me">我</span>
+            <span className="review-share-link"><i></i><b>♥</b><i></i></span>
+            <span className="review-share-person is-partner">👨🏻</span>
+          </div>
+          <div className={'review-share-success' + (wechatSent ? ' is-new' : '')}>
+            <span>✓</span>{wechatSent ? '邀请成功' : '已共享给男友'}
+          </div>
+          <h2 className="review-share-title">月经周期已共享给男友</h2>
+          <p className="review-share-desc">男友现在可以查看你的周期信息，在经期前后给予更多关心和陪伴。</p>
+
+          <div className="review-share-active-card">
+            <div className="review-share-active-head"><span className="review-share-live-dot"></span><b>正在共享</b></div>
+            <div className="review-share-active-items">
+              <span>月经日期</span><span>周期长度</span><span>周期预测</span>
+            </div>
+            <div className="review-share-active-private">点滴、症状、心情等私人记录不会被共享</div>
+          </div>
+
+          <button type="button" className="review-share-close-btn" onClick={()=>setCloseConfirmOpen(true)}>关闭共享</button>
+          <p className="review-share-footnote">关闭后，男友将无法继续查看你的周期数据</p>
+        </div>
+
+        {closeConfirmOpen ? (
+          <div className="review-share-confirm-mask" role="presentation">
+            <div className="review-share-confirm" role="dialog" aria-modal="true" aria-label="确认关闭共享">
+              <div className="review-share-confirm-icon">!</div>
+              <h3>确定关闭共享吗？</h3>
+              <p>关闭后，男友将无法继续查看你的周期数据。</p>
+              <div className="review-share-confirm-actions">
+                <button type="button" className="is-keep" onClick={()=>setCloseConfirmOpen(false)}>继续共享</button>
+                <button type="button" className="is-close" onClick={handleCloseSharing}>确认关闭</button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </section>
+    );
+  }
+
+  return (
+    <section className={'review-cycle-detail review-share-page' + (open ? ' is-open' : '')} aria-hidden={!open} aria-label="共享周期">
+      <div className="review-detail-nav review-share-nav">
+        <button type="button" className="review-detail-back" aria-label="返回" onClick={onClose}><ReviewBackIcon/></button>
+        <span className="review-detail-title">共享周期</span>
+      </div>
+      <div className="review-share-content">
+        <div className="review-share-hero" aria-hidden="true">
+          <span className="review-share-person is-me">我</span>
+          <span className="review-share-link"><i></i><b>♥</b><i></i></span>
+          <span className="review-share-person is-partner">TA</span>
+        </div>
+        <h2 className="review-share-title">共享我的月经周期数据给TA</h2>
+        <p className="review-share-desc">可以共享给男友、闺蜜、家人，邀请成功后对方可以了解你的经期情况，在经期前后获得更多关心和陪伴。</p>
+
+        <div className="review-share-actions">
+          <button type="button" className="review-share-btn is-wechat" onClick={handleWechatInvite}>
+            <span className="review-share-btn-icon"><ReviewWechatIcon/></span>
+            微信邀请共享
+          </button>
+          <button type="button" className="review-share-btn is-face" onClick={()=>setFaceInviteOpen(true)}>
+            <span className="review-share-btn-icon"><ReviewFaceInviteIcon/></span>
+            面对面邀请共享
+          </button>
+        </div>
+
+        <div className="review-share-scope">
+          <div className="review-share-scope-title">共享内容说明</div>
+          <div className="review-share-scope-row is-allowed"><span>✓</span><p>可查看月经日期、周期长度和周期预测</p></div>
+          <div className="review-share-scope-row is-private"><span>⌁</span><p>不会共享点滴、症状、心情等私人记录</p></div>
+        </div>
+        <p className="review-share-footnote">你可以随时停止共享</p>
+      </div>
+      <div className={'review-share-toast' + (wechatSent ? ' is-show' : '')} role="status">微信邀请已生成</div>
+    </section>
+  );
+}
+
 function CycleDetailPage({open, onClose}){
   const [range, setRange] = useState('3y');
   const ranges = [
@@ -556,6 +737,84 @@ function CycleDetailPage({open, onClose}){
     {key:'3y', label:'最近3年'},
     {key:'all', label:'全部'},
   ];
+  const analysisCopy = {
+    '1y': {
+      items: [
+        {
+          tone:'is-good',
+          title:'最近一年规律性：很好',
+          text:<>最近 12 次周期都在 <b>28-31 天</b>之间，平均约 <b>29.7 天</b>，波动标准差约 <b>1.0 天</b>。每次都处于常见周期范围内，整体节奏稳定。</>,
+        },
+        {
+          tone:'is-note',
+          title:'近期有轻微缩短',
+          text:<>前 6 次平均约 <b>30.0 天</b>，后 6 次平均约 <b>29.3 天</b>。变化幅度不到 1 天，属于轻微趋势，暂时不代表异常。</>,
+        },
+        {
+          tone:'is-good',
+          title:'波动范围正在收窄',
+          text:<>这一年最长周期是 <b>31 天</b>，最短是 <b>28 天</b>，最大相差只有 3 天。最近几次大多集中在 28-30 天，周期表现比过去更集中。</>,
+        },
+        {
+          tone:'is-note',
+          title:'连续两次 28 天，建议继续观察',
+          text:<>最近两个周期都是 <b>28 天</b>，是近一年里的低位，但仍在正常范围内。可以继续记录未来 2-3 次，看看是否稳定在新的节奏。</>,
+        },
+      ],
+      summary:'近一年周期规律、波动小，近期有轻微缩短，但仍处于健康区间。继续保持记录即可；如果之后连续出现明显提前、推迟或伴随不适，再结合身体状态进一步关注。',
+    },
+    '3y': {
+      items: [
+        {
+          tone:'is-good',
+          title:'整体规律性：相当好',
+          text:<>50 次里只有 2025 年 1 月那次 <b>36 天</b> 超出「正常上限」35 天，其余都在 28-34 天之间。周期间波动的标准差只有约 <b>1.9 天</b>。临床上通常认为同一年内波动小于 7-9 天就算「规律」，你远好于这个标准。</>,
+        },
+        {
+          tone:'is-note',
+          title:'最值得注意：周期在逐渐缩短',
+          text:<>把 50 个周期拟合一条趋势线，斜率约 <b>-0.11 天/周期</b>，相当于每年缩短 1 天多，两年累计缩短约 2.5 天。最近两个周期都是 <b>28 天</b>，是整段记录里最短的，当前这次又「提前」来了。</>,
+        },
+        {
+          tone:'is-good',
+          title:'不只是变短，还变得更稳了',
+          text:<>把前 12 个周期和后 12 个周期对比很明显：前半段在 <b>29-36 天</b> 之间跳，跨度 7 天；后半段收窄到 <b>28-31 天</b>，跨度只有 3 天。波动几乎减半，你的身体在向「28-31 天」这个更窄的区间收敛。</>,
+        },
+        {
+          tone:'is-note',
+          title:'季节的规律倾向',
+          text:<>按月对比两年同月：4-5 月偏短（<b>28-29 天</b>），冬季 12-2 月偏长（<b>30-32 天</b>），看着像「春短冬长」。但只有两年数据，而且这个「季节性」和整体下降趋势混在一起、没法拆开，所以只能算一个值得继续观察的猜想。</>,
+        },
+      ],
+      summary:'总的来说，你的周期完全在健康区间内，规律性还在变好，没有需要担心的异常。轻微、渐进的周期缩短很常见，可能和年龄、压力、作息、体重等很多因素相关。这是对记录的解读，不是医学诊断。',
+    },
+    'all': {
+      items: [
+        {
+          tone:'is-good',
+          title:'长期规律性：稳定',
+          text:<>全部 50 次记录覆盖约 4 年，周期平均约 <b>30.9 天</b>，绝大多数集中在 28-34 天。长期波动标准差约 <b>1.8 天</b>，说明整体节奏一直比较规律。</>,
+        },
+        {
+          tone:'is-note',
+          title:'仅出现过一次偏长周期',
+          text:<>只有 2025 年 1 月的一次周期为 <b>36 天</b>，略高于 35 天，其余记录均未超过正常上限。这次偏长是孤立波动，没有形成连续异常。</>,
+        },
+        {
+          tone:'is-note',
+          title:'长期趋势缓慢缩短',
+          text:<>从全部记录看，早期周期更多分布在 <b>30-34 天</b>，近一年逐渐集中到 <b>28-31 天</b>。这是缓慢、渐进的变化，不是突然缩短。</>,
+        },
+        {
+          tone:'is-good',
+          title:'周期正在变得更集中',
+          text:<>早期记录的高低跨度约 6 天，最近一年缩小到 <b>3 天</b>。虽然平均周期略有下降，但稳定性反而更好，身体正在形成更清晰的节奏。</>,
+        },
+      ],
+      summary:'从全部记录看，你的周期长期规律，只有一次孤立的偏长记录。近几年周期缓慢缩短、波动范围同步收窄，目前没有明显异常信号。长期趋势适合持续观察，不用于替代医学诊断。',
+    },
+  };
+  const currentAnalysis = analysisCopy[range];
 
   return (
     <section className={'review-cycle-detail' + (open ? ' is-open' : '')} aria-hidden={!open} aria-label="月经周期详情">
@@ -589,44 +848,31 @@ function CycleDetailPage({open, onClose}){
           </div>
         </div>
 
-        <div className="review-detail-card">
+        <div className="review-detail-card review-ai-insight-card">
           <div className="review-insight-head">
             <span className="review-ai-badge" aria-hidden="true">AI</span>
             <span>趋势分析</span>
           </div>
           <div className="review-insight-body">
-            <div className="review-insight-item is-good">
-              <span className="review-insight-dot"></span>
-              <div>
-                <div className="review-insight-title">整体规律性：相当好</div>
-                <div className="review-insight-text">50 次里只有 2025 年 1 月那次 <b>36 天</b> 超出「正常上限」35 天，其余都在 28-34 天之间。周期间波动的标准差只有约 <b>1.9 天</b>。临床上通常认为同一年内波动小于 7-9 天就算「规律」，你远好于这个标准。</div>
+            {currentAnalysis.items.map((item, index)=>(
+              <div className={'review-insight-item ' + item.tone} key={index}>
+                <span className="review-insight-dot"></span>
+                <div>
+                  <div className="review-insight-title">{item.title}</div>
+                  <div className="review-insight-text">{item.text}</div>
+                </div>
               </div>
-            </div>
-            <div className="review-insight-item is-note">
-              <span className="review-insight-dot"></span>
-              <div>
-                <div className="review-insight-title">最值得注意：周期在逐渐缩短</div>
-                <div className="review-insight-text">把 50 个周期拟合一条趋势线，斜率约 <b>-0.11 天/周期</b>，相当于每年缩短 1 天多，两年累计缩短约 2.5 天。最近两个周期都是 <b>28 天</b>，是整段记录里最短的，当前这次又「提前」来了。</div>
-              </div>
-            </div>
-            <div className="review-insight-item is-good">
-              <span className="review-insight-dot"></span>
-              <div>
-                <div className="review-insight-title">不只是变短，还变得更稳了</div>
-                <div className="review-insight-text">把前 12 个周期和后 12 个周期对比很明显：前半段在 <b>29-36 天</b> 之间跳，跨度 7 天；后半段收窄到 <b>28-31 天</b>，跨度只有 3 天。波动几乎减半，你的身体在向「28-31 天」这个更窄的区间收敛。</div>
-              </div>
-            </div>
-            <div className="review-insight-item is-note">
-              <span className="review-insight-dot"></span>
-              <div>
-                <div className="review-insight-title">季节的规律倾向</div>
-                <div className="review-insight-text">按月对比两年同月：4-5 月偏短（<b>28-29 天</b>），冬季 12-2 月偏长（<b>30-32 天</b>），看着像「春短冬长」。但只有两年数据，而且这个「季节性」和整体下降趋势混在一起、没法拆开，所以只能算一个值得继续观察的猜想。</div>
-              </div>
-            </div>
+            ))}
             <div className="review-insight-summary">
               <div className="review-summary-head">总结</div>
-              <p className="review-summary-text">总的来说，你的周期完全在健康区间内，规律性还在变好，没有需要担心的异常。轻微、渐进的周期缩短很常见，可能和年龄、压力、作息、体重等很多因素相关。这是对记录的解读，不是医学诊断。</p>
+              <p className="review-summary-text">{currentAnalysis.summary}</p>
             </div>
+          </div>
+          <div className="review-ai-lock-mask">
+            <button type="button" className="review-ai-unlock-btn">
+              <span className="review-ai-unlock-vip">VIP</span>
+              <span>立即解锁</span>
+            </button>
           </div>
         </div>
       </div>
@@ -660,12 +906,7 @@ function ReviewMoodValue({kind, word, trend}){
 }
 
 function CycleChart(){
-  const data = [
-    ['24.6',29],['24.7',34],['24.8',31],['24.9',30],['24.10',33],['24.11',31],
-    ['24.12',32],['25.1',36],['25.2',31],['25.3',30],['25.4',32],['25.5',30],
-    ['25.6',31],['25.7',29],['25.8',30],['25.9',31],['25.10',29],['25.11',30],
-    ['25.12',29],['26.1',31],['26.2',30],['26.3',30],['26.4',28],['26.5',28],
-  ];
+  const data = REVIEW_CYCLE_ALL_DATA.slice(-24);
   const vals = data.map(d=>d[1]);
   const n = vals.length;
   const normalMax = 35;
@@ -713,6 +954,107 @@ function CycleChart(){
         <text key={k} x={X(+k)} y={H - 8} textAnchor="middle" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{labels[k]}</text>
       ))}
     </svg>
+  );
+}
+
+function ExpandedCycleChart(){
+  const data = REVIEW_CYCLE_ALL_DATA;
+  const vals = data.map(item=>item[1]);
+  const n = vals.length;
+  const W = Math.max(1160, n * 28);
+  const H = 250;
+  const padL = 36, padR = 34, padT = 18, padB = 32;
+  const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
+  const yMin = 26, yMax = 37, normalMax = 35;
+  const X = i => x0 + (x1 - x0) * (i / (n - 1));
+  const Y = v => y1 - (v - yMin) / (yMax - yMin) * (y1 - y0);
+  const pts = vals.map((v, i)=>[X(i), Y(v)]);
+  const sx = vals.reduce((sum, _value, i)=>sum + i, 0);
+  const sy = vals.reduce((sum, value)=>sum + value, 0);
+  const sxy = vals.reduce((sum, value, i)=>sum + i * value, 0);
+  const sxx = vals.reduce((sum, _value, i)=>sum + i * i, 0);
+  const b = (n * sxy - sx * sy) / (n * sxx - sx * sx);
+  const a = (sy - b * sx) / n;
+  let anomalyIdx = -1;
+  vals.forEach((value, i)=>{ if(value > normalMax && (anomalyIdx < 0 || value > vals[anomalyIdx])) anomalyIdx = i; });
+  const labelIndexes = data.map((_item, i)=>i).filter(i=>i % 2 === 0 || i === n - 1);
+
+  return (
+    <svg
+      viewBox={'0 0 ' + W + ' ' + H}
+      style={{width:W + 'px'}}
+      preserveAspectRatio="none"
+      role="img"
+      aria-label="全部月经周期趋势曲线"
+    >
+      <rect x={x0} y={y0} width={x1 - x0} height={Y(normalMax) - y0} fill="rgba(255,149,0,0.06)"/>
+      {[28,32,36].map(value=>(
+        <React.Fragment key={value}>
+          <line x1={x0} y1={Y(value)} x2={x1} y2={Y(value)} stroke="rgba(0,0,0,0.06)" strokeWidth="1"/>
+          <text x={x0 - 8} y={Y(value) + 4} textAnchor="end" fontSize="10" fill="#aaaab0" fontFamily="PingFang SC">{value}</text>
+        </React.Fragment>
+      ))}
+      <line x1={x0} y1={Y(normalMax)} x2={x1} y2={Y(normalMax)} stroke="#ffb15a" strokeWidth="1" strokeDasharray="4 4"/>
+      <text x={x1} y={Y(normalMax) - 6} textAnchor="end" fontSize="10" fill="#e8930f" fontFamily="PingFang SC">正常上限 35天</text>
+      <line x1={X(0)} y1={Y(a)} x2={X(n - 1)} y2={Y(a + b * (n - 1))} stroke="#bfc0c5" strokeWidth="1.5" strokeDasharray="5 4"/>
+      <path d={reviewSmoothPath(pts)} fill="none" stroke="#ff4d88" strokeWidth="2.2" strokeLinejoin="round" strokeLinecap="round"/>
+      {vals.map((value, i)=>{
+        const isAnomaly = i === anomalyIdx;
+        const isLast = i === n - 1;
+        return (
+          <React.Fragment key={i}>
+            <circle cx={X(i)} cy={Y(value)} r={isLast ? 4.5 : (isAnomaly ? 4 : 2.5)} fill={isAnomaly ? '#ff9500' : '#ff4d88'} stroke={isLast || isAnomaly ? '#fff' : 'none'} strokeWidth="2"/>
+            {isAnomaly ? <text x={X(i)} y={Y(value) - 9} textAnchor="middle" fontSize="10" fontWeight="600" fill="#e8930f" fontFamily="PingFang SC">{value}天</text> : null}
+            {isLast ? <text x={X(i)} y={Y(value) + 17} textAnchor="end" fontSize="10" fontWeight="600" fill="#ff4d88" fontFamily="PingFang SC">{value}天</text> : null}
+          </React.Fragment>
+        );
+      })}
+      {labelIndexes.map(i=>(
+        <text key={i} x={X(i)} y={H - 9} textAnchor="middle" fontSize="9.5" fill="#aaaab0" fontFamily="PingFang SC">{data[i][0]}</text>
+      ))}
+    </svg>
+  );
+}
+
+function CycleLandscapePage({open, onClose}){
+  const scrollerRef = React.useRef(null);
+
+  React.useEffect(()=>{
+    if(!open) return undefined;
+    const scroller = scrollerRef.current;
+    if(scroller) scroller.scrollLeft = scroller.scrollWidth;
+    const handleKeyDown = event=>{ if(event.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handleKeyDown);
+    return ()=>document.removeEventListener('keydown', handleKeyDown);
+  }, [open, onClose]);
+
+  return (
+    <section
+      className={'review-cycle-landscape' + (open ? ' is-open' : '')}
+      aria-hidden={!open}
+      role="dialog"
+      aria-modal="true"
+      aria-label="全部月经周期横屏图表"
+    >
+      <div className="review-cycle-landscape-surface">
+        <header className="review-cycle-landscape-head">
+          <div>
+            <h2>全部月经周期</h2>
+            <p>共 {REVIEW_CYCLE_ALL_DATA.length} 个周期 · 左右滑动查看</p>
+          </div>
+          <button type="button" className="review-cycle-landscape-close" aria-label="关闭横屏图表" onClick={onClose}>×</button>
+        </header>
+        <div className="review-cycle-landscape-legend">
+          <span className="review-legend-item is-cycle"><i></i>周期天数</span>
+          <span className="review-legend-item is-trend"><i></i>趋势</span>
+          <span className="review-legend-item is-warning"><i></i>偏长周期</span>
+          <span className="review-cycle-landscape-tip">← 滑动查看更多 →</span>
+        </div>
+        <div className="review-cycle-landscape-scroll" ref={scrollerRef}>
+          <ExpandedCycleChart/>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -1007,10 +1349,10 @@ function DietTargetChart({selectedIndex, onSelect}){
   );
 }
 
-function DietDistributionCard({onOpen}){
+function DietDistributionCard({onOpen, title='热量分布', more='查看完整热量分布'}){
   return (
     <ReviewCard
-      title="热量分布"
+      title={title}
       iconClass="is-diet"
       icon={<ReviewDietIcon/>}
       chart={<DietDistributionChart/>}
@@ -1030,7 +1372,7 @@ function DietDistributionCard({onOpen}){
           <ReviewMetric value="6" unit="/7天" label="记录天数"/>
         </>
       )}
-      more="查看完整热量分布"
+      more={more}
       onOpen={onOpen}
     />
   );
@@ -1348,9 +1690,200 @@ function MoodChart(){
   );
 }
 
-function ReviewPage(){
+function PeriodLengthChart(){
+  const values = [6,7,6,7,8,7,6,7];
+  const labels = ['11月','12月','1月','2月','3月','4月','5月','本次'];
+  const W = 340, H = 156, padL = 28, padR = 14, padT = 18, padB = 26;
+  const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
+  const X = i => x0 + (x1 - x0) * (i / (values.length - 1));
+  const Y = v => y1 - (v - 4) / 6 * (y1 - y0);
+  const points = values.map((value, i)=>[X(i), Y(value)]);
+  return (
+    <svg viewBox="0 0 340 156" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近8次经期长度趋势">
+      <rect x={x0} y={Y(8)} width={x1 - x0} height={Y(5) - Y(8)} rx="8" fill="rgba(255,77,136,0.06)"/>
+      {[5,7,9].map(value=><line key={value} x1={x0} y1={Y(value)} x2={x1} y2={Y(value)} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/>)}
+      <path d={reviewSmoothPath(points)} fill="none" stroke="#ff6f9f" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+      {values.map((value, i)=>(
+        <React.Fragment key={labels[i]}>
+          <circle cx={X(i)} cy={Y(value)} r={i === values.length - 1 ? 4.5 : 3} fill="#ff6f9f" stroke="#fff" strokeWidth="1.5"/>
+          {i === values.length - 1 ? <text x={X(i) - 2} y={Y(value) - 10} textAnchor="end" fontSize="10" fontWeight="600" fill="#e7447c" fontFamily="PingFang SC">7天</text> : null}
+          <text x={X(i)} y={H - 7} textAnchor="middle" fontSize="9" fill={i === values.length - 1 ? '#e7447c' : '#bbbbbf'} fontFamily="PingFang SC">{labels[i]}</text>
+        </React.Fragment>
+      ))}
+    </svg>
+  );
+}
+
+function PeriodReviewCard(){
+  return (
+    <ReviewCard
+      title="经期"
+      iconClass="is-period"
+      icon={<ReviewPeriodIcon/>}
+      chart={<PeriodLengthChart/>}
+      legend={<span className="review-legend-item is-period"><i></i>经期天数</span>}
+      metrics={(
+        <>
+          <ReviewMetric value="7" unit="天" label="最近经期"/>
+          <ReviewMetric value="6.8" unit="天" label="近半年平均"/>
+          <ReviewMetric value="→ 稳定" label="整体趋势" trend/>
+        </>
+      )}
+      more="查看完整经期变化"
+    />
+  );
+}
+
+function SymptomReviewChart(){
+  const days = [
+    {label:'周一', values:[1,0,0]}, {label:'周二', values:[1,1,0]}, {label:'周三', values:[0,1,1]},
+    {label:'周四', values:[2,1,0]}, {label:'周五', values:[1,0,1]}, {label:'周六', values:[0,1,0]},
+    {label:'今天', values:[1,1,1]},
+  ];
+  const colors = ['#ff729f','#7aa8e8','#f6b24d'];
+  const W = 340, H = 156, padL = 28, padR = 12, padT = 14, padB = 26;
+  const x0 = padL, x1 = W - padR, y1 = H - padB;
+  const band = (x1 - x0) / days.length;
+  const X = i => x0 + band * i + band / 2;
+  const unit = 25;
+  return (
+    <svg viewBox="0 0 340 156" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近7天症状记录构成">
+      {[1,2,3].map(v=><line key={v} x1={x0} y1={y1 - v * unit} x2={x1} y2={y1 - v * unit} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/>)}
+      {days.map((day, i)=>{
+        let offset = 0;
+        return (
+          <React.Fragment key={day.label}>
+            {day.values.map((value, idx)=>{
+              if(!value) return null;
+              const height = value * unit - 3;
+              const y = y1 - offset - value * unit + 1.5;
+              offset += value * unit;
+              return <rect key={idx} x={X(i) - 10} y={y} width="20" height={height} rx="7" fill={colors[idx]}/>;
+            })}
+            <text x={X(i)} y={H - 7} textAnchor="middle" fontSize="9" fontWeight={i === days.length - 1 ? '600' : '400'} fill={i === days.length - 1 ? '#e7447c' : '#bbbbbf'} fontFamily="PingFang SC">{day.label}</text>
+          </React.Fragment>
+        );
+      })}
+    </svg>
+  );
+}
+
+function SymptomReviewCard(){
+  return (
+    <ReviewCard
+      title="症状"
+      iconClass="is-symptom"
+      icon={<ReviewSymptomIcon/>}
+      chart={<SymptomReviewChart/>}
+      legend={(
+        <>
+          <span className="review-legend-item is-symptom-pain"><i></i>腹痛</span>
+          <span className="review-legend-item is-symptom-back"><i></i>腰酸</span>
+          <span className="review-legend-item is-symptom-tired"><i></i>疲惫</span>
+        </>
+      )}
+      metrics={(
+        <>
+          <ReviewMetric value="腹痛" label="最近症状"/>
+          <ReviewMetric value="9" unit="次" label="近7天记录"/>
+          <ReviewMetric value="↘ 减少" label="较上周" trend/>
+        </>
+      )}
+      more="查看完整症状变化"
+    />
+  );
+}
+
+function StoolReviewChart(){
+  const values = [1,1,0,2,1,1,1];
+  const labels = ['周一','周二','周三','周四','周五','周六','今天'];
+  const W = 340, H = 156, padL = 28, padR = 12, padT = 14, padB = 26;
+  const x0 = padL, x1 = W - padR, y1 = H - padB;
+  const band = (x1 - x0) / values.length;
+  const X = i => x0 + band * i + band / 2;
+  const Y = v => y1 - v / 3 * 94;
+  return (
+    <svg viewBox="0 0 340 156" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近7天便便次数">
+      <rect x={x0} y={Y(1.5)} width={x1 - x0} height={Y(0.5) - Y(1.5)} rx="8" fill="rgba(129,97,191,0.06)"/>
+      <text x={x1} y={Y(1.5) - 4} textAnchor="end" fontSize="9" fill="#8d72c5" fontFamily="PingFang SC">规律区间</text>
+      {values.map((value, i)=>(
+        <React.Fragment key={labels[i]}>
+          {value > 0 ? <rect x={X(i) - 11} y={Y(value)} width="22" height={y1 - Y(value)} rx="10" fill={i === values.length - 1 ? '#8264bd' : '#b49fd9'}/> : <circle cx={X(i)} cy={y1 - 4} r="3" fill="#d7d3dc"/>}
+          <text x={X(i)} y={H - 7} textAnchor="middle" fontSize="9" fill={i === values.length - 1 ? '#8264bd' : '#bbbbbf'} fontFamily="PingFang SC">{labels[i]}</text>
+        </React.Fragment>
+      ))}
+    </svg>
+  );
+}
+
+function StoolReviewCard(){
+  return (
+    <ReviewCard
+      title="便便"
+      iconClass="is-stool"
+      icon={<ReviewStoolIcon/>}
+      chart={<StoolReviewChart/>}
+      legend={<span className="review-legend-item is-stool"><i></i>每日次数</span>}
+      metrics={(
+        <>
+          <ReviewMetric value="1" unit="次" label="最近记录"/>
+          <ReviewMetric value="1.0" unit="次" label="近7天日均"/>
+          <ReviewMetric value="→ 规律" label="整体趋势" trend/>
+        </>
+      )}
+      more="查看完整便便变化"
+    />
+  );
+}
+
+function LoveReviewChart(){
+  const values = [3,4,2,5,3,4];
+  const labels = ['1月','2月','3月','4月','5月','6月'];
+  const W = 340, H = 156, padL = 28, padR = 12, padT = 14, padB = 26;
+  const x0 = padL, x1 = W - padR, y1 = H - padB;
+  const band = (x1 - x0) / values.length;
+  const X = i => x0 + band * i + band / 2;
+  const Y = v => y1 - v / 6 * 100;
+  return (
+    <svg viewBox="0 0 340 156" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近6个月爱爱记录次数">
+      {[2,4,6].map(v=><line key={v} x1={x0} y1={Y(v)} x2={x1} y2={Y(v)} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/>)}
+      {values.map((value, i)=>(
+        <React.Fragment key={labels[i]}>
+          <rect x={X(i) - 13} y={Y(value)} width="26" height={y1 - Y(value)} rx="12" fill={i === values.length - 1 ? '#ef6f83' : '#f3a4b0'}/>
+          <text x={X(i)} y={Y(value) - 6} textAnchor="middle" fontSize="10" fill="#dc5c72" fontFamily="PingFang SC">{value}</text>
+          <text x={X(i)} y={H - 7} textAnchor="middle" fontSize="9" fill={i === values.length - 1 ? '#dc5c72' : '#bbbbbf'} fontFamily="PingFang SC">{labels[i]}</text>
+        </React.Fragment>
+      ))}
+    </svg>
+  );
+}
+
+function LoveReviewCard(){
+  return (
+    <ReviewCard
+      title="爱爱"
+      iconClass="is-love"
+      icon={<ReviewLoveIcon/>}
+      chart={<LoveReviewChart/>}
+      legend={<span className="review-legend-item is-love"><i></i>每月记录次数</span>}
+      metrics={(
+        <>
+          <ReviewMetric value="4" unit="次" label="本月记录"/>
+          <ReviewMetric value="3.5" unit="次" label="近半年月均"/>
+          <ReviewMetric value="→ 平稳" label="整体趋势" trend/>
+        </>
+      )}
+      more="查看完整爱爱记录"
+    />
+  );
+}
+
+function ReviewPage({mode='经期', cycleShared=false, onCycleSharedChange}){
   const [cycleDetailOpen, setCycleDetailOpen] = useState(false);
+  const [cycleShareOpen, setCycleShareOpen] = useState(false);
+  const [cycleLandscapeOpen, setCycleLandscapeOpen] = useState(false);
   const [dietDistDetailOpen, setDietDistDetailOpen] = useState(false);
+  const isPeriodMode = mode === '经期';
   const cycleData = [29,34,31,30,33,31,32,36,31,30,32,30,31,29,30,31,29,30,29,31,30,30,28,28];
   const cycleLast12 = cycleData.slice(-12);
   const cycleAvg = cycleLast12.reduce((s, x)=>s + x, 0) / cycleLast12.length;
@@ -1364,17 +1897,59 @@ function ReviewPage(){
         <span className="review-nav-title">回顾</span>
       </div>
       <div className="review-content">
-        <p className="review-page-greeting">已记录 <b>350 天</b>，共 <b>3 项</b>可回顾</p>
+        <p className="review-page-greeting">已记录 <b>350 天</b>，共 <b>{isPeriodMode ? 12 : 8} 项</b>可回顾</p>
 
       <ReviewCard
-        title="月经周期"
+        title={isPeriodMode ? '周期' : '月经周期'}
         icon={<ReviewDropletIcon/>}
+        headAction={cycleShared ? (
+          <button
+            type="button"
+            className="review-cycle-shared-badge"
+            aria-label="管理已共享给男友的周期"
+            onKeyDown={(event)=>event.stopPropagation()}
+            onClick={(event)=>{
+              event.stopPropagation();
+              setCycleDetailOpen(false);
+              setCycleShareOpen(true);
+            }}
+          >
+            <span className="review-cycle-shared-avatar" aria-hidden="true">👨🏻</span>
+            <span>已共享给男友</span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="review-cycle-share-cta"
+            aria-label="共享周期给TA"
+            onKeyDown={(event)=>event.stopPropagation()}
+            onClick={(event)=>{
+              event.stopPropagation();
+              setCycleDetailOpen(false);
+              setCycleShareOpen(true);
+            }}
+          >
+            <ReviewShareIcon/><span>共享给TA</span>
+          </button>
+        )}
         chart={<CycleChart/>}
         legend={(
           <>
             <span className="review-legend-item is-cycle"><i></i>周期天数</span>
             <span className="review-legend-item is-trend"><i></i>趋势</span>
             <span className="review-legend-item is-warning"><i></i>偏长周期</span>
+            <button
+              type="button"
+              className="review-cycle-expand-btn"
+              aria-label="横屏展开全部周期"
+              onKeyDown={event=>event.stopPropagation()}
+              onClick={event=>{
+                event.stopPropagation();
+                setCycleLandscapeOpen(true);
+              }}
+            >
+              <ReviewExpandIcon/>
+            </button>
           </>
         )}
         metrics={(
@@ -1384,9 +1959,15 @@ function ReviewPage(){
             <ReviewMetric value="↘ 缩短" label="整体趋势" trend/>
           </>
         )}
-        more="查看完整周期变化"
-        onOpen={()=>setCycleDetailOpen(true)}
+        more="查看AI趋势分析"
+        moreBadge="VIP"
+        onOpen={()=>{
+          setCycleShareOpen(false);
+          setCycleDetailOpen(true);
+        }}
       />
+
+      {isPeriodMode ? <PeriodReviewCard/> : null}
 
       <ReviewCard
         title="体重"
@@ -1404,9 +1985,15 @@ function ReviewPage(){
         more="查看完整体重变化"
       />
 
-      <DietDistributionCard onOpen={()=>setDietDistDetailOpen(true)}/>
-      <DietTargetCard/>
-      <DietPhotoWallCard/>
+      {isPeriodMode ? <SymptomReviewCard/> : null}
+
+      {!isPeriodMode ? (
+        <>
+          <DietDistributionCard onOpen={()=>setDietDistDetailOpen(true)}/>
+          <DietTargetCard/>
+          <DietPhotoWallCard/>
+        </>
+      ) : null}
 
       <ReviewCard
         title="心情"
@@ -1433,13 +2020,34 @@ function ReviewPage(){
         )}
       />
 
+      {isPeriodMode ? (
+        <DietDistributionCard
+          title="饮食"
+          more="查看完整饮食变化"
+          onOpen={()=>setDietDistDetailOpen(true)}
+        />
+      ) : null}
+
+      {isPeriodMode ? <StoolReviewCard/> : null}
+      {isPeriodMode ? <LoveReviewCard/> : null}
+
       <FeedingReviewCard/>
       <SleepReviewCard/>
       <DiaperReviewCard/>
       <FoodReviewCard/>
       </div>
-      <CycleDetailPage open={cycleDetailOpen} onClose={()=>setCycleDetailOpen(false)}/>
+      <CycleDetailPage
+        open={cycleDetailOpen}
+        onClose={()=>setCycleDetailOpen(false)}
+      />
+      <CycleSharePage
+        open={cycleShareOpen}
+        onClose={()=>setCycleShareOpen(false)}
+        shared={cycleShared}
+        onSharedChange={onCycleSharedChange}
+      />
       <DietDistributionDetailPage open={dietDistDetailOpen} onClose={()=>setDietDistDetailOpen(false)}/>
+      <CycleLandscapePage open={cycleLandscapeOpen} onClose={()=>setCycleLandscapeOpen(false)}/>
     </main>
   );
 }

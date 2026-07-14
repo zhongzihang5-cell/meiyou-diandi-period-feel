@@ -113,10 +113,17 @@ const PERIOD_DOCK_QUICK_ITEMS = [
   { id:'symptom', label:'症状', action:'symptom', iconSrc:'assets/record-symptom.png' },
   { id:'mood', label:'心情', action:'mood', iconSrc:'assets/record-mood.png' },
   { id:'diet', label:'饮食', action:'diet', iconSrc:'assets/record-diet.png' },
-  { id:'stool', label:'便便', icon:'💩', text:'便便' },
   { id:'water', label:'喝水', icon:'🥤', text:'喝水' },
+  { id:'stool', label:'便便', icon:'💩', text:'便便' },
   { id:'exercise', label:'运动', icon:'🏃', text:'运动' },
+  { id:'sleep', label:'睡眠', icon:'🌙', text:'睡眠' },
+  { id:'medicine', label:'吃药', icon:'💊', text:'吃药' },
+  { id:'habit', label:'好习惯', icon:'✅', text:'好习惯' },
+  { id:'diary', label:'日记', icon:'📔', text:'日记' },
+  { id:'checkup', label:'体检单', icon:'🩺', text:'体检单' },
   { id:'account', label:'记账', icon:'💰', text:'记账' },
+  { id:'travel', label:'旅行', icon:'✈️', text:'旅行' },
+  { id:'pet', label:'宠物', icon:'🐾', text:'宠物' },
 ];
 
 function BabyFeedingQuickIcon({type}){
@@ -286,6 +293,7 @@ function App(){
     return initial.activeTab;
   });
   const [recordLifeMode, setRecordLifeMode] = useState('经期');
+  const [cycleSharedWithPartner, setCycleSharedWithPartner] = useState(false);
   const [babyVoiceSession, setBabyVoiceSession] = useState({active:false, cancel:false, textLength:0});
   const [babyVoiceSuccess, setBabyVoiceSuccess] = useState({show:false});
   const [babyVoiceCoachHidden, setBabyVoiceCoachHidden] = useState(false);
@@ -2004,8 +2012,18 @@ function App(){
     || searchCriteria.personPanelFilter
   ));
   const displayTimeline = React.useMemo(()=>{
-    const source = (recordLifeMode === '育儿' && babyFeedingEntryActive)
+    const modeTimeline = recordLifeMode === '经期'
       ? (timeline || []).map(block=>{
+          if(block.type !== 'day') return block;
+          const originalItems = block.items || block.entries || [];
+          const items = originalItems.filter(item=>item.kind !== 'baby-feeding-card');
+          if(items.length === originalItems.length) return block;
+          if(items.length === 0) return null;
+          return {...block, items, entries:undefined};
+        }).filter(Boolean)
+      : timeline;
+    const source = (recordLifeMode === '育儿' && babyFeedingEntryActive)
+      ? (modeTimeline || []).map(block=>{
           if(block.type !== 'day') return block;
           const items = block.items || block.entries || [];
           const hasBabyFeeding = items.some(item=>item.kind === 'baby-feeding-card');
@@ -2031,7 +2049,7 @@ function App(){
             isToday:true,
           };
         })
-      : timeline;
+      : modeTimeline;
     if(!isSearchActive || !filterTimelineForSearch) return source;
     return filterTimelineForSearch(source, searchCriteria);
   }, [timeline, searchCriteria, isSearchActive, filterTimelineForSearch, recordLifeMode, babyFeedingEntryActive]);
@@ -2158,7 +2176,11 @@ function App(){
       )}
 
       {showReview && ReviewPage && (
-        <ReviewPage/>
+        <ReviewPage
+          mode={recordLifeMode}
+          cycleShared={cycleSharedWithPartner}
+          onCycleSharedChange={setCycleSharedWithPartner}
+        />
       )}
 
       <div
@@ -2300,6 +2322,7 @@ function App(){
             sisterPlayAnimation={sisterPlayAnimation}
             sisterCycleDone={sisterCycleDone}
             hideTodayGuide={!showTodayGuide}
+            hideBabyFeeding={recordLifeMode === '经期'}
             onSisterCycleComplete={handleSisterCycleComplete}
             firstDropAnim={recordFeedback ? firstDropAnim : null}
             onFirstDropLand={recordFeedback ? handleFirstDropLand : undefined}

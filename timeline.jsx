@@ -138,14 +138,24 @@ function CycleStartMarker({block}){
   );
 }
 
-function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, hideGapDivider, hideDayHeader, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
-  const lastItemId = resolveTimelineLastItemId(blocks, sisterCycleDone, hideTodayGuide);
-  const dayBlocks = blocks.filter(b => b.type === 'day');
+function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, hideGapDivider, hideDayHeader, hideBabyFeeding, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
+  const visibleBlocks = hideBabyFeeding
+    ? (blocks || []).map(block=>{
+        if(block.type !== 'day') return block;
+        const originalItems = block.items || block.entries || [];
+        const items = originalItems.filter(item=>item.kind !== 'baby-feeding-card');
+        if(items.length === originalItems.length) return block;
+        if(items.length === 0) return null;
+        return {...block, items, entries:undefined};
+      }).filter(Boolean)
+    : blocks;
+  const lastItemId = resolveTimelineLastItemId(visibleBlocks, sisterCycleDone, hideTodayGuide);
+  const dayBlocks = visibleBlocks.filter(b => b.type === 'day');
 
   return (
     <div className="tl-feed">
       <div className="tl-rail-continuous">
-        {blocks.map((block, i)=>{
+        {visibleBlocks.map((block, i)=>{
           if(block.type === 'day'){
             return (
               <TimelineDateSection
