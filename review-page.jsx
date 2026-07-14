@@ -2058,7 +2058,7 @@ function DietWeeklyAnalysisCard(){
 
 function DietDistributionDetailPage({open, onClose}){
   return (
-    <section className={'review-cycle-detail' + (open ? ' is-open' : '')} aria-hidden={!open} aria-label="饮食详情">
+    <section className={'review-cycle-detail is-fullscreen-detail' + (open ? ' is-open' : '')} aria-hidden={!open} aria-label="饮食详情">
       <div className="review-detail-nav">
         <button type="button" className="review-detail-back" aria-label="返回" onClick={onClose}>
           <ReviewBackIcon/>

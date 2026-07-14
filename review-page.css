@@ -1100,7 +1100,8 @@
   transform:translateX(0);
   transition:transform .3s cubic-bezier(.2,0,0,1);
 }
-.review-cycle-detail.is-cycle-ai-detail{
+.review-cycle-detail.is-cycle-ai-detail,
+.review-cycle-detail.is-fullscreen-detail{
   position:fixed;
   top:44px;
   right:auto;
@@ -1111,7 +1112,8 @@
   max-width:390px;
   transform:translateX(50%);
 }
-.review-cycle-detail.is-cycle-ai-detail.is-open{
+.review-cycle-detail.is-cycle-ai-detail.is-open,
+.review-cycle-detail.is-fullscreen-detail.is-open{
   transform:translateX(-50%);
 }
 .review-detail-nav{
