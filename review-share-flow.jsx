@@ -98,7 +98,7 @@ function ReviewShareInvite({sent, onBack, onSend, onCopy, onQr, onPreview}){
   );
 }
 
-function ReviewShareManage({shareState, enabledLabels, onBack, onEdit, onCancel}){
+function ReviewShareManage({shareState, enabledLabels, onBack, onEdit, onCancel, onFamily}){
   const accepted = shareState.status === 'accepted';
   return (
     <div className="rsf-screen">
@@ -110,6 +110,17 @@ function ReviewShareManage({shareState, enabledLabels, onBack, onEdit, onCancel}
           <div className="rsf-visible"><span>TA 能看到：</span>{enabledLabels.join('、') || '尚未选择内容'}</div>
           <div className="rsf-manage-actions"><button type="button" onClick={onEdit}>修改可见内容</button><button type="button" className="is-danger" onClick={onCancel}>{accepted ? '取消共享' : '取消邀请'}</button></div>
         </div>
+        {accepted ? (
+          <button type="button" className="rsf-family-share-card" onClick={onFamily}>
+            <span className="rsf-family-share-icon" aria-hidden="true">👪</span>
+            <span className="rsf-family-share-copy">
+              <b>共享给家人</b>
+              <small>一起记录、查看宝宝的喂养回顾。可添加多位家人。</small>
+              <em>本 demo 示意</em>
+            </span>
+            <span className="rsf-family-share-chevron" aria-hidden="true">›</span>
+          </button>
+        ) : null}
         <div className="rsf-section-title">共享给我的</div>
         <div className="rsf-empty">还没有人把回顾共享给你</div>
       </div>
@@ -153,7 +164,7 @@ function ReviewShareFlow({open, shareState, onShareStateChange, onClose, onOpenP
       {screen === 'scene' ? <ReviewShareScene onBack={onClose} onPartner={()=>setScreen('auth')} onFamily={()=>showToast('家人场景复用同一套框架，本 demo 聚焦伴侣流程')}/> : null}
       {screen === 'auth' ? <ReviewShareAuthorization modules={modules} onToggle={toggleModule} editing={editing} onBack={()=>{setScreen(editing ? 'manage' : 'scene');setEditing(false);}} onNext={()=>{if(editing){setEditing(false);setScreen('manage');showToast('可见内容已更新');}else setScreen('invite');}}/> : null}
       {screen === 'invite' ? <ReviewShareInvite sent={shareState?.status === 'invited' || shareState?.status === 'accepted'} onBack={()=>setScreen('auth')} onSend={()=>{markInvited();showToast('已发送给 TA，等待接受');}} onCopy={()=>showToast('链接已复制')} onQr={()=>showToast('二维码已生成')} onPreview={()=>{if(shareState?.status === 'idle') markInvited();onOpenPartnerPreview?.();}}/> : null}
-      {screen === 'manage' ? <ReviewShareManage shareState={shareState} enabledLabels={enabledLabels} onBack={onClose} onEdit={()=>{setEditing(true);setScreen('auth');}} onCancel={()=>setConfirmOpen(true)}/> : null}
+      {screen === 'manage' ? <ReviewShareManage shareState={shareState} enabledLabels={enabledLabels} onBack={onClose} onEdit={()=>{setEditing(true);setScreen('auth');}} onCancel={()=>setConfirmOpen(true)} onFamily={()=>showToast('家人共享场景复用同一套框架，本 demo 暂不展开')}/> : null}
       <div className={'rsf-toast' + (toastText ? ' is-show' : '')} role="status">{toastText}</div>
       {confirmOpen ? <><button type="button" className="rsf-mask" aria-label="关闭" onClick={()=>setConfirmOpen(false)}></button><div className="rsf-sheet" role="dialog" aria-modal="true"><h3>{shareState?.status === 'accepted' ? '取消对阿泽的共享？' : '取消这次邀请？'}</h3><p>{shareState?.status === 'accepted' ? '取消后 TA 会立即无法查看你的任何回顾内容。你随时可以重新邀请。' : '取消后，这条邀请将失效，你可以稍后重新发起。'}</p><div><button type="button" onClick={()=>setConfirmOpen(false)}>再想想</button><button type="button" className="is-danger" onClick={revoke}>确认取消</button></div></div></> : null}
     </section>
