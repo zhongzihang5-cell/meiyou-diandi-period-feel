@@ -1,6 +1,13 @@
 const { useState, useEffect, useRef } = React;
 const PERIOD_START_NOTICE_TITLE = '本次周期29天，最近3次周期稳定，点击查看';
 const BABY_VOICE_DEMO_TEXT = '今天早上喂奶喂了60ml';
+const DEFAULT_REVIEW_SHARE_STATE = {
+  status:'idle',
+  partnerName:'',
+  invitedAt:'',
+  acceptedAt:'',
+  modules:{cycle:true, period:true, care:true, mood:false, symptom:false, weight:false, intimate:false},
+};
 
 function shouldShowAnalysis(hits, analysis){
   if(!analysis || !hits.length) return false;
@@ -293,7 +300,8 @@ function App(){
     return initial.activeTab;
   });
   const [recordLifeMode, setRecordLifeMode] = useState('经期');
-  const [cycleSharedWithPartner, setCycleSharedWithPartner] = useState(false);
+  const [reviewShareState, setReviewShareState] = useState(DEFAULT_REVIEW_SHARE_STATE);
+  const [partnerPreviewOpen, setPartnerPreviewOpen] = useState(false);
   const [babyVoiceSession, setBabyVoiceSession] = useState({active:false, cancel:false, textLength:0});
   const [babyVoiceSuccess, setBabyVoiceSuccess] = useState({show:false});
   const [babyVoiceCoachHidden, setBabyVoiceCoachHidden] = useState(false);
@@ -1892,6 +1900,7 @@ function App(){
   const showRecordTab = scene.calendar.enabled && activeTab === 'cal';
   const showHome = activeTab === 'home';
   const showReview = activeTab === 'cash';
+  const showMe = activeTab === 'me';
   const showFloatNotice = scene.floatNotice.enabled && showAnalysisNotice && activeTab === 'cal';
   const showRecordShell = activeTab === 'note';
   const showTodayGuide = noteScene.record.todayGuide && !hideTodayGuide;
@@ -1909,6 +1918,7 @@ function App(){
   const XhsStyleSearchPage = window.XhsStyleSearchPage;
   const ReviewPage = window.ReviewPage;
   const HomePage = window.HomePage;
+  const MePage = window.MePage;
   const VoiceTranscribeInputLayer = window.VoiceTranscribeInputLayer;
 
   const toggleSearchPage = ()=>{
@@ -2124,6 +2134,15 @@ function App(){
         />
       )}
 
+      {showMe && MePage && (
+        <MePage
+          shareState={reviewShareState}
+          partnerPreviewOpen={partnerPreviewOpen}
+          onPartnerPreviewOpenChange={setPartnerPreviewOpen}
+          onShareStateChange={setReviewShareState}
+        />
+      )}
+
       {showRecordTab && (
         <RecordPage
           key={scene.id}
@@ -2178,8 +2197,12 @@ function App(){
       {showReview && ReviewPage && (
         <ReviewPage
           mode={recordLifeMode}
-          cycleShared={cycleSharedWithPartner}
-          onCycleSharedChange={setCycleSharedWithPartner}
+          shareState={reviewShareState}
+          onShareStateChange={setReviewShareState}
+          onOpenPartnerPreview={()=>{
+            setPartnerPreviewOpen(true);
+            setActiveTab('me');
+          }}
         />
       )}
 

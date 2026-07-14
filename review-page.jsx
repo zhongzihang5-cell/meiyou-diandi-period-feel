@@ -2091,13 +2091,11 @@ function LoveReviewCard(){
   );
 }
 
-function ReviewPage({mode='经期', cycleShared=false, onCycleSharedChange}){
+function ReviewPage({mode='经期', shareState, onShareStateChange, onOpenPartnerPreview}){
   const [reviewSearchOpen, setReviewSearchOpen] = useState(false);
-  const [shareHubOpen, setShareHubOpen] = useState(false);
+  const [shareFlowOpen, setShareFlowOpen] = useState(false);
   const [cycleDetailOpen, setCycleDetailOpen] = useState(false);
-  const [cycleShareOpen, setCycleShareOpen] = useState(false);
   const [cycleLandscapeOpen, setCycleLandscapeOpen] = useState(false);
-  const [sharedReviewCards, setSharedReviewCards] = useState({});
   const [dietDistDetailOpen, setDietDistDetailOpen] = useState(false);
   const isPeriodMode = mode === '经期';
   const cycleData = [29,34,31,30,33,31,32,36,31,30,32,30,31,29,30,31,29,30,29,31,30,30,28,28];
@@ -2108,7 +2106,9 @@ function ReviewPage({mode='经期', cycleShared=false, onCycleSharedChange}){
   const weightDelta = weightData[weightData.length - 1] - weightData[0];
   const I = window.Icon;
   const ReviewSearchOverlay = window.ReviewSearchOverlay;
-  const sharedReviewCount = (cycleShared ? 1 : 0) + Object.values(sharedReviewCards).filter(Boolean).length;
+  const ReviewShareFlow = window.ReviewShareFlow;
+  const shareStatus = shareState?.status || 'idle';
+  const shareActive = shareStatus === 'invited' || shareStatus === 'accepted';
 
   return (
     <main className={'review-page' + (reviewSearchOpen ? ' is-review-search-open' : '')} aria-label="回顾">
@@ -2125,13 +2125,13 @@ function ReviewPage({mode='经期', cycleShared=false, onCycleSharedChange}){
         <span className="review-nav-title">回顾</span>
         <button
           type="button"
-          className={'review-nav-share' + (sharedReviewCount ? ' is-shared' : '')}
+          className={'review-nav-share' + (shareActive ? ' is-shared' : '')}
           aria-label="共享回顾"
-          onClick={()=>setShareHubOpen(true)}
+          onClick={()=>setShareFlowOpen(true)}
         >
           <ReviewShareIcon/>
-          <span>{sharedReviewCount ? '共享中' : '共享'}</span>
-          {sharedReviewCount ? <span className="review-nav-share-avatar" aria-hidden="true">👨🏻</span> : null}
+          <span>{shareStatus === 'accepted' ? '共享中' : shareStatus === 'invited' ? '待接受' : '共享'}</span>
+          {shareActive ? <span className="review-nav-share-avatar" aria-hidden="true">👨🏻</span> : null}
         </button>
       </div>
       <div className="review-content">
@@ -2170,7 +2170,6 @@ function ReviewPage({mode='经期', cycleShared=false, onCycleSharedChange}){
         more="查看AI趋势分析"
         moreBadge="VIP"
         onOpen={()=>{
-          setCycleShareOpen(false);
           setCycleDetailOpen(true);
         }}
       />
@@ -2248,22 +2247,7 @@ function ReviewPage({mode='经期', cycleShared=false, onCycleSharedChange}){
         open={cycleDetailOpen}
         onClose={()=>setCycleDetailOpen(false)}
       />
-      <ReviewShareHubPage
-        open={shareHubOpen}
-        onClose={()=>setShareHubOpen(false)}
-        cycleShared={cycleShared}
-        onCycleManage={()=>{
-          setCycleShareOpen(true);
-        }}
-        sharedCards={sharedReviewCards}
-        onToggleCard={(title, shared)=>setSharedReviewCards(current=>({...current, [title]:shared}))}
-      />
-      <CycleSharePage
-        open={cycleShareOpen}
-        onClose={()=>setCycleShareOpen(false)}
-        shared={cycleShared}
-        onSharedChange={onCycleSharedChange}
-      />
+      {ReviewShareFlow ? <ReviewShareFlow open={shareFlowOpen} shareState={shareState} onShareStateChange={onShareStateChange} onClose={()=>setShareFlowOpen(false)} onOpenPartnerPreview={onOpenPartnerPreview}/> : null}
       {reviewSearchOpen && ReviewSearchOverlay ? (
         <ReviewSearchOverlay onClose={()=>setReviewSearchOpen(false)}/>
       ) : null}
