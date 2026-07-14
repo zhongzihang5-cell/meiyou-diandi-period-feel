@@ -482,15 +482,36 @@
 .record-blank-stream.is-scheme1-preview .rb-s1-preview-stage{
   min-height:calc(100dvh - 44px - var(--my-dock-float-b, 180px) - 76px);
   display:flex;
+  flex-direction:column;
   align-items:center;
   justify-content:center;
+  gap:12px;
   padding:12px 20px 28px;
+  box-sizing:border-box;
+}
+
+.record-blank-stream.is-scheme1-preview .rb-s1-preview-carousel{
+  width:100%;
+  max-width:308px;
+  overflow:hidden;
+  touch-action:pan-y;
+}
+
+.record-blank-stream.is-scheme1-preview .rb-s1-preview-track{
+  display:flex;
+  width:100%;
+  will-change:transform;
+}
+
+.record-blank-stream.is-scheme1-preview .rb-s1-preview-slide{
+  flex:0 0 100%;
+  width:100%;
+  min-width:100%;
   box-sizing:border-box;
 }
 
 .record-blank-stream.is-scheme1-preview .rb-s1-preview-card{
   width:100%;
-  max-width:308px;
   background:#fff;
   border-radius:12px;
   box-shadow:0 2px 12px rgba(0,0,0,0.06);
@@ -501,6 +522,67 @@
   display:block;
   width:100%;
   height:auto;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-drag:none;
+}
+
+.record-blank-stream.is-scheme1-preview .rb-s1-preview-placeholder{
+  min-height:360px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  padding:28px 24px;
+  box-sizing:border-box;
+  text-align:center;
+}
+
+.record-blank-stream.is-scheme1-preview .rb-s1-preview-placeholder.is-peach{
+  background:linear-gradient(180deg, #fff7f2 0%, #ffe8df 100%);
+}
+
+.record-blank-stream.is-scheme1-preview .rb-s1-preview-placeholder.is-lilac{
+  background:linear-gradient(180deg, #faf6ff 0%, #efe6fb 100%);
+}
+
+.record-blank-stream.is-scheme1-preview .rb-s1-preview-placeholder-title{
+  font-size:17px;
+  font-weight:500;
+  color:rgba(0,0,0,0.8);
+  line-height:1.19;
+}
+
+.record-blank-stream.is-scheme1-preview .rb-s1-preview-placeholder-desc{
+  font-size:14px;
+  font-weight:400;
+  color:rgba(0,0,0,0.6);
+  line-height:1.29;
+}
+
+.record-blank-stream.is-scheme1-preview .rb-s1-preview-dots{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  min-height:12px;
+}
+
+.record-blank-stream.is-scheme1-preview .rb-s1-preview-dot{
+  width:6px;
+  height:4px;
+  padding:0;
+  border:0;
+  border-radius:80px;
+  background:rgba(0,0,0,0.14);
+  cursor:pointer;
+  transition:width 0.22s ease, background 0.22s ease;
+}
+
+.record-blank-stream.is-scheme1-preview .rb-s1-preview-dot.is-active{
+  width:16px;
+  background:#ff4d88;
 }
 
 /* 方案二 · 示例数据 + 蒙层 */

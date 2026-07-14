@@ -380,11 +380,137 @@ function RecordBlankEmptyState() {
   );
 }
 
+const EMPTY_PREVIEW_SLIDES = [
+  { type: 'img', src: 'assets/empty-preview-no-data-card.png', alt: '无数据空值页示例' },
+  { type: 'placeholder', tone: 'peach', title: '坚持记录', desc: '把日常一点点留下' },
+  { type: 'placeholder', tone: 'lilac', title: '发现规律', desc: '时间长了更懂自己' },
+];
+
 function RecordBlankScheme1PreviewCard() {
+  const slideCount = EMPTY_PREVIEW_SLIDES.length;
+  const [active, setActive] = useState(0);
+  const [dragX, setDragX] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const touchRef = useRef({ x: 0, y: 0, active: false, locked: false });
+  const dragXRef = useRef(0);
+  const pauseUntilRef = useRef(0);
+  const stageRef = useRef(null);
+
+  const goTo = (index) => {
+    const next = ((index % slideCount) + slideCount) % slideCount;
+    setActive(next);
+  };
+
+  useEffect(() => {
+    if (dragging) return undefined;
+    const timer = setInterval(() => {
+      if (Date.now() < pauseUntilRef.current) return;
+      setActive((prev) => (prev + 1) % slideCount);
+    }, 3600);
+    return () => clearInterval(timer);
+  }, [dragging, slideCount]);
+
+  const pauseAutoplay = () => {
+    pauseUntilRef.current = Date.now() + 5000;
+  };
+
+  const updateDragX = (value) => {
+    dragXRef.current = value;
+    setDragX(value);
+  };
+
+  const onTouchStart = (event) => {
+    const touch = event.touches[0];
+    if (!touch) return;
+    touchRef.current = { x: touch.clientX, y: touch.clientY, active: true, locked: false };
+    setDragging(true);
+    updateDragX(0);
+    pauseAutoplay();
+  };
+
+  const onTouchMove = (event) => {
+    const touch = event.touches[0];
+    const state = touchRef.current;
+    if (!touch || !state.active) return;
+    const dx = touch.clientX - state.x;
+    const dy = touch.clientY - state.y;
+    if (!state.locked) {
+      if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+      if (Math.abs(dy) > Math.abs(dx)) {
+        touchRef.current = { ...state, active: false };
+        setDragging(false);
+        updateDragX(0);
+        return;
+      }
+      touchRef.current = { ...state, locked: true };
+    }
+    const width = stageRef.current?.offsetWidth || 300;
+    const max = width * 0.35;
+    updateDragX(Math.max(-max, Math.min(max, dx)));
+  };
+
+  const onTouchEnd = () => {
+    const state = touchRef.current;
+    const width = stageRef.current?.offsetWidth || 300;
+    const threshold = width * 0.18;
+    const dx = dragXRef.current;
+    if (state.active && state.locked) {
+      if (dx <= -threshold) goTo(active + 1);
+      else if (dx >= threshold) goTo(active - 1);
+    }
+    touchRef.current = { x: 0, y: 0, active: false, locked: false };
+    setDragging(false);
+    updateDragX(0);
+    pauseAutoplay();
+  };
+
+  const trackStyle = {
+    transform: 'translateX(calc(' + (-active * 100) + '% + ' + dragX + 'px))',
+    transition: dragging ? 'none' : 'transform 0.32s ease',
+  };
+
   return (
     <div className="rb-s1-preview-stage" aria-label="无数据空值页预览">
-      <div className="rb-s1-preview-card">
-        <img src="assets/empty-preview-no-data-card.png" alt="无数据空值页示例" />
+      <div
+        className="rb-s1-preview-carousel"
+        ref={stageRef}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        onTouchCancel={onTouchEnd}
+      >
+        <div className="rb-s1-preview-track" style={trackStyle}>
+          {EMPTY_PREVIEW_SLIDES.map((slide, index) => (
+            <div className="rb-s1-preview-slide" key={index} aria-hidden={index !== active}>
+              <div className="rb-s1-preview-card">
+                {slide.type === 'img' ? (
+                  <img src={slide.src} alt={slide.alt || ''} draggable="false" />
+                ) : (
+                  <div className={'rb-s1-preview-placeholder is-' + slide.tone}>
+                    <div className="rb-s1-preview-placeholder-title">{slide.title}</div>
+                    <div className="rb-s1-preview-placeholder-desc">{slide.desc}</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="rb-s1-preview-dots" role="tablist" aria-label="轮播指示">
+        {EMPTY_PREVIEW_SLIDES.map((_, index) => (
+          <button
+            key={index}
+            type="button"
+            role="tab"
+            className={'rb-s1-preview-dot' + (index === active ? ' is-active' : '')}
+            aria-selected={index === active}
+            aria-label={'第 ' + (index + 1) + ' 页'}
+            onClick={() => {
+              goTo(index);
+              pauseAutoplay();
+            }}
+          />
+        ))}
       </div>
     </div>
   );
