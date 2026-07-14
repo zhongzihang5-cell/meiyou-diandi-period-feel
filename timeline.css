@@ -3427,6 +3427,16 @@
   color:#8E8E93;
   margin-left:4px;
 }
+.v3-chart-cal-remain{
+  margin-top:6px;
+  font-size:12px;
+  line-height:1.29;
+  color:rgba(0,0,0,0.6);
+}
+.v3-chart-cal-remain b{
+  font-weight:500;
+  color:rgba(0,0,0,0.8);
+}
 .v3-chart-cal-bar{
   margin-top:6px;
   display:flex;

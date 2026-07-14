@@ -1338,18 +1338,263 @@ const DIET_MEAL_LABELS = {
 };
 
 // 餐次热量；缺项表示当天未记录该餐。柱图从上到下：早→午→晚→加餐→饮品→其他
-const DIET_STACK_DAYS = [
-  {date:'7.7', meals:{lunch:520, dinner:610, snack:120, drink:180, other:40}},
-  {date:'7.8', meals:{breakfast:260, lunch:640, dinner:690, snack:150, other:70}},
-  {date:'7.9', meals:{breakfast:310, lunch:480, dinner:550, drink:160}},
-  {date:'7.10', meals:{lunch:680, dinner:720, snack:210, drink:240, other:80}},
-  {date:'7.11', meals:{breakfast:290, lunch:560, dinner:600, snack:90, other:50}},
-  {date:'7.12', meals:{breakfast:340, lunch:520, dinner:650, snack:80, drink:200}},
-  {date:'今天', meals:{breakfast:280, lunch:460, drink:158}, highlight:true},
-].map((day)=>{
-  const total = DIET_MEAL_ORDER.reduce((sum, key)=>sum + (day.meals[key] || 0), 0);
-  return {...day, total};
-});
+const DIET_BALANCE_LOW = 1600;
+const DIET_BALANCE_HIGH = 2000;
+
+function buildDietAllDays(count = 120){
+  let seed = 20260714;
+  const rnd = ()=>{
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / 233280;
+  };
+  const days = [];
+  const today = new Date(2026, 6, 13);
+  for(let i = count - 1; i >= 0; i--){
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const label = (i === 0) ? '今天' : ((d.getMonth() + 1) + '/' + d.getDate());
+    const skip = rnd() < 0.08 && i !== 0;
+    if(skip){
+      days.push({date:label, total:0, meals:{}, empty:true, highlight:i === 0});
+      continue;
+    }
+    const meals = {
+      breakfast: rnd() < 0.16 ? 0 : Math.round(240 + rnd() * 180),
+      lunch: Math.round(430 + rnd() * 260),
+      dinner: rnd() < 0.06 ? 0 : Math.round(470 + rnd() * 280),
+      snack: rnd() < 0.34 ? 0 : Math.round(70 + rnd() * 150),
+      drink: rnd() < 0.22 ? 0 : Math.round(90 + rnd() * 170),
+      other: rnd() < 0.52 ? 0 : Math.round(35 + rnd() * 75),
+    };
+    let total = DIET_MEAL_ORDER.reduce((sum, key)=>sum + (meals[key] || 0), 0);
+    const target = Math.round(1680 + rnd() * 420);
+    if(total > 0){
+      const scale = target / total;
+      DIET_MEAL_ORDER.forEach((key)=>{
+        if(meals[key]) meals[key] = Math.max(Math.round(meals[key] * scale), 0);
+      });
+      total = DIET_MEAL_ORDER.reduce((sum, key)=>sum + (meals[key] || 0), 0);
+    }
+    days.push({date:label, total, meals, highlight:i === 0});
+  }
+  return days;
+}
+
+const REVIEW_DIET_ALL_DAYS = buildDietAllDays(120);
+const DIET_CARD_DAYS = REVIEW_DIET_ALL_DAYS.slice(-30);
+const DIET_STACK_DAYS = REVIEW_DIET_ALL_DAYS.slice(-7);
+
+function reviewDietAvg(days){
+  const recorded = days.filter(day=>!day.empty);
+  if(!recorded.length) return 0;
+  return Math.round(recorded.reduce((sum, day)=>sum + day.total, 0) / recorded.length);
+}
+
+function reviewDietDeltaText(delta){
+  if(delta > 0) return '+' + delta;
+  if(delta < 0) return String(delta);
+  return '0';
+}
+
+const DIET_CARD_AVG = reviewDietAvg(DIET_CARD_DAYS);
+const DIET_CARD_DELTA = reviewDietAvg(DIET_CARD_DAYS) - reviewDietAvg(REVIEW_DIET_ALL_DAYS.slice(-60, -30));
+const DIET_CARD_RECORD_DAYS = DIET_CARD_DAYS.filter(day=>!day.empty).length;
+
+function DietMealStackedChart({days, ariaLabel='热量分布堆叠柱状图'}){
+  const W = 340, H = 188, padL = 34, padR = 10, padT = 22, padB = 26;
+  const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
+  const yMax = 2500;
+  const band = (x1 - x0) / Math.max(days.length, 1);
+  const barWidth = days.length > 14 ? 14 : 20;
+  const gap = 2;
+  const radius = 4;
+  const X = i => x0 + band * i + band / 2;
+  const Y = value => y1 - value / yMax * (y1 - y0);
+  const stackFromBottom = [...DIET_MEAL_ORDER].reverse();
+  return (
+    <svg viewBox={'0 0 ' + W + ' ' + H} preserveAspectRatio="xMidYMid meet" role="img" aria-label={ariaLabel}>
+      {[500,1000,1500,2000,2500].map(tick=>(
+        <React.Fragment key={tick}>
+          <line x1={x0} y1={Y(tick)} x2={x1} y2={Y(tick)} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/>
+          <text x={x0 - 5} y={Y(tick) + 3} textAnchor="end" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{tick}</text>
+        </React.Fragment>
+      ))}
+      <line x1={x0} y1={y1} x2={x1} y2={y1} stroke="rgba(0,0,0,0.06)" strokeWidth="1"/>
+      {days.map((day, i)=>{
+        if(day.empty){
+          return (
+            <text key={day.date + '-' + i} x={X(i)} y={H - 8} textAnchor="middle" fontSize="9" fontWeight={day.highlight ? '600' : '400'} fill={day.highlight ? '#ff7a3d' : '#bbbbbf'} fontFamily="PingFang SC">{day.date}</text>
+          );
+        }
+        let stacked = 0;
+        const segments = stackFromBottom
+          .map(type=>({type, value:day.meals[type] || 0}))
+          .filter(segment=>segment.value > 0);
+        return (
+          <React.Fragment key={day.date + '-' + i}>
+            <text x={X(i)} y={Y(day.total) - 6} textAnchor="middle" fontSize="9" fontWeight={day.highlight ? '600' : '500'} fill={day.highlight ? '#ff7a3d' : 'rgba(0,0,0,0.55)'} fontFamily="PingFang SC">{day.total}</text>
+            {segments.map((segment)=>{
+              const bottom = Y(stacked);
+              stacked += segment.value;
+              const top = Y(stacked);
+              const height = Math.max(bottom - top - gap, 3);
+              return (
+                <rect
+                  key={segment.type}
+                  x={X(i) - barWidth / 2}
+                  y={top}
+                  width={barWidth}
+                  height={height}
+                  rx={radius}
+                  fill={DIET_MEAL_COLORS[segment.type]}
+                />
+              );
+            })}
+            <text x={X(i)} y={H - 8} textAnchor="middle" fontSize="9" fontWeight={day.highlight ? '600' : '400'} fill={day.highlight ? '#ff7a3d' : '#bbbbbf'} fontFamily="PingFang SC">{day.date}</text>
+          </React.Fragment>
+        );
+      })}
+    </svg>
+  );
+}
+
+function DietCalorieLineChart({
+  days,
+  width = 340,
+  height = 168,
+  padL = 28,
+  padR = 14,
+  padT = 14,
+  padB = 26,
+  yMin = 1200,
+  yMax = 2100,
+  balanceLow = DIET_BALANCE_LOW,
+  balanceHigh = DIET_BALANCE_HIGH,
+  labelIndexes = null,
+  ariaLabel = '每日热量趋势曲线',
+  wide = false,
+}){
+  const points = days.filter(day=>!day.empty);
+  const n = points.length;
+  if(n < 2){
+    return <svg viewBox={'0 0 ' + width + ' ' + height} preserveAspectRatio="xMidYMid meet" role="img" aria-label={ariaLabel}/>;
+  }
+  const x0 = padL, x1 = width - padR, y0 = padT, y1 = height - padB;
+  const X = i => x0 + (x1 - x0) * (i / (n - 1));
+  const Y = v => y1 - (v - yMin) / (yMax - yMin) * (y1 - y0);
+  const vals = points.map(day=>day.total);
+  const pts = vals.map((v, i)=>[X(i), Y(v)]);
+  let maxI = 0, minI = 0;
+  vals.forEach((v, i)=>{ if(v > vals[maxI]) maxI = i; if(v < vals[minI]) minI = i; });
+  const lastI = n - 1;
+  const marks = labelIndexes || [0, Math.round((n - 1) * 0.42), Math.round((n - 1) * 0.76), n - 1]
+    .filter((value, index, arr)=>arr.indexOf(value) === index);
+  const yTicks = [1200, 1500, 1800, 2100];
+
+  return (
+    <svg
+      viewBox={'0 0 ' + width + ' ' + height}
+      style={wide ? {width:width + 'px'} : undefined}
+      preserveAspectRatio={wide ? 'none' : 'xMidYMid meet'}
+      role="img"
+      aria-label={ariaLabel}
+    >
+      <rect x={x0} y={Y(balanceHigh)} width={x1 - x0} height={Y(balanceLow) - Y(balanceHigh)} fill="rgba(255,149,0,0.08)"/>
+      {yTicks.map(tick=>(
+        <React.Fragment key={tick}>
+          <line x1={x0} y1={Y(tick)} x2={x1} y2={Y(tick)} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/>
+          <text x={x0 - 5} y={Y(tick) + 3} textAnchor="end" fontSize={wide ? 10 : 9} fill="#bbbbbf" fontFamily="PingFang SC">{tick}</text>
+        </React.Fragment>
+      ))}
+      <path d={reviewSmoothPath(pts)} fill="none" stroke="#ff7a3d" strokeWidth={wide ? 2.2 : 2} strokeLinejoin="round" strokeLinecap="round"/>
+      {vals.map((v, i)=>{
+        const isMax = i === maxI;
+        const isMin = i === minI;
+        const isLast = i === lastI;
+        const showDot = isMax || isMin || isLast;
+        return (
+          <React.Fragment key={i}>
+            <circle cx={X(i)} cy={Y(v)} r={showDot ? (wide ? 4 : 3.8) : (wide ? 2.5 : 1.8)} fill={isMax ? '#ff9500' : '#ff7a3d'} stroke={showDot ? '#fff' : 'none'} strokeWidth="1.5"/>
+            {isMax ? <text x={X(i)} y={Y(v) - 8} textAnchor="middle" fontSize={wide ? 10 : 9.5} fontWeight="600" fill="#e8930f" fontFamily="PingFang SC">{v} kcal 最高</text> : null}
+            {isMin ? <text x={X(i)} y={Y(v) + 16} textAnchor="middle" fontSize={wide ? 10 : 9.5} fontWeight="600" fill="#ff7a3d" fontFamily="PingFang SC">{v} kcal 最低</text> : null}
+            {isLast && !isMax ? <text x={X(i)} y={Y(v) + 16} textAnchor="end" fontSize={wide ? 10 : 9.5} fontWeight="600" fill="#ff7a3d" fontFamily="PingFang SC">{v} kcal</text> : null}
+          </React.Fragment>
+        );
+      })}
+      {marks.map(idx=>(
+        <text key={idx} x={X(idx)} y={height - 8} textAnchor="middle" fontSize={wide ? 9.5 : 9} fill="#bbbbbf" fontFamily="PingFang SC">{points[idx].date}</text>
+      ))}
+    </svg>
+  );
+}
+
+function DietDistributionChart(){
+  return <DietCalorieLineChart days={DIET_CARD_DAYS} ariaLabel="近30天每日热量趋势曲线"/>;
+}
+
+function ExpandedDietCalorieChart(){
+  const days = REVIEW_DIET_ALL_DAYS.filter(day=>!day.empty);
+  const n = days.length;
+  const width = Math.max(1160, n * 22);
+  const labelIndexes = days.map((_day, i)=>i).filter(i=>i % 4 === 0 || i === n - 1);
+  return (
+    <DietCalorieLineChart
+      days={days}
+      width={width}
+      height={250}
+      padL={36}
+      padR={34}
+      padT={18}
+      padB={32}
+      labelIndexes={labelIndexes}
+      ariaLabel="全部饮食热量趋势曲线"
+      wide={true}
+    />
+  );
+}
+
+function DietLandscapePage({open, onClose}){
+  const scrollerRef = React.useRef(null);
+
+  React.useEffect(()=>{
+    if(!open) return undefined;
+    const scroller = scrollerRef.current;
+    if(scroller) scroller.scrollLeft = scroller.scrollWidth;
+    const handleKeyDown = event=>{ if(event.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handleKeyDown);
+    return ()=>document.removeEventListener('keydown', handleKeyDown);
+  }, [open, onClose]);
+
+  const recordedCount = REVIEW_DIET_ALL_DAYS.filter(day=>!day.empty).length;
+
+  return (
+    <section
+      className={'review-cycle-landscape review-diet-landscape' + (open ? ' is-open' : '')}
+      aria-hidden={!open}
+      role="dialog"
+      aria-modal="true"
+      aria-label="全部饮食热量横屏图表"
+    >
+      <div className="review-cycle-landscape-surface">
+        <header className="review-cycle-landscape-head">
+          <div>
+            <h2>全部饮食热量</h2>
+            <p>共 {recordedCount} 天记录 · 左右滑动查看</p>
+          </div>
+          <button type="button" className="review-cycle-landscape-close" aria-label="关闭横屏图表" onClick={onClose}>×</button>
+        </header>
+        <div className="review-cycle-landscape-legend">
+          <span className="review-legend-item is-diet"><i></i>每日热量</span>
+          <span className="review-legend-item is-diet-band"><i></i>均衡参考区间</span>
+          <span className="review-cycle-landscape-tip">← 滑动查看更多 →</span>
+        </div>
+        <div className="review-cycle-landscape-scroll" ref={scrollerRef}>
+          <ExpandedDietCalorieChart/>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 const DIET_REVIEW_PHOTOS = [
   'assets/diet-meal-1.png',
@@ -1389,62 +1634,442 @@ const DIET_TARGET_DAYS = [
   const goal = DIET_TARGET_GOAL;
   const remain = Math.max(goal - day.intake + (day.burn || 0), 0);
   const over = day.intake > goal;
+  const empty = day.intake <= 0;
   const ratio = goal > 0 ? Math.min(day.intake / goal, 1.15) : 0;
-  return {...day, goal, remain, over, ratio, empty: day.intake <= 0};
+  return {...day, goal, remain, over, ratio, empty, met:false};
 });
 
-function DietDistributionChart(){
-  const days = DIET_STACK_DAYS;
-  const W = 340, H = 188, padL = 34, padR = 10, padT = 22, padB = 26;
-  const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
-  const yMax = 2500;
-  const band = (x1 - x0) / days.length;
-  const barWidth = 20;
-  const gap = 2;
-  const radius = 4;
-  const X = i => x0 + band * i + band / 2;
-  const Y = value => y1 - value / yMax * (y1 - y0);
-  // SVG 自下而上堆叠，反转后视觉上从上到下为：早→午→晚→加餐→饮品→其他
-  const stackFromBottom = [...DIET_MEAL_ORDER].reverse();
+const DIET_DAILY_WEEK_LABEL = '7.7—7.13';
+
+function DietBudgetHeadAction({goal = DIET_TARGET_GOAL}){
   return (
-    <svg viewBox={'0 0 ' + W + ' ' + H} preserveAspectRatio="xMidYMid meet" role="img" aria-label="近7天热量分布堆叠柱状图">
-      {[500,1000,1500,2000,2500].map(tick=>(
-        <React.Fragment key={tick}>
-          <line x1={x0} y1={Y(tick)} x2={x1} y2={Y(tick)} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/>
-          <text x={x0 - 5} y={Y(tick) + 3} textAnchor="end" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{tick}</text>
-        </React.Fragment>
+    <button
+      type="button"
+      className="review-card-head-btn is-budget"
+      title="点击可修改热量目标"
+      aria-label={'热量目标 ' + goal + '，点击可修改'}
+      onClick={(event)=>event.stopPropagation()}
+    >
+      <span>热量目标 {goal}</span>
+      <i className="review-diet-budget-tip" aria-hidden="true">!</i>
+    </button>
+  );
+}
+
+function DietDistributionCard({onOpen, onLandscapeOpen, title='饮食', more='查看饮食付费分析'}){
+  return (
+    <ReviewCard
+      title={title}
+      iconClass="is-diet"
+      icon={<ReviewDietIcon/>}
+      headAction={<DietBudgetHeadAction goal={DIET_TARGET_GOAL}/>}
+      chart={<DietDistributionChart/>}
+      legend={(
+        <>
+          <span className="review-legend-item is-diet"><i></i>每日热量</span>
+          <span className="review-legend-item is-diet-band"><i></i>均衡参考区间</span>
+          {typeof onLandscapeOpen === 'function' ? (
+            <button
+              type="button"
+              className="review-cycle-expand-btn"
+              aria-label="横屏展开全部饮食热量"
+              onKeyDown={event=>event.stopPropagation()}
+              onClick={event=>{
+                event.stopPropagation();
+                onLandscapeOpen();
+              }}
+            >
+              <ReviewExpandIcon/>
+            </button>
+          ) : null}
+        </>
+      )}
+      metrics={(
+        <>
+          <ReviewMetric value={String(DIET_CARD_AVG)} unit="kcal" label="近30天日均"/>
+          <ReviewMetric value={reviewDietDeltaText(DIET_CARD_DELTA)} unit="kcal" label="较上月"/>
+          <ReviewMetric value={String(DIET_CARD_RECORD_DAYS)} unit="天" label="达标天数"/>
+        </>
+      )}
+      more={more}
+      moreBadge="VIP"
+      onOpen={onOpen}
+    />
+  );
+}
+
+function DietMealLegend(){
+  return (
+    <>
+      {DIET_MEAL_ORDER.map(type=>(
+        <span className={'review-legend-item is-diet-meal is-' + type} key={type}>
+          <i style={{background:DIET_MEAL_COLORS[type]}}></i>{DIET_MEAL_LABELS[type]}
+        </span>
       ))}
-      <line x1={x0} y1={y1} x2={x1} y2={y1} stroke="rgba(0,0,0,0.06)" strokeWidth="1"/>
-      {days.map((day, i)=>{
-        let stacked = 0;
-        const segments = stackFromBottom
-          .map(type=>({type, value:day.meals[type] || 0}))
-          .filter(segment=>segment.value > 0);
-        return (
-          <React.Fragment key={day.date}>
-            <text x={X(i)} y={Y(day.total) - 6} textAnchor="middle" fontSize="9" fontWeight={day.highlight ? '600' : '500'} fill={day.highlight ? '#ff7a3d' : 'rgba(0,0,0,0.55)'} fontFamily="PingFang SC">{day.total}</text>
-            {segments.map((segment)=>{
-              const bottom = Y(stacked);
-              stacked += segment.value;
-              const top = Y(stacked);
-              const height = Math.max(bottom - top - gap, 3);
-              return (
-                <rect
-                  key={segment.type}
-                  x={X(i) - barWidth / 2}
-                  y={top}
-                  width={barWidth}
-                  height={height}
-                  rx={radius}
-                  fill={DIET_MEAL_COLORS[segment.type]}
-                />
-              );
-            })}
-            <text x={X(i)} y={H - 8} textAnchor="middle" fontSize="9" fontWeight={day.highlight ? '600' : '400'} fill={day.highlight ? '#ff7a3d' : '#bbbbbf'} fontFamily="PingFang SC">{day.date}</text>
-          </React.Fragment>
-        );
-      })}
-    </svg>
+    </>
+  );
+}
+
+const DIET_NUTRIENT_COLORS = {
+  carb: '#5ec8a8',
+  protein: '#ffb15a',
+  fat: '#ff6b8a',
+  fiber: '#a8b4c4',
+  vitamin_c: '#7ec8ff',
+  calcium: '#c4a8e8',
+  iron: '#e8a87e',
+  sodium: '#8fb4d8',
+};
+
+const DIET_DAILY_NUTRIENTS = {
+  '7.7': {
+    ring: [
+      {key:'carb', label:'碳水化合物', pct:0.38, color:DIET_NUTRIENT_COLORS.carb},
+      {key:'protein', label:'蛋白质', pct:0.28, color:DIET_NUTRIENT_COLORS.protein},
+      {key:'fat', label:'脂肪', pct:0.34, color:DIET_NUTRIENT_COLORS.fat},
+    ],
+    rows: [
+      {key:'carb', name:'碳水化合物', kcal:186, intake:46.5, recommend:'150–190', status:'low', tip:'今天主食偏少，晚餐可补一小碗杂粮饭。'},
+      {key:'protein', name:'蛋白质', kcal:137, intake:34.2, recommend:'55–90', status:'low', tip:'蛋白摄入偏低，午晚各加一份优质蛋白会更稳。'},
+      {key:'fat', name:'脂肪', kcal:166, intake:18.4, recommend:'35–55', status:'ok', tip:'脂肪比例正常，继续优先选择少油烹饪。'},
+      {key:'fiber', name:'膳食纤维', kcal:12, intake:6.0, recommend:'25–30', status:'low', tip:'纤维不足，加一份绿叶菜或水果会更好。'},
+    ],
+  },
+  '7.8': {
+    ring: [
+      {key:'protein', label:'蛋白质', pct:0.52, color:DIET_NUTRIENT_COLORS.protein},
+      {key:'fat', label:'脂肪', pct:0.33, color:DIET_NUTRIENT_COLORS.fat},
+      {key:'carb', label:'碳水化合物', pct:0.15, color:DIET_NUTRIENT_COLORS.carb},
+    ],
+    rows: [
+      {key:'carb', name:'碳水化合物', kcal:197, intake:49.2, recommend:'150–190', status:'low', tip:'碳水占比很低，全天更像高蛋白高脂结构。'},
+      {key:'protein', name:'蛋白质', kcal:681, intake:170.3, recommend:'55–90', status:'high', tip:'蛋白质明显偏高，肉蛋摄入可略减。'},
+      {key:'fat', name:'脂肪', kcal:432, intake:48.0, recommend:'35–55', status:'high', tip:'脂肪也偏高，晚餐少油会更有助于压总量。'},
+      {key:'sodium', name:'钠', kcal:0, intake:3.8, recommend:'<2.0', unit:'g', status:'high', tip:'外食或酱料偏多，注意控盐。'},
+    ],
+  },
+  '7.9': {
+    ring: [
+      {key:'carb', label:'碳水化合物', pct:0.35, color:DIET_NUTRIENT_COLORS.carb},
+      {key:'protein', label:'蛋白质', pct:0.30, color:DIET_NUTRIENT_COLORS.protein},
+      {key:'fat', label:'脂肪', pct:0.35, color:DIET_NUTRIENT_COLORS.fat},
+    ],
+    rows: [
+      {key:'carb', name:'碳水化合物', kcal:184, intake:46.0, recommend:'150–190', status:'low', tip:'结构较均衡，但碳水总量仍略低。'},
+      {key:'protein', name:'蛋白质', kcal:158, intake:39.5, recommend:'55–90', status:'ok', tip:'蛋白质落在推荐区间，维持即可。'},
+      {key:'fat', name:'脂肪', kcal:184, intake:20.4, recommend:'35–55', status:'ok', tip:'脂肪比例正常，没有明显偏科。'},
+      {key:'vitamin_c', name:'维生素C', kcal:0, intake:42, recommend:'60–100', unit:'mg', status:'low', tip:'维C偏低，补一份水果或彩椒沙拉。'},
+    ],
+  },
+  '7.10': {
+    ring: [
+      {key:'fat', label:'脂肪', pct:0.48, color:DIET_NUTRIENT_COLORS.fat},
+      {key:'protein', label:'蛋白质', pct:0.28, color:DIET_NUTRIENT_COLORS.protein},
+      {key:'carb', label:'碳水化合物', pct:0.24, color:DIET_NUTRIENT_COLORS.carb},
+    ],
+    rows: [
+      {key:'carb', name:'碳水化合物', kcal:341, intake:85.2, recommend:'150–190', status:'low', tip:'虽然超量，但碳水占比仍不高，结构偏油。'},
+      {key:'protein', name:'蛋白质', kcal:398, intake:99.5, recommend:'55–90', status:'high', tip:'蛋白也偏高，像是午晚两餐都偏丰盛。'},
+      {key:'fat', name:'脂肪', kcal:681, intake:75.7, recommend:'35–55', status:'high', tip:'脂肪是主要推手，油炸和过油菜是重点。'},
+      {key:'iron', name:'铁', kcal:0, intake:8.2, recommend:'12–20', unit:'mg', status:'low', tip:'铁摄入偏低，红肉或豆类可以适量补。'},
+    ],
+  },
+  '7.11': {
+    ring: [
+      {key:'carb', label:'碳水化合物', pct:0.44, color:DIET_NUTRIENT_COLORS.carb},
+      {key:'fat', label:'脂肪', pct:0.30, color:DIET_NUTRIENT_COLORS.fat},
+      {key:'protein', label:'蛋白质', pct:0.26, color:DIET_NUTRIENT_COLORS.protein},
+    ],
+    rows: [
+      {key:'carb', name:'碳水化合物', kcal:484, intake:121, recommend:'150–190', status:'ok', tip:'碳水占比最高，主食记录比较完整。'},
+      {key:'protein', name:'蛋白质', kcal:286, intake:71.5, recommend:'55–90', status:'ok', tip:'蛋白适中，和主食搭配较均衡。'},
+      {key:'fat', name:'脂肪', kcal:330, intake:36.7, recommend:'35–55', status:'ok', tip:'脂肪没有明显超标，结构相对健康。'},
+      {key:'calcium', name:'钙', kcal:0, intake:520, recommend:'700–1000', unit:'mg', status:'low', tip:'钙摄入不足，可加牛奶、酸奶或豆制品。'},
+    ],
+  },
+  '7.12': {
+    ring: [
+      {key:'protein', label:'蛋白质', pct:0.34, color:DIET_NUTRIENT_COLORS.protein},
+      {key:'carb', label:'碳水化合物', pct:0.33, color:DIET_NUTRIENT_COLORS.carb},
+      {key:'fat', label:'脂肪', pct:0.33, color:DIET_NUTRIENT_COLORS.fat},
+    ],
+    rows: [
+      {key:'carb', name:'碳水化合物', kcal:389, intake:97.3, recommend:'150–190', status:'low', tip:'三大营养素较均衡，但总量接近目标上限。'},
+      {key:'protein', name:'蛋白质', kcal:401, intake:100.3, recommend:'55–90', status:'high', tip:'蛋白略高，可把部分肉蛋换成蔬菜。'},
+      {key:'fat', name:'脂肪', kcal:389, intake:43.2, recommend:'35–55', status:'ok', tip:'脂肪控制不错，是达标日里结构较好的一天。'},
+      {key:'fiber', name:'膳食纤维', kcal:22, intake:11.0, recommend:'25–30', status:'low', tip:'纤维接近下限，再加半盘蔬菜会更稳。'},
+    ],
+  },
+  '今天': {
+    ring: [
+      {key:'carb', label:'碳水化合物', pct:0.40, color:DIET_NUTRIENT_COLORS.carb},
+      {key:'protein', label:'蛋白质', pct:0.35, color:DIET_NUTRIENT_COLORS.protein},
+      {key:'fat', label:'脂肪', pct:0.25, color:DIET_NUTRIENT_COLORS.fat},
+    ],
+    rows: [
+      {key:'carb', name:'碳水化合物', kcal:359, intake:89.8, recommend:'150–190', status:'low', tip:'还在进行中，晚餐适当补主食会更均衡。'},
+      {key:'protein', name:'蛋白质', kcal:314, intake:78.5, recommend:'55–90', status:'ok', tip:'蛋白目前适中，不必额外加量。'},
+      {key:'fat', name:'脂肪', kcal:224, intake:24.9, recommend:'35–55', status:'ok', tip:'脂肪占比最低，今天整体偏清淡。'},
+      {key:'vitamin_c', name:'维生素C', kcal:0, intake:28, recommend:'60–100', unit:'mg', status:'low', tip:'维C偏少，下午可加一份水果。'},
+    ],
+  },
+};
+
+function getDietDailyNutrientData(dateKey){
+  const raw = DIET_DAILY_NUTRIENTS[dateKey] || DIET_DAILY_NUTRIENTS['今天'];
+  const rowMap = {};
+  raw.rows.forEach((row)=>{ rowMap[row.key] = row; });
+  return {
+    ring: raw.ring.map((item)=>({
+      ...item,
+      kcal: rowMap[item.key] ? rowMap[item.key].kcal : 0,
+    })),
+    rows: raw.rows,
+  };
+}
+
+function dietDayMacrosBalanced(dateKey){
+  const data = DIET_DAILY_NUTRIENTS[dateKey];
+  if(!data) return false;
+  return ['carb', 'protein', 'fat'].every((key)=>{
+    const row = data.rows.find((item)=> item.key === key);
+    return row && row.status === 'ok';
+  });
+}
+
+DIET_TARGET_DAYS.forEach((day)=>{
+  day.met = dietDayMacrosBalanced(day.date);
+});
+
+function dietNutrientStatusIcon(status){
+  if(status === 'ok') return '✓';
+  if(status === 'high') return '↑';
+  return '↓';
+}
+
+function DietNutrientComposeBar({ring}){
+  if(!ring || !ring.length) return null;
+  return (
+    <div className="review-nutrient-compose" aria-label="热量构成">
+      <div className="review-nutrient-compose-bar" role="img" aria-label="三大营养素热量占比">
+        {ring.map((item)=>(
+          <span
+            key={item.key}
+            className="review-nutrient-compose-seg"
+            style={{flex: item.pct + ' 1 0%', background: item.color}}
+          />
+        ))}
+      </div>
+      <div className="review-nutrient-compose-legend">
+        {ring.map((item)=>{
+          const pct = Math.round(item.pct * 100);
+          const short = item.label.length > 3 ? item.label.slice(0, 2) : item.label;
+          return (
+            <div className="review-nutrient-compose-item" key={item.key}>
+              <span className="review-nutrient-compose-dot" style={{background:item.color}} aria-hidden="true"></span>
+              <span className="review-nutrient-compose-name">{short}</span>
+              <span className="review-nutrient-compose-meta">{pct}% · {item.kcal} kcal</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function DietNutrientAnalysisSection({data}){
+  if(!data) return null;
+  const rowMap = {};
+  data.rows.forEach((row)=>{ rowMap[row.key] = row; });
+  const listRows = data.ring.map((item)=> rowMap[item.key]).filter(Boolean);
+  return (
+    <div className="review-nutrient-section">
+      <div className="review-nutrient-head">
+        <div className="review-nutrient-title-wrap">
+          <span className="review-nutrient-title">关键营养素分析</span>
+          <span className="review-card-more-badge">VIP</span>
+        </div>
+      </div>
+
+      <DietNutrientComposeBar ring={data.ring}/>
+
+      <div className="review-nutrient-list" aria-label="关键营养素摄入明细">
+        {listRows.map((row)=>{
+          const color = DIET_NUTRIENT_COLORS[row.key] || '#ccc';
+          const unit = row.unit || 'g';
+          const intakeText = typeof row.intake === 'number' && row.intake % 1 !== 0
+            ? row.intake.toFixed(1)
+            : String(row.intake);
+          return (
+            <div className="review-nutrient-item" key={row.key}>
+              <div className="review-nutrient-item-main">
+                <span className="review-nutrient-item-name">
+                  <i style={{background:color}} aria-hidden="true"></i>
+                  {row.name}
+                </span>
+                <span className={'review-nutrient-item-value is-' + row.status}>
+                  <b>{intakeText}{unit}</b>
+                  <em aria-hidden="true">{dietNutrientStatusIcon(row.status)}</em>
+                </span>
+                <span className="review-nutrient-item-rec">{row.recommend}{unit}</span>
+              </div>
+              <p className="review-nutrient-item-tip">{row.tip}</p>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function DietDailyIntakePanel({day}){
+  const intakeRatio = day.goal > 0 ? Math.min(day.intake / day.goal, 1) : 0;
+  const percent = day.empty ? 0 : Math.round((day.intake / day.goal) * 100);
+  const ringColor = day.over ? '#ff9500' : '#ff4d88';
+  const trackColor = day.over ? 'rgba(255,149,0,0.14)' : '#fce6ee';
+  const remainOrOver = day.over ? (day.intake - day.goal) : day.remain;
+  return (
+    <div className={'review-diet-daily-intake' + (day.over ? ' is-over' : '')}>
+      <div className="review-diet-daily-intake-ring">
+        <DietTargetRing ratio={intakeRatio} size={64} stroke={6} color={ringColor} track={trackColor}/>
+        <div className="review-diet-daily-intake-pct">{percent}%</div>
+      </div>
+      <div className="review-diet-daily-intake-meta">
+        <div className="review-diet-daily-intake-lbl">今日已摄入</div>
+        <div className="review-diet-daily-intake-val">
+          {day.empty ? 0 : day.intake}
+          <span>/ {day.goal} kcal</span>
+        </div>
+        <div className="review-diet-daily-intake-remain">
+          {day.over ? '已超出 ' : '还可以吃 '}
+          <b>{remainOrOver}</b>
+          {' kcal'}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DietDailyWeekStrip({selectedIndex, onSelect}){
+  return (
+    <div className="review-diet-daily-week" aria-label="近7天热量达标圆环">
+      {DIET_TARGET_DAYS.map((day, index)=>(
+        <button
+          type="button"
+          key={day.date}
+          className={'review-diet-daily-day' + (index === selectedIndex ? ' is-selected' : '') + (day.highlight ? ' is-today' : '') + (day.empty ? ' is-empty' : '') + (day.over ? ' is-over' : '') + (day.met ? ' is-met' : '')}
+          aria-label={day.date + (day.over ? ' 超量' : day.met ? ' 营养均衡' : '')}
+          onClick={()=>onSelect(index)}
+        >
+          <span className="review-diet-daily-day-num">{day.date}</span>
+          <span className="review-diet-daily-ring-wrap">
+            <DietTargetRing
+              ratio={day.empty ? 0 : Math.min(day.ratio, 1)}
+              size={28}
+              stroke={3}
+              color={day.over ? '#ff9500' : '#ff8fb3'}
+              track={day.over ? 'rgba(255,149,0,0.16)' : '#f0f0f2'}
+            />
+            {day.met ? <span className="review-diet-daily-star" aria-hidden="true">★</span> : null}
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function DietDailyReportCard(){
+  const [selectedIndex, setSelectedIndex] = useState(DIET_TARGET_DAYS.length - 1);
+  const selected = DIET_TARGET_DAYS[selectedIndex] || DIET_TARGET_DAYS[DIET_TARGET_DAYS.length - 1];
+  const nutrientData = getDietDailyNutrientData(selected.date);
+  return (
+    <div className="review-detail-card review-diet-daily-card">
+      <div className="review-diet-daily-head">
+        <span className="review-diet-daily-icon is-diet" aria-hidden="true"><ReviewDietIcon/></span>
+        <div className="review-diet-daily-head-copy">
+          <div className="review-diet-daily-title">饮食日报</div>
+          <div className="review-diet-daily-sub">{DIET_DAILY_WEEK_LABEL}</div>
+        </div>
+      </div>
+
+      <DietDailyWeekStrip selectedIndex={selectedIndex} onSelect={setSelectedIndex}/>
+      <DietDailyIntakePanel day={selected}/>
+
+      <div className="review-diet-daily-divider" aria-hidden="true"></div>
+
+      <DietNutrientAnalysisSection data={nutrientData}/>
+    </div>
+  );
+}
+
+function DietWeeklyAnalysisCard(){
+  return (
+    <div className="review-detail-card review-diet-weekly-card">
+      <div className="review-diet-weekly-head">
+        <div className="review-diet-weekly-title-wrap">
+          <div className="review-diet-weekly-title">周饮食分析</div>
+          <span className="review-card-more-badge">VIP</span>
+        </div>
+      </div>
+      <div className="review-chart review-detail-chart">
+        <DietMealStackedChart days={DIET_STACK_DAYS} ariaLabel="近7天热量分布堆叠柱状图"/>
+      </div>
+      <div className="review-legend"><DietMealLegend/></div>
+
+      <div className="review-diet-weekly-divider" aria-hidden="true"></div>
+
+      <div className="review-insight-body">
+        <div className="review-insight-item is-good">
+          <span className="review-insight-dot"></span>
+          <div>
+            <div className="review-insight-title">整体摄入：中高偏稳</div>
+            <div className="review-insight-text">近 30 天有记录日日均约 <b>{DIET_CARD_AVG} kcal</b>，较上月{DIET_CARD_DELTA >= 0 ? '略升' : '略降'} <b>{Math.abs(DIET_CARD_DELTA)} kcal</b>。多数天数落在均衡参考区间内，波动不算大。</div>
+          </div>
+        </div>
+        <div className="review-insight-item is-note">
+          <span className="review-insight-dot"></span>
+          <div>
+            <div className="review-insight-title">最突出：午餐和晚餐占比偏高</div>
+            <div className="review-insight-text">按餐次拆开后，午餐+晚餐合计大约占全天热量的 <b>65%-75%</b>。早餐偶有缺记，加餐和饮品则比较零散，这会让「傍晚后半段」更容易推高当日总量。</div>
+          </div>
+        </div>
+        <div className="review-insight-item is-good">
+          <span className="review-insight-dot"></span>
+          <div>
+            <div className="review-insight-title">记录习惯：覆盖率不错</div>
+            <div className="review-insight-text">近 30 天记录了 <b>{DIET_CARD_RECORD_DAYS}</b> 天，连续记录能让餐次比例判断更可靠，也更容易看出「某几天突然冲高」是不是偶发。</div>
+          </div>
+        </div>
+        <div className="review-insight-item is-note">
+          <span className="review-insight-dot"></span>
+          <div>
+            <div className="review-insight-title">值得留意：周末更容易冲高</div>
+            <div className="review-insight-text">样本里周末若干天更容易出现 <b>1900+</b> 的峰值，常常伴随着晚餐更高、或加餐/饮品叠加上去。如果目标更看重「稳」，周末的晚餐分量比早餐更值得先调。</div>
+          </div>
+        </div>
+        <div className="review-insight-summary">
+          <div className="review-summary-head">总结</div>
+          <p className="review-summary-text">总体看，你最近的热量摄入并不失控，结构上更依赖午晚两餐。若想更贴合热量目标，优先把周末晚餐和加餐压一点，并尽量补齐早餐记录，波动会更可控。这是对记录的解读，不是营养处方。</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DietDistributionDetailPage({open, onClose}){
+  return (
+    <section className={'review-cycle-detail' + (open ? ' is-open' : '')} aria-hidden={!open} aria-label="饮食详情">
+      <div className="review-detail-nav">
+        <button type="button" className="review-detail-back" aria-label="返回" onClick={onClose}>
+          <ReviewBackIcon/>
+        </button>
+        <span className="review-detail-title">饮食</span>
+      </div>
+      <div className="review-detail-content">
+        <DietDailyReportCard/>
+        <DietWeeklyAnalysisCard/>
+      </div>
+    </section>
   );
 }
 
@@ -1567,266 +2192,6 @@ function DietTargetChart({selectedIndex, onSelect}){
   );
 }
 
-function DietDistributionCard({onOpen, title='热量分布', more='查看完整热量分布'}){
-  return (
-    <ReviewCard
-      title={title}
-      iconClass="is-diet"
-      icon={<ReviewDietIcon/>}
-      chart={<DietDistributionChart/>}
-      legend={(
-        <>
-          {DIET_MEAL_ORDER.map(type=>(
-            <span className={'review-legend-item is-diet-meal is-' + type} key={type}>
-              <i style={{background:DIET_MEAL_COLORS[type]}}></i>{DIET_MEAL_LABELS[type]}
-            </span>
-          ))}
-        </>
-      )}
-      metrics={(
-        <>
-          <ReviewMetric value="1660" unit="kcal" label="近7天日均"/>
-          <ReviewMetric value="+60" unit="kcal" label="较上周"/>
-          <ReviewMetric value="6" unit="/7天" label="记录天数"/>
-        </>
-      )}
-      more={more}
-      onOpen={onOpen}
-    />
-  );
-}
-
-function buildDietDetailDays(count){
-  let seed = 20260714;
-  const rnd = ()=>{
-    seed = (seed * 9301 + 49297) % 233280;
-    return seed / 233280;
-  };
-  const days = [];
-  const today = new Date(2026, 6, 13);
-  for(let i = count - 1; i >= 0; i--){
-    const d = new Date(today);
-    d.setDate(today.getDate() - i);
-    const label = (i === 0) ? '今天' : ((d.getMonth() + 1) + '.' + d.getDate());
-    const skip = rnd() < 0.12 && i !== 0;
-    if(skip){
-      days.push({date:label, total:0, meals:{}, empty:true, highlight:i === 0});
-      continue;
-    }
-    const meals = {
-      breakfast: rnd() < 0.18 ? 0 : Math.round(220 + rnd() * 180),
-      lunch: Math.round(420 + rnd() * 280),
-      dinner: rnd() < 0.08 ? 0 : Math.round(450 + rnd() * 300),
-      snack: rnd() < 0.35 ? 0 : Math.round(60 + rnd() * 160),
-      drink: rnd() < 0.25 ? 0 : Math.round(80 + rnd() * 180),
-      other: rnd() < 0.55 ? 0 : Math.round(30 + rnd() * 80),
-    };
-    const total = DIET_MEAL_ORDER.reduce((sum, key)=>sum + (meals[key] || 0), 0);
-    days.push({date:label, total, meals, highlight:i === 0});
-  }
-  return days;
-}
-
-const DIET_DETAIL_SERIES = {
-  '7d': DIET_STACK_DAYS,
-  '30d': buildDietDetailDays(30),
-  'all': buildDietDetailDays(90),
-};
-
-function DietDistributionDetailChart({range}){
-  const days = DIET_DETAIL_SERIES[range] || DIET_DETAIL_SERIES['7d'];
-  if(range === '7d'){
-    const W = 340, H = 188, padL = 34, padR = 10, padT = 22, padB = 26;
-    const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
-    const yMax = 2500;
-    const band = (x1 - x0) / days.length;
-    const barWidth = 20;
-    const gap = 2;
-    const radius = 4;
-    const X = i => x0 + band * i + band / 2;
-    const Y = value => y1 - value / yMax * (y1 - y0);
-    const stackFromBottom = [...DIET_MEAL_ORDER].reverse();
-    return (
-      <svg viewBox={'0 0 ' + W + ' ' + H} preserveAspectRatio="xMidYMid meet" role="img" aria-label="近7天热量分布堆叠柱状图">
-        {[500,1000,1500,2000,2500].map(tick=>(
-          <React.Fragment key={tick}>
-            <line x1={x0} y1={Y(tick)} x2={x1} y2={Y(tick)} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/>
-            <text x={x0 - 5} y={Y(tick) + 3} textAnchor="end" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{tick}</text>
-          </React.Fragment>
-        ))}
-        <line x1={x0} y1={y1} x2={x1} y2={y1} stroke="rgba(0,0,0,0.06)" strokeWidth="1"/>
-        {days.map((day, i)=>{
-          let stacked = 0;
-          const segments = stackFromBottom
-            .map(type=>({type, value:day.meals[type] || 0}))
-            .filter(segment=>segment.value > 0);
-          return (
-            <React.Fragment key={day.date + '-' + i}>
-              <text x={X(i)} y={Y(day.total) - 6} textAnchor="middle" fontSize="9" fontWeight={day.highlight ? '600' : '500'} fill={day.highlight ? '#ff7a3d' : 'rgba(0,0,0,0.55)'} fontFamily="PingFang SC">{day.total}</text>
-              {segments.map((segment)=>{
-                const bottom = Y(stacked);
-                stacked += segment.value;
-                const top = Y(stacked);
-                const height = Math.max(bottom - top - gap, 3);
-                return (
-                  <rect
-                    key={segment.type}
-                    x={X(i) - barWidth / 2}
-                    y={top}
-                    width={barWidth}
-                    height={height}
-                    rx={radius}
-                    fill={DIET_MEAL_COLORS[segment.type]}
-                  />
-                );
-              })}
-              <text x={X(i)} y={H - 8} textAnchor="middle" fontSize="9" fontWeight={day.highlight ? '600' : '400'} fill={day.highlight ? '#ff7a3d' : '#bbbbbf'} fontFamily="PingFang SC">{day.date}</text>
-            </React.Fragment>
-          );
-        })}
-      </svg>
-    );
-  }
-
-  const points = days.filter(day=>!day.empty);
-  const n = points.length;
-  const W = 340, H = 180, padL = 34, padR = 14, padT = 16, padB = 28;
-  const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
-  const yMin = 800, yMax = 2400;
-  const goal = DIET_TARGET_GOAL;
-  const X = i => x0 + (x1 - x0) * (i / Math.max(n - 1, 1));
-  const Y = v => y1 - (v - yMin) / (yMax - yMin) * (y1 - y0);
-  const vals = points.map(d=>d.total);
-  const pts = vals.map((v, i)=>[X(i), Y(v)]);
-  let maxI = 0, minI = 0;
-  vals.forEach((v, i)=>{ if(v > vals[maxI]) maxI = i; if(v < vals[minI]) minI = i; });
-  const markCount = range === '30d' ? 5 : 6;
-  const marks = [];
-  for(let i = 0; i < markCount; i++){
-    marks.push(Math.round(i * (n - 1) / Math.max(markCount - 1, 1)));
-  }
-  return (
-    <svg viewBox={'0 0 ' + W + ' ' + H} preserveAspectRatio="xMidYMid meet" role="img" aria-label="热量摄入趋势曲线">
-      {[1000,1400,1800,2200].map(tick=>(
-        <React.Fragment key={tick}>
-          <line x1={x0} y1={Y(tick)} x2={x1} y2={Y(tick)} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/>
-          <text x={x0 - 5} y={Y(tick) + 3} textAnchor="end" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{tick}</text>
-        </React.Fragment>
-      ))}
-      <line x1={x0} y1={Y(goal)} x2={x1} y2={Y(goal)} stroke="#ffb15a" strokeWidth="1" strokeDasharray="3 3"/>
-      <text x={x1} y={Y(goal) - 4} textAnchor="end" fontSize="9" fill="#e8930f" fontFamily="PingFang SC">目标 {goal} kcal</text>
-      <path d={reviewSmoothPath(pts)} fill="none" stroke="#ff7a3d" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round"/>
-      {vals.map((v, i)=>{
-        const isMax = i === maxI;
-        const isMin = i === minI;
-        const isLast = i === n - 1;
-        return (
-          <React.Fragment key={i}>
-            <circle cx={X(i)} cy={Y(v)} r={isLast || isMax || isMin ? 3.8 : 1.8} fill={isMax ? '#ff9500' : '#ff7a3d'} stroke={(isLast || isMax || isMin) ? '#fff' : 'none'} strokeWidth="1.5"/>
-            {isMax ? <text x={X(i)} y={Y(v) - 8} textAnchor="middle" fontSize="9.5" fontWeight="600" fill="#e8930f" fontFamily="PingFang SC">{v}</text> : null}
-            {isLast && !isMax ? <text x={X(i)} y={Y(v) + 14} textAnchor="end" fontSize="9.5" fontWeight="600" fill="#ff7a3d" fontFamily="PingFang SC">{v}</text> : null}
-          </React.Fragment>
-        );
-      })}
-      {marks.map(idx=>(
-        <text key={idx} x={X(idx)} y={H - 9} textAnchor="middle" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{points[idx].date}</text>
-      ))}
-    </svg>
-  );
-}
-
-function DietDistributionDetailPage({open, onClose}){
-  const [range, setRange] = useState('7d');
-  const ranges = [
-    {key:'7d', label:'最近7天'},
-    {key:'30d', label:'最近30天'},
-    {key:'all', label:'全部'},
-  ];
-
-  return (
-    <section className={'review-cycle-detail' + (open ? ' is-open' : '')} aria-hidden={!open} aria-label="热量分布详情">
-      <div className="review-detail-nav">
-        <button type="button" className="review-detail-back" aria-label="返回" onClick={onClose}>
-          <ReviewBackIcon/>
-        </button>
-        <span className="review-detail-title">热量分布</span>
-      </div>
-      <div className="review-detail-content">
-        <div className="review-segment" role="tablist" aria-label="时间范围">
-          {ranges.map(item=>(
-            <button
-              key={item.key}
-              type="button"
-              className={range === item.key ? 'is-active' : ''}
-              aria-selected={range === item.key}
-              onClick={()=>setRange(item.key)}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="review-detail-card">
-          <div className="review-chart review-detail-chart"><DietDistributionDetailChart range={range}/></div>
-          <div className="review-legend">
-            {range === '7d' ? DIET_MEAL_ORDER.map(type=>(
-              <span className={'review-legend-item is-diet-meal is-' + type} key={type}>
-                <i style={{background:DIET_MEAL_COLORS[type]}}></i>{DIET_MEAL_LABELS[type]}
-              </span>
-            )) : (
-              <>
-                <span className="review-legend-item is-diet"><i></i>每日摄入</span>
-                <span className="review-legend-item is-diet-band"><i></i>热量目标</span>
-              </>
-            )}
-          </div>
-        </div>
-
-        <div className="review-detail-card">
-          <div className="review-insight-head">
-            <span className="review-ai-badge" aria-hidden="true">AI</span>
-            <span>趋势分析</span>
-          </div>
-          <div className="review-insight-body">
-            <div className="review-insight-item is-good">
-              <span className="review-insight-dot"></span>
-              <div>
-                <div className="review-insight-title">整体摄入：中高偏稳</div>
-                <div className="review-insight-text">近 7 天有记录日日均约 <b>1660 kcal</b>，较上周略升 <b>60 kcal</b>。多数天数落在 <b>1500-1900</b> 区间，波动不算大，属于比较稳定的摄入节奏。</div>
-              </div>
-            </div>
-            <div className="review-insight-item is-note">
-              <span className="review-insight-dot"></span>
-              <div>
-                <div className="review-insight-title">最突出：午餐和晚餐占比偏高</div>
-                <div className="review-insight-text">按餐次拆开后，午餐+晚餐合计大约占全天热量的 <b>65%-75%</b>。早餐偶有缺记，加餐和饮品则比较零散，这会让「傍晚后半段」更容易推高当日总量。</div>
-              </div>
-            </div>
-            <div className="review-insight-item is-good">
-              <span className="review-insight-dot"></span>
-              <div>
-                <div className="review-insight-title">记录习惯：覆盖率不错</div>
-                <div className="review-insight-text">近 7 天记录了 <b>6/7</b> 天，近 30 天大约能覆盖七八成有记录日。连续记录能让餐次比例判断更可靠，也更容易看出「某几天突然冲高」是不是偶发。</div>
-              </div>
-            </div>
-            <div className="review-insight-item is-note">
-              <span className="review-insight-dot"></span>
-              <div>
-                <div className="review-insight-title">值得留意：周末更容易冲高</div>
-                <div className="review-insight-text">样本里周末若干天更容易出现 <b>1900+</b> 的峰值，常常伴随着晚餐更高、或加餐/饮品叠加上去。如果目标更看重「稳」，周末的晚餐分量比早餐更值得先调。</div>
-              </div>
-            </div>
-            <div className="review-insight-summary">
-              <div className="review-summary-head">总结</div>
-              <p className="review-summary-text">总体看，你最近的热量摄入并不失控，结构上更依赖午晚两餐。若想更贴合热量目标，优先把周末晚餐和加餐压一点，并尽量补齐早餐记录，波动会更可控。这是对记录的解读，不是营养处方。</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function DietPhotoWallCard(){
   return (
     <ReviewCard
@@ -1845,18 +2210,7 @@ function DietTargetCard(){
       title="热量目标"
       iconClass="is-diet-target"
       icon={<ReviewDietTargetIcon/>}
-      headAction={(
-        <button
-          type="button"
-          className="review-card-head-btn is-budget"
-          title="点击可修改热量目标"
-          aria-label={'热量目标 ' + DIET_TARGET_GOAL + '，点击可修改'}
-          onClick={(event)=>event.stopPropagation()}
-        >
-          <span>热量目标 {DIET_TARGET_GOAL}</span>
-          <i className="review-diet-budget-tip" aria-hidden="true">!</i>
-        </button>
-      )}
+      headAction={<DietBudgetHeadAction goal={DIET_TARGET_GOAL}/>}
       chart={<DietTargetChart selectedIndex={selectedIndex} onSelect={setSelectedIndex}/>}
       metrics={(
         <>
@@ -2102,6 +2456,7 @@ function ReviewPage({mode='经期', shareState, onShareStateChange, onOpenPartne
   const [cycleDetailOpen, setCycleDetailOpen] = useState(false);
   const [cycleLandscapeOpen, setCycleLandscapeOpen] = useState(false);
   const [dietDistDetailOpen, setDietDistDetailOpen] = useState(false);
+  const [dietLandscapeOpen, setDietLandscapeOpen] = useState(false);
   const isPeriodMode = mode === '经期';
   const cycleData = [29,34,31,30,33,31,32,36,31,30,32,30,31,29,30,31,29,30,29,31,30,30,28,28];
   const cycleLast12 = cycleData.slice(-12);
@@ -2140,7 +2495,7 @@ function ReviewPage({mode='经期', shareState, onShareStateChange, onOpenPartne
         </button>
       </div>
       <div className="review-content">
-        <p className="review-page-greeting">已记录 <b>350 天</b>，共 <b>{isPeriodMode ? 12 : 8} 项</b>可回顾</p>
+        <p className="review-page-greeting">已记录 <b>350 天</b>，共 <b>{isPeriodMode ? 11 : 7} 项</b>可回顾</p>
 
       <ReviewCard
         title={isPeriodMode ? '周期' : '月经周期'}
@@ -2203,8 +2558,10 @@ function ReviewPage({mode='经期', shareState, onShareStateChange, onOpenPartne
 
       {!isPeriodMode ? (
         <>
-          <DietDistributionCard onOpen={()=>setDietDistDetailOpen(true)}/>
-          <DietTargetCard/>
+          <DietDistributionCard
+            onOpen={()=>setDietDistDetailOpen(true)}
+            onLandscapeOpen={()=>setDietLandscapeOpen(true)}
+          />
           <DietPhotoWallCard/>
         </>
       ) : null}
@@ -2235,11 +2592,12 @@ function ReviewPage({mode='经期', shareState, onShareStateChange, onOpenPartne
       />
 
       {isPeriodMode ? (
-        <DietDistributionCard
-          title="饮食"
-          more="查看完整饮食变化"
-          onOpen={()=>setDietDistDetailOpen(true)}
-        />
+        <>
+          <DietDistributionCard
+            onOpen={()=>setDietDistDetailOpen(true)}
+            onLandscapeOpen={()=>setDietLandscapeOpen(true)}
+          />
+        </>
       ) : null}
 
       {isPeriodMode ? <StoolReviewCard/> : null}
@@ -2259,6 +2617,7 @@ function ReviewPage({mode='经期', shareState, onShareStateChange, onOpenPartne
         <ReviewSearchOverlay onClose={()=>setReviewSearchOpen(false)}/>
       ) : null}
       <DietDistributionDetailPage open={dietDistDetailOpen} onClose={()=>setDietDistDetailOpen(false)}/>
+      <DietLandscapePage open={dietLandscapeOpen} onClose={()=>setDietLandscapeOpen(false)}/>
       <CycleLandscapePage open={cycleLandscapeOpen} onClose={()=>setCycleLandscapeOpen(false)}/>
     </main>
   );
