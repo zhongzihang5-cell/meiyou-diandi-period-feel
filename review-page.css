@@ -56,13 +56,13 @@
   gap:4px;
   transform:translateY(-50%);
   background:transparent;
-  color:var(--my-brand-red);
+  color:var(--my-text-secondary);
   font-size:13px;
   font-weight:500;
   font-family:inherit;
   cursor:pointer;
 }
-.review-nav-share:active{background:rgba(255,77,136,.08)}
+.review-nav-share:active{background:rgba(0,0,0,.05)}
 .review-nav-share svg{
   width:18px;
   height:18px;
@@ -74,7 +74,7 @@
 }
 .review-nav-share.is-shared{
   padding:2px 3px 2px 8px;
-  background:rgba(255,77,136,.08);
+  background:transparent;
   font-size:11px;
 }
 .review-nav-share-avatar{
