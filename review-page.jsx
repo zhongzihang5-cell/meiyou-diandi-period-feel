@@ -478,12 +478,7 @@ function ReviewFaceInviteIcon(){
   return <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM18 18h3v3h-3zM18 14h3M14 19v2"/></svg>;
 }
 
-const ReviewCardShareContext = React.createContext(null);
-
-function ReviewCard({title, iconClass='', icon, chart, legend, metrics, more, moreBadge, headAction, sample, onOpen, showShareAction=true}){
-  const cardShareContext = React.useContext(ReviewCardShareContext);
-  const requestCardShare = cardShareContext?.requestShare;
-  const cardShared = Boolean(cardShareContext?.sharedCards?.[title]);
+function ReviewCard({title, iconClass='', icon, chart, legend, metrics, more, moreBadge, headAction, sample, onOpen}){
   const isActionable = typeof onOpen === 'function';
   const handleKeyDown = (event)=>{
     if(!isActionable) return;
@@ -506,34 +501,6 @@ function ReviewCard({title, iconClass='', icon, chart, legend, metrics, more, mo
           <div className="review-card-title">{title}</div>
           <div className="review-card-head-actions">
             {headAction}
-            {showShareAction && cardShared ? (
-              <button
-                type="button"
-                className="review-card-shared-cta"
-                aria-label={title + '已共享，点击管理'}
-                onKeyDown={event=>event.stopPropagation()}
-                onClick={event=>{
-                  event.stopPropagation();
-                  requestCardShare?.(title);
-                }}
-              >
-                <span>已共享给</span>
-                <span className="review-card-shared-avatar" aria-hidden="true">👨🏻</span>
-              </button>
-            ) : showShareAction ? (
-              <button
-                type="button"
-                className="review-card-share-cta"
-                aria-label={'共享' + title + '给TA'}
-                onKeyDown={event=>event.stopPropagation()}
-                onClick={event=>{
-                  event.stopPropagation();
-                  requestCardShare?.(title);
-                }}
-              >
-                <ReviewShareIcon/><span>共享给TA</span>
-              </button>
-            ) : null}
           </div>
         </div>
         <div className="review-chart">{chart}</div>
@@ -880,6 +847,96 @@ function ReviewCardSharePage({open, onClose, title, shared, onEnable}){
             </div>
           </div>
         ) : null}
+      </div>
+      <div className={'review-share-toast' + (toastMessage ? ' is-show' : '')} role="status">{toastMessage}</div>
+    </section>
+  );
+}
+
+const REVIEW_SHARE_HUB_ITEMS = [
+  {title:'周期', desc:'月经日期、周期长度和周期预测'},
+  {title:'经期', desc:'经期日期、经期天数和经期趋势'},
+  {title:'体重', desc:'体重记录、体重趋势和变化分析'},
+  {title:'症状', desc:'症状类型、记录时间和症状趋势'},
+  {title:'心情', desc:'心情记录、心情趋势和变化分析'},
+  {title:'饮食', desc:'饮食记录、热量摄入和饮食趋势'},
+  {title:'便便', desc:'记录时间、每日次数和规律趋势'},
+  {title:'爱爱', desc:'记录日期、记录次数和变化趋势'},
+  {title:'喂奶', desc:'喂奶时间、喂奶方式和喂奶量'},
+  {title:'睡眠', desc:'睡眠时间、睡眠时长和睡眠趋势'},
+  {title:'换尿布', desc:'更换时间、尿布类型和次数趋势'},
+  {title:'辅食', desc:'辅食时间、辅食内容和摄入量'},
+];
+
+function ReviewShareHubPage({open, onClose, cycleShared, onCycleManage, sharedCards, onToggleCard}){
+  const [toastMessage, setToastMessage] = useState('');
+  const sharedCount = (cycleShared ? 1 : 0) + Object.values(sharedCards || {}).filter(Boolean).length;
+
+  React.useEffect(()=>{
+    if(!open) setToastMessage('');
+  }, [open]);
+
+  const showToast = message=>{
+    setToastMessage(message);
+    window.setTimeout(()=>setToastMessage(''), 1800);
+  };
+
+  const handleItem = title=>{
+    if(title === '周期' || !cycleShared){
+      onCycleManage?.();
+      return;
+    }
+    const nextShared = !Boolean(sharedCards?.[title]);
+    onToggleCard?.(title, nextShared);
+    showToast(nextShared ? title + '已开启共享' : title + '已停止共享');
+  };
+
+  return (
+    <section className={'review-cycle-detail review-share-page review-share-hub' + (open ? ' is-open' : '')} aria-hidden={!open} aria-label="回顾共享管理">
+      <div className="review-detail-nav review-share-nav">
+        <button type="button" className="review-detail-back" aria-label="返回" onClick={onClose}><ReviewBackIcon/></button>
+        <span className="review-detail-title">共享管理</span>
+      </div>
+      <div className="review-share-hub-content">
+        <div className="review-share-hub-summary">
+          <div>
+            <h2>共享我的回顾</h2>
+            <p>{cycleShared ? `已向男友共享 ${sharedCount} 项回顾` : '邀请信任的人，选择想让TA了解的回顾'}</p>
+          </div>
+          <span className={'review-share-hub-status' + (cycleShared ? ' is-connected' : '')}>{cycleShared ? '共享中' : '未连接'}</span>
+        </div>
+
+        <div className="review-share-manage-card review-share-hub-person">
+          <div className="review-share-manage-head"><b>{cycleShared ? '已共享的人' : '共享给谁'}</b></div>
+          <div className="review-share-member-row">
+            <span className="review-share-member-avatar" aria-hidden="true">{cycleShared ? '👨🏻' : 'TA'}</span>
+            <span className="review-share-member-info">
+              <b>{cycleShared ? '男友' : '还没有共享对象'}</b>
+              <small>{cycleShared ? '共享关系已连接，可随时调整共享内容' : '可以邀请男友、闺蜜或家人'}</small>
+            </span>
+            <button type="button" className="review-share-member-enable" onClick={onCycleManage}>{cycleShared ? '管理' : '邀请TA'}</button>
+          </div>
+        </div>
+
+        <div className="review-share-manage-card review-share-hub-data">
+          <div className="review-share-manage-head">
+            <b>选择共享内容</b>
+            <span>{sharedCount} 项已开启</span>
+          </div>
+          <div className="review-share-hub-list">
+            {REVIEW_SHARE_HUB_ITEMS.map(item=>{
+              const checked = item.title === '周期' ? cycleShared : Boolean(sharedCards?.[item.title]);
+              return (
+                <button key={item.title} type="button" className="review-share-hub-row" onClick={()=>handleItem(item.title)}>
+                  <span className="review-share-hub-row-copy"><b>{item.title}</b><small>{item.desc}</small></span>
+                  <span className={'review-share-switch' + (checked ? ' is-on' : '')} aria-label={checked ? '已开启' : '未开启'}><i></i></span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <p className="review-share-hub-note">仅会共享你主动开启的内容，可以随时调整或停止共享。</p>
       </div>
       <div className={'review-share-toast' + (toastMessage ? ' is-show' : '')} role="status">{toastMessage}</div>
     </section>
@@ -2036,10 +2093,10 @@ function LoveReviewCard(){
 
 function ReviewPage({mode='经期', cycleShared=false, onCycleSharedChange}){
   const [reviewSearchOpen, setReviewSearchOpen] = useState(false);
+  const [shareHubOpen, setShareHubOpen] = useState(false);
   const [cycleDetailOpen, setCycleDetailOpen] = useState(false);
   const [cycleShareOpen, setCycleShareOpen] = useState(false);
   const [cycleLandscapeOpen, setCycleLandscapeOpen] = useState(false);
-  const [cardShareTarget, setCardShareTarget] = useState('');
   const [sharedReviewCards, setSharedReviewCards] = useState({});
   const [dietDistDetailOpen, setDietDistDetailOpen] = useState(false);
   const isPeriodMode = mode === '经期';
@@ -2051,23 +2108,9 @@ function ReviewPage({mode='经期', cycleShared=false, onCycleSharedChange}){
   const weightDelta = weightData[weightData.length - 1] - weightData[0];
   const I = window.Icon;
   const ReviewSearchOverlay = window.ReviewSearchOverlay;
-  const handleReviewCardShare = React.useCallback((title)=>{
-    setCycleDetailOpen(false);
-    setCardShareTarget('');
-    if(!cycleShared){
-      setCycleShareOpen(true);
-      return;
-    }
-    setCycleShareOpen(false);
-    setCardShareTarget(title);
-  }, [cycleShared]);
-  const reviewCardShareContextValue = React.useMemo(()=>({
-    requestShare:handleReviewCardShare,
-    sharedCards:sharedReviewCards,
-  }), [handleReviewCardShare, sharedReviewCards]);
+  const sharedReviewCount = (cycleShared ? 1 : 0) + Object.values(sharedReviewCards).filter(Boolean).length;
 
   return (
-    <ReviewCardShareContext.Provider value={reviewCardShareContextValue}>
     <main className={'review-page' + (reviewSearchOpen ? ' is-review-search-open' : '')} aria-label="回顾">
       <div className="review-nav">
         <button
@@ -2080,6 +2123,16 @@ function ReviewPage({mode='经期', cycleShared=false, onCycleSharedChange}){
           <I name="search" size={20} stroke={1.7}/>
         </button>
         <span className="review-nav-title">回顾</span>
+        <button
+          type="button"
+          className={'review-nav-share' + (sharedReviewCount ? ' is-shared' : '')}
+          aria-label="共享回顾"
+          onClick={()=>setShareHubOpen(true)}
+        >
+          <ReviewShareIcon/>
+          <span>{sharedReviewCount ? '共享中' : '共享'}</span>
+          {sharedReviewCount ? <span className="review-nav-share-avatar" aria-hidden="true">👨🏻</span> : null}
+        </button>
       </div>
       <div className="review-content">
         <p className="review-page-greeting">已记录 <b>350 天</b>，共 <b>{isPeriodMode ? 12 : 8} 项</b>可回顾</p>
@@ -2087,39 +2140,6 @@ function ReviewPage({mode='经期', cycleShared=false, onCycleSharedChange}){
       <ReviewCard
         title={isPeriodMode ? '周期' : '月经周期'}
         icon={<ReviewDropletIcon/>}
-        showShareAction={false}
-        headAction={cycleShared ? (
-          <button
-            type="button"
-            className="review-cycle-shared-badge"
-            aria-label="管理已共享给男友的周期"
-            onKeyDown={(event)=>event.stopPropagation()}
-            onClick={(event)=>{
-              event.stopPropagation();
-              setCardShareTarget('');
-              setCycleDetailOpen(false);
-              setCycleShareOpen(true);
-            }}
-          >
-            <span>已共享给</span>
-            <span className="review-cycle-shared-avatar" aria-hidden="true">👨🏻</span>
-          </button>
-        ) : (
-          <button
-            type="button"
-            className="review-cycle-share-cta"
-            aria-label="共享周期给TA"
-            onKeyDown={(event)=>event.stopPropagation()}
-            onClick={(event)=>{
-              event.stopPropagation();
-              setCardShareTarget('');
-              setCycleDetailOpen(false);
-              setCycleShareOpen(true);
-            }}
-          >
-            <ReviewShareIcon/><span>共享给TA</span>
-          </button>
-        )}
         chart={<CycleChart/>}
         legend={(
           <>
@@ -2150,7 +2170,6 @@ function ReviewPage({mode='经期', cycleShared=false, onCycleSharedChange}){
         more="查看AI趋势分析"
         moreBadge="VIP"
         onOpen={()=>{
-          setCardShareTarget('');
           setCycleShareOpen(false);
           setCycleDetailOpen(true);
         }}
@@ -2229,18 +2248,21 @@ function ReviewPage({mode='经期', cycleShared=false, onCycleSharedChange}){
         open={cycleDetailOpen}
         onClose={()=>setCycleDetailOpen(false)}
       />
+      <ReviewShareHubPage
+        open={shareHubOpen}
+        onClose={()=>setShareHubOpen(false)}
+        cycleShared={cycleShared}
+        onCycleManage={()=>{
+          setCycleShareOpen(true);
+        }}
+        sharedCards={sharedReviewCards}
+        onToggleCard={(title, shared)=>setSharedReviewCards(current=>({...current, [title]:shared}))}
+      />
       <CycleSharePage
         open={cycleShareOpen}
         onClose={()=>setCycleShareOpen(false)}
         shared={cycleShared}
         onSharedChange={onCycleSharedChange}
-      />
-      <ReviewCardSharePage
-        open={Boolean(cardShareTarget)}
-        onClose={()=>setCardShareTarget('')}
-        title={cardShareTarget || '数据'}
-        shared={Boolean(sharedReviewCards[cardShareTarget])}
-        onEnable={()=>setSharedReviewCards(current=>({...current, [cardShareTarget]:true}))}
       />
       {reviewSearchOpen && ReviewSearchOverlay ? (
         <ReviewSearchOverlay onClose={()=>setReviewSearchOpen(false)}/>
@@ -2248,7 +2270,6 @@ function ReviewPage({mode='经期', cycleShared=false, onCycleSharedChange}){
       <DietDistributionDetailPage open={dietDistDetailOpen} onClose={()=>setDietDistDetailOpen(false)}/>
       <CycleLandscapePage open={cycleLandscapeOpen} onClose={()=>setCycleLandscapeOpen(false)}/>
     </main>
-    </ReviewCardShareContext.Provider>
   );
 }
 
