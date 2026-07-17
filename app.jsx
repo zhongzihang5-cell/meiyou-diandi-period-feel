@@ -1715,6 +1715,11 @@ function App(){
   const submitWeightRecord = (payload)=>{
     markUserRecorded();
     const entry = window.createWeightRecordEntry(payload);
+    if(payload?.source === 'camera' || payload?.photoUrl){
+      entry.weightSource = 'camera';
+      entry.photoUrl = payload.photoUrl || null;
+      if(entry.primary) entry.primary.photoUrl = payload.photoUrl || null;
+    }
     const entryText = entry.primary?.weightValue || entry.primary?.text || entry.body || '';
     if(recordFeedback && tryStartFirstDrop(entry, entryText)) return;
     const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
@@ -1757,6 +1762,60 @@ function App(){
     const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
       || window.resolveEntryDayId('', timeline);
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
+  };
+
+  const submitCameraRecord = (payload)=>{
+    if(payload?.mode === 'weight'){
+      submitWeightRecord({
+        value:Number(payload.value) || 108.4,
+        unit:payload.unit === 'kg' ? 'kg' : 'jin',
+        photoUrl:payload.photoUrl || null,
+        source:'camera',
+      });
+      setTimeout(()=>scrollTimelineToBottom('smooth'), 80);
+      return;
+    }
+
+    if(payload?.mode !== 'water') return;
+    const amount = Math.max(1, Math.round(Number(payload.value) || 350));
+    if(recordLifeMode === '育儿'){
+      handleBabyFeedingQuickSelect({
+        id:'water-camera',
+        label:'喝水',
+        cardIcon:'💧',
+        iconSrc:'assets/baby-feeding-icons/water.png',
+        color:'#5B8DEF',
+        value:`${amount}ml`,
+        text:`喝水：${amount}ml`,
+        photoUrl:payload.photoUrl || null,
+      });
+      return;
+    }
+
+    markUserRecorded();
+    const stamp = Date.now();
+    const entry = {
+      kind:'record-group',
+      id:'e-water-camera-'+stamp+'-g',
+      isNew:true,
+      cameraSource:'water',
+      photoUrl:payload.photoUrl || null,
+      primary:{
+        id:'e-water-camera-'+stamp,
+        time:window.formatNowTime(),
+        kind:'daily-record',
+        recordType:'water',
+        icon:'water',
+        recordLabel:'喝水',
+        recordDetail:`${amount}ml`,
+        text:`喝水：${amount}ml`,
+        tags:[],
+      },
+    };
+    const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
+      || window.resolveEntryDayId('', timeline);
+    setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
+    setTimeout(()=>scrollTimelineToBottom('smooth'), 80);
   };
 
   const buildRecordTabDietWeekData = (todayTotalKcal)=>{
@@ -2250,6 +2309,7 @@ function App(){
           onWeightConfirm={submitWeightRecord}
           onFoodConfirm={submitFoodRecord}
           onDietCapture={submitDietCapture}
+          onCameraRecord={submitCameraRecord}
           onVoiceDone={submitVoice}
           onPhoto={()=>setShowPhoto(true)}
           onDockExpandedChange={setDockExpanded}
@@ -2365,6 +2425,7 @@ function App(){
           onWeightConfirm={submitWeightRecord}
           onFoodConfirm={submitFoodRecord}
           onDietCapture={submitDietCapture}
+          onCameraRecord={submitCameraRecord}
           onVoiceDone={recordLifeMode === '育儿' ? submitBabyFeedingVoice : submitVoice}
           onPhoto={()=>setShowPhoto(true)}
           onDockExpandedChange={setDockExpanded}
