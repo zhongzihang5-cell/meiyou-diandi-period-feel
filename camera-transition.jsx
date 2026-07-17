@@ -4,6 +4,59 @@ const TRANSITION_DURATION = 520;
 const TRANSITION_EASING = 'cubic-bezier(0.5, 0.02, 0.1, 1)';
 const OVERLAY_FADE_DURATION = Math.round(TRANSITION_DURATION * 0.55);
 
+const CAMERA_RECOGNITION_MODES = [
+  {
+    id: 'weight',
+    label: '体重',
+    available: true,
+    capturePhoto: '体重秤.webp',
+    helpText: '对准体重秤显示屏，保持数字清晰',
+    analyzeText: '正在 OCR 识别体重数值...',
+  },
+  {
+    id: 'period',
+    label: '月经',
+    available: false,
+    helpText: '月经识别将在后续补充',
+  },
+  {
+    id: 'discharge',
+    label: '白带',
+    available: false,
+    helpText: '白带识别将在后续补充',
+  },
+  {
+    id: 'diet',
+    label: '饮食',
+    available: true,
+    helpText: '确保食物在辅助框内',
+    analyzeText: '正在识别食物...',
+  },
+  {
+    id: 'water',
+    label: '喝水',
+    available: true,
+    capturePhoto: '水杯.jpg',
+    helpText: '将水杯完整放在辅助框内',
+    analyzeText: '正在估算本次饮水量...',
+  },
+  {
+    id: 'stool',
+    label: '便便',
+    available: false,
+    helpText: '便便识别将在后续补充',
+  },
+];
+
+const CAMERA_RECOGNITION_MODE_MAP = CAMERA_RECOGNITION_MODES.reduce((map, mode) => {
+  map[mode.id] = mode;
+  return map;
+}, {});
+
+function getCameraRecognitionMode(modeId) {
+  return CAMERA_RECOGNITION_MODE_MAP[modeId] || CAMERA_RECOGNITION_MODE_MAP.weight;
+}
+
 function measureElementRect(el, container) {
   if (!el || !container) return null;
   
@@ -40,9 +93,22 @@ const PHOTO_PICKER_PLACEHOLDERS = Array.from({ length: 17 }, (_, index) => ({
 
 const PHOTO_PICKER_ITEMS = [...MOCK_PHOTOS, ...PHOTO_PICKER_PLACEHOLDERS];
 
-function PhotoPicker({ onSelect, onClose }) {
+function PhotoPicker({ onSelect, onClose, mode = 'diet' }) {
   const I = window.Icon;
   const [activeTab, setActiveTab] = React.useState('photos');
+  const modeConfig = getCameraRecognitionMode(mode);
+  const featuredPhoto = modeConfig.capturePhoto
+    ? {
+        id: `featured-${mode}`,
+        date: '2026-07-16',
+        time: '09:41',
+        thumb: modeConfig.capturePhoto,
+        type: mode,
+      }
+    : null;
+  const pickerItems = featuredPhoto
+    ? [featuredPhoto, ...PHOTO_PICKER_ITEMS.filter((photo) => photo.thumb !== featuredPhoto.thumb)]
+    : PHOTO_PICKER_ITEMS;
 
   return (
     <div className="photo-picker">
@@ -76,7 +142,7 @@ function PhotoPicker({ onSelect, onClose }) {
       <div className="photo-picker-content">
         {activeTab === 'photos' ? (
           <div className="photo-grid">
-            {PHOTO_PICKER_ITEMS.map(photo => (
+            {pickerItems.map(photo => (
               photo.placeholder ? (
                 <div
                   key={photo.id}
@@ -116,7 +182,7 @@ function PhotoPicker({ onSelect, onClose }) {
   );
 }
 
-function PhotoPickerSheet({ onSelect, onClose }) {
+function PhotoPickerSheet({ onSelect, onClose, mode }) {
   const [entered, setEntered] = React.useState(false);
 
   React.useEffect(() => {
@@ -133,13 +199,12 @@ function PhotoPickerSheet({ onSelect, onClose }) {
         aria-label="关闭相册"
       />
       <div className="photo-picker-sheet-panel">
-        <PhotoPicker onSelect={onSelect} onClose={onClose} />
+        <PhotoPicker onSelect={onSelect} onClose={onClose} mode={mode} />
       </div>
     </div>
   );
 }
 
-const CAMERA_HELP_TEXT = '确保食物在辅助框内';
 const SHOOT_EXAMPLE_GOOD = 'assets/camera/shoot-example-good.png';
 const SHOOT_EXAMPLE_BAD = 'assets/camera/shoot-example-bad.png';
 function CameraShootingGuideSheet({ onClose }) {
@@ -265,7 +330,7 @@ function CameraPermissionDialog({ onAllow, onDeny }) {
       <div className="camera-perm-dialog">
         <CameraPermissionIcon/>
         <h2 id="camera-perm-title" className="camera-perm-title">美柚想访问相机</h2>
-        <p className="camera-perm-subtitle">为您提供记录食物及热量分析功能，请允许APP访问相机拍摄食物照片</p>
+        <p className="camera-perm-subtitle">用于智能识别体重、饮食和饮水记录，请允许美柚访问相机</p>
         <div className="camera-perm-actions">
           <button type="button" className="camera-perm-btn" onClick={onDeny}>不允许</button>
           <button type="button" className="camera-perm-btn" onClick={onAllow}>允许</button>
@@ -312,7 +377,7 @@ function PhotoLibraryPermissionDialog({ onAllowFull, onLimit, onDeny }) {
       <div className="photo-lib-perm-dialog">
         <PhotoLibraryIcon/>
         <h2 id="photo-lib-perm-title" className="photo-lib-perm-title">“美柚”想完全访问你的照片图库。</h2>
-        <p className="photo-lib-perm-subtitle">为了分析图片识别热量。请授予相册访问权限。</p>
+        <p className="photo-lib-perm-subtitle">为了从图片中识别记录内容，请授予相册访问权限。</p>
         <div className="photo-lib-perm-grid">
           {previewPhotos.map((photo) => (
             <div key={photo.id} className="photo-lib-perm-grid-item">
@@ -355,7 +420,7 @@ function CameraPermissionBlocked({ onEnable }) {
   return (
     <div className="camera-perm-blocked">
       <div className="camera-perm-blocked-body">
-        <h2 className="camera-perm-blocked-title">允许开启以下权限即可记录饮食</h2>
+        <h2 className="camera-perm-blocked-title">允许开启以下权限即可智能拍照记录</h2>
         <div className="camera-perm-blocked-col">
           <PermissionPrivacyNote />
           <div className="camera-perm-blocked-list">
@@ -378,10 +443,152 @@ function CameraPermissionBlocked({ onEnable }) {
   );
 }
 
+function CameraModeCarousel({ value, onChange, disabled = false }) {
+  const scrollerRef = React.useRef(null);
+  const settleTimerRef = React.useRef(null);
+
+  const centerMode = React.useCallback((modeId, behavior = 'smooth') => {
+    const scroller = scrollerRef.current;
+    const item = scroller?.querySelector?.(`[data-camera-mode="${modeId}"]`);
+    if (!scroller || !item) return;
+    const targetLeft = item.offsetLeft - (scroller.clientWidth - item.offsetWidth) / 2;
+    scroller.scrollTo({ left: targetLeft, behavior });
+  }, []);
+
+  React.useEffect(() => {
+    centerMode(value, 'auto');
+  }, [centerMode, value]);
+
+  React.useEffect(() => () => {
+    if (settleTimerRef.current) window.clearTimeout(settleTimerRef.current);
+  }, []);
+
+  const handleScroll = () => {
+    if (disabled) return;
+    if (settleTimerRef.current) window.clearTimeout(settleTimerRef.current);
+    settleTimerRef.current = window.setTimeout(() => {
+      const scroller = scrollerRef.current;
+      if (!scroller) return;
+      const center = scroller.getBoundingClientRect().left + scroller.clientWidth / 2;
+      const items = [...scroller.querySelectorAll('[data-camera-mode]')];
+      const nearest = items.reduce((best, item) => {
+        const rect = item.getBoundingClientRect();
+        const distance = Math.abs(rect.left + rect.width / 2 - center);
+        return !best || distance < best.distance ? { item, distance } : best;
+      }, null);
+      const nextMode = nearest?.item?.dataset?.cameraMode;
+      if (nextMode && nextMode !== value) onChange?.(nextMode);
+    }, 90);
+  };
+
+  return (
+    <div className="camera-mode-carousel" aria-label="拍照识别类型">
+      <div
+        ref={scrollerRef}
+        className="camera-mode-scroller"
+        onScroll={handleScroll}
+      >
+        {CAMERA_RECOGNITION_MODES.map((mode) => (
+          <button
+            key={mode.id}
+            type="button"
+            data-camera-mode={mode.id}
+            className={
+              'camera-mode-item'
+              + (value === mode.id ? ' is-active' : '')
+              + (!mode.available ? ' is-planned' : '')
+            }
+            aria-pressed={value === mode.id}
+            onClick={() => {
+              if (disabled) return;
+              onChange?.(mode.id);
+              centerMode(mode.id);
+            }}
+          >
+            {mode.label}
+          </button>
+        ))}
+      </div>
+      <span className="camera-mode-marker" aria-hidden="true"/>
+    </div>
+  );
+}
+
+function CameraRecognitionResult({ result, onChange, onRetake, onSave }) {
+  const isWeight = result?.mode === 'weight';
+  const numericValue = result?.value ?? '';
+  const isValid = Number(numericValue) > 0;
+
+  return (
+    <div className="camera-recognition-result">
+      <span className="camera-result-handle" aria-hidden="true"/>
+      <div className="camera-result-status">
+        <span className="camera-result-check" aria-hidden="true">✓</span>
+        <span>{isWeight ? 'OCR 识别完成' : 'AI 容量估算完成'}</span>
+      </div>
+      <div className="camera-result-heading">
+        <div>
+          <h2>{isWeight ? '识别到体重数值' : '估算本次喝水'}</h2>
+          <p>{isWeight ? '请确认数字与体重秤显示一致' : '识别为日常水杯，容量可手动修正'}</p>
+        </div>
+        <span className={'camera-result-type-icon is-' + result.mode} aria-hidden="true">
+          {isWeight ? '⚖' : '💧'}
+        </span>
+      </div>
+      <div className="camera-result-value-row">
+        <input
+          className="camera-result-value-input"
+          type="number"
+          inputMode="decimal"
+          min="0"
+          step={isWeight ? '0.1' : '10'}
+          aria-label={isWeight ? '体重数值' : '喝水量'}
+          value={numericValue}
+          onChange={(event) => onChange?.({ ...result, value: event.target.value })}
+        />
+        {isWeight ? (
+          <div className="camera-result-unit-switch" role="group" aria-label="体重单位">
+            <button
+              type="button"
+              className={result.unit === 'jin' ? 'is-active' : ''}
+              onClick={() => onChange?.({ ...result, unit: 'jin' })}
+            >
+              斤
+            </button>
+            <button
+              type="button"
+              className={result.unit === 'kg' ? 'is-active' : ''}
+              onClick={() => onChange?.({ ...result, unit: 'kg' })}
+            >
+              kg
+            </button>
+          </div>
+        ) : (
+          <span className="camera-result-fixed-unit">ml</span>
+        )}
+      </div>
+      <div className="camera-result-actions">
+        <button type="button" className="camera-result-retake" onClick={onRetake}>
+          重拍
+        </button>
+        <button
+          type="button"
+          className="camera-result-save"
+          onClick={onSave}
+          disabled={!isValid}
+        >
+          保存记录
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function CameraCaptureAnalyzePanel({
   phase,
   progress = 0,
   errorKind = null,
+  mode = 'diet',
   onRetry,
   onRetake,
   showRetry,
@@ -390,6 +597,7 @@ function CameraCaptureAnalyzePanel({
   const isLoading = phase === 'loading';
   const isTimeoutError = phase === 'error' && errorKind === 'timeout';
   const isNotFoodError = phase === 'error' && errorKind === 'not-food';
+  const modeConfig = getCameraRecognitionMode(mode);
 
   return (
     <div className={'camera-analyze-sheet' + (isLoading ? ' is-loading' : '') + (phase === 'error' ? ' is-error' : '') + (isNotFoodError ? ' is-not-food' : '')}>
@@ -402,7 +610,7 @@ function CameraCaptureAnalyzePanel({
       <div className="camera-analyze-status-row">
         {isLoading && (
           <>
-            <span className="camera-analyze-status-text">正在识别食物......</span>
+            <span className="camera-analyze-status-text">{modeConfig.analyzeText || '正在识别图片...'}</span>
             <span className="camera-analyze-status-icon" aria-hidden="true">
               <svg viewBox="0 0 16 16" fill="none">
                 <circle cx="8" cy="8" r="7" fill="#007AFF"/>
@@ -503,23 +711,30 @@ function useDietPhotoAnalyze({ onSuccess, onAnalyzeStart }) {
     if (!isRetry) setFailureCount(0);
     onAnalyzeStart?.();
 
-    const activeScenario = readScenario();
-    const analyzeMs = resolveAnalyzeMs(activeScenario, loadingMs);
+    const recognitionMode = meta?.mode || 'diet';
+    const activeScenario = recognitionMode === 'diet' ? readScenario() : 'success';
+    const analyzeMs = recognitionMode === 'diet'
+      ? resolveAnalyzeMs(activeScenario, loadingMs)
+      : 1500;
     const isEarlySuccess = activeScenario === 'success';
     const startedAt = Date.now();
     progressTimerRef.current = window.setInterval(() => {
       const elapsed = Date.now() - startedAt;
-      const pct = Math.min(isEarlySuccess ? 58 : 92, 6 + (elapsed / loadingMs) * 86);
+      const pct = Math.min(isEarlySuccess ? 86 : 92, 6 + (elapsed / analyzeMs) * 86);
       setProgress(pct);
     }, 100);
 
     analyzeTimerRef.current = window.setTimeout(() => {
       clearTimers();
-      const result = mockRecognize({ scenario: readScenario(), forceSuccess });
+      const result = recognitionMode === 'diet'
+        ? mockRecognize({ scenario: readScenario(), forceSuccess })
+        : { ok: true };
       if (result?.ok) {
+        setProgress(100);
+        setPhase('ready');
         finishTimerRef.current = window.setTimeout(() => {
           onSuccess?.({ photoUrl: url, ...meta });
-          reset();
+          if (recognitionMode === 'diet') reset();
         }, 160);
         return;
       }
@@ -591,12 +806,18 @@ function CameraView({
   analyzeErrorKind = null,
   onAnalyzeRetry,
   onAnalyzeRetake,
+  activeMode = 'weight',
+  onModeChange,
+  recognitionResult,
+  onRecognitionChange,
+  onRecognitionSave,
 }) {
   const I = window.Icon;
   const [flash, setFlash] = React.useState(false);
+  const modeConfig = getCameraRecognitionMode(activeMode);
   
   const handleCapture = () => {
-    if (permPending || permDenied || analyzePhase) return;
+    if (permPending || permDenied || analyzePhase || !modeConfig.available) return;
     setFlash(true);
     setTimeout(() => {
       setFlash(false);
@@ -627,7 +848,7 @@ function CameraView({
           </div>
         ) : (
           <>
-            <div className="camera-frame">
+            <div className={'camera-frame is-' + activeMode}>
               {permPending && (
                 <CameraPermissionDialog
                   onAllow={onPermissionAllow}
@@ -639,7 +860,9 @@ function CameraView({
               <span className="camera-frame-corner bl"/>
               <span className="camera-frame-corner br"/>
             </div>
-            <div className="camera-hint">{CAMERA_HELP_TEXT}</div>
+            <div className={'camera-hint' + (!modeConfig.available ? ' is-planned' : '')}>
+              {modeConfig.helpText}
+            </div>
           </>
         )}
         {flash && <div className="camera-flash" />}
@@ -657,43 +880,69 @@ function CameraView({
         <PhotoPickerSheet
           onSelect={onSelectPhoto}
           onClose={onCloseGallery}
+          mode={activeMode}
         />
       )}
 
       <div className="camera-bottom-bar">
         {showAnalyze ? (
-          <CameraCaptureAnalyzePanel
-            phase={analyzePhase}
-            progress={analyzeProgress}
-            errorKind={analyzeErrorKind}
-            onRetry={onAnalyzeRetry}
-            onRetake={onAnalyzeRetake}
-            showRetry={analyzeFailureCount < analyzeMaxFailures}
-            isExhausted={analyzeExhausted}
-          />
+          recognitionResult ? (
+            <CameraRecognitionResult
+              result={recognitionResult}
+              onChange={onRecognitionChange}
+              onRetake={onAnalyzeRetake}
+              onSave={onRecognitionSave}
+            />
+          ) : (
+            <CameraCaptureAnalyzePanel
+              phase={analyzePhase}
+              progress={analyzeProgress}
+              errorKind={analyzeErrorKind}
+              mode={activeMode}
+              onRetry={onAnalyzeRetry}
+              onRetake={onAnalyzeRetake}
+              showRetry={analyzeFailureCount < analyzeMaxFailures}
+              isExhausted={analyzeExhausted}
+            />
+          )
         ) : (
-          <div className="camera-controls">
-            {!showGallery && (
-              <button type="button" className="camera-gallery-btn" onClick={onOpenGallery} aria-label="相册">
-                <I name="image" size={24} stroke={1.5} />
-              </button>
-            )}
-            {!permDenied && (
-              <button
-                type="button"
-                className={'camera-shutter' + (permPending ? ' is-disabled' : '')}
-                onClick={handleCapture}
-                aria-label="拍照"
+          <>
+            {!showGallery && !permDenied ? (
+              <CameraModeCarousel
+                value={activeMode}
+                onChange={onModeChange}
                 disabled={permPending}
-              >
-                <span className="camera-shutter-ring"/>
-                <span className="camera-shutter-inner"/>
-              </button>
-            )}
-            {!showGallery && (
-              <span className="camera-controls-side" aria-hidden="true"/>
-            )}
-          </div>
+              />
+            ) : null}
+            <div className="camera-controls">
+              {!showGallery && (
+                <button
+                  type="button"
+                  className={'camera-gallery-btn' + (!modeConfig.available ? ' is-disabled' : '')}
+                  onClick={onOpenGallery}
+                  aria-label="相册"
+                  disabled={!modeConfig.available}
+                >
+                  <I name="image" size={24} stroke={1.5} />
+                </button>
+              )}
+              {!permDenied && (
+                <button
+                  type="button"
+                  className={'camera-shutter' + (permPending || !modeConfig.available ? ' is-disabled' : '')}
+                  onClick={handleCapture}
+                  aria-label={modeConfig.available ? `拍摄${modeConfig.label}` : `${modeConfig.label}识别后续支持`}
+                  disabled={permPending || !modeConfig.available}
+                >
+                  <span className="camera-shutter-ring"/>
+                  <span className="camera-shutter-inner"/>
+                </button>
+              )}
+              {!showGallery && (
+                <span className="camera-controls-side" aria-hidden="true"/>
+              )}
+            </div>
+          </>
         )}
       </div>
     </div>
@@ -705,6 +954,7 @@ function CameraTransition({
   sourceRect, 
   cardContent,
   containerRef,
+  initialMode = 'weight',
   onCaptureSuccess,
   onClose,
   onSelectPhoto,
@@ -717,6 +967,8 @@ function CameraTransition({
   const [sessionDenied, setSessionDenied] = React.useState(false);
   const [photoPermGranted, setPhotoPermGranted] = React.useState(false);
   const [showPhotoPermDialog, setShowPhotoPermDialog] = React.useState(false);
+  const [activeMode, setActiveMode] = React.useState(initialMode);
+  const [recognitionResult, setRecognitionResult] = React.useState(null);
   const wrapperRef = React.useRef(null);
 
   const containerSize = React.useMemo(() => {
@@ -738,8 +990,10 @@ function CameraTransition({
       setSessionDenied(false);
       setPhotoPermGranted(false);
       setShowPhotoPermDialog(false);
+      setActiveMode(getCameraRecognitionMode(initialMode).id);
+      setRecognitionResult(null);
     }
-  }, [active, sourceRect, phase]);
+  }, [active, initialMode, sourceRect, phase]);
 
   React.useEffect(() => {
     const onScenarioChange = () => {
@@ -748,6 +1002,7 @@ function CameraTransition({
       setSessionDenied(false);
       setPhotoPermGranted(false);
       setShowPhotoPermDialog(false);
+      setRecognitionResult(null);
     };
     window.addEventListener('cameraPermissionScenarioChange', onScenarioChange);
     return () => window.removeEventListener('cameraPermissionScenarioChange', onScenarioChange);
@@ -810,6 +1065,7 @@ function CameraTransition({
   };
   
   const handleOpenGallery = () => {
+    if (!getCameraRecognitionMode(activeMode).available) return;
     if (photoPermGranted) {
       setShowGallery(true);
       return;
@@ -836,7 +1092,25 @@ function CameraTransition({
   };
 
   const handleAnalyzeSuccess = React.useCallback((payload) => {
-    onCaptureSuccess?.(payload);
+    if (payload?.mode === 'weight') {
+      setRecognitionResult({
+        ...payload,
+        mode: 'weight',
+        value: 108.4,
+        unit: 'jin',
+      });
+      return;
+    }
+    if (payload?.mode === 'water') {
+      setRecognitionResult({
+        ...payload,
+        mode: 'water',
+        value: 350,
+        unit: 'ml',
+      });
+      return;
+    }
+    onCaptureSuccess?.({ ...payload, mode: 'diet' });
     onClose?.();
   }, [onCaptureSuccess, onClose]);
 
@@ -847,19 +1121,45 @@ function CameraTransition({
       handleCloseGallery();
       return;
     }
+    setRecognitionResult(null);
     analyze.reset();
     onClose?.();
   };
 
   const handleCapturePhoto = () => {
-    const photoUrl = window.pickFallbackPhoto?.() || null;
-    analyze.runAnalyze({ url: photoUrl, meta: { type: 'capture' } });
+    const modeConfig = getCameraRecognitionMode(activeMode);
+    if (!modeConfig.available) return;
+    const photoUrl = modeConfig.capturePhoto || window.pickFallbackPhoto?.() || null;
+    analyze.runAnalyze({ url: photoUrl, meta: { type: 'capture', mode: activeMode } });
   };
   
   const handleSelectPhoto = (photo) => {
+    if (!getCameraRecognitionMode(activeMode).available) return;
     setShowGallery(false);
     const photoUrl = photo?.thumb || photo?.url || window.pickFallbackPhoto?.() || null;
-    analyze.runAnalyze({ url: photoUrl, meta: { type: 'select', photo } });
+    analyze.runAnalyze({ url: photoUrl, meta: { type: 'select', photo, mode: activeMode } });
+  };
+
+  const handleModeChange = (nextMode) => {
+    if (analyze.isAnalyzing) return;
+    setActiveMode(getCameraRecognitionMode(nextMode).id);
+  };
+
+  const handleAnalyzeRetake = () => {
+    setRecognitionResult(null);
+    analyze.handleRetake();
+  };
+
+  const handleRecognitionSave = () => {
+    if (!recognitionResult || Number(recognitionResult.value) <= 0) return;
+    onCaptureSuccess?.({
+      ...recognitionResult,
+      value: Number(recognitionResult.value),
+      recognitionState: 'ready',
+    });
+    setRecognitionResult(null);
+    analyze.reset();
+    onClose?.();
   };
 
   if (!mounted || !sourceRect) return null;
@@ -950,7 +1250,12 @@ function CameraTransition({
             analyzeExhausted={analyze.isExhausted}
             analyzeErrorKind={analyze.errorKind}
             onAnalyzeRetry={analyze.handleRetry}
-            onAnalyzeRetake={analyze.handleRetake}
+            onAnalyzeRetake={handleAnalyzeRetake}
+            activeMode={activeMode}
+            onModeChange={handleModeChange}
+            recognitionResult={recognitionResult}
+            onRecognitionChange={setRecognitionResult}
+            onRecognitionSave={handleRecognitionSave}
           />
       </div>
       
@@ -1015,8 +1320,8 @@ function CameraPermissionScenarioBar() {
       </div>
       <p className="demo-scene-dock-hint">
         {{
-          unauthorized: '未授权：每次进入饮食相机都会先弹出权限弹窗；点「不允许」后显示权限引导页',
-          authorized: '已授权：进入饮食相机不再弹出权限弹窗',
+          unauthorized: '未授权：每次进入智能相机都会先弹出权限弹窗；点「不允许」后显示权限引导页',
+          authorized: '已授权：进入智能相机不再弹出权限弹窗',
         }[value] || ''}
       </p>
     </div>

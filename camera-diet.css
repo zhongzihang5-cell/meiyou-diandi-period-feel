@@ -124,6 +124,12 @@
   max-width:300px;
   width:max-content;
 }
+.camera-main .camera-hint.is-planned{
+  color:rgba(255,255,255,0.72);
+}
+.camera-frame.is-weight{
+  height:220px;
+}
 
 .camera-frame-corner{
   position:absolute;
@@ -173,6 +179,63 @@
   padding:0 24px 36px;
   z-index:20;
 }
+.camera-mode-carousel{
+  position:relative;
+  width:calc(100% + 48px);
+  margin:0 -24px 18px;
+  overflow:hidden;
+}
+.camera-mode-scroller{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  width:100%;
+  overflow-x:auto;
+  padding:12px calc(50% - 34px) 9px;
+  scroll-snap-type:x mandatory;
+  scrollbar-width:none;
+  overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
+}
+.camera-mode-scroller::-webkit-scrollbar{
+  display:none;
+}
+.camera-mode-item{
+  width:68px;
+  height:30px;
+  flex:0 0 68px;
+  border:0;
+  padding:0;
+  background:transparent;
+  color:rgba(255,255,255,0.52);
+  font:inherit;
+  font-size:14px;
+  line-height:30px;
+  text-align:center;
+  cursor:pointer;
+  scroll-snap-align:center;
+  transition:color .18s ease, transform .18s ease, opacity .18s ease;
+}
+.camera-mode-item.is-active{
+  color:#fff;
+  font-weight:600;
+  transform:scale(1.06);
+}
+.camera-mode-item.is-planned:not(.is-active){
+  opacity:.58;
+}
+.camera-mode-marker{
+  position:absolute;
+  left:50%;
+  bottom:2px;
+  width:18px;
+  height:3px;
+  border-radius:2px;
+  background:#ff4d88;
+  transform:translateX(-50%);
+  box-shadow:0 0 8px rgba(255,77,136,.5);
+  pointer-events:none;
+}
 .camera-controls{
   display:flex;
   align-items:center;
@@ -192,6 +255,10 @@
   border-radius:50%;
 }
 .camera-gallery-btn:active{ background:rgba(255,255,255,0.3); }
+.camera-gallery-btn.is-disabled{
+  opacity:.35;
+  pointer-events:none;
+}
 .camera-shutter{
   width:72px;height:72px;
   border:none;
@@ -989,4 +1056,166 @@
   visibility:hidden;
   margin-bottom:0;
   height:0;
+}
+
+/* 体重 / 喝水识别结果确认 */
+.camera-recognition-result{
+  width:100%;
+  min-height:260px;
+  padding:9px 18px 28px;
+  border-radius:16px 16px 0 0;
+  background:#fff;
+  color:#222;
+  box-sizing:border-box;
+}
+.camera-result-handle{
+  display:block;
+  width:34px;
+  height:4px;
+  margin:0 auto 13px;
+  border-radius:2px;
+  background:#dedee3;
+}
+.camera-result-status{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  color:#3f956f;
+  font-size:12px;
+  line-height:18px;
+}
+.camera-result-check{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:16px;
+  height:16px;
+  border-radius:50%;
+  background:#43b581;
+  color:#fff;
+  font-size:11px;
+  font-weight:700;
+}
+.camera-result-heading{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin-top:8px;
+}
+.camera-result-heading h2{
+  margin:0;
+  font-size:19px;
+  line-height:26px;
+  font-weight:650;
+  color:#222;
+}
+.camera-result-heading p{
+  margin:3px 0 0;
+  font-size:12px;
+  line-height:18px;
+  color:#8e8e93;
+}
+.camera-result-type-icon{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:42px;
+  height:42px;
+  flex:0 0 42px;
+  border-radius:8px;
+  font-size:22px;
+  background:#f2e9ff;
+  color:#8d54ff;
+}
+.camera-result-type-icon.is-water{
+  background:#e8f5ff;
+  color:#4aa9e9;
+}
+.camera-result-value-row{
+  display:flex;
+  align-items:center;
+  min-height:54px;
+  margin-top:14px;
+  padding:0 12px;
+  border:1px solid #e8e8ec;
+  border-radius:8px;
+  background:#fafafd;
+}
+.camera-result-value-input{
+  width:0;
+  min-width:0;
+  flex:1;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:#252525;
+  font:inherit;
+  font-size:27px;
+  line-height:36px;
+  font-weight:650;
+  font-variant-numeric:tabular-nums;
+}
+.camera-result-value-input::-webkit-inner-spin-button,
+.camera-result-value-input::-webkit-outer-spin-button{
+  -webkit-appearance:none;
+  margin:0;
+}
+.camera-result-unit-switch{
+  display:flex;
+  align-items:center;
+  gap:3px;
+  padding:3px;
+  border-radius:7px;
+  background:#ededf2;
+}
+.camera-result-unit-switch button{
+  min-width:38px;
+  height:28px;
+  border:0;
+  border-radius:5px;
+  background:transparent;
+  color:#8e8e93;
+  font:inherit;
+  font-size:12px;
+  cursor:pointer;
+}
+.camera-result-unit-switch button.is-active{
+  background:#fff;
+  color:#ff4d88;
+  font-weight:600;
+  box-shadow:0 1px 4px rgba(0,0,0,.08);
+}
+.camera-result-fixed-unit{
+  color:#6e6e73;
+  font-size:15px;
+  font-weight:500;
+}
+.camera-result-actions{
+  display:grid;
+  grid-template-columns:1fr 2fr;
+  gap:10px;
+  margin-top:14px;
+}
+.camera-result-actions button{
+  height:44px;
+  border-radius:8px;
+  font:inherit;
+  font-size:15px;
+  font-weight:600;
+  cursor:pointer;
+}
+.camera-result-retake{
+  border:1px solid #e3e3e8;
+  background:#fff;
+  color:#555;
+}
+.camera-result-save{
+  border:1px solid #ff4d88;
+  background:#ff4d88;
+  color:#fff;
+}
+.camera-result-save:disabled{
+  opacity:.4;
+  cursor:not-allowed;
 }

@@ -218,7 +218,7 @@ function QuickCardFan({
 
 function DockPublisher({
   draft, onDraft, onSend, onQuickMark, onMoodConfirm, onSymptomConfirm, onWeightConfirm,
-  onFoodConfirm, onDietCapture,
+  onFoodConfirm, onDietCapture, onCameraRecord,
   onVoiceDone, onPhoto, onDockExpandedChange, onCameraActiveChange, activeTab, showScheme3Bubble,
   highlightScheme3Input, dockPlaceholder, defaultInputMode = 'voice',
   demoPhase, isDemoRunning, hideQuickFan = false, hideQuickFab = false,
@@ -243,6 +243,7 @@ function DockPublisher({
   const [inputFocused, setInputFocused] = React.useState(false);
   const [cameraOpen, setCameraOpen] = React.useState(false);
   const [cameraSourceRect, setCameraSourceRect] = React.useState(null);
+  const [cameraInitialMode, setCameraInitialMode] = React.useState('weight');
   const [feedingExpanded, setFeedingExpanded] = React.useState(false);
   const recTimer = React.useRef(null);
   const prevTabRef = React.useRef(activeTab);
@@ -395,25 +396,33 @@ function DockPublisher({
     onSymptomConfirm?.(symptoms);
   };
 
-  const handleDietFanTap = (buttonEl)=>{
+  const openRecognitionCamera = (buttonEl, initialMode = 'weight')=>{
     if(!buttonEl) return;
     const phone = buttonEl.closest('.phone');
     if(!phone) return;
     containerRef.current = phone;
     const rect = measureElementRect?.(buttonEl, phone);
     setCameraSourceRect(rect);
+    setCameraInitialMode(initialMode);
     setQuickOpen(false);
     setQuickSelected(null);
     setCameraOpen(true);
   };
 
+  const handleDietFanTap = (buttonEl)=>{
+    openRecognitionCamera(buttonEl, 'diet');
+  };
+
   const handleCameraCaptureSuccess = (payload)=>{
-    onDietCapture?.({
+    const normalized = {
+      ...payload,
       type: payload?.type || 'capture',
       photoUrl: payload?.photoUrl || null,
       photo: payload?.photo,
       recognitionState: 'ready',
-    });
+    };
+    if(normalized.mode === 'diet') onDietCapture?.(normalized);
+    else onCameraRecord?.(normalized);
   };
 
   const handleCameraClose = ()=>{
@@ -499,12 +508,13 @@ function DockPublisher({
           active={cameraOpen}
           sourceRect={cameraSourceRect}
           containerRef={containerRef}
+          initialMode={cameraInitialMode}
           cardContent={
             <>
               <span className="quick-menu-item-icon">
-                <QuickCardIcon kind="diet" color="currentColor" size={22}/>
+                <I name="camera" size={22} stroke={1.7}/>
               </span>
-              <span className="quick-menu-item-label">记录饮食</span>
+              <span className="quick-menu-item-label">智能拍照</span>
             </>
           }
           onCaptureSuccess={handleCameraCaptureSuccess}
@@ -676,7 +686,12 @@ function DockPublisher({
                 </button>
               ) : null}
 
-              <button type="button" className="dock-camera-btn" aria-label="上传照片">
+              <button
+                type="button"
+                className="dock-camera-btn"
+                aria-label="智能拍照记录"
+                onClick={(event)=>openRecognitionCamera(event.currentTarget, 'weight')}
+              >
                 <I name="camera" size={22} stroke={1.7}/>
               </button>
             </div>
