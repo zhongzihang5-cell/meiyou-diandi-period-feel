@@ -111,24 +111,23 @@
 .camera-main .camera-hint{
   position:absolute;
   left:50%;
-  top:calc(50% + 138px);
+  top:calc(50% + 132px);
   transform:translateX(-50%);
   margin-top:0;
   margin-bottom:0;
   padding:0 24px;
   text-align:center;
-  font-size:13px;
-  line-height:1.5;
-  color:rgba(255,255,255,0.55);
-  background:transparent;
-  max-width:300px;
-  width:max-content;
-}
-.camera-main .camera-hint.is-planned{
+  font-size:14px;
+  line-height:22px;
   color:rgba(255,255,255,0.72);
-}
-.camera-frame.is-weight{
-  height:220px;
+  background:transparent;
+  max-width:292px;
+  width:292px;
+  min-height:66px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-sizing:border-box;
 }
 
 .camera-frame-corner{
@@ -178,63 +177,6 @@
   right:0;
   padding:0 24px 36px;
   z-index:20;
-}
-.camera-mode-carousel{
-  position:relative;
-  width:calc(100% + 48px);
-  margin:0 -24px 18px;
-  overflow:hidden;
-}
-.camera-mode-scroller{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  width:100%;
-  overflow-x:auto;
-  padding:12px calc(50% - 34px) 9px;
-  scroll-snap-type:x mandatory;
-  scrollbar-width:none;
-  overscroll-behavior-x:contain;
-  -webkit-overflow-scrolling:touch;
-}
-.camera-mode-scroller::-webkit-scrollbar{
-  display:none;
-}
-.camera-mode-item{
-  width:68px;
-  height:30px;
-  flex:0 0 68px;
-  border:0;
-  padding:0;
-  background:transparent;
-  color:rgba(255,255,255,0.52);
-  font:inherit;
-  font-size:14px;
-  line-height:30px;
-  text-align:center;
-  cursor:pointer;
-  scroll-snap-align:center;
-  transition:color .18s ease, transform .18s ease, opacity .18s ease;
-}
-.camera-mode-item.is-active{
-  color:#fff;
-  font-weight:600;
-  transform:scale(1.06);
-}
-.camera-mode-item.is-planned:not(.is-active){
-  opacity:.58;
-}
-.camera-mode-marker{
-  position:absolute;
-  left:50%;
-  bottom:2px;
-  width:18px;
-  height:3px;
-  border-radius:2px;
-  background:#ff4d88;
-  transform:translateX(-50%);
-  box-shadow:0 0 8px rgba(255,77,136,.5);
-  pointer-events:none;
 }
 .camera-controls{
   display:flex;
@@ -1058,7 +1000,7 @@
   height:0;
 }
 
-/* 体重 / 喝水识别结果确认 */
+/* 自动分类识别结果确认 */
 .camera-recognition-result{
   width:100%;
   min-height:260px;
@@ -1124,13 +1066,29 @@
   height:42px;
   flex:0 0 42px;
   border-radius:8px;
-  font-size:22px;
   background:#f2e9ff;
   color:#8d54ff;
+}
+.camera-result-type-icon img{
+  width:28px;
+  height:28px;
+  object-fit:contain;
 }
 .camera-result-type-icon.is-water{
   background:#e8f5ff;
   color:#4aa9e9;
+}
+.camera-result-type-icon.is-period{
+  background:#fff0f3;
+}
+.camera-result-type-icon.is-discharge{
+  background:#eef9f4;
+}
+.camera-result-type-icon.is-diet{
+  background:#fff5e9;
+}
+.camera-result-type-icon.is-stool{
+  background:#f4f0eb;
 }
 .camera-result-value-row{
   display:flex;
@@ -1190,6 +1148,42 @@
   color:#6e6e73;
   font-size:15px;
   font-weight:500;
+}
+.camera-result-summary{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:14px;
+}
+.camera-result-summary-item{
+  min-width:0;
+  min-height:58px;
+  padding:9px 11px;
+  border:1px solid #e8e8ec;
+  border-radius:8px;
+  background:#fafafd;
+  box-sizing:border-box;
+}
+.camera-result-summary-item span{
+  display:block;
+  color:#8e8e93;
+  font-size:11px;
+  line-height:16px;
+}
+.camera-result-summary-item strong{
+  display:block;
+  margin-top:2px;
+  overflow-wrap:anywhere;
+  color:#2e2e32;
+  font-size:14px;
+  line-height:20px;
+  font-weight:600;
+}
+.camera-result-estimate-note{
+  margin:8px 0 0;
+  color:#9a9a9f;
+  font-size:10px;
+  line-height:15px;
 }
 .camera-result-actions{
   display:grid;

@@ -1776,6 +1776,41 @@ function App(){
       return;
     }
 
+    const detectedRecordMeta = {
+      period:{ label:'月经', icon:'flow', detail:'经量多，颜色鲜红色' },
+      discharge:{ label:'白带', icon:'discharge', detail:'淡黄色，黏稠' },
+      stool:{ label:'便便', icon:'stool', detail:'布里斯托 2 型，黄褐色' },
+    }[payload?.mode];
+    if(detectedRecordMeta){
+      markUserRecorded();
+      const stamp = Date.now();
+      const detail = payload?.summary || detectedRecordMeta.detail;
+      const entry = {
+        kind:'record-group',
+        id:`e-${payload.mode}-camera-${stamp}-g`,
+        isNew:true,
+        cameraSource:payload.mode,
+        photoUrl:payload.photoUrl || null,
+        primary:{
+          id:`e-${payload.mode}-camera-${stamp}`,
+          time:window.formatNowTime(),
+          kind:'daily-record',
+          recordType:payload.mode,
+          icon:detectedRecordMeta.icon,
+          recordLabel:detectedRecordMeta.label,
+          recordDetail:detail,
+          text:`${detectedRecordMeta.label}：${detail}`,
+          photoUrl:payload.photoUrl || null,
+          tags:[],
+        },
+      };
+      const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
+        || window.resolveEntryDayId('', timeline);
+      setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
+      setTimeout(()=>scrollTimelineToBottom('smooth'), 80);
+      return;
+    }
+
     if(payload?.mode !== 'water') return;
     const amount = Math.max(1, Math.round(Number(payload.value) || 350));
     if(recordLifeMode === '育儿'){

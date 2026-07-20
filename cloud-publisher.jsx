@@ -243,7 +243,6 @@ function DockPublisher({
   const [inputFocused, setInputFocused] = React.useState(false);
   const [cameraOpen, setCameraOpen] = React.useState(false);
   const [cameraSourceRect, setCameraSourceRect] = React.useState(null);
-  const [cameraInitialMode, setCameraInitialMode] = React.useState('weight');
   const [feedingExpanded, setFeedingExpanded] = React.useState(false);
   const recTimer = React.useRef(null);
   const prevTabRef = React.useRef(activeTab);
@@ -396,21 +395,20 @@ function DockPublisher({
     onSymptomConfirm?.(symptoms);
   };
 
-  const openRecognitionCamera = (buttonEl, initialMode = 'weight')=>{
+  const openRecognitionCamera = (buttonEl)=>{
     if(!buttonEl) return;
     const phone = buttonEl.closest('.phone');
     if(!phone) return;
     containerRef.current = phone;
     const rect = measureElementRect?.(buttonEl, phone);
     setCameraSourceRect(rect);
-    setCameraInitialMode(initialMode);
     setQuickOpen(false);
     setQuickSelected(null);
     setCameraOpen(true);
   };
 
   const handleDietFanTap = (buttonEl)=>{
-    openRecognitionCamera(buttonEl, 'diet');
+    openRecognitionCamera(buttonEl);
   };
 
   const handleCameraCaptureSuccess = (payload)=>{
@@ -508,7 +506,6 @@ function DockPublisher({
           active={cameraOpen}
           sourceRect={cameraSourceRect}
           containerRef={containerRef}
-          initialMode={cameraInitialMode}
           cardContent={
             <>
               <span className="quick-menu-item-icon">

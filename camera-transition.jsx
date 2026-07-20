@@ -8,43 +8,50 @@ const CAMERA_RECOGNITION_MODES = [
   {
     id: 'weight',
     label: '体重',
-    available: true,
     capturePhoto: '体重秤.webp',
-    helpText: '对准体重秤显示屏，保持数字清晰',
-    analyzeText: '正在 OCR 识别体重数值...',
+    iconSrc: 'assets/record-weight.png',
+    resultTitle: '识别为体重记录',
+    resultDescription: '已读取体重秤屏幕数值，请确认后保存',
   },
   {
     id: 'period',
     label: '月经',
-    available: false,
-    helpText: '月经识别将在后续补充',
+    capturePhoto: '使用过的量大卫生巾.jpg',
+    iconSrc: 'assets/record-flow.png',
+    resultTitle: '识别为月经记录',
+    resultDescription: '已根据照片估测经量和颜色',
   },
   {
     id: 'discharge',
     label: '白带',
-    available: false,
-    helpText: '白带识别将在后续补充',
+    capturePhoto: '白带.jpeg',
+    iconSrc: 'assets/record-discharge.png',
+    resultTitle: '识别为白带记录',
+    resultDescription: '已根据照片估测颜色和性状',
   },
   {
     id: 'diet',
     label: '饮食',
-    available: true,
-    helpText: '确保食物在辅助框内',
-    analyzeText: '正在识别食物...',
+    capturePhoto: 'assets/gallery/IMG_9140-a0794273-c982-414f-8516-52af2c4456e1.png',
+    iconSrc: 'assets/record-diet.png',
+    resultTitle: '识别为饮食记录',
+    resultDescription: '已识别照片中的主要食物',
   },
   {
     id: 'water',
     label: '喝水',
-    available: true,
     capturePhoto: '水杯.jpg',
-    helpText: '将水杯完整放在辅助框内',
-    analyzeText: '正在估算本次饮水量...',
+    iconSrc: 'assets/baby-feeding-icons/water.png',
+    resultTitle: '识别为喝水记录',
+    resultDescription: '已根据容器估算本次饮水量',
   },
   {
     id: 'stool',
     label: '便便',
-    available: false,
-    helpText: '便便识别将在后续补充',
+    capturePhoto: '便便.jpg',
+    iconSrc: 'assets/record-stool.png',
+    resultTitle: '识别为便便记录',
+    resultDescription: '已根据照片估测形态和颜色',
   },
 ];
 
@@ -55,6 +62,74 @@ const CAMERA_RECOGNITION_MODE_MAP = CAMERA_RECOGNITION_MODES.reduce((map, mode) 
 
 function getCameraRecognitionMode(modeId) {
   return CAMERA_RECOGNITION_MODE_MAP[modeId] || CAMERA_RECOGNITION_MODE_MAP.weight;
+}
+
+const AUTO_DETECT_DEMO_PHOTOS = CAMERA_RECOGNITION_MODES.map((mode, index) => ({
+  id: `auto-detect-${mode.id}`,
+  date: '2026-07-20',
+  time: `09:${String(41 + index).padStart(2, '0')}`,
+  thumb: mode.capturePhoto,
+  type: mode.id,
+  mode: mode.id,
+}));
+
+let autoDetectCaptureIndex = 0;
+
+function getNextAutoDetectDemoPhoto() {
+  const photo = AUTO_DETECT_DEMO_PHOTOS[autoDetectCaptureIndex % AUTO_DETECT_DEMO_PHOTOS.length];
+  autoDetectCaptureIndex += 1;
+  return photo;
+}
+
+function inferCameraRecognitionMode(photo) {
+  const candidate = photo?.mode || photo?.type;
+  if (candidate === 'food') return 'diet';
+  return CAMERA_RECOGNITION_MODE_MAP[candidate] ? candidate : 'diet';
+}
+
+function buildCameraRecognitionResult(payload) {
+  const mode = inferCameraRecognitionMode(payload?.photo || payload);
+  const base = { ...payload, mode };
+  if (mode === 'weight') return { ...base, value: 108.4, unit: 'jin' };
+  if (mode === 'water') return { ...base, value: 350, unit: 'ml' };
+  if (mode === 'period') {
+    return {
+      ...base,
+      summary: '经量多，颜色鲜红色',
+      summaryItems: [
+        { label: '经量', value: '多' },
+        { label: '颜色', value: '鲜红色' },
+      ],
+    };
+  }
+  if (mode === 'discharge') {
+    return {
+      ...base,
+      summary: '淡黄色，黏稠',
+      summaryItems: [
+        { label: '颜色', value: '淡黄色' },
+        { label: '性状', value: '黏稠' },
+      ],
+    };
+  }
+  if (mode === 'stool') {
+    return {
+      ...base,
+      summary: '布里斯托 2 型，黄褐色',
+      summaryItems: [
+        { label: '形态', value: '布里斯托 2 型' },
+        { label: '颜色', value: '黄褐色' },
+      ],
+    };
+  }
+  return {
+    ...base,
+    summary: '鸡肉吐司，约 510 千卡',
+    summaryItems: [
+      { label: '食物', value: '鸡肉吐司' },
+      { label: '热量', value: '约 510 千卡' },
+    ],
+  };
 }
 
 function measureElementRect(el, container) {
@@ -91,24 +166,15 @@ const PHOTO_PICKER_PLACEHOLDERS = Array.from({ length: 17 }, (_, index) => ({
   thumb: MOCK_PHOTOS[index % MOCK_PHOTOS.length].thumb,
 }));
 
-const PHOTO_PICKER_ITEMS = [...MOCK_PHOTOS, ...PHOTO_PICKER_PLACEHOLDERS];
+const PHOTO_PICKER_ITEMS = [
+  ...AUTO_DETECT_DEMO_PHOTOS,
+  ...MOCK_PHOTOS.filter((photo) => !AUTO_DETECT_DEMO_PHOTOS.some((demo) => demo.thumb === photo.thumb)),
+  ...PHOTO_PICKER_PLACEHOLDERS,
+];
 
-function PhotoPicker({ onSelect, onClose, mode = 'diet' }) {
+function PhotoPicker({ onSelect, onClose }) {
   const I = window.Icon;
   const [activeTab, setActiveTab] = React.useState('photos');
-  const modeConfig = getCameraRecognitionMode(mode);
-  const featuredPhoto = modeConfig.capturePhoto
-    ? {
-        id: `featured-${mode}`,
-        date: '2026-07-16',
-        time: '09:41',
-        thumb: modeConfig.capturePhoto,
-        type: mode,
-      }
-    : null;
-  const pickerItems = featuredPhoto
-    ? [featuredPhoto, ...PHOTO_PICKER_ITEMS.filter((photo) => photo.thumb !== featuredPhoto.thumb)]
-    : PHOTO_PICKER_ITEMS;
 
   return (
     <div className="photo-picker">
@@ -142,7 +208,7 @@ function PhotoPicker({ onSelect, onClose, mode = 'diet' }) {
       <div className="photo-picker-content">
         {activeTab === 'photos' ? (
           <div className="photo-grid">
-            {pickerItems.map(photo => (
+            {PHOTO_PICKER_ITEMS.map(photo => (
               photo.placeholder ? (
                 <div
                   key={photo.id}
@@ -182,7 +248,7 @@ function PhotoPicker({ onSelect, onClose, mode = 'diet' }) {
   );
 }
 
-function PhotoPickerSheet({ onSelect, onClose, mode }) {
+function PhotoPickerSheet({ onSelect, onClose }) {
   const [entered, setEntered] = React.useState(false);
 
   React.useEffect(() => {
@@ -199,7 +265,7 @@ function PhotoPickerSheet({ onSelect, onClose, mode }) {
         aria-label="关闭相册"
       />
       <div className="photo-picker-sheet-panel">
-        <PhotoPicker onSelect={onSelect} onClose={onClose} mode={mode} />
+        <PhotoPicker onSelect={onSelect} onClose={onClose} />
       </div>
     </div>
   );
@@ -330,7 +396,7 @@ function CameraPermissionDialog({ onAllow, onDeny }) {
       <div className="camera-perm-dialog">
         <CameraPermissionIcon/>
         <h2 id="camera-perm-title" className="camera-perm-title">美柚想访问相机</h2>
-        <p className="camera-perm-subtitle">用于智能识别体重、饮食和饮水记录，请允许美柚访问相机</p>
+        <p className="camera-perm-subtitle">用于智能识别体重、月经、白带、饮食、喝水和便便记录，请允许美柚访问相机</p>
         <div className="camera-perm-actions">
           <button type="button" className="camera-perm-btn" onClick={onDeny}>不允许</button>
           <button type="button" className="camera-perm-btn" onClick={onAllow}>允许</button>
@@ -443,130 +509,77 @@ function CameraPermissionBlocked({ onEnable }) {
   );
 }
 
-function CameraModeCarousel({ value, onChange, disabled = false }) {
-  const scrollerRef = React.useRef(null);
-  const settleTimerRef = React.useRef(null);
-
-  const centerMode = React.useCallback((modeId, behavior = 'smooth') => {
-    const scroller = scrollerRef.current;
-    const item = scroller?.querySelector?.(`[data-camera-mode="${modeId}"]`);
-    if (!scroller || !item) return;
-    const targetLeft = item.offsetLeft - (scroller.clientWidth - item.offsetWidth) / 2;
-    scroller.scrollTo({ left: targetLeft, behavior });
-  }, []);
-
-  React.useEffect(() => {
-    centerMode(value, 'auto');
-  }, [centerMode, value]);
-
-  React.useEffect(() => () => {
-    if (settleTimerRef.current) window.clearTimeout(settleTimerRef.current);
-  }, []);
-
-  const handleScroll = () => {
-    if (disabled) return;
-    if (settleTimerRef.current) window.clearTimeout(settleTimerRef.current);
-    settleTimerRef.current = window.setTimeout(() => {
-      const scroller = scrollerRef.current;
-      if (!scroller) return;
-      const center = scroller.getBoundingClientRect().left + scroller.clientWidth / 2;
-      const items = [...scroller.querySelectorAll('[data-camera-mode]')];
-      const nearest = items.reduce((best, item) => {
-        const rect = item.getBoundingClientRect();
-        const distance = Math.abs(rect.left + rect.width / 2 - center);
-        return !best || distance < best.distance ? { item, distance } : best;
-      }, null);
-      const nextMode = nearest?.item?.dataset?.cameraMode;
-      if (nextMode && nextMode !== value) onChange?.(nextMode);
-    }, 90);
-  };
-
-  return (
-    <div className="camera-mode-carousel" aria-label="拍照识别类型">
-      <div
-        ref={scrollerRef}
-        className="camera-mode-scroller"
-        onScroll={handleScroll}
-      >
-        {CAMERA_RECOGNITION_MODES.map((mode) => (
-          <button
-            key={mode.id}
-            type="button"
-            data-camera-mode={mode.id}
-            className={
-              'camera-mode-item'
-              + (value === mode.id ? ' is-active' : '')
-              + (!mode.available ? ' is-planned' : '')
-            }
-            aria-pressed={value === mode.id}
-            onClick={() => {
-              if (disabled) return;
-              onChange?.(mode.id);
-              centerMode(mode.id);
-            }}
-          >
-            {mode.label}
-          </button>
-        ))}
-      </div>
-      <span className="camera-mode-marker" aria-hidden="true"/>
-    </div>
-  );
-}
-
 function CameraRecognitionResult({ result, onChange, onRetake, onSave }) {
+  const modeConfig = getCameraRecognitionMode(result?.mode);
   const isWeight = result?.mode === 'weight';
+  const isWater = result?.mode === 'water';
+  const isNumeric = isWeight || isWater;
   const numericValue = result?.value ?? '';
-  const isValid = Number(numericValue) > 0;
+  const isValid = !isNumeric || Number(numericValue) > 0;
+  const showEstimateNote = ['period', 'discharge', 'stool'].includes(result?.mode);
 
   return (
     <div className="camera-recognition-result">
       <span className="camera-result-handle" aria-hidden="true"/>
       <div className="camera-result-status">
         <span className="camera-result-check" aria-hidden="true">✓</span>
-        <span>{isWeight ? 'OCR 识别完成' : 'AI 容量估算完成'}</span>
+        <span>AI 自动分类完成</span>
       </div>
       <div className="camera-result-heading">
         <div>
-          <h2>{isWeight ? '识别到体重数值' : '估算本次喝水'}</h2>
-          <p>{isWeight ? '请确认数字与体重秤显示一致' : '识别为日常水杯，容量可手动修正'}</p>
+          <h2>{modeConfig.resultTitle}</h2>
+          <p>{modeConfig.resultDescription}</p>
         </div>
         <span className={'camera-result-type-icon is-' + result.mode} aria-hidden="true">
-          {isWeight ? '⚖' : '💧'}
+          <img src={modeConfig.iconSrc} alt="" />
         </span>
       </div>
-      <div className="camera-result-value-row">
-        <input
-          className="camera-result-value-input"
-          type="number"
-          inputMode="decimal"
-          min="0"
-          step={isWeight ? '0.1' : '10'}
-          aria-label={isWeight ? '体重数值' : '喝水量'}
-          value={numericValue}
-          onChange={(event) => onChange?.({ ...result, value: event.target.value })}
-        />
-        {isWeight ? (
-          <div className="camera-result-unit-switch" role="group" aria-label="体重单位">
-            <button
-              type="button"
-              className={result.unit === 'jin' ? 'is-active' : ''}
-              onClick={() => onChange?.({ ...result, unit: 'jin' })}
-            >
-              斤
-            </button>
-            <button
-              type="button"
-              className={result.unit === 'kg' ? 'is-active' : ''}
-              onClick={() => onChange?.({ ...result, unit: 'kg' })}
-            >
-              kg
-            </button>
-          </div>
-        ) : (
-          <span className="camera-result-fixed-unit">ml</span>
-        )}
-      </div>
+      {isNumeric ? (
+        <div className="camera-result-value-row">
+          <input
+            className="camera-result-value-input"
+            type="number"
+            inputMode="decimal"
+            min="0"
+            step={isWeight ? '0.1' : '10'}
+            aria-label={isWeight ? '体重数值' : '喝水量'}
+            value={numericValue}
+            onChange={(event) => onChange?.({ ...result, value: event.target.value })}
+          />
+          {isWeight ? (
+            <div className="camera-result-unit-switch" role="group" aria-label="体重单位">
+              <button
+                type="button"
+                className={result.unit === 'jin' ? 'is-active' : ''}
+                onClick={() => onChange?.({ ...result, unit: 'jin' })}
+              >
+                斤
+              </button>
+              <button
+                type="button"
+                className={result.unit === 'kg' ? 'is-active' : ''}
+                onClick={() => onChange?.({ ...result, unit: 'kg' })}
+              >
+                kg
+              </button>
+            </div>
+          ) : (
+            <span className="camera-result-fixed-unit">ml</span>
+          )}
+        </div>
+      ) : (
+        <div className="camera-result-summary">
+          {(result?.summaryItems || []).map((item) => (
+            <div className="camera-result-summary-item" key={item.label}>
+              <span>{item.label}</span>
+              <strong>{item.value}</strong>
+            </div>
+          ))}
+        </div>
+      )}
+      {showEstimateNote ? (
+        <p className="camera-result-estimate-note">AI 估测结果仅用于辅助记录，不作医学诊断</p>
+      ) : null}
       <div className="camera-result-actions">
         <button type="button" className="camera-result-retake" onClick={onRetake}>
           重拍
@@ -588,7 +601,6 @@ function CameraCaptureAnalyzePanel({
   phase,
   progress = 0,
   errorKind = null,
-  mode = 'diet',
   onRetry,
   onRetake,
   showRetry,
@@ -597,8 +609,6 @@ function CameraCaptureAnalyzePanel({
   const isLoading = phase === 'loading';
   const isTimeoutError = phase === 'error' && errorKind === 'timeout';
   const isNotFoodError = phase === 'error' && errorKind === 'not-food';
-  const modeConfig = getCameraRecognitionMode(mode);
-
   return (
     <div className={'camera-analyze-sheet' + (isLoading ? ' is-loading' : '') + (phase === 'error' ? ' is-error' : '') + (isNotFoodError ? ' is-not-food' : '')}>
       <div className="camera-analyze-progress-track" aria-hidden={!isLoading}>
@@ -610,7 +620,7 @@ function CameraCaptureAnalyzePanel({
       <div className="camera-analyze-status-row">
         {isLoading && (
           <>
-            <span className="camera-analyze-status-text">{modeConfig.analyzeText || '正在识别图片...'}</span>
+            <span className="camera-analyze-status-text">正在判断记录类型...</span>
             <span className="camera-analyze-status-icon" aria-hidden="true">
               <svg viewBox="0 0 16 16" fill="none">
                 <circle cx="8" cy="8" r="7" fill="#007AFF"/>
@@ -657,7 +667,7 @@ function CameraCaptureAnalyzePanel({
   );
 }
 
-function useDietPhotoAnalyze({ onSuccess, onAnalyzeStart }) {
+function useCameraPhotoAnalyze({ onSuccess, onAnalyzeStart }) {
   const loadingMs = window.PHOTO_ANALYZE_LOADING_MS || 5000;
   const mockRecognize = window.mockRecognizeDietPhoto || (() => ({ ok: true }));
   const readScenario = window.readDietRecognitionScenario || (() => 'success');
@@ -734,7 +744,6 @@ function useDietPhotoAnalyze({ onSuccess, onAnalyzeStart }) {
         setPhase('ready');
         finishTimerRef.current = window.setTimeout(() => {
           onSuccess?.({ photoUrl: url, ...meta });
-          if (recognitionMode === 'diet') reset();
         }, 160);
         return;
       }
@@ -806,18 +815,15 @@ function CameraView({
   analyzeErrorKind = null,
   onAnalyzeRetry,
   onAnalyzeRetake,
-  activeMode = 'weight',
-  onModeChange,
   recognitionResult,
   onRecognitionChange,
   onRecognitionSave,
 }) {
   const I = window.Icon;
   const [flash, setFlash] = React.useState(false);
-  const modeConfig = getCameraRecognitionMode(activeMode);
   
   const handleCapture = () => {
-    if (permPending || permDenied || analyzePhase || !modeConfig.available) return;
+    if (permPending || permDenied || analyzePhase) return;
     setFlash(true);
     setTimeout(() => {
       setFlash(false);
@@ -848,7 +854,7 @@ function CameraView({
           </div>
         ) : (
           <>
-            <div className={'camera-frame is-' + activeMode}>
+            <div className="camera-frame">
               {permPending && (
                 <CameraPermissionDialog
                   onAllow={onPermissionAllow}
@@ -860,8 +866,8 @@ function CameraView({
               <span className="camera-frame-corner bl"/>
               <span className="camera-frame-corner br"/>
             </div>
-            <div className={'camera-hint' + (!modeConfig.available ? ' is-planned' : '')}>
-              {modeConfig.helpText}
+            <div className="camera-hint camera-auto-detect-hint">
+              快速拍照记录体重、月经、白带、饮食、喝水、便便情况
             </div>
           </>
         )}
@@ -880,7 +886,6 @@ function CameraView({
         <PhotoPickerSheet
           onSelect={onSelectPhoto}
           onClose={onCloseGallery}
-          mode={activeMode}
         />
       )}
 
@@ -898,7 +903,6 @@ function CameraView({
               phase={analyzePhase}
               progress={analyzeProgress}
               errorKind={analyzeErrorKind}
-              mode={activeMode}
               onRetry={onAnalyzeRetry}
               onRetake={onAnalyzeRetake}
               showRetry={analyzeFailureCount < analyzeMaxFailures}
@@ -907,21 +911,13 @@ function CameraView({
           )
         ) : (
           <>
-            {!showGallery && !permDenied ? (
-              <CameraModeCarousel
-                value={activeMode}
-                onChange={onModeChange}
-                disabled={permPending}
-              />
-            ) : null}
             <div className="camera-controls">
               {!showGallery && (
                 <button
                   type="button"
-                  className={'camera-gallery-btn' + (!modeConfig.available ? ' is-disabled' : '')}
+                  className="camera-gallery-btn"
                   onClick={onOpenGallery}
                   aria-label="相册"
-                  disabled={!modeConfig.available}
                 >
                   <I name="image" size={24} stroke={1.5} />
                 </button>
@@ -929,10 +925,10 @@ function CameraView({
               {!permDenied && (
                 <button
                   type="button"
-                  className={'camera-shutter' + (permPending || !modeConfig.available ? ' is-disabled' : '')}
+                  className={'camera-shutter' + (permPending ? ' is-disabled' : '')}
                   onClick={handleCapture}
-                  aria-label={modeConfig.available ? `拍摄${modeConfig.label}` : `${modeConfig.label}识别后续支持`}
-                  disabled={permPending || !modeConfig.available}
+                  aria-label="拍照并自动识别记录类型"
+                  disabled={permPending}
                 >
                   <span className="camera-shutter-ring"/>
                   <span className="camera-shutter-inner"/>
@@ -954,7 +950,6 @@ function CameraTransition({
   sourceRect, 
   cardContent,
   containerRef,
-  initialMode = 'weight',
   onCaptureSuccess,
   onClose,
   onSelectPhoto,
@@ -967,7 +962,6 @@ function CameraTransition({
   const [sessionDenied, setSessionDenied] = React.useState(false);
   const [photoPermGranted, setPhotoPermGranted] = React.useState(false);
   const [showPhotoPermDialog, setShowPhotoPermDialog] = React.useState(false);
-  const [activeMode, setActiveMode] = React.useState(initialMode);
   const [recognitionResult, setRecognitionResult] = React.useState(null);
   const wrapperRef = React.useRef(null);
 
@@ -990,10 +984,9 @@ function CameraTransition({
       setSessionDenied(false);
       setPhotoPermGranted(false);
       setShowPhotoPermDialog(false);
-      setActiveMode(getCameraRecognitionMode(initialMode).id);
       setRecognitionResult(null);
     }
-  }, [active, initialMode, sourceRect, phase]);
+  }, [active, sourceRect, phase]);
 
   React.useEffect(() => {
     const onScenarioChange = () => {
@@ -1065,7 +1058,6 @@ function CameraTransition({
   };
   
   const handleOpenGallery = () => {
-    if (!getCameraRecognitionMode(activeMode).available) return;
     if (photoPermGranted) {
       setShowGallery(true);
       return;
@@ -1092,29 +1084,10 @@ function CameraTransition({
   };
 
   const handleAnalyzeSuccess = React.useCallback((payload) => {
-    if (payload?.mode === 'weight') {
-      setRecognitionResult({
-        ...payload,
-        mode: 'weight',
-        value: 108.4,
-        unit: 'jin',
-      });
-      return;
-    }
-    if (payload?.mode === 'water') {
-      setRecognitionResult({
-        ...payload,
-        mode: 'water',
-        value: 350,
-        unit: 'ml',
-      });
-      return;
-    }
-    onCaptureSuccess?.({ ...payload, mode: 'diet' });
-    onClose?.();
-  }, [onCaptureSuccess, onClose]);
+    setRecognitionResult(buildCameraRecognitionResult(payload));
+  }, []);
 
-  const analyze = useDietPhotoAnalyze({ onSuccess: handleAnalyzeSuccess });
+  const analyze = useCameraPhotoAnalyze({ onSuccess: handleAnalyzeSuccess });
 
   const handleCameraClose = () => {
     if (showGallery) {
@@ -1127,22 +1100,20 @@ function CameraTransition({
   };
 
   const handleCapturePhoto = () => {
-    const modeConfig = getCameraRecognitionMode(activeMode);
-    if (!modeConfig.available) return;
-    const photoUrl = modeConfig.capturePhoto || window.pickFallbackPhoto?.() || null;
-    analyze.runAnalyze({ url: photoUrl, meta: { type: 'capture', mode: activeMode } });
+    const photo = getNextAutoDetectDemoPhoto();
+    analyze.runAnalyze({
+      url: photo.thumb,
+      meta: { type: 'capture', photo, mode: inferCameraRecognitionMode(photo) },
+    });
   };
   
   const handleSelectPhoto = (photo) => {
-    if (!getCameraRecognitionMode(activeMode).available) return;
     setShowGallery(false);
     const photoUrl = photo?.thumb || photo?.url || window.pickFallbackPhoto?.() || null;
-    analyze.runAnalyze({ url: photoUrl, meta: { type: 'select', photo, mode: activeMode } });
-  };
-
-  const handleModeChange = (nextMode) => {
-    if (analyze.isAnalyzing) return;
-    setActiveMode(getCameraRecognitionMode(nextMode).id);
+    analyze.runAnalyze({
+      url: photoUrl,
+      meta: { type: 'select', photo, mode: inferCameraRecognitionMode(photo) },
+    });
   };
 
   const handleAnalyzeRetake = () => {
@@ -1151,10 +1122,11 @@ function CameraTransition({
   };
 
   const handleRecognitionSave = () => {
-    if (!recognitionResult || Number(recognitionResult.value) <= 0) return;
+    const isNumeric = ['weight', 'water'].includes(recognitionResult?.mode);
+    if (!recognitionResult || (isNumeric && Number(recognitionResult.value) <= 0)) return;
     onCaptureSuccess?.({
       ...recognitionResult,
-      value: Number(recognitionResult.value),
+      value: isNumeric ? Number(recognitionResult.value) : recognitionResult.value,
       recognitionState: 'ready',
     });
     setRecognitionResult(null);
@@ -1251,8 +1223,6 @@ function CameraTransition({
             analyzeErrorKind={analyze.errorKind}
             onAnalyzeRetry={analyze.handleRetry}
             onAnalyzeRetake={handleAnalyzeRetake}
-            activeMode={activeMode}
-            onModeChange={handleModeChange}
             recognitionResult={recognitionResult}
             onRecognitionChange={setRecognitionResult}
             onRecognitionSave={handleRecognitionSave}
