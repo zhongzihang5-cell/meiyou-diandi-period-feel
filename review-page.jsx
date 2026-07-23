@@ -3183,7 +3183,7 @@ function MoodMonthDistributionCard(){
           <b>5月21日</b>
         </div>
         <div className="review-mood-time-insight">
-          <span>最消极月份</span>
+          <span>最易消极月份</span>
           <b>3月</b>
         </div>
         <div className="review-mood-time-insight">
@@ -3191,6 +3191,9 @@ function MoodMonthDistributionCard(){
           <b>7月</b>
         </div>
       </div>
+      <p className="review-mood-time-tip">
+        你在春季更容易出现低落情绪，5月的积极状态最多。情绪没有好坏之分，试着找到属于自己的调节方式，让每一天都更舒服一些 ✨
+      </p>
     </div>
   );
 }
@@ -3606,7 +3609,7 @@ function MoodCycleTrendCard({range = 'cycle', periodOffset = 0}){
   const compareUp = periodOffset % 2 === 0;
   const periodMoodLabel = isYear ? '年度心情' : '周期心情';
   const compareLabel = isYear ? '较上年' : '较上周期';
-  const compareValue = compareUp ? '更积极' : '更消极';
+  const compareValue = compareUp ? '↗ 更积极' : '↘ 更消极';
   const periodMoodFace = periodMoodWord === '超开心' ? '😄'
     : periodMoodWord === '挺开心' ? '😊'
     : periodMoodWord === '中性' ? '😐'
@@ -3861,7 +3864,7 @@ function MoodReviewCard({onOpen, onLandscapeOpen}){
             <div className="review-metric-label">本周期心情</div>
           </div>
           <div className="review-metric">
-            <ReviewMoodValue word="↗ 变好" trend/>
+            <ReviewMoodValue word="↗ 更积极" trend/>
             <div className="review-metric-label">较上周期</div>
           </div>
         </>
