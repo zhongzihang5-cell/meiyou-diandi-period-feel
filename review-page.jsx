@@ -4258,7 +4258,7 @@ function ReviewPage({mode='经期', shareState, onShareStateChange, onOpenPartne
         </button>
       </div>
       <div className="review-content">
-        <p className="review-page-greeting">已记录 <b>350 天</b>，共 <b>{isPeriodMode ? 12 : 9} 项</b>可回顾</p>
+        <p className="review-page-greeting">已记录 <b>350 天</b>，共 <b>{isPeriodMode ? 8 : 5} 项</b>可回顾</p>
 
       <ReviewCard
         title={isPeriodMode ? '周期' : '月经周期'}
@@ -4333,10 +4333,6 @@ function ReviewPage({mode='经期', shareState, onShareStateChange, onOpenPartne
       {isPeriodMode ? <StoolReviewCard/> : null}
       {isPeriodMode ? <LoveReviewCard/> : null}
 
-      <FeedingReviewCard/>
-      <SleepReviewCard/>
-      <DiaperReviewCard/>
-      <FoodReviewCard/>
       </div>
       <CycleDetailPage
         open={cycleDetailOpen}
