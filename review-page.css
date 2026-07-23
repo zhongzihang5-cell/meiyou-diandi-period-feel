@@ -137,6 +137,14 @@
   box-shadow:var(--shadow-1);
   overflow:hidden;
 }
+.review-health-image-card{
+  background:#fff;
+}
+.review-health-image-card img{
+  display:block;
+  width:100%;
+  height:auto;
+}
 .review-card + .review-card{margin-top:16px}
 .review-card.is-sample{position:relative}
 .review-card.is-actionable{
