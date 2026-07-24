@@ -3606,10 +3606,9 @@ function MoodCycleTrendCard({range = 'cycle', periodOffset = 0}){
   const periodMoodVals = isYear ? MOOD_YEAR_VALS : MOOD_CYCLE_VALS;
   const periodMoodAvg = periodMoodVals.reduce((s, v)=>s + v, 0) / periodMoodVals.length;
   const periodMoodWord = moodWordFromAvg(periodMoodAvg);
-  const compareUp = periodOffset % 2 === 0;
-  const periodMoodLabel = isYear ? '年度心情' : '周期心情';
-  const compareLabel = isYear ? '较上年' : '较上周期';
-  const compareValue = compareUp ? '↗ 更积极' : '↘ 更消极';
+  const periodMoodLabel = '记录最多的是';
+  const compareLabel = '最常出现在';
+  const compareValue = isYear ? '夏季' : '黄体期';
   const periodMoodFace = periodMoodWord === '超开心' ? '😄'
     : periodMoodWord === '挺开心' ? '😊'
     : periodMoodWord === '中性' ? '😐'
@@ -3691,7 +3690,7 @@ function MoodCycleTrendCard({range = 'cycle', periodOffset = 0}){
         </div>
         <div className="review-mood-insight">
           <span>{compareLabel}</span>
-          <b className={compareUp ? 'is-up' : ''}>{compareValue}</b>
+          <b>{compareValue}</b>
         </div>
       </div>
     </div>
@@ -4127,44 +4126,1262 @@ function SymptomReviewCard(){
   );
 }
 
-function StoolReviewChart(){
-  const values = [1,1,0,2,1,1,1];
-  const labels = ['周一','周二','周三','周四','周五','周六','今天'];
-  const W = 340, H = 156, padL = 28, padR = 12, padT = 14, padB = 26;
-  const x0 = padL, x1 = W - padR, y1 = H - padB;
-  const band = (x1 - x0) / values.length;
-  const X = i => x0 + band * i + band / 2;
-  const Y = v => y1 - v / 3 * 94;
+/** 近 28 天每日次数：6/3 — 今天；多为 1–2 次，中段有一次 3 次峰值 */
+const STOOL_CARD_VALUES = [
+  1,1,2,1,1,2,1,
+  1,2,3,2,1,1,2,
+  1,0,1,1,2,1,1,
+  2,1,1,2,1,1,1,
+];
+const STOOL_CARD_START = new Date(2026, 5, 3); // 6/3
+const STOOL_CARD_LABEL_INDEXES = [0, 7, 14, 21, 27]; // 6/3 · 6/10 · 6/17 · 6/24 · 今天
+
+const STOOL_CARD_RECORDS = STOOL_CARD_VALUES.map((count, i)=>{
+  const d = new Date(STOOL_CARD_START);
+  d.setDate(STOOL_CARD_START.getDate() + i);
+  const isLast = i === STOOL_CARD_VALUES.length - 1;
+  return {
+    count,
+    date: isLast ? '今天' : ((d.getMonth() + 1) + '/' + d.getDate()),
+  };
+});
+
+/** 横屏滑动：近 2 个月每日次数（末 28 天与列表卡对齐） */
+const STOOL_ALL_RECORDS = (()=>{
+  const seed = [
+    1,1,0,1,2,1,1, 1,0,1,1,2,1,0, 1,1,1,0,2,1,1,
+    1,2,1,0,1,1,1, 0,1,2,1,1,1,0,
+  ];
+  const values = seed.concat(STOOL_CARD_VALUES);
+  const start = new Date(2026, 4, 6); // 5/6
+  return values.map((count, i)=>{
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    const isLast = i === values.length - 1;
+    return {
+      count,
+      date: isLast ? '今天' : ((d.getMonth() + 1) + '/' + d.getDate()),
+    };
+  });
+})();
+
+function StoolReviewChart({
+  values = STOOL_CARD_VALUES,
+  records = STOOL_CARD_RECORDS,
+  labelIndexes = STOOL_CARD_LABEL_INDEXES,
+  phaseBands = null,
+  height = 168,
+  gradientId = 'stoolCardFill',
+  ariaLabel = '近28天便便次数折线图',
+}){
+  const n = values.length;
+  const W = 340, H = height;
+  const padL = 34, padR = 16, padT = 22, padB = 24;
+  const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
+  const plotH = y1 - y0;
+  const yMax = 3;
+  const X = i => x0 + (n <= 1 ? 0 : (x1 - x0) * (i / (n - 1)));
+  const Y = v => y1 - (v / yMax) * plotH;
+  const pts = values.map((v, i)=>[X(i), Y(v)]);
+  const linePath = pts.map((p, i)=>(i === 0 ? 'M' : 'L') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  const areaPath = linePath
+    + ' L' + pts[n - 1][0].toFixed(1) + ' ' + y1.toFixed(1)
+    + ' L' + pts[0][0].toFixed(1) + ' ' + y1.toFixed(1)
+    + ' Z';
+  const stoolColor = '#8264bd';
+  const bands = phaseBands && phaseBands.length === n ? phaseBands : null;
+
   return (
-    <svg viewBox="0 0 340 156" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近7天便便次数">
-      <rect x={x0} y={Y(1.5)} width={x1 - x0} height={Y(0.5) - Y(1.5)} rx="8" fill="rgba(129,97,191,0.06)"/>
-      <text x={x1} y={Y(1.5) - 4} textAnchor="end" fontSize="9" fill="#8d72c5" fontFamily="PingFang SC">规律区间</text>
-      {values.map((value, i)=>(
-        <React.Fragment key={labels[i]}>
-          {value > 0 ? <rect x={X(i) - 11} y={Y(value)} width="22" height={y1 - Y(value)} rx="10" fill={i === values.length - 1 ? '#8264bd' : '#b49fd9'}/> : <circle cx={X(i)} cy={y1 - 4} r="3" fill="#d7d3dc"/>}
-          <text x={X(i)} y={H - 7} textAnchor="middle" fontSize="9" fill={i === values.length - 1 ? '#8264bd' : '#bbbbbf'} fontFamily="PingFang SC">{labels[i]}</text>
+    <svg viewBox={'0 0 ' + W + ' ' + H} preserveAspectRatio="xMidYMid meet" role="img" aria-label={ariaLabel}>
+      <defs>
+        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={stoolColor} stopOpacity="0.28"/>
+          <stop offset="55%" stopColor={stoolColor} stopOpacity="0.1"/>
+          <stop offset="100%" stopColor={stoolColor} stopOpacity="0.02"/>
+        </linearGradient>
+      </defs>
+      {bands ? values.map((_, i)=>{
+        const xLeft = i === 0 ? x0 : (X(i - 1) + X(i)) / 2;
+        const xRight = i === n - 1 ? x1 : (X(i) + X(i + 1)) / 2;
+        return (
+          <rect
+            key={'ph' + i}
+            x={xLeft}
+            y={y0}
+            width={Math.max(0.5, xRight - xLeft)}
+            height={plotH}
+            fill={moodPhaseBandFill(bands[i])}
+          />
+        );
+      }) : null}
+      {[0, 1, 2, 3].map(tick=>(
+        <React.Fragment key={tick}>
+          <line
+            x1={x0}
+            y1={Y(tick)}
+            x2={x1}
+            y2={Y(tick)}
+            stroke="rgba(130,100,189,0.16)"
+            strokeWidth="1"
+            strokeDasharray="3 3"
+          />
+          <text
+            x={x0 - 6}
+            y={Y(tick) + 3}
+            textAnchor="end"
+            fontSize="9"
+            fill="#bbbbbf"
+            fontFamily="PingFang SC"
+          >
+            {tick}次
+          </text>
         </React.Fragment>
+      ))}
+      <path d={areaPath} fill={'url(#' + gradientId + ')'}/>
+      <path d={linePath} fill="none" stroke={stoolColor} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round"/>
+      {values.map((value, i)=>{
+        const isLast = i === n - 1;
+        return (
+          <circle
+            key={i}
+            cx={X(i)}
+            cy={Y(value)}
+            r={isLast ? 4.5 : 2.2}
+            fill={stoolColor}
+            stroke={isLast ? '#fff' : 'none'}
+            strokeWidth={isLast ? 2 : 0}
+          />
+        );
+      })}
+      {labelIndexes.map(i=>(
+        <text
+          key={i}
+          x={X(i)}
+          y={H - 7}
+          textAnchor="middle"
+          fontSize="9"
+          fill={i === n - 1 ? stoolColor : '#bbbbbf'}
+          fontFamily="PingFang SC"
+        >
+          {records[i].date}
+        </text>
       ))}
     </svg>
   );
 }
 
-function StoolReviewCard(){
+const STOOL_CYCLE_PHASES = buildMoodCyclePhases(STOOL_CARD_VALUES.length);
+
+function StoolBarChart({
+  values = STOOL_CARD_VALUES,
+  records = STOOL_CARD_RECORDS,
+  labelIndexes = STOOL_CARD_LABEL_INDEXES,
+  phaseBands = null,
+  height = 168,
+  ariaLabel = '近28天便便次数柱状图',
+}){
+  const n = values.length;
+  const W = 340, H = height;
+  const padL = 34, padR = 16, padT = 22, padB = 24;
+  const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
+  const plotH = y1 - y0;
+  const yMax = 3;
+  const band = (x1 - x0) / n;
+  const barW = Math.min(7.5, band * 0.55);
+  const X = i => x0 + band * i + band / 2;
+  const Y = v => y1 - (v / yMax) * plotH;
+  const barColor = '#c4b0e0';
+  const todayColor = '#8264bd';
+  const lastVal = values[n - 1];
+  const bands = phaseBands && phaseBands.length === n ? phaseBands : null;
+
+  return (
+    <svg viewBox={'0 0 ' + W + ' ' + H} preserveAspectRatio="xMidYMid meet" role="img" aria-label={ariaLabel}>
+      {bands ? values.map((_, i)=>{
+        const xLeft = i === 0 ? x0 : (X(i - 1) + X(i)) / 2;
+        const xRight = i === n - 1 ? x1 : (X(i) + X(i + 1)) / 2;
+        return (
+          <rect
+            key={'ph' + i}
+            x={xLeft}
+            y={y0}
+            width={Math.max(0.5, xRight - xLeft)}
+            height={plotH}
+            fill={moodPhaseBandFill(bands[i])}
+          />
+        );
+      }) : null}
+      {[0, 1, 2, 3].map(tick=>(
+        <React.Fragment key={tick}>
+          <line
+            x1={x0}
+            y1={Y(tick)}
+            x2={x1}
+            y2={Y(tick)}
+            stroke="rgba(130,100,189,0.14)"
+            strokeWidth="1"
+            strokeDasharray="3 3"
+          />
+          <text
+            x={x0 - 6}
+            y={Y(tick) + 3}
+            textAnchor="end"
+            fontSize="9"
+            fill="#bbbbbf"
+            fontFamily="PingFang SC"
+          >
+            {tick}次
+          </text>
+        </React.Fragment>
+      ))}
+      {values.map((value, i)=>{
+        const isLast = i === n - 1;
+        const cx = X(i);
+        if(value <= 0){
+          return (
+            <circle
+              key={i}
+              cx={cx}
+              cy={y1}
+              r="3"
+              fill="#fff"
+              stroke="#d4d0d8"
+              strokeWidth="1.4"
+            />
+          );
+        }
+        const barY = Y(value);
+        return (
+          <rect
+            key={i}
+            x={cx - barW / 2}
+            y={barY}
+            width={barW}
+            height={Math.max(2, y1 - barY)}
+            rx={Math.min(4, barW / 2)}
+            fill={isLast ? todayColor : barColor}
+          />
+        );
+      })}
+      {lastVal > 0 ? (
+        <text
+          x={X(n - 1)}
+          y={Y(lastVal) - 6}
+          textAnchor="middle"
+          fill={todayColor}
+          fontFamily="PingFang SC"
+        >
+          <tspan fontSize="11" fontWeight="500">{lastVal}</tspan>
+          <tspan fontSize="9" fontWeight="400">次</tspan>
+        </text>
+      ) : null}
+      {labelIndexes.map(i=>(
+        <text
+          key={i}
+          x={X(i)}
+          y={H - 7}
+          textAnchor="middle"
+          fontSize="9"
+          fill={i === n - 1 ? todayColor : '#bbbbbf'}
+          fontFamily="PingFang SC"
+        >
+          {records[i].date}
+        </text>
+      ))}
+    </svg>
+  );
+}
+
+const STOOL_INTERVAL_COLORS = [
+  {ring:'#D9CFF5'},
+  {ring:'#AE97E8'},
+  {ring:'#7C5FD3'},
+  {ring:'#452C93'},
+];
+
+const STOOL_INTERVAL_ROWS = [
+  {label:'不到1天', count:12},
+  {label:'1~2天', count:5},
+  {label:'2~3天', count:3},
+  {label:'3天以上', count:1},
+];
+
+const STOOL_YEAR_INTERVAL_ROWS = [
+  {label:'不到1天', count:210},
+  {label:'1~2天', count:96},
+  {label:'2~3天', count:40},
+  {label:'3天以上', count:14},
+];
+
+const STOOL_PHASE_SHARE = [
+  {label:'月经期', days:5, count:8, color:'rgba(255,77,136,0.55)'},
+  {label:'卵泡期', days:6, count:5, color:'rgba(0,204,153,0.55)'},
+  {label:'排卵期', days:5, count:4, color:'rgba(179,136,232,0.55)'},
+  {label:'黄体期', days:12, count:5, color:'rgba(0,204,153,0.55)'},
+];
+
+function stoolFmtAvg(v){
+  return v.toFixed(1);
+}
+
+function StoolPhaseShareList({title = '各阶段日均便便次数', items = STOOL_PHASE_SHARE}){
+  const data = items.map(it=>({...it, avg: it.count / it.days}));
+  const maxAvg = Math.max(...data.map(d=>d.avg), 0.0001);
+  return (
+    <div className="review-mood-share-bars review-stool-phase-share">
+      {title ? <div className="review-mood-share-bars-title">{title}</div> : null}
+      <div className="review-mood-share-bars-list">
+        {data.map((it)=>(
+          <div className="review-stool-phase-row" key={it.label}>
+            <div className="review-stool-phase-top">
+              <span>{it.label}</span>
+              <b>{stoolFmtAvg(it.avg)}<em>次/天</em></b>
+            </div>
+            <div className="review-mood-share-bar-track">
+              <i style={{width:(it.avg / maxAvg * 100) + '%', background:it.color}}/>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function StoolCycleTrendCard({range = 'cycle'}){
+  const [chartMode, setChartMode] = React.useState('line');
+  const isYear = range === 'year';
+  const isBar = !isYear && chartMode === 'bar';
+  const yearValues = STOOL_ALL_RECORDS.map(r=>r.count);
+  const yearRecords = STOOL_ALL_RECORDS;
+  const yearLabelIndexes = yearRecords
+    .map((_r, i)=>i)
+    .filter(i=>i % Math.max(1, Math.floor((yearRecords.length - 1) / 4)) === 0 || i === yearRecords.length - 1)
+    .slice(0, 4)
+    .concat([yearRecords.length - 1])
+    .filter((v, i, arr)=>arr.indexOf(v) === i);
+
+  return (
+    <div className="review-detail-card review-mood-trend-card review-stool-trend-card">
+      <div className="review-mood-trend-head">
+        <div className="review-mood-trend-title review-mood-section-title">便便次数</div>
+        {isYear ? null : (
+          <button
+            type="button"
+            className={'review-mood-trend-switch' + (isBar ? ' is-capsule' : '')}
+            aria-label={isBar ? '切换为折线图' : '切换为柱状图'}
+            aria-pressed={isBar}
+            onClick={()=>setChartMode(isBar ? 'line' : 'bar')}
+          >
+            <i className="is-line" aria-hidden="true"/>
+            <i className="is-capsule" aria-hidden="true"/>
+          </button>
+        )}
+      </div>
+      <div className={'review-chart review-detail-chart review-mood-trend-chart' + (isYear ? ' is-compact' : '')}>
+        {isYear ? (
+          <StoolReviewChart
+            values={yearValues}
+            records={yearRecords}
+            labelIndexes={yearLabelIndexes}
+            height={132}
+            gradientId="stoolDetailTrendYear"
+            ariaLabel="近一年便便次数"
+          />
+        ) : isBar ? (
+          <StoolBarChart
+            phaseBands={STOOL_CYCLE_PHASES}
+            height={168}
+            ariaLabel="本周期便便次数柱状图"
+          />
+        ) : (
+          <StoolReviewChart
+            phaseBands={STOOL_CYCLE_PHASES}
+            height={168}
+            gradientId="stoolDetailTrend"
+            ariaLabel="本周期便便次数"
+          />
+        )}
+      </div>
+      {isYear ? null : <MoodCyclePhaseLegend/>}
+      <div className="review-mood-insight-grid">
+        <div className="review-mood-insight">
+          <span>记录便便天数</span>
+          <b>{isYear ? '286' : '19'}<small>/{isYear ? '365' : '28'}天</small></b>
+        </div>
+        <div className="review-mood-insight">
+          <span>日均便便次数</span>
+          <b>0.8<small>次</small></b>
+        </div>
+      </div>
+      {isYear ? null : (
+        <>
+          {(()=>{
+            const data = STOOL_PHASE_SHARE.map(it=>({...it, avg: it.count / it.days}));
+            const most = data.reduce((a, b)=>b.avg > a.avg ? b : a);
+            const least = data.reduce((a, b)=>b.avg < a.avg ? b : a);
+            return (
+              <div className="review-mood-time-summary review-stool-phase-summary">
+                <div className="review-mood-time-summary-card">
+                  <span>便便最多阶段</span>
+                  <div className="review-mood-time-summary-main">
+                    <b>{most.label}</b>
+                  </div>
+                  <em>日均 <i style={{color:most.color}}>{stoolFmtAvg(most.avg)}次</i></em>
+                </div>
+                <div className="review-mood-time-summary-card">
+                  <span>便便最少阶段</span>
+                  <div className="review-mood-time-summary-main">
+                    <b>{least.label}</b>
+                  </div>
+                  <em>日均 <i style={{color:least.color}}>{stoolFmtAvg(least.avg)}次</i></em>
+                </div>
+              </div>
+            );
+          })()}
+        </>
+      )}
+    </div>
+  );
+}
+
+function StoolIntervalCard({range = 'cycle'}){
+  const isYear = range === 'year';
+  const rows = isYear ? STOOL_YEAR_INTERVAL_ROWS : STOOL_INTERVAL_ROWS;
+  const total = rows.reduce((s, r)=>s + r.count, 0) || 1;
+  const avgText = isYear
+    ? [{n:'1', u:'天'}, {n:'10', u:'小时'}]
+    : [{n:'1', u:'天'}, {n:'6', u:'小时'}];
+  const maxText = isYear
+    ? [{n:'5', u:'天'}, {n:'2', u:'小时'}]
+    : [{n:'3', u:'天'}, {n:'4', u:'小时'}];
+  const minText = isYear
+    ? [{n:'8', u:'小时'}]
+    : [{n:'5', u:'小时'}];
+
+  const CX = 75, R = 64, SW = 22, GAP = 3;
+  const C = 2 * Math.PI * R;
+  let acc = 0;
+  const segs = rows.map((row, i)=>{
+    const frac = row.count / total;
+    const full = frac * C;
+    const vis = Math.max(full - GAP, 0.5);
+    const seg = {
+      color: STOOL_INTERVAL_COLORS[i % STOOL_INTERVAL_COLORS.length].ring,
+      dash: vis,
+      offset: -acc,
+    };
+    acc += full;
+    return seg;
+  });
+
+  return (
+    <div className="review-detail-card review-stool-interval-card">
+      <div className="review-mood-detail-head">便便间隔</div>
+      <div className="review-stool-donut-wrap">
+        <div className="review-stool-donut">
+          <svg viewBox="0 0 150 150" role="img" aria-label="便便间隔占比环形图">
+            {segs.map((s, i)=>(
+              <circle
+                key={i}
+                cx={CX}
+                cy={CX}
+                r={R}
+                fill="none"
+                stroke={s.color}
+                strokeWidth={SW}
+                strokeDasharray={s.dash.toFixed(2) + ' ' + (C - s.dash).toFixed(2)}
+                strokeDashoffset={s.offset.toFixed(2)}
+                transform={'rotate(-90 ' + CX + ' ' + CX + ')'}
+              />
+            ))}
+          </svg>
+          <div className="review-stool-donut-center">
+            <span>平均间隔</span>
+            <b>{avgText.map((t, i)=>(<React.Fragment key={i}>{t.n}<small>{t.u}</small></React.Fragment>))}</b>
+          </div>
+        </div>
+        <div className="review-stool-donut-legend">
+          {rows.map((row, i)=>{
+            const c = STOOL_INTERVAL_COLORS[i % STOOL_INTERVAL_COLORS.length];
+            return (
+              <div className="review-stool-donut-row" key={row.label}>
+                <i style={{background:c.ring}}/>
+                <span>{row.label}</span>
+                <em>{row.count}次</em>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <div className="review-mood-insight-grid">
+        <div className="review-mood-insight">
+          <span>最长间隔</span>
+          <b>{maxText.map((t, i)=>(<React.Fragment key={i}>{t.n}<small>{t.u}</small></React.Fragment>))}</b>
+        </div>
+        <div className="review-mood-insight">
+          <span>最短间隔</span>
+          <b>{minText.map((t, i)=>(<React.Fragment key={i}>{t.n}<small>{t.u}</small></React.Fragment>))}</b>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const STOOL_FORM_PHASES = [
+  {key:'menstrual', label:'月经期', days:5, arc:'rgba(255,77,136,0.28)', fill:'rgba(255,77,136,0.09)', text:'#f2799a', pos:{top:'25%', left:'67%'}},
+  {key:'follicular', label:'卵泡期', days:6, arc:'rgba(0,204,153,0.26)', fill:'rgba(0,204,153,0.06)', text:'#22b487', pos:{top:'66%', left:'88%'}},
+  {key:'ovulation', label:'排卵期', days:5, arc:'rgba(179,136,232,0.40)', fill:'rgba(179,136,232,0.14)', text:'#9a6fd4', pos:{top:'92%', left:'50%'}},
+  {key:'luteal', label:'黄体期', days:12, arc:'rgba(0,204,153,0.26)', fill:'rgba(0,204,153,0.06)', text:'#22b487', pos:{top:'49%', left:'9%'}},
+];
+
+const STOOL_SHAPE_TYPES = {
+  t1:{color:'#7a4e26', label:'硬球状'},
+  t2:{color:'#966326', label:'凹凸香肠状'},
+  t3:{color:'#af7c33', label:'裂纹香肠状'},
+  t4:{color:'#c68f36', label:'平滑香蕉状'},
+  t5:{color:'#cf9a4a', label:'软块状'},
+  t6:{color:'#cfa05c', label:'糊状'},
+  t7:{color:'#c6a465', label:'水液状'},
+};
+
+const STOOL_STATE_VOLUME = {
+  tiny:{color:'#cf9a3f', label:'非常少量', size:3.5},
+  small:{color:'#c6862c', label:'少量', size:5},
+  mid:{color:'#b57327', label:'一般量', size:6.5},
+  big:{color:'#9c6018', label:'大量', size:8},
+};
+
+const STOOL_STATE_FEELING = {
+  smooth:{color:'#e0a92a', icon:'#f4cf5e', label:'舒畅'},
+  residual:{color:'#d9701f', icon:'#f0a866', label:'有残便感'},
+  hard:{color:'#e2455e', icon:'#f2899b', label:'排便困难'},
+};
+
+const STATE_SHAPE_BY_DAY = {2:'t4',3:'t4',7:'t4',12:'t4',16:'t4',21:'t4',1:'t3',6:'t3',13:'t3',23:'t3',17:'t1',19:'t1',25:'t1',4:'t5',8:'t5',11:'t5',9:'t2',14:'t6',27:'t7'};
+const STATE_VOLUME_BY_DAY = {1:'small',2:'mid',3:'mid',6:'small',7:'mid',8:'mid',9:'tiny',10:'big',12:'mid',13:'small',14:'tiny',16:'mid',17:'mid',19:'big',20:'small',21:'mid',25:'mid',26:'small'};
+const STATE_FEELING_BY_DAY = {1:'smooth',2:'smooth',3:'smooth',4:'residual',6:'smooth',7:'smooth',8:'smooth',9:'residual',10:'hard',11:'residual',12:'smooth',13:'smooth',14:'residual',16:'smooth',17:'hard',19:'hard',21:'smooth',23:'residual',25:'smooth',26:'smooth',27:'hard'};
+
+const STOOL_STATE_DIMS = [
+  {
+    key:'shape', tab:'形状', name:'形状', marker:'glyph', cats:STOOL_SHAPE_TYPES, byDay:STATE_SHAPE_BY_DAY, order:['t1','t2','t3','t4','t5','t6','t7'],
+    modules:[
+      {title:'稀便最集中', phase:'月经期', phaseColor:'#ef6f8f', desc:'记录 3 次偏稀'},
+      {title:'硬便最集中', phase:'黄体期', phaseColor:'#3ec19a', desc:'记录 4 次偏硬'},
+    ],
+    modulesYear:[
+      {title:'稀便最集中', phase:'3月', desc:'记录 6 次偏稀'},
+      {title:'硬便最集中', phase:'11月', desc:'记录 7 次偏硬'},
+    ],
+  },
+  {
+    key:'volume', tab:'分量', name:'分量', marker:'size', cats:STOOL_STATE_VOLUME, byDay:STATE_VOLUME_BY_DAY, order:['tiny','small','mid','big'],
+    modules:[
+      {title:'排得最多', phase:'月经期', phaseColor:'#ef6f8f', desc:'记录 4 次一般~大量'},
+      {title:'排得最少', phase:'黄体期', phaseColor:'#3ec19a', desc:'记录 4 次少量及以下'},
+    ],
+    modulesYear:[
+      {title:'排得最多', phase:'6月', desc:'记录 9 次一般~大量'},
+      {title:'排得最少', phase:'2月', desc:'记录 8 次少量及以下'},
+    ],
+  },
+  {
+    key:'feeling', tab:'感受', name:'感受', marker:'dot', cats:STOOL_STATE_FEELING, byDay:STATE_FEELING_BY_DAY, order:['smooth','residual','hard'],
+    modules:[
+      {title:'最舒畅', phase:'卵泡期', phaseColor:'#3ec19a', desc:'记录 5 次舒畅'},
+      {title:'最费力', phase:'黄体期', phaseColor:'#3ec19a', desc:'记录 4 次排便困难'},
+    ],
+    modulesYear:[
+      {title:'最舒畅', phase:'4月', desc:'记录 9 次舒畅'},
+      {title:'最费力', phase:'12月', desc:'记录 6 次排便困难'},
+    ],
+  },
+];
+
+const STOOL_STATE_TOTAL = 22;
+
+const STOOL_STATE_YEAR = {
+  shape:  ['t4','t3','t4','t1','t4','t3','t4','t5','t4','t3','t1','t4'],
+  volume: ['mid','mid','small','mid','big','mid','small','mid','mid','big','small','mid'],
+  feeling:['smooth','smooth','residual','smooth','smooth','hard','smooth','residual','smooth','smooth','hard','smooth'],
+};
+
+const STOOL_STATE_YEAR_TICKS = [[0,'1月'],[3,'4月'],[6,'7月'],[9,'10月'],[11,'今']];
+
+function StoolStateScatter({dim, months}){
+  const cols = months.length;
+  const counts = {};
+  months.forEach(m=>{ counts[m] = (counts[m] || 0) + 1; });
+  const rows = dim.order.filter(k=>counts[k]);
+  const W = 340, rowH = 46, padTop = 10, padBottom = 26, labelW = 78, countW = 34;
+  const plotX0 = labelW, plotX1 = W - countW;
+  const H = padTop + rows.length * rowH + padBottom;
+  const colX = i => plotX0 + (i + 0.5) / cols * (plotX1 - plotX0);
+  const rowY = idx => padTop + idx * rowH + rowH / 2;
+  return (
+    <svg className="review-stool-scatter" viewBox={'0 0 ' + W + ' ' + H} preserveAspectRatio="xMidYMid meet" role="img" aria-label={dim.name + '散点分布'}>
+      <rect x={plotX0} y={padTop} width={(plotX1 - plotX0).toFixed(1)} height={(rows.length * rowH).toFixed(1)} rx="10" fill="#f7f6fb"/>
+      {months.map((m, i)=>(
+        <line key={'v' + i} x1={colX(i).toFixed(1)} y1={padTop + 6} x2={colX(i).toFixed(1)} y2={padTop + rows.length * rowH - 6} stroke="rgba(0,0,0,0.05)" strokeWidth="1" strokeDasharray="2 3"/>
+      ))}
+      {rows.map((k, idx)=>{
+        const cat = dim.cats[k];
+        const y = rowY(idx);
+        return (
+          <g key={k}>
+            <text x={0} y={(y + 4).toFixed(1)} textAnchor="start" fontSize="13" fill="rgba(0,0,0,0.6)" fontFamily="PingFang SC">{cat.label}</text>
+            {months.map((m, i)=> m === k ? (
+              <g key={i} transform={'translate(' + colX(i).toFixed(1) + ' ' + y.toFixed(1) + ')'}>
+                <StoolStateMarker dim={dim} catKey={k}/>
+              </g>
+            ) : null)}
+            <text x={W - 4} y={(y + 4).toFixed(1)} textAnchor="end" fontSize="13" fontWeight="500" fill="rgba(0,0,0,0.7)" fontFamily="PingFang SC">{counts[k]}次</text>
+          </g>
+        );
+      })}
+      {STOOL_STATE_YEAR_TICKS.map(([i, label])=>(
+        <text key={label} x={colX(i).toFixed(1)} y={H - 8} textAnchor="middle" fontSize="12" fill="rgba(0,0,0,0.4)" fontFamily="PingFang SC">{label}</text>
+      ))}
+    </svg>
+  );
+}
+
+function StoolShapeGlyph({type}){
+  const c = (STOOL_SHAPE_TYPES[type] || STOOL_SHAPE_TYPES.t4).color;
+  if(type === 't1'){
+    return <g fill={c}><circle cx={-3.8} cy={-1} r={3.3}/><circle cx={3.8} cy={-1.4} r={3.1}/><circle cx={0} cy={4} r={3.2}/></g>;
+  }
+  if(type === 't2'){
+    return <path fill={c} d="M-8 0.5 Q-8 -3 -5 -3.2 Q-4.6 -5 -2 -4.6 Q-0.5 -6 2 -4.8 Q3.6 -5.6 5 -3.6 Q8 -3.4 8 0.5 Q8 4 4 4.2 Q0 5 -4 4.2 Q-8 4 -8 0.5 Z"/>;
+  }
+  if(type === 't3'){
+    return (
+      <g>
+        <rect x={-8} y={-3.6} width={16} height={7.2} rx={3.6} fill={c}/>
+        <g stroke="rgba(255,255,255,0.55)" strokeWidth={0.9} strokeLinecap="round">
+          <path d="M-3.4 -2.6 L-4 2.6"/>
+          <path d="M1.4 -2.6 L2 2.6"/>
+        </g>
+      </g>
+    );
+  }
+  if(type === 't4'){
+    return <path d="M -7 3 A 9 9 0 0 1 7 -2" fill="none" stroke={c} strokeWidth={5} strokeLinecap="round"/>;
+  }
+  if(type === 't5'){
+    return <g fill={c}><path d="M-7 1 Q-7 -3 -3.6 -3 Q-1.2 -3.4 -1.2 0.2 Q-1.2 3.6 -4.2 3.5 Q-7 3.4 -7 1Z"/><path d="M1 -0.6 Q1 -4.3 4.6 -3.9 Q7.4 -3.5 7 0.2 Q6.7 3.6 3.4 3.3 Q0.7 3 1 -0.6Z"/></g>;
+  }
+  if(type === 't6'){
+    return <path fill={c} d="M-7 1 Q-8 -2 -5 -2.6 Q-5 -5 -2 -4.4 Q-1 -6 1.5 -4.8 Q3 -5.8 4.6 -3.8 Q7.6 -3.6 7.4 -0.6 Q8.4 2 5.6 3 Q4.8 5 2 4.2 Q0 5.4 -2.4 4 Q-5.6 4.8 -7 1Z"/>;
+  }
+  return <g fill={c}><path d="M-7 2 Q-5 -1 -2 1 Q0 -2 2.5 0.4 Q5 -1.4 7 2 Q3.5 5 -1 4.2 Q-5 5 -7 2Z"/><circle cx={-4} cy={-3.4} r={1.1}/><circle cx={3} cy={-4} r={1}/></g>;
+}
+
+function StoolFeelingFace({type}){
+  const s = 'rgba(0,0,0,0.5)';
+  if(type === 'smooth'){
+    return (
+      <g fill="none" stroke={s} strokeWidth={1.3} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M-4 -1 Q-3 -2.6 -2 -1"/>
+        <path d="M2 -1 Q3 -2.6 4 -1"/>
+        <path d="M-3.4 2 Q0 5 3.4 2"/>
+      </g>
+    );
+  }
+  if(type === 'residual'){
+    return (
+      <g>
+        <circle cx={-3} cy={-1.3} r={0.95} fill={s}/>
+        <circle cx={3} cy={-1.3} r={0.95} fill={s}/>
+        <path d="M-3 2.6 H3" fill="none" stroke={s} strokeWidth={1.3} strokeLinecap="round"/>
+      </g>
+    );
+  }
+  return (
+    <g fill="none" stroke={s} strokeWidth={1.3} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M-4.6 -2.6 L-2 -1.2 L-4.6 0.2"/>
+      <path d="M4.6 -2.6 L2 -1.2 L4.6 0.2"/>
+      <path d="M-3.4 3.2 Q0 0.6 3.4 3.2"/>
+    </g>
+  );
+}
+
+function StoolCatIcon({dimKey, catKey, cat}){
+  if(dimKey === 'feeling'){
+    return (
+      <svg className="review-stool-comp-icon" viewBox="0 0 26 26" aria-hidden="true">
+        <circle cx={13} cy={13} r={13} fill={cat.icon || cat.color}/>
+        <g transform="translate(13 13)"><StoolFeelingFace type={catKey}/></g>
+      </svg>
+    );
+  }
+  return (
+    <svg className="review-stool-comp-icon" viewBox="0 0 26 26" aria-hidden="true">
+      <circle cx={13} cy={13} r={13} fill="#f4ecdb"/>
+      <g transform="translate(13 13)">
+        {dimKey === 'volume'
+          ? <circle r={cat.size + 2.5} fill={cat.color}/>
+          : <StoolShapeGlyph type={catKey}/>}
+      </g>
+    </svg>
+  );
+}
+
+function StoolStateMarker({dim, catKey}){
+  const cat = dim.cats[catKey];
+  if(dim.marker === 'glyph'){
+    return (
+      <>
+        <circle r={13} fill="#fff" stroke="rgba(0,0,0,0.06)" strokeWidth={1}/>
+        <StoolShapeGlyph type={catKey}/>
+      </>
+    );
+  }
+  if(dim.marker === 'size'){
+    return <circle r={cat.size} fill={cat.color}/>;
+  }
+  return (
+    <>
+      <circle r={9} fill={cat.icon || cat.color}/>
+      <StoolFeelingFace type={catKey}/>
+    </>
+  );
+}
+
+function StoolCompositionList({rows, total, dimKey}){
+  const max = Math.max(...rows.map(r=>r.count), 1);
+  return (
+    <div className="review-stool-comp-list">
+      {rows.map((r, i)=>{
+        const pct = Math.round(r.count / total * 100);
+        return (
+          <div className="review-stool-comp-row" key={r.label}>
+            <StoolCatIcon dimKey={dimKey} catKey={r.key} cat={r.cat}/>
+            <span className="review-stool-comp-label">{dimKey === 'shape' ? (i + 1) + ' ' : ''}{r.label}</span>
+            <div className="review-stool-comp-track">
+              <i style={{width:(r.count / max * 100) + '%', background:r.color}}/>
+            </div>
+            <b className="review-stool-comp-pct">{pct}%</b>
+            <em className="review-stool-comp-count">{r.count}次</em>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function StoolStateCard({range = 'cycle'}){
+  const isYear = range === 'year';
+  const [dimKey, setDimKey] = React.useState('shape');
+  const dim = STOOL_STATE_DIMS.find(d=>d.key === dimKey) || STOOL_STATE_DIMS[0];
+  const CX = 170, RING = 150, RSW = 7, REC = 124, WEDGE = 147, HOLE = 86;
+  const RC = 2 * Math.PI * RING;
+  const step = 360 / 28;
+
+  const yearMonths = STOOL_STATE_YEAR[dimKey] || [];
+  const catCount = {};
+  if(isYear){
+    yearMonths.forEach(m=>{ catCount[m] = (catCount[m] || 0) + 1; });
+  } else {
+    Object.keys(dim.byDay).forEach(d=>{ const c = dim.byDay[d]; catCount[c] = (catCount[c] || 0) + 1; });
+  }
+  const recorded = isYear ? yearMonths.length : Object.keys(dim.byDay).length;
+  let topKey = dim.order[0], topN = 0;
+  dim.order.forEach(k=>{ if((catCount[k] || 0) > topN){ topN = catCount[k] || 0; topKey = k; } });
+  const topCat = dim.cats[topKey] || {};
+  const topPct = Math.round(topN / recorded * 100);
+
+  const compRows = dim.order.map(k=>({key:k, label:dim.cats[k].label, count:catCount[k] || 0, color:dim.cats[k].color, cat:dim.cats[k]}));
+
+  const posFor = (angleDeg, radius)=>{
+    const r = angleDeg * Math.PI / 180;
+    return {x: CX + radius * Math.cos(r), y: CX + radius * Math.sin(r)};
+  };
+
+  const gap = (3 / 360) * RC;
+  let dayStart = 0;
+  const arcs = STOOL_FORM_PHASES.map(ph=>{
+    const startDeg = -90 + dayStart * step;
+    const endDeg = -90 + (dayStart + ph.days) * step;
+    const len = (ph.days / 28) * RC;
+    const vis = Math.max(len - gap, 1);
+    const offset = -((dayStart / 28) * RC + gap / 2);
+    const p0 = posFor(startDeg, WEDGE);
+    const p1 = posFor(endDeg, WEDGE);
+    const large = (endDeg - startDeg) > 180 ? 1 : 0;
+    const wedge = 'M ' + CX + ' ' + CX
+      + ' L ' + p0.x.toFixed(2) + ' ' + p0.y.toFixed(2)
+      + ' A ' + WEDGE + ' ' + WEDGE + ' 0 ' + large + ' 1 ' + p1.x.toFixed(2) + ' ' + p1.y.toFixed(2)
+      + ' Z';
+    dayStart += ph.days;
+    return {vis, offset, color:ph.arc, fill:ph.fill, wedge};
+  });
+
+  let bAcc = 0;
+  const boundaries = STOOL_FORM_PHASES.map(ph=>{
+    const a = -90 + bAcc * step;
+    bAcc += ph.days;
+    return a;
+  });
+
+  const markers = [];
+  for(let d = 1; d <= 28; d++){
+    const ang = -90 + (d - 0.5) * step;
+    markers.push({...posFor(ang, REC), cat:dim.byDay[d]});
+  }
+
+  return (
+    <div className="review-detail-card review-stool-state-card">
+      <div className="review-stool-form-head">
+        <div className="review-mood-detail-head">便便状态</div>
+        <div className="review-stool-form-toggle" role="tablist" aria-label="便便状态维度">
+          {STOOL_STATE_DIMS.map(d=>(
+            <button
+              key={d.key}
+              type="button"
+              className={d.key === dimKey ? 'is-active' : ''}
+              aria-selected={d.key === dimKey}
+              onClick={()=>setDimKey(d.key)}
+            >{d.tab}</button>
+          ))}
+        </div>
+      </div>
+      {isYear ? (
+        <StoolStateScatter dim={dim} months={yearMonths}/>
+      ) : (
+      <div className="review-stool-form-wrap">
+        <svg viewBox="0 0 340 340" role="img" aria-label="便便状态分布图">
+          {arcs.map((a, i)=>(
+            <path key={'wedge' + i} d={a.wedge} fill={a.fill}/>
+          ))}
+          <circle cx={CX} cy={CX} r={HOLE} fill="#fff"/>
+          {arcs.map((a, i)=>(
+            <circle
+              key={'arc' + i}
+              cx={CX}
+              cy={CX}
+              r={RING}
+              fill="none"
+              stroke={a.color}
+              strokeWidth={RSW}
+              strokeDasharray={a.vis.toFixed(2) + ' ' + (RC - a.vis).toFixed(2)}
+              strokeDashoffset={a.offset.toFixed(2)}
+              transform={'rotate(-90 ' + CX + ' ' + CX + ')'}
+            />
+          ))}
+          {boundaries.map((a, i)=>{
+            const p = posFor(a, RING);
+            return <circle key={'bd' + i} cx={p.x.toFixed(2)} cy={p.y.toFixed(2)} r={3} fill="rgba(0,0,0,0.16)"/>;
+          })}
+          {markers.map((m, i)=> m.cat ? (
+            <g key={'m' + i} transform={'translate(' + m.x.toFixed(2) + ' ' + m.y.toFixed(2) + ')'}>
+              <StoolStateMarker dim={dim} catKey={m.cat}/>
+            </g>
+          ) : (
+            <circle key={'g' + i} cx={m.x.toFixed(2)} cy={m.y.toFixed(2)} r={2.6} fill="rgba(0,0,0,0.12)"/>
+          ))}
+        </svg>
+        <div className="review-stool-form-center">
+          <span>最常见</span>
+          <b style={{color:topCat.color}}>{topCat.label}</b>
+        </div>
+        {STOOL_FORM_PHASES.map(ph=>(
+          <span
+            key={ph.key}
+            className="review-stool-form-label"
+            style={{top:ph.pos.top, left:ph.pos.left, color:ph.text}}
+          >{ph.label}</span>
+        ))}
+      </div>
+      )}
+      <div className="review-stool-state-divider"/>
+      <div className="review-stool-comp-head">{dim.name}构成</div>
+      <StoolCompositionList rows={compRows} total={recorded} dimKey={dimKey}/>
+      <div className="review-mood-time-summary review-stool-state-modules">
+        {(isYear ? dim.modulesYear : dim.modules).map(m=>(
+          <div className="review-mood-time-summary-card" key={m.title}>
+            <span>{m.title}</span>
+            <div className="review-stool-state-main">
+              {m.phaseColor ? <i style={{background:m.phaseColor}}/> : null}
+              <b>{m.phase}</b>
+            </div>
+            <em>{m.desc}</em>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function StoolBarList({items}){
+  const max = Math.max(...items.map(it=>it.count), 1);
+  return (
+    <div className="review-mood-share-bars review-stool-phase-share">
+      <div className="review-mood-share-bars-list">
+        {items.map(it=>(
+          <div className="review-stool-phase-row" key={it.label}>
+            <div className="review-stool-phase-top">
+              <span>{it.label}</span>
+              <b>{it.count}<em>次</em></b>
+            </div>
+            <div className="review-mood-share-bar-track">
+              <i style={{width:(it.count / max * 100) + '%', background:it.color}}/>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const STOOL_TIME_DENSITY = [0.02,0.01,0.01,0.01,0.02,0.05,0.16,0.55,0.95,0.62,0.32,0.16,0.10,0.12,0.20,0.30,0.22,0.14,0.12,0.16,0.24,0.32,0.20,0.08,0.03];
+
+const STOOL_TIME_BARS = [
+  {label:'小于5分钟', count:4, color:'#d9cff5', textLight:false},
+  {label:'5-10分钟', count:7, color:'#ae97e8', textLight:true},
+  {label:'10-20分钟', count:3, color:'#7c5fd3', textLight:true},
+  {label:'大于20分钟', count:2, color:'#452c93', textLight:true},
+];
+
+const STOOL_TIME_BARS_YEAR = [
+  {label:'小于5分钟', count:62, color:'#d9cff5', textLight:false},
+  {label:'5-10分钟', count:110, color:'#ae97e8', textLight:true},
+  {label:'10-20分钟', count:48, color:'#7c5fd3', textLight:true},
+  {label:'大于20分钟', count:30, color:'#452c93', textLight:true},
+];
+
+function StoolTimeWave(){
+  const W = 340, H = 148;
+  const padL = 14, padR = 14, padT = 30, padB = 26;
+  const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
+  const yMax = Math.max(...STOOL_TIME_DENSITY);
+  const X = h => x0 + (h / 24) * (x1 - x0);
+  const Y = v => y1 - (v / yMax) * (y1 - y0);
+  const pts = STOOL_TIME_DENSITY.map((v, i)=>[X(i), Y(v)]);
+  const line = reviewSmoothPath(pts);
+  const area = line + ' L' + X(24).toFixed(1) + ' ' + y1.toFixed(1) + ' L' + X(0).toFixed(1) + ' ' + y1.toFixed(1) + ' Z';
+  const ticks = [0, 6, 12, 18, 24];
+  const bandX0 = X(7), bandX1 = X(9);
+  return (
+    <svg className="review-stool-time-wave" viewBox={'0 0 ' + W + ' ' + H} preserveAspectRatio="xMidYMid meet" role="img" aria-label="排便时段分布">
+      <defs>
+        <linearGradient id="stoolTimeWaveFill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="rgba(124,95,211,0.30)"/>
+          <stop offset="100%" stopColor="rgba(124,95,211,0.02)"/>
+        </linearGradient>
+      </defs>
+      <rect x={bandX0.toFixed(1)} y={y0} width={(bandX1 - bandX0).toFixed(1)} height={(y1 - y0).toFixed(1)} rx="6" fill="rgba(124,95,211,0.14)"/>
+      <path d={area} fill="url(#stoolTimeWaveFill)"/>
+      <path d={line} fill="none" stroke="#7c5fd3" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+      <text x={X(8).toFixed(1)} y={y0 - 9} textAnchor="middle" fontSize="13" fontWeight="500" fill="#7c5fd3" fontFamily="PingFang SC">7-9点</text>
+      {ticks.map(t=>(
+        <text key={t} x={X(t).toFixed(1)} y={H - 6} textAnchor={t === 0 ? 'start' : t === 24 ? 'end' : 'middle'} fontSize="12" fill="rgba(0,0,0,0.4)" fontFamily="PingFang SC">{t}点</text>
+      ))}
+    </svg>
+  );
+}
+
+function StoolTimeBars({bars = STOOL_TIME_BARS}){
+  const total = bars.reduce((s, b)=>s + b.count, 0) || 1;
+  const max = Math.max(...bars.map(b=>b.count), 1);
+  return (
+    <div className="review-stool-time-list">
+      {bars.map(b=>{
+        const pct = Math.round(b.count / total * 100);
+        return (
+          <div className="review-stool-time-row" key={b.label}>
+            <span className="review-stool-time-label">{b.label}</span>
+            <div className="review-stool-time-track">
+              <div
+                className="review-stool-time-fill"
+                style={{width:(b.count / max * 100) + '%', background:b.color}}
+              >
+                <em style={{color:b.textLight ? '#fff' : 'rgba(0,0,0,0.55)'}}>{b.count}次</em>
+              </div>
+            </div>
+            <b className="review-stool-time-pct">{pct}%</b>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function StoolTimeCard({range = 'cycle'}){
+  const bars = range === 'year' ? STOOL_TIME_BARS_YEAR : STOOL_TIME_BARS;
+  const topBar = bars.reduce((a, b)=>b.count > a.count ? b : a);
+  return (
+    <div className="review-detail-card review-stool-time-card">
+      <div className="review-mood-detail-head">排便时间</div>
+      <StoolTimeWave/>
+      <div className="review-stool-state-divider"/>
+      <div className="review-stool-comp-head">单次用时</div>
+      <StoolTimeBars bars={bars}/>
+      <div className="review-mood-time-summary review-stool-state-modules">
+        <div className="review-mood-time-summary-card">
+          <span>最常便便时段</span>
+          <div className="review-stool-state-main">
+            <b>早上</b>
+          </div>
+        </div>
+        <div className="review-mood-time-summary-card">
+          <span>最常便便用时</span>
+          <div className="review-stool-state-main">
+            <b>{topBar.label}</b>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StoolReviewMetric({segments, label}){
+  return (
+    <div className="review-metric">
+      <div className="review-stool-metric-value">
+        {segments.map((seg, i)=>(
+          <React.Fragment key={i}>
+            {seg.value != null ? (
+              <span className={'review-stool-metric-number' + (i > 0 && seg.value != null ? ' is-secondary' : '')}>
+                {seg.value}
+              </span>
+            ) : null}
+            {seg.unit ? <span className="review-stool-metric-unit">{seg.unit}</span> : null}
+          </React.Fragment>
+        ))}
+      </div>
+      <div className="review-metric-label">{label}</div>
+    </div>
+  );
+}
+
+function ExpandedStoolChart(){
+  const records = STOOL_ALL_RECORDS;
+  const values = records.map(r=>r.count);
+  const n = values.length;
+  const W = Math.max(1160, n * 22);
+  const H = 250;
+  const padL = 44, padR = 34, padT = 18, padB = 32;
+  const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
+  const yMax = 3;
+  const X = i => x0 + (n <= 1 ? 0 : (x1 - x0) * (i / (n - 1)));
+  const Y = v => y1 - (v / yMax) * (y1 - y0);
+  const pts = values.map((v, i)=>[X(i), Y(v)]);
+  const linePath = pts.map((p, i)=>(i === 0 ? 'M' : 'L') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  const areaPath = linePath
+    + ' L' + pts[n - 1][0].toFixed(1) + ' ' + y1.toFixed(1)
+    + ' L' + pts[0][0].toFixed(1) + ' ' + y1.toFixed(1)
+    + ' Z';
+  const labelIndexes = records.map((_r, i)=>i).filter(i=>i % 5 === 0 || i === n - 1);
+  const stoolColor = '#8264bd';
+  const gradId = 'stoolLandscapeFill';
+
+  return (
+    <svg
+      viewBox={'0 0 ' + W + ' ' + H}
+      style={{width:W + 'px'}}
+      preserveAspectRatio="none"
+      role="img"
+      aria-label="全部便便记录次数折线图"
+    >
+      <defs>
+        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={stoolColor} stopOpacity="0.28"/>
+          <stop offset="55%" stopColor={stoolColor} stopOpacity="0.1"/>
+          <stop offset="100%" stopColor={stoolColor} stopOpacity="0.02"/>
+        </linearGradient>
+      </defs>
+      {[0, 1, 2, 3].map(tick=>(
+        <React.Fragment key={tick}>
+          <line
+            x1={x0}
+            y1={Y(tick)}
+            x2={x1}
+            y2={Y(tick)}
+            stroke="rgba(130,100,189,0.16)"
+            strokeWidth="1"
+            strokeDasharray="4 4"
+          />
+          <text
+            x={x0 - 8}
+            y={Y(tick) + 4}
+            textAnchor="end"
+            fontSize="10"
+            fill="#aaaab0"
+            fontFamily="PingFang SC"
+          >
+            {tick}次
+          </text>
+        </React.Fragment>
+      ))}
+      <path d={areaPath} fill={'url(#' + gradId + ')'}/>
+      <path d={linePath} fill="none" stroke={stoolColor} strokeWidth="2.2" strokeLinejoin="round" strokeLinecap="round"/>
+      {values.map((value, i)=>{
+        const isLast = i === n - 1;
+        return (
+          <circle
+            key={i}
+            cx={X(i)}
+            cy={Y(value)}
+            r={isLast ? 4.5 : 2.2}
+            fill={stoolColor}
+            stroke={isLast ? '#fff' : 'none'}
+            strokeWidth={isLast ? 2 : 0}
+          />
+        );
+      })}
+      {labelIndexes.map(i=>(
+        <text
+          key={i}
+          x={X(i)}
+          y={H - 9}
+          textAnchor="middle"
+          fontSize="9.5"
+          fill={i === n - 1 ? stoolColor : '#aaaab0'}
+          fontFamily="PingFang SC"
+        >
+          {records[i].date}
+        </text>
+      ))}
+    </svg>
+  );
+}
+
+function StoolLandscapePage({open, onClose}){
+  const scrollerRef = React.useRef(null);
+
+  React.useEffect(()=>{
+    if(!open) return undefined;
+    const scroller = scrollerRef.current;
+    if(scroller) scroller.scrollLeft = scroller.scrollWidth;
+    const handleKeyDown = event=>{ if(event.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handleKeyDown);
+    return ()=>document.removeEventListener('keydown', handleKeyDown);
+  }, [open, onClose]);
+
+  return (
+    <section
+      className={'review-cycle-landscape' + (open ? ' is-open' : '')}
+      aria-hidden={!open}
+      role="dialog"
+      aria-modal="true"
+      aria-label="全部便便记录横屏图表"
+    >
+      <div className="review-cycle-landscape-surface">
+        <header className="review-cycle-landscape-head">
+          <div>
+            <h2>全部便便记录</h2>
+            <p>共 {STOOL_ALL_RECORDS.length} 天 · 左右滑动查看</p>
+          </div>
+          <button type="button" className="review-cycle-landscape-close" aria-label="关闭横屏图表" onClick={onClose}>×</button>
+        </header>
+        <div className="review-cycle-landscape-legend">
+          <span className="review-legend-item is-stool"><i></i>便便次数</span>
+          <span className="review-cycle-landscape-tip">← 滑动查看更多 →</span>
+        </div>
+        <div className="review-cycle-landscape-scroll" ref={scrollerRef}>
+          <ExpandedStoolChart/>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function StoolDetailBody({range, periodOffset = 0}){
+  void periodOffset;
+  return (
+    <>
+      <StoolCycleTrendCard range={range}/>
+      <StoolStateCard range={range}/>
+      <StoolIntervalCard range={range}/>
+      <StoolTimeCard range={range}/>
+    </>
+  );
+}
+
+function StoolDetailPage({open, onClose}){
+  const [range, setRange] = React.useState('cycle');
+  const [periodOffset, setPeriodOffset] = React.useState(0);
+  const ranges = [
+    {key:'cycle', label:'按周期'},
+    {key:'year', label:'按年'},
+  ];
+  const switchRange = (key)=>{
+    setRange(key);
+    setPeriodOffset(0);
+  };
+  return (
+    <section className={'review-cycle-detail is-fullscreen-detail' + (open ? ' is-open' : '')} aria-hidden={!open} aria-label="便便详情">
+      <div className="review-detail-nav">
+        <button type="button" className="review-detail-back" aria-label="返回" onClick={onClose}>
+          <ReviewBackIcon/>
+        </button>
+        <span className="review-detail-title">便便</span>
+      </div>
+      <div className="review-detail-content">
+        <div className="review-segment" role="tablist" aria-label="时间范围">
+          {ranges.map(item=>(
+            <button
+              key={item.key}
+              type="button"
+              className={range === item.key ? 'is-active' : ''}
+              aria-selected={range === item.key}
+              onClick={()=>switchRange(item.key)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+        <MoodPeriodNav range={range} offset={periodOffset} onChange={setPeriodOffset}/>
+        <StoolDetailBody range={range} periodOffset={periodOffset}/>
+      </div>
+    </section>
+  );
+}
+
+function StoolReviewCard({onOpen, onLandscapeOpen}){
   return (
     <ReviewCard
       title="便便"
       iconClass="is-stool"
       icon={<ReviewStoolIcon/>}
+      headAction={typeof onLandscapeOpen === 'function' ? (
+        <button
+          type="button"
+          className="review-cycle-expand-btn"
+          aria-label="横屏展开全部便便"
+          onKeyDown={event=>event.stopPropagation()}
+          onClick={event=>{
+            event.stopPropagation();
+            onLandscapeOpen();
+          }}
+        >
+          <ReviewExpandIcon/>
+        </button>
+      ) : null}
       chart={<StoolReviewChart/>}
-      legend={<span className="review-legend-item is-stool"><i></i>每日次数</span>}
+      legend={<span className="review-legend-item is-stool"><i></i>便便次数</span>}
       metrics={(
         <>
-          <ReviewMetric value="1" unit="次" label="最近记录"/>
-          <ReviewMetric value="1.0" unit="次" label="近7天日均"/>
-          <ReviewMetric value="→ 规律" label="整体趋势" trend/>
+          <StoolReviewMetric
+            label="最近记录"
+            segments={[
+              {value:'8', unit:'小时'},
+              {value:'2', unit:'分'},
+              {unit:'前'},
+            ]}
+          />
+          <StoolReviewMetric
+            label="平均每日便便"
+            segments={[{value:'1.2', unit:'次'}]}
+          />
+          <StoolReviewMetric
+            label="便便总次数"
+            segments={[{value:'23', unit:'次'}]}
+          />
         </>
       )}
       more="查看完整便便变化"
+      onOpen={onOpen}
     />
   );
 }
@@ -4220,6 +5437,8 @@ function ReviewPage({mode='经期', shareState, onShareStateChange, onOpenPartne
   const [dietLandscapeOpen, setDietLandscapeOpen] = useState(false);
   const [moodDetailOpen, setMoodDetailOpen] = useState(false);
   const [moodLandscapeOpen, setMoodLandscapeOpen] = useState(false);
+  const [stoolDetailOpen, setStoolDetailOpen] = useState(false);
+  const [stoolLandscapeOpen, setStoolLandscapeOpen] = useState(false);
   const isPeriodMode = mode === '经期';
   const cycleData = [29,34,31,30,33,31,32,36,31,30,32,30,31,29,30,31,29,30,29,31,30,30,28,28];
   const cycleLast12 = cycleData.slice(-12);
@@ -4330,7 +5549,12 @@ function ReviewPage({mode='经期', shareState, onShareStateChange, onOpenPartne
         onLandscapeOpen={()=>setMoodLandscapeOpen(true)}
       />
 
-      {isPeriodMode ? <StoolReviewCard/> : null}
+      {isPeriodMode ? (
+        <StoolReviewCard
+          onOpen={()=>setStoolDetailOpen(true)}
+          onLandscapeOpen={()=>setStoolLandscapeOpen(true)}
+        />
+      ) : null}
       {isPeriodMode ? <LoveReviewCard/> : null}
 
       <FeedingReviewCard/>
@@ -4349,6 +5573,8 @@ function ReviewPage({mode='经期', shareState, onShareStateChange, onOpenPartne
       <DietDistributionDetailPage open={dietDistDetailOpen} onClose={()=>setDietDistDetailOpen(false)}/>
       <MoodDetailPage open={moodDetailOpen} onClose={()=>setMoodDetailOpen(false)}/>
       <MoodLandscapePage open={moodLandscapeOpen} onClose={()=>setMoodLandscapeOpen(false)}/>
+      <StoolDetailPage open={stoolDetailOpen} onClose={()=>setStoolDetailOpen(false)}/>
+      <StoolLandscapePage open={stoolLandscapeOpen} onClose={()=>setStoolLandscapeOpen(false)}/>
       <DietLandscapePage open={dietLandscapeOpen} onClose={()=>setDietLandscapeOpen(false)}/>
       <CycleLandscapePage open={cycleLandscapeOpen} onClose={()=>setCycleLandscapeOpen(false)}/>
     </main>
