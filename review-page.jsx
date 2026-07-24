@@ -1346,7 +1346,7 @@ const DIET_MEAL_LABELS = {
 };
 
 // 餐次热量；缺项表示当天未记录该餐。柱图从上到下：早→午→晚→加餐→饮品→其他
-const DIET_BALANCE_LOW = 1600;
+const DIET_BALANCE_LOW = 1700;
 const DIET_BALANCE_HIGH = 2000;
 
 function buildDietAllDays(count = 120){
@@ -1649,14 +1649,17 @@ const DIET_TARGET_DAYS = [
 
 const DIET_DAILY_WEEK_LABEL = '7.7—7.13';
 
-function DietBudgetHeadAction({goal = DIET_TARGET_GOAL}){
+function DietBudgetHeadAction({goal = DIET_TARGET_GOAL, onOpen}){
   return (
     <button
       type="button"
       className="review-card-head-btn is-budget"
       title="点击可修改热量目标"
       aria-label={'热量目标 ' + goal + '，点击可修改'}
-      onClick={(event)=>event.stopPropagation()}
+      onClick={(event)=>{
+        event.stopPropagation();
+        if(typeof onOpen === 'function') onOpen();
+      }}
     >
       <span>热量目标 {goal}</span>
       <i className="review-diet-budget-tip" aria-hidden="true">!</i>
@@ -1664,7 +1667,234 @@ function DietBudgetHeadAction({goal = DIET_TARGET_GOAL}){
   );
 }
 
-function DietDistributionCard({onOpen, onLandscapeOpen, title='饮食', more='查看饮食付费分析'}){
+const DIET_ACTIVITY_OPTIONS = [
+  {id:'sedentary', title:'久坐活动', desc:'几乎不运动', factor:1.2},
+  {id:'light', title:'轻度活动', desc:'每周1-3次', factor:1.375},
+  {id:'moderate', title:'中度活动', desc:'每周3-5次', factor:1.55},
+];
+
+const DIET_PLAN_OPTIONS = [
+  {id:'lose', title:'减重', delta:-300},
+  {id:'maintain', title:'保持', delta:0},
+  {id:'gain', title:'增重', delta:300},
+];
+
+const DIET_DEFAULT_BIRTH = '1999.03.15';
+
+function parseDietBirthDate(text){
+  const match = String(text || '').trim().match(/^(\d{4})[.\/\-年](\d{1,2})[.\/\-月](\d{1,2})/);
+  if(!match) return null;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  if(year < 1920 || year > 2020 || month < 1 || month > 12 || day < 1 || day > 31) return null;
+  const date = new Date(year, month - 1, day);
+  if(date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) return null;
+  return date;
+}
+
+function formatDietBirthDate(date){
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return y + '.' + m + '.' + d;
+}
+
+function dietAgeFromBirth(birthText, today = new Date(2026, 6, 13)){
+  const birth = parseDietBirthDate(birthText);
+  if(!birth) return 27;
+  let age = today.getFullYear() - birth.getFullYear();
+  const md = today.getMonth() * 100 + today.getDate();
+  const bmd = birth.getMonth() * 100 + birth.getDate();
+  if(md < bmd) age -= 1;
+  return Math.max(10, Math.min(80, age));
+}
+
+function calcDietCalorieGoal(heightCm, weightKg, age, activityId, planId = 'maintain'){
+  const option = DIET_ACTIVITY_OPTIONS.find(item=>item.id === activityId) || DIET_ACTIVITY_OPTIONS[0];
+  const plan = DIET_PLAN_OPTIONS.find(item=>item.id === planId) || DIET_PLAN_OPTIONS[1];
+  const bmr = 10 * weightKg + 6.25 * heightCm - 5 * age - 161;
+  const base = Math.floor((bmr * option.factor) / 10) * 10;
+  return Math.max(800, Math.min(4000, base + plan.delta));
+}
+
+function DietBudgetSettingsPage({open, onClose, onComplete, initialGoal = 1440}){
+  const [birthDate, setBirthDate] = useState(DIET_DEFAULT_BIRTH);
+  const [height, setHeight] = useState(160);
+  const [weight, setWeight] = useState(50);
+  const [activity, setActivity] = useState('sedentary');
+  const [plan, setPlan] = useState('maintain');
+  const [goal, setGoal] = useState(initialGoal);
+  const [goalDirty, setGoalDirty] = useState(false);
+  const age = dietAgeFromBirth(birthDate);
+
+  React.useEffect(()=>{
+    if(!open) return;
+    setBirthDate(DIET_DEFAULT_BIRTH);
+    setHeight(160);
+    setWeight(50);
+    setActivity('sedentary');
+    setPlan('maintain');
+    setGoal(initialGoal || calcDietCalorieGoal(160, 50, dietAgeFromBirth(DIET_DEFAULT_BIRTH), 'sedentary', 'maintain'));
+    setGoalDirty(true);
+  }, [open, initialGoal]);
+
+  React.useEffect(()=>{
+    if(!open || goalDirty) return;
+    setGoal(calcDietCalorieGoal(height, weight, age, activity, plan));
+  }, [open, height, weight, age, activity, plan, goalDirty]);
+
+  React.useEffect(()=>{
+    if(!open) return undefined;
+    const handleKeyDown = event=>{ if(event.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handleKeyDown);
+    return ()=>document.removeEventListener('keydown', handleKeyDown);
+  }, [open, onClose]);
+
+  const editNumber = (label, value, unit, min, max, onChange)=>{
+    const next = window.prompt(label + '（' + unit + '）', String(value));
+    if(next == null) return;
+    const num = Number(next);
+    if(!Number.isFinite(num)) return;
+    onChange(Math.min(max, Math.max(min, Math.round(num * 10) / 10)));
+    setGoalDirty(false);
+  };
+
+  const editBirthDate = ()=>{
+    const next = window.prompt('出生日期（如 1999.03.15）', birthDate);
+    if(next == null) return;
+    const parsed = parseDietBirthDate(next);
+    if(!parsed) return;
+    setBirthDate(formatDietBirthDate(parsed));
+    setGoalDirty(false);
+  };
+
+  return (
+    <section
+      className={'review-cycle-detail is-fullscreen-detail review-diet-budget-page' + (open ? ' is-open' : '')}
+      aria-hidden={!open}
+      aria-label="热量目标设定"
+    >
+      <div className="review-detail-nav">
+        <button type="button" className="review-detail-back" aria-label="返回" onClick={onClose}>
+          <ReviewBackIcon/>
+        </button>
+        <span className="review-detail-title">热量目标设定</span>
+      </div>
+      <div className="review-detail-content review-diet-budget-content">
+        <div className="review-detail-card review-diet-budget-card">
+          <div className="review-diet-budget-list" role="list">
+            <button
+              type="button"
+              className="review-diet-budget-row"
+              role="listitem"
+              onClick={editBirthDate}
+            >
+              <span className="review-diet-budget-label">出生日期</span>
+              <span className="review-diet-budget-value is-editable">{birthDate}</span>
+              <span className="review-diet-budget-chevron" aria-hidden="true">›</span>
+            </button>
+            <button
+              type="button"
+              className="review-diet-budget-row"
+              role="listitem"
+              onClick={()=>editNumber('身高', height, 'cm', 100, 220, setHeight)}
+            >
+              <span className="review-diet-budget-label">身高</span>
+              <span className="review-diet-budget-value is-editable">{height.toFixed(1)} cm</span>
+              <span className="review-diet-budget-chevron" aria-hidden="true">›</span>
+            </button>
+            <button
+              type="button"
+              className="review-diet-budget-row"
+              role="listitem"
+              onClick={()=>editNumber('体重', weight, 'kg', 30, 150, setWeight)}
+            >
+              <span className="review-diet-budget-label">体重</span>
+              <span className="review-diet-budget-value is-editable">{weight.toFixed(1)} kg</span>
+              <span className="review-diet-budget-chevron" aria-hidden="true">›</span>
+            </button>
+          </div>
+
+          <div className="review-diet-budget-section">
+            <div className="review-diet-budget-section-title">活动量</div>
+            <div className="review-diet-budget-activity" role="radiogroup" aria-label="活动量">
+              {DIET_ACTIVITY_OPTIONS.map(option=>(
+                <button
+                  type="button"
+                  key={option.id}
+                  role="radio"
+                  aria-checked={activity === option.id}
+                  className={'review-diet-budget-activity-card' + (activity === option.id ? ' is-active' : '')}
+                  onClick={()=>{ setActivity(option.id); setGoalDirty(false); }}
+                >
+                  <b>{option.title}</b>
+                  <span>{option.desc}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="review-diet-budget-section">
+            <div className="review-diet-budget-section-title">你的计划</div>
+            <div className="review-diet-budget-plan" role="radiogroup" aria-label="你的计划">
+              {DIET_PLAN_OPTIONS.map(option=>(
+                <button
+                  type="button"
+                  key={option.id}
+                  role="radio"
+                  aria-checked={plan === option.id}
+                  className={'review-diet-budget-plan-card' + (plan === option.id ? ' is-active' : '')}
+                  onClick={()=>{ setPlan(option.id); setGoalDirty(false); }}
+                >
+                  {option.title}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="review-diet-budget-section">
+            <div className="review-diet-budget-section-title">热量目标</div>
+            <div className="review-diet-budget-goal">
+              <label className="review-diet-budget-goal-main">
+                <input
+                  className="review-diet-budget-goal-input"
+                  type="number"
+                  min="800"
+                  max="4000"
+                  step="10"
+                  value={goal}
+                  aria-label="热量目标"
+                  onChange={event=>{
+                    const next = Number(event.target.value);
+                    if(!Number.isFinite(next)) return;
+                    setGoal(Math.min(4000, Math.max(800, Math.round(next))));
+                    setGoalDirty(true);
+                  }}
+                />
+                <span className="review-diet-budget-goal-unit">kcal / 天</span>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div className="review-diet-budget-footer">
+          <button
+            type="button"
+            className="review-diet-budget-done"
+            onClick={()=>{
+              if(typeof onComplete === 'function') onComplete(goal);
+              onClose();
+            }}
+          >
+            完成
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function DietDistributionCard({onOpen, onLandscapeOpen, title='饮食', more='查看完整饮食记录'}){
   return (
     <ReviewCard
       title={title}
@@ -1688,15 +1918,14 @@ function DietDistributionCard({onOpen, onLandscapeOpen, title='饮食', more='�
       legend={(
         <>
           <span className="review-legend-item is-diet"><i></i>每日热量</span>
-          <span className="review-legend-item is-diet-band"><i></i>均衡参考区间</span>
-          <DietBudgetHeadAction goal={DIET_TARGET_GOAL}/>
+          <span className="review-legend-item is-diet-band"><i></i>均衡参考区间 {DIET_BALANCE_LOW}—{DIET_BALANCE_HIGH}</span>
         </>
       )}
       metrics={(
         <>
           <ReviewMetric value={String(DIET_CARD_AVG)} unit="kcal" label="近30天日均"/>
           <ReviewMetric value={reviewDietDeltaText(DIET_CARD_DELTA)} unit="kcal" label="较上月"/>
-          <ReviewMetric value={String(DIET_CARD_RECORD_DAYS)} unit="天" label="达标天数"/>
+          <ReviewMetric value={String(DIET_CARD_RECORD_DAYS)} unit="天" label="记录天数"/>
         </>
       )}
       more={more}
@@ -1894,7 +2123,6 @@ function DietNutrientAnalysisSection({data}){
       <div className="review-nutrient-head">
         <div className="review-nutrient-title-wrap">
           <span className="review-nutrient-title">关键营养素分析</span>
-          <span className="review-card-more-badge">VIP</span>
         </div>
       </div>
 
@@ -1985,18 +2213,15 @@ function DietDailyWeekStrip({selectedIndex, onSelect}){
   );
 }
 
-function DietDailyReportCard(){
+function DietDailyReportCard({goal = 1440, onOpenBudget}){
   const [selectedIndex, setSelectedIndex] = useState(DIET_TARGET_DAYS.length - 1);
   const selected = DIET_TARGET_DAYS[selectedIndex] || DIET_TARGET_DAYS[DIET_TARGET_DAYS.length - 1];
   const nutrientData = getDietDailyNutrientData(selected.date);
   return (
     <div className="review-detail-card review-diet-daily-card">
-      <div className="review-diet-daily-head">
-        <span className="review-diet-daily-icon is-diet" aria-hidden="true"><ReviewDietIcon/></span>
-        <div className="review-diet-daily-head-copy">
-          <div className="review-diet-daily-title">饮食日报</div>
-          <div className="review-diet-daily-sub">{DIET_DAILY_WEEK_LABEL}</div>
-        </div>
+      <div className="review-mood-detail-head review-diet-daily-head">
+        <span>每日摄入</span>
+        <DietBudgetHeadAction goal={goal} onOpen={onOpenBudget}/>
       </div>
 
       <DietDailyWeekStrip selectedIndex={selectedIndex} onSelect={setSelectedIndex}/>
@@ -2012,51 +2237,135 @@ function DietDailyReportCard(){
 function DietWeeklyAnalysisCard(){
   return (
     <div className="review-detail-card review-diet-weekly-card">
-      <div className="review-diet-weekly-head">
-        <div className="review-diet-weekly-title-wrap">
-          <div className="review-diet-weekly-title">周饮食分析</div>
-          <span className="review-card-more-badge">VIP</span>
-        </div>
-      </div>
+      <div className="review-mood-detail-head">餐次分布</div>
       <div className="review-chart review-detail-chart">
-        <DietMealStackedChart days={DIET_STACK_DAYS} ariaLabel="近7天热量分布堆叠柱状图"/>
+        <DietMealStackedChart days={DIET_STACK_DAYS} ariaLabel="近7天热量餐次分布堆叠柱状图"/>
       </div>
       <div className="review-legend"><DietMealLegend/></div>
+      <div className="review-mood-time-summary review-diet-phase-summary">
+        <div className="review-mood-time-summary-card">
+          <span>热量摄入最高餐次</span>
+          <div className="review-mood-time-summary-main">
+            <i style={{background:DIET_MEAL_COLORS.dinner}}/>
+            <b>晚餐</b>
+          </div>
+          <em>约占全天热量的 <i style={{color:'#ff7a3d'}}>38%</i></em>
+        </div>
+        <div className="review-mood-time-summary-card">
+          <span>热量摄入最低餐次</span>
+          <div className="review-mood-time-summary-main">
+            <i style={{background:DIET_MEAL_COLORS.breakfast}}/>
+            <b>早餐</b>
+          </div>
+          <em>约占全天热量的 <i style={{color:'#ffa940'}}>14%</i></em>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-      <div className="review-diet-weekly-divider" aria-hidden="true"></div>
+const DIET_TREND_VALUES = [
+  1740,1690,1820,1880,1900,1830,1860,
+  1840,1900,1870,1930,1890,1950,1960,
+  1900,2040,1960,2050,1930,2089,1950,
+  2050,1980,2010,1970,2000,1900,1731,
+];
+const DIET_TREND_START = new Date(2026, 5, 16); // 6/16
+const DIET_TREND_LABEL_INDEXES = [0, 7, 14, 21, 27];
+const DIET_TREND_DATES = DIET_TREND_VALUES.map((_v, i)=>{
+  const d = new Date(DIET_TREND_START);
+  d.setDate(DIET_TREND_START.getDate() + i);
+  const isLast = i === DIET_TREND_VALUES.length - 1;
+  return isLast ? '今天' : ((d.getMonth() + 1) + '/' + d.getDate());
+});
+const DIET_TREND_PHASES = [
+  'menstrual','menstrual','menstrual','menstrual','menstrual',
+  'follicular','follicular','follicular','follicular','follicular','follicular','follicular','follicular',
+  'ovulationDay','ovulation','ovulation','ovulation',
+  'luteal','luteal','luteal','luteal','luteal','luteal','luteal','luteal','luteal','luteal','luteal',
+];
 
-      <div className="review-insight-body">
-        <div className="review-insight-item is-good">
-          <span className="review-insight-dot"></span>
-          <div>
-            <div className="review-insight-title">整体摄入：中高偏稳</div>
-            <div className="review-insight-text">近 30 天有记录日日均约 <b>{DIET_CARD_AVG} kcal</b>，较上月{DIET_CARD_DELTA >= 0 ? '略升' : '略降'} <b>{Math.abs(DIET_CARD_DELTA)} kcal</b>。多数天数落在均衡参考区间内，波动不算大。</div>
-          </div>
+function dietPhaseBandFill(phase){
+  if(phase === 'menstrual') return 'rgba(255,77,136,0.10)';
+  if(phase === 'ovulation' || phase === 'ovulationDay') return 'rgba(179,136,232,0.14)';
+  return 'rgba(0,204,153,0.08)';
+}
+
+function DietCalorieTrendCard(){
+  const values = DIET_TREND_VALUES;
+  const n = values.length;
+  const W = 340, H = 186;
+  const padL = 40, padR = 16, padT = 24, padB = 24;
+  const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
+  const plotH = y1 - y0;
+  const yMin = 1550, yMax = 2250;
+  const X = i => x0 + (n <= 1 ? 0 : (x1 - x0) * (i / (n - 1)));
+  const Y = v => y1 - (v - yMin) / (yMax - yMin) * plotH;
+  const pts = values.map((v, i)=>[X(i), Y(v)]);
+  const linePath = reviewSmoothPath(pts);
+  const color = '#ff7a3d';
+  const yTicks = [1600, 1800, 2000, 2200];
+  const phases = DIET_TREND_PHASES;
+  return (
+    <div className="review-detail-card review-mood-trend-card review-diet-trend-card">
+      <div className="review-mood-detail-head">热量趋势</div>
+      <div className="review-chart review-detail-chart review-mood-trend-chart">
+        <svg viewBox={'0 0 ' + W + ' ' + H} preserveAspectRatio="xMidYMid meet" role="img" aria-label="热量摄入趋势">
+          <defs>
+            <linearGradient id="dietTrendFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={color} stopOpacity="0.26"/>
+              <stop offset="60%" stopColor={color} stopOpacity="0.08"/>
+              <stop offset="100%" stopColor={color} stopOpacity="0.02"/>
+            </linearGradient>
+          </defs>
+          {phases.map((ph, i)=>{
+            const xLeft = i === 0 ? x0 : (X(i - 1) + X(i)) / 2;
+            const xRight = i === n - 1 ? x1 : (X(i) + X(i + 1)) / 2;
+            return <rect key={'ph' + i} x={xLeft} y={y0} width={Math.max(0.5, xRight - xLeft)} height={plotH} fill={dietPhaseBandFill(ph)}/>;
+          })}
+          {yTicks.map(t=>(
+            <g key={t}>
+              <line x1={x0} y1={Y(t)} x2={x1} y2={Y(t)} stroke="rgba(0,0,0,0.06)" strokeWidth="1" strokeDasharray="3 3"/>
+              <text x={x0 - 6} y={Y(t) + 3} textAnchor="end" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{t}</text>
+            </g>
+          ))}
+          <path d={linePath + ' L' + pts[n - 1][0].toFixed(1) + ' ' + y1.toFixed(1) + ' L' + pts[0][0].toFixed(1) + ' ' + y1.toFixed(1) + ' Z'} fill="url(#dietTrendFill)"/>
+          <path d={linePath} fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round"/>
+          {values.map((v, i)=>{
+            const isLast = i === n - 1;
+            return <circle key={i} cx={X(i)} cy={Y(v)} r={isLast ? 4.5 : 2} fill={color} stroke={isLast ? '#fff' : 'none'} strokeWidth={isLast ? 2 : 0}/>;
+          })}
+          {DIET_TREND_LABEL_INDEXES.map(i=>(
+            <text key={i} x={X(i)} y={H - 7} textAnchor="middle" fontSize="9" fill={i === n - 1 ? color : '#bbbbbf'} fontFamily="PingFang SC">{DIET_TREND_DATES[i]}</text>
+          ))}
+        </svg>
+      </div>
+      <div className="review-mood-cycle-phase-legend" aria-hidden="true">
+        <span><i className="is-menstrual"/>月经期</span>
+        <span><i className="is-foll-luteal"/>卵泡期 / 黄体期</span>
+        <span><i className="is-ovulation"/>排卵期</span>
+        <span><i className="is-ovulation-day"/>排卵日</span>
+      </div>
+      <div className="review-mood-insight-grid">
+        <div className="review-mood-insight">
+          <span>日均热量</span>
+          <b>1908<small>kcal</small></b>
         </div>
-        <div className="review-insight-item is-note">
-          <span className="review-insight-dot"></span>
-          <div>
-            <div className="review-insight-title">最突出：午餐和晚餐占比偏高</div>
-            <div className="review-insight-text">按餐次拆开后，午餐+晚餐合计大约占全天热量的 <b>65%-75%</b>。早餐偶有缺记，加餐和饮品则比较零散，这会让「傍晚后半段」更容易推高当日总量。</div>
-          </div>
+        <div className="review-mood-insight">
+          <span>较上月</span>
+          <b className="is-down">↘ 18<small>kcal</small></b>
         </div>
-        <div className="review-insight-item is-good">
-          <span className="review-insight-dot"></span>
-          <div>
-            <div className="review-insight-title">记录习惯：覆盖率不错</div>
-            <div className="review-insight-text">近 30 天记录了 <b>{DIET_CARD_RECORD_DAYS}</b> 天，连续记录能让餐次比例判断更可靠，也更容易看出「某几天突然冲高」是不是偶发。</div>
-          </div>
+      </div>
+      <div className="review-mood-time-summary review-diet-phase-summary">
+        <div className="review-mood-time-summary-card">
+          <span>热量摄入最高阶段</span>
+          <div className="review-mood-time-summary-main"><b>黄体期</b></div>
+          <em>日均 <i style={{color:'#3ec19a'}}>1969 kcal</i></em>
         </div>
-        <div className="review-insight-item is-note">
-          <span className="review-insight-dot"></span>
-          <div>
-            <div className="review-insight-title">值得留意：周末更容易冲高</div>
-            <div className="review-insight-text">样本里周末若干天更容易出现 <b>1900+</b> 的峰值，常常伴随着晚餐更高、或加餐/饮品叠加上去。如果目标更看重「稳」，周末的晚餐分量比早餐更值得先调。</div>
-          </div>
-        </div>
-        <div className="review-insight-summary">
-          <div className="review-summary-head">总结</div>
-          <p className="review-summary-text">总体看，你最近的热量摄入并不失控，结构上更依赖午晚两餐。若想更贴合热量目标，优先把周末晚餐和加餐压一点，并尽量补齐早餐记录，波动会更可控。这是对记录的解读，不是营养处方。</p>
+        <div className="review-mood-time-summary-card">
+          <span>热量摄入最低阶段</span>
+          <div className="review-mood-time-summary-main"><b>月经期</b></div>
+          <em>日均 <i style={{color:'#ef6f8f'}}>1740 kcal</i></em>
         </div>
       </div>
     </div>
@@ -2064,8 +2373,19 @@ function DietWeeklyAnalysisCard(){
 }
 
 function DietDistributionDetailPage({open, onClose}){
+  const [timelineOpen, setTimelineOpen] = useState(false);
+  const [budgetOpen, setBudgetOpen] = useState(false);
+  const [calorieGoal, setCalorieGoal] = useState(1440);
+  const [periodOffset, setPeriodOffset] = useState(0);
+  const nestedOpen = timelineOpen || budgetOpen;
+  React.useEffect(()=>{
+    if(!open) return;
+    setPeriodOffset(0);
+    setTimelineOpen(false);
+    setBudgetOpen(false);
+  }, [open]);
   return (
-    <section className={'review-cycle-detail is-fullscreen-detail' + (open ? ' is-open' : '')} aria-hidden={!open} aria-label="饮食详情">
+    <section className={'review-cycle-detail is-fullscreen-detail' + (open ? ' is-open' : '') + (nestedOpen ? ' is-timeline-open' : '')} aria-hidden={!open} aria-label="饮食详情">
       <div className="review-detail-nav">
         <button type="button" className="review-detail-back" aria-label="返回" onClick={onClose}>
           <ReviewBackIcon/>
@@ -2073,8 +2393,114 @@ function DietDistributionDetailPage({open, onClose}){
         <span className="review-detail-title">饮食</span>
       </div>
       <div className="review-detail-content">
-        <DietDailyReportCard/>
+        <MoodPeriodNav range="cycle" offset={periodOffset} onChange={setPeriodOffset}/>
+        <DietDailyReportCard goal={calorieGoal} onOpenBudget={()=>setBudgetOpen(true)}/>
+        <DietCalorieTrendCard/>
         <DietWeeklyAnalysisCard/>
+        <DietMonthStickerCard onOpenAll={()=>setTimelineOpen(true)}/>
+      </div>
+      <DietTimelinePage open={timelineOpen} onClose={()=>setTimelineOpen(false)}/>
+      <DietBudgetSettingsPage
+        open={budgetOpen}
+        onClose={()=>setBudgetOpen(false)}
+        initialGoal={calorieGoal}
+        onComplete={setCalorieGoal}
+      />
+    </section>
+  );
+}
+
+const DIET_STICKER_BG = ['#ffe8ee', '#fff3d6', '#e8f4ff', '#e8f8ef', '#f3e8ff', '#ffe9d6'];
+const DIET_WEEKDAY_SHORT = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+
+function buildDietStickerDays(){
+  const today = new Date(2026, 6, 13);
+  const photoDays = [...DIET_CALENDAR_PHOTO_DAYS].sort((a, b)=>b - a);
+  return photoDays.map((day)=>{
+    const d = new Date(2026, 6, day);
+    const isToday = day === today.getDate();
+    const count = 3 + ((day * 3) % 4);
+    const stickers = Array.from({length:count}, (_, i)=>{
+      const photo = DIET_REVIEW_PHOTOS[(day + i * 3) % DIET_REVIEW_PHOTOS.length];
+      return {photo, bg:DIET_STICKER_BG[(day + i) % DIET_STICKER_BG.length]};
+    });
+    return {
+      key:'d' + day,
+      day,
+      weekday: isToday ? '今天' : DIET_WEEKDAY_SHORT[d.getDay()],
+      isToday,
+      stickers,
+    };
+  });
+}
+
+const DIET_STICKER_DAYS = buildDietStickerDays();
+
+function DietStickerRow({row}){
+  return (
+    <div className={'review-diet-sticker-row' + (row.isToday ? ' is-today' : '')}>
+      <div className="review-diet-sticker-date">
+        <b>{row.day}</b>
+        <span>{row.weekday}</span>
+      </div>
+      <div className="review-diet-sticker-stack">
+        {row.stickers.map((s, i)=>(
+          <span className="review-diet-sticker" key={i} style={{background:s.bg, zIndex:row.stickers.length - i}}>
+            <img src={s.photo} alt=""/>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DietMonthStickerCard({onOpenAll}){
+  const preview = DIET_STICKER_DAYS.slice(0, 5);
+  return (
+    <div className="review-detail-card review-diet-sticker-card">
+      <div className="review-mood-detail-head">食物照片墙</div>
+      <div className="review-diet-sticker-list">
+        {preview.map(row=>(
+          <DietStickerRow row={row} key={row.key}/>
+        ))}
+      </div>
+      <button type="button" className="review-diet-sticker-more" onClick={onOpenAll}>
+        查看全部 {DIET_STICKER_DAYS.length} 天
+        <span aria-hidden="true">›</span>
+      </button>
+    </div>
+  );
+}
+
+function DietTimelinePage({open, onClose}){
+  React.useEffect(()=>{
+    if(!open) return undefined;
+    const handleKeyDown = event=>{ if(event.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handleKeyDown);
+    return ()=>document.removeEventListener('keydown', handleKeyDown);
+  }, [open, onClose]);
+
+  return (
+    <section
+      className={'review-cycle-detail is-fullscreen-detail review-diet-timeline' + (open ? ' is-open' : '')}
+      aria-hidden={!open}
+      aria-label="食物照片墙"
+    >
+      <div className="review-detail-nav">
+        <button type="button" className="review-detail-back" aria-label="返回" onClick={onClose}>
+          <ReviewBackIcon/>
+        </button>
+        <span className="review-detail-title">食物照片墙</span>
+      </div>
+      <div className="review-detail-content">
+        <div className="review-detail-card review-diet-sticker-card is-timeline">
+          <div className="review-diet-sticker-sub is-block">7月 · 共 {DIET_STICKER_DAYS.length} 天有记录</div>
+          <div className="review-diet-sticker-list">
+            {DIET_STICKER_DAYS.map(row=>(
+              <DietStickerRow row={row} key={row.key}/>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );

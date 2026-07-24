@@ -2255,8 +2255,346 @@
 .review-diet-daily-head{
   display:flex;
   align-items:center;
+  justify-content:space-between;
   gap:10px;
+  margin-bottom:12px;
+}
+.review-diet-weekly-card .review-mood-detail-head{
+  margin-bottom:12px;
+}
+.review-diet-trend-card .review-mood-detail-head{
+  margin-bottom:12px;
+}
+.review-diet-phase-summary{
+  margin-top:12px;
+}
+.review-diet-trend-card .review-mood-insight b.is-down{
+  color:rgba(0,0,0,0.8);
+}
+.review-diet-sticker-card .review-mood-detail-head{
   margin-bottom:4px;
+}
+.review-diet-sticker-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
+}
+.review-diet-sticker-sub{
+  margin-top:2px;
+  font-size:12px;
+  color:rgba(0,0,0,0.45);
+  line-height:1.29;
+}
+.review-diet-sticker-sub.is-block{
+  margin:0 0 12px;
+}
+.review-diet-sticker-share{
+  flex:0 0 auto;
+  height:28px;
+  padding:0 14px;
+  border:0;
+  border-radius:80px;
+  background:rgba(255,77,136,0.12);
+  color:#ff4d88;
+  font-size:13px;
+  font-weight:500;
+  cursor:pointer;
+}
+.review-diet-sticker-list{
+  display:flex;
+  flex-direction:column;
+}
+.review-diet-sticker-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-height:64px;
+  padding:10px 0;
+  border-bottom:0.5px solid rgba(0,0,0,0.06);
+}
+.review-diet-sticker-row:last-child{
+  border-bottom:0;
+}
+.review-diet-sticker-date{
+  width:36px;
+  flex:0 0 36px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+}
+.review-diet-sticker-date b{
+  font-size:21px;
+  font-weight:500;
+  color:rgba(0,0,0,0.8);
+  line-height:1.1;
+}
+.review-diet-sticker-date span{
+  font-size:11px;
+  color:rgba(0,0,0,0.4);
+  line-height:1.2;
+}
+.review-diet-sticker-stack{
+  flex:1;
+  min-width:0;
+  display:flex;
+  align-items:center;
+  overflow:hidden;
+}
+.review-diet-sticker{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  border:2px solid #fff;
+  overflow:hidden;
+  flex:0 0 44px;
+  box-sizing:border-box;
+  margin-left:-12px;
+  position:relative;
+}
+.review-diet-sticker:first-child{
+  margin-left:0;
+}
+.review-diet-sticker img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+.review-diet-sticker-more{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  width:100%;
+  margin-top:8px;
+  padding:10px 0 2px;
+  border:0;
+  background:none;
+  color:#ff4d88;
+  font-size:14px;
+  font-weight:500;
+  cursor:pointer;
+}
+.review-diet-sticker-more span{
+  font-size:16px;
+  line-height:1;
+}
+.review-diet-timeline,
+.review-diet-budget-page{
+  z-index:160;
+  top:0 !important;
+  bottom:0;
+  background:var(--my-bg);
+}
+.review-cycle-detail.is-timeline-open > .review-detail-nav{
+  visibility:hidden;
+}
+.review-diet-sticker-card.is-timeline{
+  margin-top:0;
+}
+.review-diet-budget-page{
+  display:flex;
+  flex-direction:column;
+}
+.review-diet-budget-page .review-detail-nav{
+  background:var(--my-bg);
+}
+.review-diet-budget-content{
+  flex:1 1 auto;
+  display:flex;
+  flex-direction:column;
+  padding-bottom:calc(20px + var(--my-safe-bottom, 0px));
+}
+.review-diet-budget-card{
+  flex:0 0 auto;
+}
+.review-diet-budget-list{
+  margin:0;
+}
+.review-diet-budget-row{
+  width:100%;
+  min-height:61px;
+  margin:0;
+  padding:0;
+  border:0;
+  border-bottom:0.5px solid var(--my-line);
+  background:transparent;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-family:inherit;
+  text-align:left;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.review-diet-budget-row.is-static{
+  cursor:default;
+}
+.review-diet-budget-row:last-child{
+  border-bottom:0;
+}
+.review-diet-budget-label{
+  flex:0 0 auto;
+  font-size:17px;
+  font-weight:500;
+  color:var(--my-text-primary);
+  line-height:1.19;
+}
+.review-diet-budget-value{
+  flex:1 1 auto;
+  text-align:right;
+  font-size:17px;
+  font-weight:400;
+  color:var(--my-text-secondary);
+  line-height:1.47;
+  font-variant-numeric:tabular-nums;
+}
+.review-diet-budget-value.is-editable{
+  color:var(--my-brand-red);
+}
+.review-diet-budget-chevron{
+  flex:0 0 auto;
+  color:rgba(0,0,0,0.25);
+  font-size:18px;
+  line-height:1;
+  transform:translateY(-1px);
+}
+.review-diet-budget-section{
+  margin-top:28px;
+}
+.review-diet-budget-section-title{
+  font-size:17px;
+  font-weight:500;
+  color:var(--my-text-primary);
+  line-height:1.19;
+  margin-bottom:12px;
+}
+.review-diet-budget-activity{
+  display:flex;
+  gap:8px;
+}
+.review-diet-budget-activity-card{
+  flex:1 1 0;
+  min-width:0;
+  min-height:64px;
+  padding:12px 8px;
+  border:1px solid rgba(0,0,0,0.08);
+  border-radius:8px;
+  background:#fff;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  font-family:inherit;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.review-diet-budget-activity-card b{
+  font-size:15px;
+  font-weight:500;
+  color:var(--my-text-primary);
+  line-height:1.19;
+}
+.review-diet-budget-activity-card span{
+  font-size:12px;
+  font-weight:400;
+  color:var(--my-text-tertiary);
+  line-height:1.29;
+}
+.review-diet-budget-activity-card.is-active{
+  border-color:var(--my-brand-red);
+  background:rgba(255,77,136,0.06);
+}
+.review-diet-budget-activity-card.is-active b,
+.review-diet-budget-activity-card.is-active span{
+  color:var(--my-brand-red);
+}
+.review-diet-budget-plan{
+  display:flex;
+  gap:8px;
+}
+.review-diet-budget-plan-card{
+  flex:1 1 0;
+  min-width:0;
+  height:40px;
+  padding:0 8px;
+  border:1px solid rgba(0,0,0,0.08);
+  border-radius:8px;
+  background:#fff;
+  color:var(--my-text-primary);
+  font-size:15px;
+  font-weight:500;
+  font-family:inherit;
+  line-height:1;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.review-diet-budget-plan-card.is-active{
+  border-color:var(--my-brand-red);
+  background:rgba(255,77,136,0.06);
+  color:var(--my-brand-red);
+}
+.review-diet-budget-goal{
+  display:flex;
+  align-items:flex-end;
+  padding-bottom:8px;
+  border-bottom:1px solid var(--my-brand-red);
+}
+.review-diet-budget-goal-main{
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+  min-width:0;
+}
+.review-diet-budget-goal-input{
+  width:4.2em;
+  border:0;
+  outline:none;
+  padding:0;
+  background:transparent;
+  color:var(--my-brand-red);
+  font-size:36px;
+  font-weight:500;
+  font-family:inherit;
+  line-height:1.1;
+  font-variant-numeric:tabular-nums;
+  -moz-appearance:textfield;
+}
+.review-diet-budget-goal-input::-webkit-outer-spin-button,
+.review-diet-budget-goal-input::-webkit-inner-spin-button{
+  -webkit-appearance:none;
+  margin:0;
+}
+.review-diet-budget-goal-unit{
+  font-size:15px;
+  font-weight:400;
+  color:var(--my-text-secondary);
+  line-height:1.19;
+}
+.review-diet-budget-footer{
+  flex:0 0 auto;
+  margin-top:auto;
+  padding-top:24px;
+}
+.review-diet-budget-done{
+  width:100%;
+  height:40px;
+  border:0;
+  border-radius:var(--r-pill);
+  background:var(--my-brand-red);
+  color:#fff;
+  font-size:17px;
+  font-weight:500;
+  font-family:inherit;
+  line-height:1;
+  cursor:pointer;
+}
+.review-diet-budget-done:active{
+  opacity:0.85;
 }
 .review-diet-daily-icon{
   width:36px;
@@ -2835,6 +3173,14 @@
   width:100%;
 }
 .review-stool-trend-card .review-mood-trend-chart > svg{
+  width:100%;
+  height:100%;
+}
+.review-diet-trend-card .review-mood-trend-chart{
+  aspect-ratio:340 / 186;
+  width:100%;
+}
+.review-diet-trend-card .review-mood-trend-chart > svg{
   width:100%;
   height:100%;
 }
@@ -3632,6 +3978,12 @@
   display:flex;
   align-items:center;
   gap:8px;
+}
+.review-mood-time-summary-main > i{
+  width:10px;
+  height:10px;
+  border-radius:3px;
+  flex:0 0 auto;
 }
 .review-mood-time-summary-main svg{
   width:28px;
