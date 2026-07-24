@@ -519,6 +519,14 @@ function ReviewCard({title, iconClass='', icon, chart, legend, metrics, more, mo
   );
 }
 
+function PeriodHealthImageCard(){
+  return (
+    <div className="review-card review-health-image-card">
+      <img src="assets/period-health-card.jpg" alt="经期健康度" />
+    </div>
+  );
+}
+
 const REVIEW_CYCLE_ALL_DATA = [
   ['22.1',33],['22.2',32],['22.4',29],['22.5',28],['22.6',31],['22.7',33],
   ['22.8',30],['22.9',32],['22.10',30],['22.11',33],['22.12',34],
@@ -5477,7 +5485,9 @@ function ReviewPage({mode='经期', shareState, onShareStateChange, onOpenPartne
         </button>
       </div>
       <div className="review-content">
-        <p className="review-page-greeting">已记录 <b>350 天</b>，共 <b>{isPeriodMode ? 12 : 9} 项</b>可回顾</p>
+        <p className="review-page-greeting">已记录 <b>350 天</b>，共 <b>{isPeriodMode ? 9 : 5} 项</b>可回顾</p>
+
+      {isPeriodMode ? <PeriodHealthImageCard/> : null}
 
       <ReviewCard
         title={isPeriodMode ? '周期' : '月经周期'}
@@ -5557,10 +5567,6 @@ function ReviewPage({mode='经期', shareState, onShareStateChange, onOpenPartne
       ) : null}
       {isPeriodMode ? <LoveReviewCard/> : null}
 
-      <FeedingReviewCard/>
-      <SleepReviewCard/>
-      <DiaperReviewCard/>
-      <FoodReviewCard/>
       </div>
       <CycleDetailPage
         open={cycleDetailOpen}
