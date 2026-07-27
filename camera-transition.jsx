@@ -38,12 +38,34 @@ const CAMERA_RECOGNITION_MODES = [
     resultDescription: '已识别照片中的主要食物',
   },
   {
-    id: 'water',
-    label: '喝水',
-    capturePhoto: '水杯.jpg',
-    iconSrc: 'assets/baby-feeding-icons/water.png',
-    resultTitle: '识别为喝水记录',
-    resultDescription: '已根据容器估算本次饮水量',
+    id: 'beverage',
+    label: '饮品',
+    capturePhoto: '星巴克红茶拿铁.webp',
+    iconSrc: 'assets/record-beverage.svg',
+    resultTitle: '识别为饮品记录',
+    resultDescription: '已识别饮品品牌、品名、规格和定制',
+    resultNote: '未知营养值未自动推断',
+    saveLabel: '保存记录',
+  },
+  {
+    id: 'skin',
+    label: '皮肤',
+    capturePhoto: '长痘.jpg',
+    iconSrc: 'assets/record-symptom.png',
+    resultTitle: '识别为皮肤状态',
+    resultDescription: '已记录照片中可见的皮肤状态',
+    resultNote: '仅记录照片中可见状态，不作肤质或疾病诊断',
+    saveLabel: '保存状态',
+  },
+  {
+    id: 'cosmetic',
+    label: '化妆品',
+    capturePhoto: 'SK2.jpeg',
+    iconSrc: 'assets/record-cosmetic.svg',
+    resultTitle: '识别为化妆品',
+    resultDescription: '已识别照片中的产品组合',
+    resultNote: '请确认产品名称和版本后加入清单',
+    saveLabel: '加入在用清单',
   },
   {
     id: 'stool',
@@ -66,7 +88,7 @@ function getCameraRecognitionMode(modeId) {
 
 const AUTO_DETECT_DEMO_PHOTOS = CAMERA_RECOGNITION_MODES.map((mode, index) => ({
   id: `auto-detect-${mode.id}`,
-  date: '2026-07-20',
+  date: '2026-07-27',
   time: `09:${String(41 + index).padStart(2, '0')}`,
   thumb: mode.capturePhoto,
   type: mode.id,
@@ -91,7 +113,6 @@ function buildCameraRecognitionResult(payload) {
   const mode = inferCameraRecognitionMode(payload?.photo || payload);
   const base = { ...payload, mode };
   if (mode === 'weight') return { ...base, value: 108.4, unit: 'jin' };
-  if (mode === 'water') return { ...base, value: 350, unit: 'ml' };
   if (mode === 'period') {
     return {
       ...base,
@@ -109,6 +130,52 @@ function buildCameraRecognitionResult(payload) {
       summaryItems: [
         { label: '颜色', value: '淡黄色' },
         { label: '性状', value: '黏稠' },
+      ],
+    };
+  }
+  if (mode === 'beverage') {
+    return {
+      ...base,
+      brand: '星巴克',
+      beverageName: '红茶咖啡拿铁鸳鸯',
+      spec: '大杯 / 冰',
+      customization: '换巴旦木奶',
+      summary: '星巴克红茶咖啡拿铁鸳鸯 · 大杯/冰',
+      summaryItems: [
+        { label: '品牌', value: '星巴克' },
+        { label: '饮品', value: '红茶咖啡拿铁鸳鸯' },
+        { label: '规格', value: '大杯 / 冰' },
+        { label: '定制', value: '换巴旦木奶' },
+      ],
+    };
+  }
+  if (mode === 'skin') {
+    return {
+      ...base,
+      area: '面颊',
+      acne: '少量可见',
+      redness: '轻微',
+      acneMarks: '少量',
+      summary: '面颊有少量可见痘痘，轻微泛红',
+      summaryItems: [
+        { label: '部位', value: '面颊' },
+        { label: '痘痘', value: '少量可见' },
+        { label: '泛红', value: '轻微' },
+        { label: '痘印', value: '少量' },
+      ],
+    };
+  }
+  if (mode === 'cosmetic') {
+    return {
+      ...base,
+      brand: 'SK-II',
+      product: '护肤精华露等4件',
+      managementStatus: '正在使用',
+      summary: 'SK-II 护肤精华露等4件 · 正在使用',
+      summaryItems: [
+        { label: '品牌', value: 'SK-II' },
+        { label: '产品', value: '护肤精华露等4件' },
+        { label: '管理状态', value: '正在使用' },
       ],
     };
   }
@@ -396,7 +463,7 @@ function CameraPermissionDialog({ onAllow, onDeny }) {
       <div className="camera-perm-dialog">
         <CameraPermissionIcon/>
         <h2 id="camera-perm-title" className="camera-perm-title">美柚想访问相机</h2>
-        <p className="camera-perm-subtitle">用于智能识别体重、月经、白带、饮食、喝水和便便记录，请允许美柚访问相机</p>
+        <p className="camera-perm-subtitle">用于智能识别体重、饮食、饮品、皮肤、化妆品等记录，请允许美柚访问相机</p>
         <div className="camera-perm-actions">
           <button type="button" className="camera-perm-btn" onClick={onDeny}>不允许</button>
           <button type="button" className="camera-perm-btn" onClick={onAllow}>允许</button>
@@ -512,14 +579,17 @@ function CameraPermissionBlocked({ onEnable }) {
 function CameraRecognitionResult({ result, onChange, onRetake, onSave }) {
   const modeConfig = getCameraRecognitionMode(result?.mode);
   const isWeight = result?.mode === 'weight';
-  const isWater = result?.mode === 'water';
-  const isNumeric = isWeight || isWater;
+  const isNumeric = isWeight;
   const numericValue = result?.value ?? '';
   const isValid = !isNumeric || Number(numericValue) > 0;
-  const showEstimateNote = ['period', 'discharge', 'stool'].includes(result?.mode);
+  const resultNote = modeConfig.resultNote || (
+    ['period', 'discharge', 'stool'].includes(result?.mode)
+      ? 'AI 估测结果仅用于辅助记录，不作医学诊断'
+      : ''
+  );
 
   return (
-    <div className="camera-recognition-result">
+    <div className={'camera-recognition-result is-' + result.mode}>
       <span className="camera-result-handle" aria-hidden="true"/>
       <div className="camera-result-status">
         <span className="camera-result-check" aria-hidden="true">✓</span>
@@ -541,31 +611,27 @@ function CameraRecognitionResult({ result, onChange, onRetake, onSave }) {
             type="number"
             inputMode="decimal"
             min="0"
-            step={isWeight ? '0.1' : '10'}
-            aria-label={isWeight ? '体重数值' : '喝水量'}
+            step="0.1"
+            aria-label="体重数值"
             value={numericValue}
             onChange={(event) => onChange?.({ ...result, value: event.target.value })}
           />
-          {isWeight ? (
-            <div className="camera-result-unit-switch" role="group" aria-label="体重单位">
-              <button
-                type="button"
-                className={result.unit === 'jin' ? 'is-active' : ''}
-                onClick={() => onChange?.({ ...result, unit: 'jin' })}
-              >
-                斤
-              </button>
-              <button
-                type="button"
-                className={result.unit === 'kg' ? 'is-active' : ''}
-                onClick={() => onChange?.({ ...result, unit: 'kg' })}
-              >
-                kg
-              </button>
-            </div>
-          ) : (
-            <span className="camera-result-fixed-unit">ml</span>
-          )}
+          <div className="camera-result-unit-switch" role="group" aria-label="体重单位">
+            <button
+              type="button"
+              className={result.unit === 'jin' ? 'is-active' : ''}
+              onClick={() => onChange?.({ ...result, unit: 'jin' })}
+            >
+              斤
+            </button>
+            <button
+              type="button"
+              className={result.unit === 'kg' ? 'is-active' : ''}
+              onClick={() => onChange?.({ ...result, unit: 'kg' })}
+            >
+              kg
+            </button>
+          </div>
         </div>
       ) : (
         <div className="camera-result-summary">
@@ -577,8 +643,8 @@ function CameraRecognitionResult({ result, onChange, onRetake, onSave }) {
           ))}
         </div>
       )}
-      {showEstimateNote ? (
-        <p className="camera-result-estimate-note">AI 估测结果仅用于辅助记录，不作医学诊断</p>
+      {resultNote ? (
+        <p className="camera-result-estimate-note">{resultNote}</p>
       ) : null}
       <div className="camera-result-actions">
         <button type="button" className="camera-result-retake" onClick={onRetake}>
@@ -590,7 +656,7 @@ function CameraRecognitionResult({ result, onChange, onRetake, onSave }) {
           onClick={onSave}
           disabled={!isValid}
         >
-          保存记录
+          {modeConfig.saveLabel || '保存记录'}
         </button>
       </div>
     </div>
@@ -867,7 +933,7 @@ function CameraView({
               <span className="camera-frame-corner br"/>
             </div>
             <div className="camera-hint camera-auto-detect-hint">
-              快速拍照记录体重、月经、白带、饮食、喝水、便便情况
+              快速拍照记录体重、饮食、饮品、皮肤、化妆品等情况
             </div>
           </>
         )}
@@ -1122,7 +1188,7 @@ function CameraTransition({
   };
 
   const handleRecognitionSave = () => {
-    const isNumeric = ['weight', 'water'].includes(recognitionResult?.mode);
+    const isNumeric = recognitionResult?.mode === 'weight';
     if (!recognitionResult || (isNumeric && Number(recognitionResult.value) <= 0)) return;
     onCaptureSuccess?.({
       ...recognitionResult,

@@ -27,6 +27,9 @@ const RECORD_ICON_SRC = {
   plan: 'assets/record-todo.png',
   diet: 'assets/record-diet.png',
   water: 'assets/baby-feeding-icons/water.png',
+  beverage: 'assets/record-beverage.svg',
+  skin: 'assets/record-symptom.png',
+  cosmetic: 'assets/record-cosmetic.svg',
 };
 function recordIconSrc(key, fallback){
   return RECORD_ICON_SRC[key] || fallback || RECORD_ICON_SRC.symptom;

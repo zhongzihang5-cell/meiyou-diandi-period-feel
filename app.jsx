@@ -1779,12 +1779,29 @@ function App(){
     const detectedRecordMeta = {
       period:{ label:'月经', icon:'flow', detail:'经量多，颜色鲜红色' },
       discharge:{ label:'白带', icon:'discharge', detail:'淡黄色，黏稠' },
+      beverage:{
+        label:'饮品',
+        icon:'beverage',
+        buildDetail:(data)=>`${data.brand || ''}${data.beverageName || ''} · ${(data.spec || '').replace(/\s*\/\s*/g, '/')}`,
+      },
+      skin:{
+        label:'皮肤状态',
+        icon:'skin',
+        buildDetail:(data)=>`${data.area || ''}有${data.acne || ''}痘痘，${data.redness || ''}泛红`,
+      },
+      cosmetic:{
+        label:'化妆品',
+        icon:'cosmetic',
+        buildDetail:(data)=>`${data.brand || ''} ${data.product || ''} · ${data.managementStatus || ''}`,
+      },
       stool:{ label:'便便', icon:'stool', detail:'布里斯托 2 型，黄褐色' },
     }[payload?.mode];
     if(detectedRecordMeta){
       markUserRecorded();
       const stamp = Date.now();
-      const detail = payload?.summary || detectedRecordMeta.detail;
+      const detail = detectedRecordMeta.buildDetail?.(payload)
+        || payload?.summary
+        || detectedRecordMeta.detail;
       const entry = {
         kind:'record-group',
         id:`e-${payload.mode}-camera-${stamp}-g`,

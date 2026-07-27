@@ -1045,6 +1045,9 @@
   gap:14px;
   margin-top:8px;
 }
+.camera-result-heading > div{
+  min-width:0;
+}
 .camera-result-heading h2{
   margin:0;
   font-size:19px;
@@ -1089,6 +1092,15 @@
 }
 .camera-result-type-icon.is-stool{
   background:#f4f0eb;
+}
+.camera-result-type-icon.is-beverage{
+  background:#e8f7f4;
+}
+.camera-result-type-icon.is-skin{
+  background:#fff0ed;
+}
+.camera-result-type-icon.is-cosmetic{
+  background:#f2efff;
 }
 .camera-result-value-row{
   display:flex;
@@ -1178,6 +1190,21 @@
   font-size:14px;
   line-height:20px;
   font-weight:600;
+}
+.camera-recognition-result.is-beverage .camera-result-summary-item{
+  border-color:#dcefeb;
+  background:#f5fbfa;
+}
+.camera-recognition-result.is-skin .camera-result-summary-item{
+  border-color:#f2dfdc;
+  background:#fff8f6;
+}
+.camera-recognition-result.is-cosmetic .camera-result-summary-item{
+  border-color:#e5e0f5;
+  background:#faf8ff;
+}
+.camera-recognition-result.is-cosmetic .camera-result-summary-item:last-child{
+  grid-column:1 / -1;
 }
 .camera-result-estimate-note{
   margin:8px 0 0;
