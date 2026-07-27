@@ -1,8 +1,12 @@
 // ============ Status bar ============
-function StatusBar(){
+function StatusBar({isMember=false, onMemberChange}){
   return (
     <div className="statusbar">
       <span>9:41</span>
+      <div className="demo-member-switch" role="group" aria-label="会员演示切换">
+        <button type="button" className={!isMember ? 'is-active' : ''} onClick={()=>onMemberChange?.(false)}>非会员</button>
+        <button type="button" className={isMember ? 'is-active' : ''} onClick={()=>onMemberChange?.(true)}>会员</button>
+      </div>
       <span className="sb-right">
         <svg width="17" height="11" viewBox="0 0 17 11" aria-hidden="true">
           <rect x="0" y="6" width="3" height="5" rx="1" fill="currentColor"/>

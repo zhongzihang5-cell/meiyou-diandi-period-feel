@@ -299,6 +299,7 @@ function App(){
     }
     return initial.activeTab;
   });
+  const [isMember, setIsMember] = useState(false);
   const [recordLifeMode, setRecordLifeMode] = useState('经期');
   const [reviewShareState, setReviewShareState] = useState(DEFAULT_REVIEW_SHARE_STATE);
   const [partnerPreviewOpen, setPartnerPreviewOpen] = useState(false);
@@ -2217,7 +2218,7 @@ function App(){
   return (
     <>
       <div className={'phone' + (homeDetailOpen ? ' is-home-detail-open' : '') + (showDockQuickStrip ? ' is-dock-quick-entry' : '')}>
-        <StatusBar/>
+        <StatusBar isMember={isMember} onMemberChange={setIsMember}/>
 
       {showHome && HomePage && (
         <HomePage
@@ -2291,6 +2292,7 @@ function App(){
       {showReview && ReviewPage && (
         <ReviewPage
           mode={recordLifeMode}
+          isMember={isMember}
           shareState={reviewShareState}
           onShareStateChange={setReviewShareState}
           onOpenPartnerPreview={()=>{

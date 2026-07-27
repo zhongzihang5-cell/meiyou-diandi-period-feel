@@ -102,9 +102,38 @@ html,body{
 .statusbar{
   height:44px;
   display:flex;align-items:center;justify-content:space-between;
+  position:relative;
   padding:0 18px;
   background:var(--my-bg);
   font-size:14px;font-weight:600;color:var(--my-text-primary);
+}
+.demo-member-switch{
+  position:absolute;
+  left:50%;
+  top:50%;
+  display:flex;
+  gap:2px;
+  padding:2px;
+  border-radius:999px;
+  background:rgba(0,0,0,.07);
+  transform:translate(-50%,-50%);
+  z-index:2;
+}
+.demo-member-switch button{
+  border:0;
+  border-radius:999px;
+  padding:3px 8px;
+  background:transparent;
+  color:var(--my-text-tertiary);
+  font-family:inherit;
+  font-size:11px;
+  line-height:16px;
+  cursor:pointer;
+}
+.demo-member-switch button.is-active{
+  background:var(--my-surface);
+  color:var(--my-brand-red);
+  box-shadow:0 1px 3px rgba(0,0,0,.12);
 }
 .sb-right{display:flex;align-items:center;gap:6px}
 .statusbar svg{display:block}

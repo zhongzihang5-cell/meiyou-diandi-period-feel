@@ -1957,6 +1957,20 @@
 .review-detail-chart{
   margin-top:2px;
 }
+.review-cycle-chart-toolbar{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 0;font-size:13px;color:var(--my-text-secondary)}
+.review-chart-mode{margin:0!important;width:112px!important;height:30px!important}
+.review-chart-mode button{font-size:12px!important}
+.review-vip-lock-content{text-align:center;padding:26px 18px 24px;color:var(--my-text-secondary)}
+.review-vip-lock-content b{display:block;margin:10px 0 6px;color:var(--my-text-primary);font-size:15px}
+.review-vip-lock-content p{margin:0 0 16px;font-size:12px;color:var(--my-text-tertiary)}
+.review-vip-lock-content button,.review-membership-entry button{border:0;border-radius:999px;background:var(--my-brand-red);color:#fff;padding:8px 20px;font:13px inherit}
+.review-membership-entry{display:flex;align-items:center;justify-content:space-between;padding:16px}
+.review-membership-entry img,.review-next-period-card img{display:block;width:100%;height:auto;border-radius:var(--r-md)}
+.review-membership-entry b{display:block;margin:6px 0 4px;font-size:15px}
+.review-membership-entry p,.review-next-period-card p{margin:0;color:var(--my-text-tertiary);font-size:12px}
+.review-next-period-card{padding:16px}
+.review-next-period-card .review-insight-head{margin-bottom:10px}
+.review-next-period-card strong{display:block;color:var(--my-brand-red);font-size:20px;margin-bottom:6px}
 .review-insight-head{
   margin-bottom:2px;
   font-size:15px;
