@@ -58,7 +58,11 @@ function ReviewStoolIcon(){
 }
 
 function ReviewLoveIcon(){
-  return <svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4.2 4.2 0 0 1 7-3.1A4.2 4.2 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>;
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 20.2S4.5 15.4 4.5 9.8A4.5 4.5 0 0 1 12 6.4a4.5 4.5 0 0 1 7.5 3.4c0 5.6-7.5 10.4-7.5 10.4z"/>
+    </svg>
+  );
 }
 
 function ReviewBabyIcon({kind}){
@@ -5820,45 +5824,1021 @@ function StoolReviewCard({onOpen, onLandscapeOpen}){
   );
 }
 
+const LOVE_CARD_VALUES = [2, 4, 3, 5, 3, 4];
+const LOVE_CARD_LABELS = ['2月', '3月', '4月', '5月', '6月', '7月'];
+const LOVE_ALL_MONTHS = (()=>{
+  const seed = [2, 3, 4, 5, 3, 2, 4, 3, 5, 4, 2, 3, 4, 2, 5, 3, 4, 3, 2, 4, 3, 5, 3, 4];
+  const end = new Date(2026, 6, 1); // 2026-07
+  return seed.map((count, i)=>{
+    const d = new Date(end.getFullYear(), end.getMonth() - (seed.length - 1 - i), 1);
+    const month = d.getMonth() + 1;
+    const year = d.getFullYear();
+    const isLast = i === seed.length - 1;
+    return {
+      key: year + '-' + month,
+      count,
+      label: isLast ? (month + '月') : ((i === 0 || month === 1) ? (String(year).slice(2) + '年' + month + '月') : (month + '月')),
+    };
+  });
+})();
+
 function LoveReviewChart(){
-  const values = [3,4,2,5,3,4];
-  const labels = ['1月','2月','3月','4月','5月','6月'];
-  const W = 340, H = 156, padL = 28, padR = 12, padT = 14, padB = 26;
-  const x0 = padL, x1 = W - padR, y1 = H - padB;
+  const values = LOVE_CARD_VALUES;
+  const labels = LOVE_CARD_LABELS;
+  const W = 340, H = 156, padL = 34, padR = 14, padT = 18, padB = 26;
+  const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
+  const yMax = 6;
   const band = (x1 - x0) / values.length;
+  const barW = 24;
   const X = i => x0 + band * i + band / 2;
-  const Y = v => y1 - v / 6 * 100;
+  const Y = v => y1 - (v / yMax) * (y1 - y0);
+  const color = '#ff4d88';
+  const softColorTop = '#FFA5C4';
+  const softColorBottom = '#FFD6E4';
   return (
-    <svg viewBox="0 0 340 156" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近6个月爱爱记录次数">
-      {[2,4,6].map(v=><line key={v} x1={x0} y1={Y(v)} x2={x1} y2={Y(v)} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/>)}
+    <svg viewBox="0 0 340 156" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近6个月爱爱次数">
+      <defs>
+        <linearGradient id="loveBarSoft" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={softColorTop}/>
+          <stop offset="100%" stopColor={softColorBottom}/>
+        </linearGradient>
+        <linearGradient id="loveBarMain" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#ff4d88"/>
+          <stop offset="100%" stopColor="#FF9BBE"/>
+        </linearGradient>
+      </defs>
+      {[0, 2, 4, 6].map(value=>(
+        <React.Fragment key={value}>
+          <line x1={x0} y1={Y(value)} x2={x1} y2={Y(value)} stroke="rgba(255,77,136,0.1)" strokeWidth="1" strokeDasharray="2 4"/>
+          <text x={x0 - 6} y={Y(value) + 3} textAnchor="end" fontSize="9" fill="#c5c5ca" fontFamily="PingFang SC">{value}次</text>
+        </React.Fragment>
+      ))}
       {values.map((value, i)=>(
         <React.Fragment key={labels[i]}>
-          <rect x={X(i) - 13} y={Y(value)} width="26" height={y1 - Y(value)} rx="12" fill={i === values.length - 1 ? '#ef6f83' : '#f3a4b0'}/>
-          <text x={X(i)} y={Y(value) - 6} textAnchor="middle" fontSize="10" fill="#dc5c72" fontFamily="PingFang SC">{value}</text>
-          <text x={X(i)} y={H - 7} textAnchor="middle" fontSize="9" fill={i === values.length - 1 ? '#dc5c72' : '#bbbbbf'} fontFamily="PingFang SC">{labels[i]}</text>
+          <rect
+            x={X(i) - barW / 2}
+            y={Y(value)}
+            width={barW}
+            height={Math.max(6, y1 - Y(value))}
+            rx="8"
+            fill={i === values.length - 1 ? 'url(#loveBarMain)' : 'url(#loveBarSoft)'}
+          />
+          {i === values.length - 1 ? (
+            <text x={X(i)} y={Y(value) - 8} textAnchor="middle" fontSize="12" fontWeight="500" fill={color} fontFamily="PingFang SC">{value}次</text>
+          ) : null}
+          <text
+            x={X(i)}
+            y={H - 7}
+            textAnchor="middle"
+            fontSize="9.5"
+            fill={i === values.length - 1 ? color : '#b7b7bd'}
+            fontFamily="PingFang SC"
+          >{labels[i]}</text>
         </React.Fragment>
       ))}
     </svg>
   );
 }
 
-function LoveReviewCard(){
+function ExpandedLoveChart(){
+  const records = LOVE_ALL_MONTHS;
+  const n = records.length;
+  const W = Math.max(980, n * 46);
+  const H = 250;
+  const padL = 40, padR = 28, padT = 28, padB = 34;
+  const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
+  const yMax = 6;
+  const band = (x1 - x0) / n;
+  const barW = Math.min(28, band * 0.58);
+  const X = i => x0 + band * i + band / 2;
+  const Y = v => y1 - (v / yMax) * (y1 - y0);
+  const color = '#ff4d88';
+  const labelIndexes = records.map((_r, i)=>i).filter(i=>i % 3 === 0 || i === n - 1);
+  return (
+    <svg
+      viewBox={'0 0 ' + W + ' ' + H}
+      style={{width:W + 'px'}}
+      preserveAspectRatio="none"
+      role="img"
+      aria-label="全部爱爱记录次数柱状图"
+    >
+      <defs>
+        <linearGradient id="loveLandscapeSoft" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#FFA5C4"/>
+          <stop offset="100%" stopColor="#FFD6E4"/>
+        </linearGradient>
+        <linearGradient id="loveLandscapeMain" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#ff4d88"/>
+          <stop offset="100%" stopColor="#FF9BBE"/>
+        </linearGradient>
+      </defs>
+      {[0, 2, 4, 6].map(tick=>(
+        <React.Fragment key={tick}>
+          <line
+            x1={x0}
+            y1={Y(tick)}
+            x2={x1}
+            y2={Y(tick)}
+            stroke="rgba(255,77,136,0.12)"
+            strokeWidth="1"
+            strokeDasharray="4 4"
+          />
+          <text
+            x={x0 - 8}
+            y={Y(tick) + 4}
+            textAnchor="end"
+            fontSize="10"
+            fill="#aaaab0"
+            fontFamily="PingFang SC"
+          >
+            {tick}次
+          </text>
+        </React.Fragment>
+      ))}
+      {records.map((item, i)=>{
+        const isLast = i === n - 1;
+        return (
+          <React.Fragment key={item.key}>
+            <rect
+              x={X(i) - barW / 2}
+              y={Y(item.count)}
+              width={barW}
+              height={Math.max(8, y1 - Y(item.count))}
+              rx="10"
+              fill={isLast ? 'url(#loveLandscapeMain)' : 'url(#loveLandscapeSoft)'}
+            />
+            {isLast ? (
+              <text
+                x={X(i)}
+                y={Y(item.count) - 10}
+                textAnchor="middle"
+                fontSize="12"
+                fontWeight="500"
+                fill={color}
+                fontFamily="PingFang SC"
+              >
+                {item.count}
+              </text>
+            ) : null}
+          </React.Fragment>
+        );
+      })}
+      {labelIndexes.map(i=>(
+        <text
+          key={records[i].key + '-label'}
+          x={X(i)}
+          y={H - 10}
+          textAnchor="middle"
+          fontSize="10"
+          fill={i === n - 1 ? color : '#aaaab0'}
+          fontFamily="PingFang SC"
+        >
+          {records[i].label}
+        </text>
+      ))}
+    </svg>
+  );
+}
+
+function LoveLandscapePage({open, onClose}){
+  const scrollerRef = React.useRef(null);
+
+  React.useEffect(()=>{
+    if(!open) return undefined;
+    const scroller = scrollerRef.current;
+    if(scroller) scroller.scrollLeft = scroller.scrollWidth;
+    const handleKeyDown = event=>{ if(event.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handleKeyDown);
+    return ()=>document.removeEventListener('keydown', handleKeyDown);
+  }, [open, onClose]);
+
+  return (
+    <section
+      className={'review-cycle-landscape' + (open ? ' is-open' : '')}
+      aria-hidden={!open}
+      role="dialog"
+      aria-modal="true"
+      aria-label="全部爱爱记录横屏图表"
+    >
+      <div className="review-cycle-landscape-surface">
+        <header className="review-cycle-landscape-head">
+          <div>
+            <h2>全部爱爱记录</h2>
+            <p>共 {LOVE_ALL_MONTHS.length} 个月 · 左右滑动查看</p>
+          </div>
+          <button type="button" className="review-cycle-landscape-close" aria-label="关闭横屏图表" onClick={onClose}>×</button>
+        </header>
+        <div className="review-cycle-landscape-legend">
+          <span className="review-legend-item is-love"><i></i>每月记录次数</span>
+          <span className="review-cycle-landscape-tip">← 滑动查看更多 →</span>
+        </div>
+        <div className="review-cycle-landscape-scroll" ref={scrollerRef}>
+          <ExpandedLoveChart/>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function LoveReviewCard({onOpen, onLandscapeOpen}){
   return (
     <ReviewCard
       title="爱爱"
       iconClass="is-love"
       icon={<ReviewLoveIcon/>}
+      headAction={typeof onLandscapeOpen === 'function' ? (
+        <button
+          type="button"
+          className="review-cycle-expand-btn"
+          aria-label="横屏展开全部爱爱"
+          onKeyDown={event=>event.stopPropagation()}
+          onClick={event=>{
+            event.stopPropagation();
+            onLandscapeOpen();
+          }}
+        >
+          <ReviewExpandIcon/>
+        </button>
+      ) : null}
       chart={<LoveReviewChart/>}
-      legend={<span className="review-legend-item is-love"><i></i>每月记录次数</span>}
+      legend={<span className="review-legend-item is-love"><i></i>爱爱次数</span>}
       metrics={(
         <>
-          <ReviewMetric value="4" unit="次" label="本月记录"/>
-          <ReviewMetric value="3.5" unit="次" label="近半年月均"/>
-          <ReviewMetric value="→ 平稳" label="整体趋势" trend/>
+          <ReviewMetric value="4" unit="次" label="本月爱爱次数"/>
+          <ReviewMetric value="3.5" unit="次" label="平均每月爱爱"/>
+          <ReviewMetric value="↗ 增长" label="整体趋势" trend/>
         </>
       )}
       more="查看完整爱爱记录"
+      onOpen={onOpen}
     />
+  );
+}
+
+const LOVE_FREQ_MONTHS = [
+  {m:'2月', v:2}, {m:'3月', v:4}, {m:'4月', v:3},
+  {m:'5月', v:5}, {m:'6月', v:3}, {m:'7月', v:4, cur:true},
+];
+const LOVE_FREQ_MONTHS_YEAR = (()=>{
+  // 去年7月 → 今年7月（含两端，共13个月）
+  const vals = [3, 4, 2, 5, 3, 4, 3, 2, 4, 3, 5, 3, 4];
+  const end = new Date(2026, 6, 1); // 2026-07
+  return vals.map((v, i)=>{
+    const d = new Date(end.getFullYear(), end.getMonth() - (vals.length - 1 - i), 1);
+    const month = d.getMonth() + 1;
+    const year = d.getFullYear();
+    const isLast = i === vals.length - 1;
+    const isFirst = i === 0;
+    const showYear = isFirst || month === 1;
+    return {
+      m: showYear ? (String(year).slice(2) + '年' + month + '月') : (month + '月'),
+      v,
+      cur: isLast,
+    };
+  });
+})();
+const LOVE_CYCLE_PHASES = [
+  {name:'月经期', cur:3, prev:2, prev2:3},
+  {name:'卵泡期', cur:1, prev:2, prev2:1},
+  {name:'排卵期', cur:2, prev:1, prev2:2},
+  {name:'黄体期', cur:5, prev:4, prev2:3},
+];
+const LOVE_PHASE_DETAIL = [
+  {name:'月经期', count:1, range:'01.27-02.01', tone:'menstrual'},
+  {name:'卵泡期', count:2, range:'02.02-02.11', tone:'follicular'},
+  {name:'排卵期', count:2, range:'02.12-02.14', tone:'ovulation', warn:'无措施1次'},
+  {name:'黄体期', count:5, range:'02.15-02.26', tone:'luteal'},
+];
+
+const LOVE_DIST_PHASES = [
+  {key:'menstrual', label:'月经期', short:'月经期', days:5, arc:'rgba(255,77,136,0.28)', fill:'rgba(255,77,136,0.09)', text:'#f2799a', pos:{top:'11%', left:'72%'}},
+  {key:'follicular', label:'卵泡期', short:'卵泡期', days:9, arc:'rgba(0,204,153,0.26)', fill:'rgba(0,204,153,0.06)', text:'#22b487', pos:{top:'68%', left:'94%'}},
+  {key:'ovulation', label:'排卵期', short:'排卵期', days:3, arc:'rgba(179,136,232,0.40)', fill:'rgba(179,136,232,0.14)', text:'#9a6fd4', pos:{top:'96%', left:'50%'}},
+  {key:'luteal', label:'黄体期', short:'黄体期', days:11, arc:'rgba(126,168,240,0.28)', fill:'rgba(126,168,240,0.08)', text:'#7C9CF0', pos:{top:'46%', left:'4%'}},
+];
+
+// day -> 'safe'(有措施/空心) | 'risk'(无措施/实心)
+const LOVE_DIST_BY_DAY = {
+  2:'safe', 3:'safe', 5:'safe',
+  10:'safe',
+  15:'safe', 16:'risk',
+  18:'safe', 19:'risk', 21:'safe', 22:'risk', 24:'safe', 25:'safe', 26:'risk', 28:'safe',
+};
+const LOVE_DIST_PHASE_BARS = [
+  {key:'menstrual', short:'月经期', safe:3, risk:0},
+  {key:'follicular', short:'卵泡期', safe:1, risk:0},
+  {key:'ovulation', short:'排卵期', safe:1, risk:1, hot:true},
+  {key:'luteal', short:'黄体期', safe:5, risk:3},
+];
+const LOVE_DIST_TOTAL = Object.keys(LOVE_DIST_BY_DAY).length;
+const LOVE_DIST_UNPROTECTED = Object.keys(LOVE_DIST_BY_DAY).filter(d=>LOVE_DIST_BY_DAY[d] === 'risk').length;
+const LOVE_DIST_IN_OVULATION = LOVE_DIST_PHASE_BARS.find(p=>p.key === 'ovulation').safe
+  + LOVE_DIST_PHASE_BARS.find(p=>p.key === 'ovulation').risk;
+const LOVE_DIST_PREGNANCY_RATE = '39.0';
+const LOVE_DIST_SAFE_COLOR = '#FFC4D9';
+const LOVE_DIST_RISK_COLOR = '#ff4d88';
+
+const LOVE_HEART_PATH = 'M0-3.6C-1.5-6.2-5.5-6.2-5.5-3C-5.5-0.9-2.8 1.5 0 4.2C2.8 1.5 5.5-0.9 5.5-3C5.5-6.2 1.5-6.2 0-3.6Z';
+
+function LoveDistHeart({x, y, risk, scale = 1}){
+  const color = risk ? LOVE_DIST_RISK_COLOR : LOVE_DIST_SAFE_COLOR;
+  return (
+    <g transform={'translate(' + x.toFixed(2) + ' ' + y.toFixed(2) + ') scale(' + scale + ')'}>
+      <path
+        d={LOVE_HEART_PATH}
+        fill={risk ? color : 'none'}
+        stroke={color}
+        strokeWidth={risk ? 0 : 1.4}
+        strokeLinejoin="round"
+      />
+    </g>
+  );
+}
+
+function LoveDistLegendHeart({risk}){
+  return (
+    <svg className="review-love-dist-legend-heart" viewBox="-7 -7 14 14" aria-hidden="true">
+      <path
+        d={LOVE_HEART_PATH}
+        fill={risk ? LOVE_DIST_RISK_COLOR : 'none'}
+        stroke={risk ? LOVE_DIST_RISK_COLOR : LOVE_DIST_SAFE_COLOR}
+        strokeWidth={risk ? 0 : 1.4}
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function LovePhaseDistChart(){
+  const CX = 170, RING = 142, RSW = 6, REC = 118, WEDGE = 138, HOLE = 82;
+  const totalDays = LOVE_DIST_PHASES.reduce((sum, ph)=>sum + ph.days, 0);
+  const RC = 2 * Math.PI * RING;
+  const step = 360 / totalDays;
+  const posFor = (angleDeg, radius)=>{
+    const r = angleDeg * Math.PI / 180;
+    return {x: CX + radius * Math.cos(r), y: CX + radius * Math.sin(r)};
+  };
+  const gap = (3 / 360) * RC;
+  let dayStart = 0;
+  const arcs = LOVE_DIST_PHASES.map(ph=>{
+    const startDeg = -90 + dayStart * step;
+    const endDeg = -90 + (dayStart + ph.days) * step;
+    const len = (ph.days / totalDays) * RC;
+    const vis = Math.max(len - gap, 1);
+    const offset = -((dayStart / totalDays) * RC + gap / 2);
+    const p0 = posFor(startDeg, WEDGE);
+    const p1 = posFor(endDeg, WEDGE);
+    const large = (endDeg - startDeg) > 180 ? 1 : 0;
+    const wedge = 'M ' + CX + ' ' + CX
+      + ' L ' + p0.x.toFixed(2) + ' ' + p0.y.toFixed(2)
+      + ' A ' + WEDGE + ' ' + WEDGE + ' 0 ' + large + ' 1 ' + p1.x.toFixed(2) + ' ' + p1.y.toFixed(2)
+      + ' Z';
+    dayStart += ph.days;
+    return {vis, offset, color:ph.arc, fill:ph.fill, wedge};
+  });
+  let bAcc = 0;
+  const boundaries = LOVE_DIST_PHASES.map(ph=>{
+    const a = -90 + bAcc * step;
+    bAcc += ph.days;
+    return a;
+  });
+  const markers = [];
+  for(let d = 1; d <= totalDays; d++){
+    const ang = -90 + (d - 0.5) * step;
+    markers.push({...posFor(ang, REC), kind:LOVE_DIST_BY_DAY[d] || null});
+  }
+  const barMax = Math.max(...LOVE_DIST_PHASE_BARS.map(p=>p.safe + p.risk), 1);
+  return (
+    <div className="review-love-dist-block">
+      <div className="review-love-dist-wrap">
+        <svg viewBox="0 0 340 340" role="img" aria-label="本周期爱爱分布图">
+          {arcs.map((a, i)=>(
+            <path key={'wedge' + i} d={a.wedge} fill={a.fill}/>
+          ))}
+          <circle cx={CX} cy={CX} r={HOLE} fill="#fff"/>
+          {arcs.map((a, i)=>(
+            <circle
+              key={'arc' + i}
+              cx={CX}
+              cy={CX}
+              r={RING}
+              fill="none"
+              stroke={a.color}
+              strokeWidth={RSW}
+              strokeDasharray={a.vis.toFixed(2) + ' ' + (RC - a.vis).toFixed(2)}
+              strokeDashoffset={a.offset.toFixed(2)}
+              transform={'rotate(-90 ' + CX + ' ' + CX + ')'}
+            />
+          ))}
+          {boundaries.map((a, i)=>{
+            const p = posFor(a, RING);
+            return <circle key={'bd' + i} cx={p.x.toFixed(2)} cy={p.y.toFixed(2)} r={2.2} fill="rgba(0,0,0,0.1)"/>;
+          })}
+          {markers.map((m, i)=>{
+            if(m.kind){
+              return <LoveDistHeart key={'m' + i} x={m.x} y={m.y} risk={m.kind === 'risk'} scale={1.15}/>;
+            }
+            return (
+              <circle
+                key={'m' + i}
+                cx={m.x.toFixed(2)}
+                cy={m.y.toFixed(2)}
+                r={1.4}
+                fill="rgba(0,0,0,0.04)"
+              />
+            );
+          })}
+        </svg>
+        <div className="review-love-dist-center">
+          <b>{LOVE_DIST_TOTAL}</b>
+          <span>本周期</span>
+        </div>
+        {LOVE_DIST_PHASES.map(ph=>(
+          <span
+            key={ph.key}
+            className="review-love-dist-label"
+            style={{top:ph.pos.top, left:ph.pos.left, color:ph.text}}
+          >{ph.label}</span>
+        ))}
+      </div>
+      <div className="review-love-dist-bars" aria-label="各阶段爱爱分布">
+        {LOVE_DIST_PHASE_BARS.map(row=>{
+          const total = row.safe + row.risk;
+          const safeW = (row.safe / barMax) * 100;
+          const riskW = (row.risk / barMax) * 100;
+          return (
+            <div className="review-love-dist-bar-row" key={row.key}>
+              <span className={'review-love-dist-bar-name' + (row.hot ? ' is-hot' : '')}>{row.short}</span>
+              <div className="review-love-dist-bar-track">
+                {row.safe > 0 ? <i className="is-safe" style={{width:safeW + '%'}}/> : null}
+                {row.risk > 0 ? <i className="is-risk" style={{width:riskW + '%'}}/> : null}
+              </div>
+              <b>{total}次</b>
+            </div>
+          );
+        })}
+      </div>
+      <div className="review-love-dist-legend">
+        <span><LoveDistLegendHeart risk={false}/>有措施</span>
+        <span><LoveDistLegendHeart risk={true}/>无措施</span>
+      </div>
+    </div>
+  );
+}
+
+function LoveFreqOverviewChart({months = LOVE_FREQ_MONTHS}){
+  const max = Math.max(6, ...months.map(item=>item.v));
+  const plotH = 104;
+  const labelPad = 16;
+  const ticks = [0, 2, 4, 6].filter(t=>t <= max);
+  return (
+    <div className="review-love-freq-chart" aria-label="爱爱次数柱状图">
+      <div className="review-love-freq-axis" aria-hidden="true">
+        {ticks.slice().reverse().map(tick=>{
+          const isZero = tick === 0;
+          const isMax = tick === max;
+          return (
+            <span
+              key={tick}
+              className={'review-love-freq-axis-tick' + (isZero ? ' is-zero' : '') + (isMax ? ' is-max' : '')}
+              style={{bottom:(tick / max) * plotH + 'px'}}
+            >
+              {tick}
+            </span>
+          );
+        })}
+      </div>
+      <div className="review-love-freq-plot">
+        <div className="review-love-freq-grid" aria-hidden="true">
+          {ticks.map(tick=>(
+            <i
+              key={tick}
+              className="review-love-freq-grid-line"
+              style={{bottom:(tick / max) * plotH + 'px'}}
+            />
+          ))}
+        </div>
+        <div className="review-love-freq-cols">
+          {months.map((item, index)=>{
+            const h = Math.max(8, (item.v / max) * plotH);
+            return (
+              <div className={'review-love-freq-col' + (item.cur ? ' is-cur' : '')} key={item.m + '-' + index}>
+                <div className="review-love-freq-bar-wrap" style={{height:(plotH + labelPad) + 'px'}}>
+                  <em
+                    className="review-love-freq-val"
+                    style={{bottom:h + 4 + 'px'}}
+                  >
+                    {item.v}次
+                  </em>
+                  <span className="review-love-freq-bar" style={{height:h + 'px'}}/>
+                </div>
+                <span className="review-love-freq-label">{item.m}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LoveFreqLineChart({months}){
+  const vals = months.map(item=>item.v);
+  const n = vals.length;
+  const W = 340;
+  const H = 156;
+  const padL = 22;
+  const padR = 12;
+  const padT = 18;
+  const padB = 26;
+  const x0 = padL;
+  const x1 = W - padR;
+  const y0 = padT;
+  const y1 = H - padB;
+  const yMax = Math.max(6, ...vals);
+  const X = i => n <= 1 ? (x0 + x1) / 2 : x0 + (x1 - x0) * (i / (n - 1));
+  const Y = v => y1 - (v / yMax) * (y1 - y0);
+  const pts = vals.map((v, i)=>[X(i), Y(v)]);
+  const ticks = [0, 2, 4, 6].filter(t=>t <= yMax);
+  const labelStep = n > 16 ? 4 : (n > 10 ? 3 : 2);
+  const labelIndexes = months
+    .map((_item, i)=>i)
+    .filter(i=>i === 0 || i === n - 1 || i % labelStep === 0);
+  const lastIdx = n - 1;
+  const lastVal = vals[lastIdx];
+  return (
+    <svg
+      className="review-love-trend-svg"
+      viewBox={'0 0 ' + W + ' ' + H}
+      preserveAspectRatio="xMidYMid meet"
+      role="img"
+      aria-label="爱爱次数折线图"
+    >
+      {ticks.map(tick=>(
+        <React.Fragment key={tick}>
+          <line
+            x1={x0}
+            y1={Y(tick)}
+            x2={x1}
+            y2={Y(tick)}
+            stroke="rgba(255,77,136,0.12)"
+            strokeWidth="1"
+            strokeDasharray="2 4"
+          />
+          <text
+            x={x0 - 6}
+            y={Y(tick) + 3}
+            textAnchor="end"
+            fontSize="10"
+            fill="#c0c0c5"
+            fontFamily="PingFang SC, -apple-system, sans-serif"
+          >{tick}</text>
+        </React.Fragment>
+      ))}
+      <path
+        d={reviewSmoothPath(pts)}
+        fill="none"
+        stroke="#ff4d88"
+        strokeWidth="2"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+      {vals.map((v, i)=>{
+        const isLast = i === lastIdx;
+        return (
+          <circle
+            key={months[i].m + '-' + i}
+            cx={X(i)}
+            cy={Y(v)}
+            r={isLast ? 4 : 2.6}
+            fill="#ff4d88"
+            stroke={isLast ? '#fff' : 'none'}
+            strokeWidth={isLast ? 2 : 0}
+          />
+        );
+      })}
+      {n > 0 ? (
+        <text
+          x={X(lastIdx)}
+          y={Y(lastVal) - 10}
+          textAnchor="middle"
+          fontSize="12"
+          fontWeight="500"
+          fill="#ff4d88"
+          fontFamily="PingFang SC, -apple-system, sans-serif"
+        >{lastVal}次</text>
+      ) : null}
+      {labelIndexes.map(i=>(
+        <text
+          key={'label-' + i}
+          x={X(i)}
+          y={H - 8}
+          textAnchor="middle"
+          fontSize="10"
+          fill={i === lastIdx ? '#ff4d88' : '#b7b7bd'}
+          fontFamily="PingFang SC, -apple-system, sans-serif"
+          fontWeight={i === lastIdx ? '500' : '400'}
+        >{months[i].m}</text>
+      ))}
+    </svg>
+  );
+}
+
+function LoveCycleCompareChart({phases = LOVE_CYCLE_PHASES}){
+  const max = 6;
+  const plotH = 112;
+  const ticks = [0, 2, 4, 6];
+  return (
+    <div className="review-love-cycle-compare">
+      <div className="review-love-cycle-plot" aria-label="近三个周期爱爱分布">
+        <div className="review-love-cycle-axis" aria-hidden="true">
+          {ticks.slice().reverse().map(tick=>{
+            const isZero = tick === 0;
+            const isMax = tick === max;
+            return (
+              <span
+                key={tick}
+                className={'review-love-cycle-axis-tick' + (isZero ? ' is-zero' : '') + (isMax ? ' is-max' : '')}
+                style={{bottom:(tick / max) * plotH + 'px'}}
+              >
+                {tick}
+              </span>
+            );
+          })}
+        </div>
+        <div className="review-love-cycle-main">
+          <div className="review-love-cycle-bars">
+            <div className="review-love-cycle-grid" aria-hidden="true">
+              {ticks.map(tick=>(
+                <i
+                  key={tick}
+                  className="review-love-cycle-grid-line"
+                  style={{bottom:(tick / max) * plotH + 'px'}}
+                />
+              ))}
+            </div>
+            {phases.map(phase=>{
+              const isHot = phase.name === '排卵期';
+              return (
+                <div
+                  className={'review-love-cycle-group' + (isHot ? ' is-hot' : '')}
+                  key={phase.name}
+                >
+                  {isHot ? <span className="review-love-cycle-hot-tag">易孕窗口</span> : null}
+                  {[
+                    {key:'prev2', v:phase.prev2},
+                    {key:'prev', v:phase.prev},
+                    {key:'cur', v:phase.cur},
+                  ].map(bar=>(
+                    <span
+                      className={'review-love-cycle-bar-wrap is-' + bar.key}
+                      key={bar.key}
+                    >
+                      {bar.key === 'cur' ? <em>{bar.v}</em> : null}
+                      <i
+                        className={'review-love-cycle-bar is-' + bar.key}
+                        style={{height:Math.max(4, bar.v / max * plotH) + 'px'}}
+                      />
+                    </span>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+          <div className="review-love-cycle-x">
+            {phases.map(phase=>(
+              <span key={phase.name} className={phase.name === '排卵期' ? 'is-hot' : ''}>{phase.name}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="review-love-cycle-legend">
+        <span><i className="is-cur"/>本次</span>
+        <span><i className="is-prev"/>上次</span>
+        <span><i className="is-prev2"/>上上次</span>
+      </div>
+    </div>
+  );
+}
+
+function LoveTrendSummary({range = 'half'}){
+  const isYear = range === 'year';
+  const isAll = range === 'all';
+  const isLine = isYear || isAll;
+  const months = isAll
+    ? LOVE_ALL_MONTHS.map((item, i, arr)=>({
+        m: item.label,
+        v: item.count,
+        cur: i === arr.length - 1,
+      }))
+    : (isYear ? LOVE_FREQ_MONTHS_YEAR : LOVE_FREQ_MONTHS);
+  const dateText = isAll
+    ? '2024年8月1日至2026年7月27日'
+    : (isYear ? '2025年7月1日至2026年7月27日' : '2026年2月1日至7月27日');
+  const metrics = isAll
+    ? {avg:'3.6', total:'86', totalLabel:'全部爱爱次数', trend:'↗ 增长', tone:'up'}
+    : (isYear
+      ? {avg:'3.5', total:'45', totalLabel:'近1年爱爱次数', trend:'→ 平稳', tone:'flat'}
+      : {avg:'3.5', total:'21', totalLabel:'近半年爱爱次数', trend:'↗ 增长', tone:'up'});
+  return (
+    <div className="review-love-trend-block">
+      <div className="review-love-trend-head">
+        <div className="review-love-trend-title">爱爱频次</div>
+        <div className="review-love-trend-range">{dateText}</div>
+      </div>
+      {isLine
+        ? <LoveFreqLineChart months={months}/>
+        : <LoveFreqOverviewChart months={months}/>}
+      <div className="review-love-trend-metrics" aria-label="爱爱频次概览">
+        <div className="review-love-trend-metric">
+          <div className="review-love-trend-metric-value">{metrics.avg}<small>次</small></div>
+          <div className="review-love-trend-metric-label">平均爱爱次数</div>
+        </div>
+        <div className="review-love-trend-metric">
+          <div className="review-love-trend-metric-value">{metrics.total}<small>次</small></div>
+          <div className="review-love-trend-metric-label">{metrics.totalLabel}</div>
+        </div>
+        <div className="review-love-trend-metric">
+          <div className={'review-love-trend-metric-value is-trend is-' + metrics.tone}>{metrics.trend}</div>
+          <div className="review-love-trend-metric-label">整体趋势</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LoveCycleCombinedCard(){
+  return (
+    <div className="review-love-cycle-combined-wrap">
+      <div className="review-love-trend-title">月经周期与爱爱</div>
+      <div className="review-detail-card review-love-mini-card review-love-cycle-combined">
+        <div className="review-love-cycle-block">
+          <div className="review-love-cycle-subhead">最近3个周期爱爱次数</div>
+          <LoveCycleCompareChart/>
+          <div className="review-love-insight">
+            你的爱爱集中在 <b>黄体期</b>，<b>排卵期</b>偏少——近 <b>3</b> 个周期都是这个规律。黄体期孕激素升高、更易放松亲密，若有备孕计划，可留意排卵前后。
+          </div>
+        </div>
+        <div className="review-love-cycle-divider" aria-hidden="true"/>
+        <div className="review-love-cycle-block">
+          <div className="review-love-cycle-subhead">本周期爱爱分布</div>
+          <LovePhaseDistChart/>
+          <div className="review-love-insight">
+            本周期爱爱共 <b>{LOVE_DIST_TOTAL}</b> 次，其中 <b>{LOVE_DIST_UNPROTECTED}</b> 次无措施，<b>{LOVE_DIST_IN_OVULATION}</b> 次落在排卵期，预测怀孕几率 <b>{LOVE_DIST_PREGNANCY_RATE}%</b>。
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const LOVE_MEASURE_ROWS = [
+  {key:'condom', label:'避孕套', count:7, color:'#5B9CFF'},
+  {key:'pill', label:'短效避孕药', count:2, color:'#9B6BD6'},
+  {key:'withdraw', label:'体外排精', count:1, color:'#3EC19A'},
+  {key:'none', label:'无措施', count:4, color:'#ff4d88'},
+];
+
+function LoveMeasureIconGlyph({type, color = '#ff4d88'}){
+  if(type === 'condom'){
+    return <path fill={color} d="M12 3.2c-2.1 0-3.6 1.2-3.6 3.1v8.6c0 2.4 1.6 4.1 3.6 4.1s3.6-1.7 3.6-4.1V6.3c0-1.9-1.5-3.1-3.6-3.1zm0 1.4c1.1 0 2 .5 2 1.7v1.1H10V6.3c0-1.2.9-1.7 2-1.7z"/>;
+  }
+  if(type === 'pill'){
+    return (
+      <g>
+        <path fill="none" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeDasharray="2.2 2" d="M16.8 7.2a6.2 6.2 0 1 1-1.4-1.4"/>
+        <path fill={color} d="M15.9 6.1l.2 2.1 1.9-.6-2.1-1.5z"/>
+        <rect x="8.2" y="10.4" width="7.6" height="3.4" rx="1.7" fill={color}/>
+      </g>
+    );
+  }
+  if(type === 'withdraw'){
+    return (
+      <g>
+        <path fill={color} d="M14.2 7.2c1.4 0 2.5 1.1 2.5 2.5v1.4c0 .5-.4.9-.9.9h-1.4l-1.8 4.2c-.2.4-.6.7-1 .7H8.8c-.7 0-1.2-.7-.9-1.3l1.6-3.6H7.8c-.8 0-1.4-.6-1.4-1.4v-.9c0-1.4 1.1-2.5 2.5-2.5h5.3z"/>
+        <circle cx="6.2" cy="9.2" r="1" fill={color}/>
+        <circle cx="4.6" cy="11.4" r=".75" fill={color}/>
+        <circle cx="6.8" cy="12.8" r=".65" fill={color}/>
+      </g>
+    );
+  }
+  return (
+    <g>
+      <path fill={color} d="M12 20.2l-5.4-4.9C4.6 13.4 3.8 11.8 3.8 10c0-2.3 1.7-4 3.9-4 1.2 0 2.3.5 3.1 1.4L12 8.7l1.2-1.3c.8-.9 1.9-1.4 3.1-1.4 1 0 1.9.3 2.5.9l-1.2 1.2c-.3-.3-.8-.5-1.3-.5-.9 0-1.6.5-2 1.2L12 11.2l-2.3-2.4c-.4-.7-1.1-1.2-2-1.2-1.4 0-2.5 1.1-2.5 2.4 0 1.1.5 2.1 1.8 3.3L12 18.2l2.2-2 .9 1.1L12 20.2z"/>
+      <path fill="none" stroke={color} strokeWidth="1.7" strokeLinecap="round" d="M15.2 6.2V5.1c0-1.3 1-2.3 2.3-2.3s2.3 1 2.3 2.3v1.8"/>
+      <rect x="14.4" y="6.8" width="6" height="4.4" rx="1.2" fill={color}/>
+    </g>
+  );
+}
+
+function LoveMeasureIcon({type, color = '#ff4d88'}){
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <LoveMeasureIconGlyph type={type} color={color}/>
+    </svg>
+  );
+}
+
+function LoveMeasureDonut(){
+  const rows = LOVE_MEASURE_ROWS;
+  const total = rows.reduce((s, r)=>s + r.count, 0) || 1;
+  const safeTotal = total - (rows.find(r=>r.key === 'none')?.count || 0);
+  const safePct = Math.round(safeTotal / total * 100);
+  const CX = 60, R = 48, SW = 16, GAP = 3;
+  const C = 2 * Math.PI * R;
+  let acc = 0;
+  const segs = rows.map(row=>{
+    const frac = row.count / total;
+    const full = frac * C;
+    const vis = Math.max(full - GAP, 0.5);
+    const start = acc;
+    const midFrac = (start + full / 2) / C;
+    const midDeg = -90 + midFrac * 360;
+    const rad = midDeg * Math.PI / 180;
+    const icon = {
+      x: CX + R * Math.cos(rad),
+      y: CX + R * Math.sin(rad),
+    };
+    const seg = {color:row.color, dash:vis, offset:-start, key:row.key, icon};
+    acc += full;
+    return seg;
+  });
+  return (
+    <div className="review-love-measure-donut-wrap">
+      <div className="review-love-measure-donut">
+        <svg viewBox="0 0 120 120" role="img" aria-label="爱爱措施占比环形图">
+          {segs.map(s=>(
+            <circle
+              key={'arc-' + s.key}
+              cx={CX}
+              cy={CX}
+              r={R}
+              fill="none"
+              stroke={s.color}
+              strokeWidth={SW}
+              strokeDasharray={s.dash.toFixed(2) + ' ' + (C - s.dash).toFixed(2)}
+              strokeDashoffset={s.offset.toFixed(2)}
+              transform={'rotate(-90 ' + CX + ' ' + CX + ')'}
+            />
+          ))}
+          {segs.map(s=>(
+            <g key={'icon-' + s.key} transform={'translate(' + s.icon.x.toFixed(2) + ' ' + s.icon.y.toFixed(2) + ')'}>
+              <circle r="8.5" fill="#fff" stroke={s.color} strokeWidth="0.9" strokeOpacity="0.35"/>
+              <g transform="translate(-7.5 -7.5) scale(0.625)">
+                <LoveMeasureIconGlyph type={s.key} color={s.color}/>
+              </g>
+            </g>
+          ))}
+        </svg>
+        <div className="review-love-measure-donut-center">
+          <span>有措施占比</span>
+          <b>{safePct}<small>%</small></b>
+        </div>
+      </div>
+      <div className="review-love-measure-donut-legend">
+        {rows.map(row=>(
+          <div className="review-love-measure-donut-row" key={row.label}>
+            <span className="review-love-measure-donut-ico" style={{background:row.color + '22'}}>
+              <LoveMeasureIcon type={row.key} color={row.color}/>
+            </span>
+            <span>{row.label}</span>
+            <em>{row.count}次</em>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function LoveMeasureCombinedCard(){
+  return (
+    <div className="review-love-cycle-combined-wrap">
+      <div className="review-love-trend-title">爱爱措施</div>
+      <div className="review-detail-card review-love-mini-card review-love-cycle-combined">
+        <LoveMeasureDonut/>
+        <div className="review-love-insight">
+          近半年记录 <b>{LOVE_DIST_TOTAL}</b> 次爱爱，其中 <b>{LOVE_DIST_TOTAL - LOVE_DIST_UNPROTECTED}</b> 次采取了措施（<b>{Math.round((LOVE_DIST_TOTAL - LOVE_DIST_UNPROTECTED) / LOVE_DIST_TOTAL * 100)}%</b>），以避孕套为主；另有 <b>{LOVE_DIST_UNPROTECTED}</b> 次无措施。
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const LOVE_HABIT_PERIODS = [
+  {key:'p1', range:'6–9时', icon:'sunrise', bg:'#FFF1F5'},
+  {key:'p2', range:'9–12时', icon:'sun', bg:'#FFF7EC'},
+  {key:'p3', range:'12–18时', icon:'cloud', bg:'#F3F8FF'},
+  {key:'p4', range:'18–21时', icon:'moon', bg:'#F5F2FF'},
+  {key:'p5', range:'21–6时', icon:'night', bg:'#F0F4FA'},
+];
+
+// 近半年 14 次爱爱各自所属时段（有记录=彩色点，其余行同列为灰点）
+const LOVE_HABIT_EVENTS = [
+  'p5', 'p4', 'p5', 'p1', 'p5', 'p4', 'p3', 'p5', 'p4', 'p2', 'p5', 'p4', 'p5', 'p3',
+];
+
+function LoveHabitTimeChart(){
+  return (
+    <div className="review-love-habit-grid" aria-label="爱爱时段分布">
+      {LOVE_HABIT_PERIODS.map(period=>{
+        const count = LOVE_HABIT_EVENTS.filter(k=>k === period.key).length;
+        return (
+          <div
+            className="review-love-habit-row"
+            key={period.key}
+            style={{'--row-bg': period.bg}}
+          >
+            <div className="review-love-habit-label">
+              <MoodTimePeriodIcon type={period.icon}/>
+              <span>{period.range}</span>
+            </div>
+            <div className="review-love-habit-dots">
+              {LOVE_HABIT_EVENTS.map((ev, i)=>(
+                <i
+                  key={period.key + '-' + i}
+                  className={ev === period.key ? 'is-on' : 'is-off'}
+                />
+              ))}
+            </div>
+            <em className="review-love-habit-count">{count}次</em>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function LoveHabitCombinedCard(){
+  const top = LOVE_HABIT_PERIODS
+    .map(p=>({...p, count:LOVE_HABIT_EVENTS.filter(k=>k === p.key).length}))
+    .sort((a, b)=>b.count - a.count)[0];
+  return (
+    <div className="review-love-cycle-combined-wrap">
+      <div className="review-love-trend-title">爱爱习惯</div>
+      <div className="review-detail-card review-love-mini-card review-love-cycle-combined">
+        <div className="review-love-cycle-block">
+          <div className="review-love-cycle-subhead">爱爱时段分布</div>
+          <LoveHabitTimeChart/>
+          <div className="review-love-insight">
+            近半年 <b>{LOVE_HABIT_EVENTS.length}</b> 次爱爱中，最多集中在 <b>{top.range}</b>（<b>{top.count}</b> 次），夜间时段更活跃。
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LoveDetailBody({range}){
+  return (
+    <>
+      <LoveTrendSummary range={range}/>
+      <div className="review-love-detail-lower">
+        <LoveCycleCombinedCard/>
+        <LoveMeasureCombinedCard/>
+        <LoveHabitCombinedCard/>
+      </div>
+    </>
+  );
+}
+
+function LoveDetailPage({open, onClose}){
+  const [range, setRange] = React.useState('half');
+  const ranges = [
+    {key:'half', label:'近半年'},
+    {key:'year', label:'近1年'},
+    {key:'all', label:'全部'},
+  ];
+  React.useEffect(()=>{
+    if(!open) return;
+    setRange('half');
+  }, [open]);
+  return (
+    <section className={'review-cycle-detail is-fullscreen-detail' + (open ? ' is-open' : '')} aria-hidden={!open} aria-label="爱爱详情">
+      <div className="review-detail-nav">
+        <button type="button" className="review-detail-back" aria-label="返回" onClick={onClose}>
+          <ReviewBackIcon/>
+        </button>
+        <span className="review-detail-title">爱爱</span>
+      </div>
+      <div className="review-detail-content review-love-detail-content">
+        <div className="review-love-detail-top">
+          <div className="review-segment" role="tablist" aria-label="时间范围">
+            {ranges.map(item=>(
+              <button
+                key={item.key}
+                type="button"
+                className={range === item.key ? 'is-active' : ''}
+                aria-selected={range === item.key}
+                onClick={()=>setRange(item.key)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <LoveDetailBody range={range}/>
+      </div>
+    </section>
   );
 }
 
@@ -5873,6 +6853,8 @@ function ReviewPage({mode='经期', shareState, onShareStateChange, onOpenPartne
   const [moodLandscapeOpen, setMoodLandscapeOpen] = useState(false);
   const [stoolDetailOpen, setStoolDetailOpen] = useState(false);
   const [stoolLandscapeOpen, setStoolLandscapeOpen] = useState(false);
+  const [loveLandscapeOpen, setLoveLandscapeOpen] = useState(false);
+  const [loveDetailOpen, setLoveDetailOpen] = useState(false);
   const isPeriodMode = mode === '经期';
   const cycleData = [29,34,31,30,33,31,32,36,31,30,32,30,31,29,30,31,29,30,29,31,30,30,28,28];
   const cycleLast12 = cycleData.slice(-12);
@@ -5991,7 +6973,12 @@ function ReviewPage({mode='经期', shareState, onShareStateChange, onOpenPartne
           onLandscapeOpen={()=>setStoolLandscapeOpen(true)}
         />
       ) : null}
-      {isPeriodMode ? <LoveReviewCard/> : null}
+      {isPeriodMode ? (
+        <LoveReviewCard
+          onOpen={()=>setLoveDetailOpen(true)}
+          onLandscapeOpen={()=>setLoveLandscapeOpen(true)}
+        />
+      ) : null}
 
       </div>
       <CycleDetailPage
@@ -6007,6 +6994,8 @@ function ReviewPage({mode='经期', shareState, onShareStateChange, onOpenPartne
       <MoodLandscapePage open={moodLandscapeOpen} onClose={()=>setMoodLandscapeOpen(false)}/>
       <StoolDetailPage open={stoolDetailOpen} onClose={()=>setStoolDetailOpen(false)}/>
       <StoolLandscapePage open={stoolLandscapeOpen} onClose={()=>setStoolLandscapeOpen(false)}/>
+      <LoveLandscapePage open={loveLandscapeOpen} onClose={()=>setLoveLandscapeOpen(false)}/>
+      <LoveDetailPage open={loveDetailOpen} onClose={()=>setLoveDetailOpen(false)}/>
       <DietLandscapePage open={dietLandscapeOpen} onClose={()=>setDietLandscapeOpen(false)}/>
       <CycleLandscapePage open={cycleLandscapeOpen} onClose={()=>setCycleLandscapeOpen(false)}/>
     </main>

@@ -568,8 +568,12 @@
   color:#8264bd;
 }
 .review-card-icon.is-love{
-  background:rgba(239,111,131,0.12);
-  color:#dc5c72;
+  background:rgba(255,77,136,0.12);
+  color:var(--my-brand-red);
+}
+.review-card-icon.is-love svg{
+  fill:currentColor;
+  stroke:none;
 }
 .review-card-icon.is-placeholder{
   background:#f1f1f3;
@@ -695,8 +699,7 @@
 .review-legend-item.is-period i{border-top:2px solid #ff6f9f}
 .review-legend-item.is-symptom-pain i,
 .review-legend-item.is-symptom-back i,
-.review-legend-item.is-symptom-tired i,
-.review-legend-item.is-love i{
+.review-legend-item.is-symptom-tired i{
   width:8px;
   height:8px;
   border-radius:2px;
@@ -711,7 +714,13 @@
   border-radius:2px;
   background:rgba(129,97,191,0.18);
 }
-.review-legend-item.is-love i{background:#ef6f83}
+.review-legend-item.is-love i{
+  width:10px;
+  height:10px;
+  border-radius:4px;
+  border-top:0;
+  background:var(--my-brand-red);
+}
 .review-legend-item.is-placeholder i{border-top:2px solid #b8b8be}
 .review-legend-item.is-sleep i{
   width:8px;
@@ -5143,4 +5152,989 @@
   font-style:normal;
   font-weight:500;
   color:#FFB347;
+}
+
+/* ===== 爱爱详情（AxC 中立方案） ===== */
+.review-love-detail-content{
+  padding:0;
+  background:#fff;
+}
+.review-love-detail-top{
+  padding:8px 16px 0;
+  background:#fff;
+}
+.review-love-detail-top .review-segment{
+  margin-bottom:8px;
+}
+.review-love-trend-block{
+  padding:4px 16px 0;
+  background:#fff;
+}
+.review-love-trend-head{
+  margin-bottom:8px;
+}
+.review-love-trend-title{
+  font-size:17px;
+  font-weight:500;
+  color:var(--my-text-primary);
+  line-height:1.19;
+}
+.review-love-trend-range{
+  margin-top:4px;
+  font-size:12px;
+  color:rgba(0,0,0,0.4);
+  line-height:1.29;
+}
+.review-love-trend-metrics{
+  margin-top:12px;
+  padding:14px 0 16px;
+  border-top:0.5px solid var(--my-line);
+  display:flex;
+  align-items:stretch;
+}
+.review-love-trend-metric{
+  flex:1;
+  min-width:0;
+  text-align:center;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.review-love-trend-metric + .review-love-trend-metric::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:50%;
+  transform:translateY(-50%);
+  width:0.5px;
+  height:28px;
+  background:var(--my-line);
+}
+.review-love-trend-metric-value{
+  height:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:19px;
+  font-weight:500;
+  color:var(--my-text-primary);
+  line-height:22px;
+  font-variant-numeric:tabular-nums;
+}
+.review-love-trend-metric-value small{
+  margin-left:1px;
+  font-size:12px;
+  font-weight:400;
+  color:rgba(0,0,0,0.55);
+  line-height:1;
+}
+.review-love-trend-metric-value.is-trend{
+  font-size:15px;
+}
+.review-love-trend-metric-value.is-trend.is-up{
+  color:var(--my-brand-red);
+}
+.review-love-trend-metric-value.is-trend.is-flat{
+  color:#E8A04A;
+}
+.review-love-trend-metric-value.is-trend.is-down{
+  color:#00cc99;
+}
+.review-love-trend-metric-label{
+  margin-top:4px;
+  min-height:28px;
+  font-size:11px;
+  color:rgba(0,0,0,0.45);
+  line-height:1.29;
+}
+.review-love-trend-svg{
+  display:block;
+  width:100%;
+  height:auto;
+}
+.review-love-detail-lower{
+  background:var(--my-bg);
+  padding:16px 16px calc(28px + var(--my-safe-bottom, 0px));
+}
+.review-love-mini-card{
+  padding:16px;
+}
+.review-love-cycle-combined-wrap > .review-love-trend-title{
+  margin:0 0 12px;
+}
+.review-love-cycle-combined-wrap + .review-love-cycle-combined-wrap{
+  margin-top:16px;
+}
+.review-love-measure-donut-wrap{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+.review-love-measure-donut{
+  position:relative;
+  flex:0 0 120px;
+  width:120px;
+  height:120px;
+}
+.review-love-measure-donut svg{
+  width:100%;
+  height:100%;
+  display:block;
+}
+.review-love-measure-donut-center{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+  text-align:center;
+  pointer-events:none;
+}
+.review-love-measure-donut-center span{
+  font-size:11px;
+  color:rgba(0,0,0,0.34);
+  line-height:1.2;
+}
+.review-love-measure-donut-center b{
+  font-size:18px;
+  font-weight:500;
+  color:var(--my-brand-red);
+  line-height:1.1;
+  font-variant-numeric:tabular-nums;
+}
+.review-love-measure-donut-center b small{
+  margin-left:1px;
+  font-size:11px;
+  font-weight:400;
+}
+.review-love-measure-donut-legend{
+  flex:1;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+}
+.review-love-measure-donut-row{
+  display:grid;
+  grid-template-columns:22px 1fr auto;
+  align-items:center;
+  column-gap:8px;
+  padding:8px 0;
+  border-bottom:0.5px solid rgba(0,0,0,0.05);
+}
+.review-love-measure-donut-row:first-child{
+  padding-top:0;
+}
+.review-love-measure-donut-row:last-child{
+  padding-bottom:0;
+  border-bottom:none;
+}
+.review-love-measure-donut-ico{
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+}
+.review-love-measure-donut-ico svg{
+  width:14px;
+  height:14px;
+  display:block;
+}
+.review-love-measure-donut-row > span{
+  min-width:0;
+  font-size:13px;
+  color:rgba(0,0,0,0.7);
+  line-height:1.29;
+}
+.review-love-measure-donut-row > em{
+  font-style:normal;
+  font-size:12px;
+  color:rgba(0,0,0,0.45);
+  line-height:1.29;
+  font-variant-numeric:tabular-nums;
+}
+.review-love-habit-grid{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.review-love-habit-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-height:44px;
+  padding:8px 10px;
+  border-radius:8px;
+  background:var(--row-bg, #f7f7f9);
+}
+.review-love-habit-label{
+  flex:0 0 72px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+}
+.review-love-habit-label svg{
+  width:22px;
+  height:22px;
+  display:block;
+}
+.review-love-habit-label span{
+  font-size:11px;
+  color:rgba(0,0,0,0.55);
+  line-height:1.29;
+  white-space:nowrap;
+}
+.review-love-habit-dots{
+  flex:1 1 auto;
+  min-width:0;
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:5px;
+}
+.review-love-habit-dots i{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  display:block;
+  flex:0 0 auto;
+}
+.review-love-habit-dots i.is-on{
+  background:var(--my-brand-red);
+}
+.review-love-habit-dots i.is-off{
+  background:rgba(0,0,0,0.08);
+}
+.review-love-habit-count{
+  flex:0 0 32px;
+  text-align:right;
+  font-style:normal;
+  font-size:12px;
+  color:rgba(0,0,0,0.45);
+  line-height:1.29;
+  font-variant-numeric:tabular-nums;
+}
+.review-love-cycle-subhead{
+  margin-bottom:12px;
+  font-size:13px;
+  font-weight:500;
+  color:var(--my-text-primary);
+  line-height:1.29;
+}
+.review-love-cycle-divider{
+  height:0;
+  margin:16px 0;
+  border-top:0.5px solid var(--my-line);
+}
+.review-love-cycle-block .review-love-insight{
+  margin-top:12px;
+}
+.review-love-mini-card .review-love-insight{
+  margin-top:12px;
+}
+.review-love-hero-card{
+  padding:0;
+  overflow:hidden;
+}
+.review-love-hero-head{
+  position:relative;
+  padding:16px;
+  background:linear-gradient(158deg, #FF6FA0 0%, #FF4D88 100%);
+  overflow:hidden;
+}
+.review-love-hero-head::before,
+.review-love-hero-head::after{
+  content:"";
+  position:absolute;
+  border-radius:50%;
+  background:rgba(255,255,255,0.1);
+  pointer-events:none;
+}
+.review-love-hero-head::before{
+  right:-30px;
+  top:-30px;
+  width:130px;
+  height:130px;
+}
+.review-love-hero-head::after{
+  right:34px;
+  top:44px;
+  width:60px;
+  height:60px;
+  background:rgba(255,255,255,0.08);
+}
+.review-love-hero-title-row{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.review-love-hero-icon{
+  width:32px;
+  height:32px;
+  border-radius:8px;
+  background:#fff;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--my-brand-red);
+  flex:0 0 auto;
+}
+.review-love-hero-icon svg{
+  width:18px;
+  height:18px;
+  fill:currentColor;
+  stroke:none;
+}
+.review-love-hero-title{
+  flex:1 1 auto;
+  min-width:0;
+  font-size:17px;
+  font-weight:500;
+  color:#fff;
+  line-height:1.19;
+}
+.review-love-hero-badge{
+  flex:0 0 auto;
+  height:20px;
+  padding:0 8px;
+  border-radius:4px;
+  background:rgba(255,255,255,0.24);
+  color:#fff;
+  font-size:11px;
+  font-weight:500;
+  line-height:20px;
+}
+.review-love-hero-sub{
+  position:relative;
+  margin:8px 0 12px;
+  font-size:12px;
+  line-height:1.29;
+  color:rgba(255,255,255,0.92);
+}
+.review-love-hero-panel{
+  position:relative;
+  background:#fff;
+  border-radius:12px;
+  padding:12px;
+  box-shadow:0 0 0.1px rgba(0,0,0,0.08);
+}
+.review-love-hero-panel-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:8px;
+}
+.review-love-hero-panel-head em{
+  font-style:normal;
+  font-size:11px;
+  color:rgba(0,0,0,0.38);
+  line-height:1.29;
+}
+.review-love-section-title{
+  font-size:15px;
+  font-weight:500;
+  color:var(--my-text-primary);
+  line-height:1.19;
+}
+.review-love-freq-chart{
+  display:flex;
+  align-items:flex-end;
+  gap:8px;
+  height:164px;
+  padding-top:8px;
+}
+.review-love-freq-chart.is-dense{
+  gap:6px;
+}
+.review-love-freq-axis{
+  position:relative;
+  flex:0 0 16px;
+  width:16px;
+  height:104px;
+  margin-top:16px;
+  margin-bottom:20px;
+}
+.review-love-freq-chart.is-dense .review-love-freq-axis{
+  margin-bottom:18px;
+}
+.review-love-freq-axis-tick{
+  position:absolute;
+  right:0;
+  transform:translateY(50%);
+  font-size:10px;
+  color:#c0c0c5;
+  line-height:1;
+  white-space:nowrap;
+}
+.review-love-freq-axis-tick.is-zero{
+  transform:translateY(0);
+}
+.review-love-freq-axis-tick.is-max{
+  transform:translateY(100%);
+}
+.review-love-freq-plot{
+  position:relative;
+  flex:1 1 auto;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+}
+.review-love-freq-grid{
+  position:absolute;
+  left:0;
+  right:0;
+  top:16px;
+  height:104px;
+  pointer-events:none;
+}
+.review-love-freq-grid-line{
+  position:absolute;
+  left:0;
+  right:0;
+  height:0;
+  border-top:1px dashed rgba(255,77,136,0.12);
+}
+.review-love-freq-cols{
+  display:flex;
+  align-items:flex-end;
+  gap:8px;
+  height:100%;
+  min-height:148px;
+}
+.review-love-freq-chart.is-dense .review-love-freq-cols{
+  gap:4px;
+}
+.review-love-freq-col{
+  flex:1 1 0;
+  min-width:0;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-end;
+  gap:6px;
+}
+.review-love-freq-chart.is-dense .review-love-freq-col{
+  gap:4px;
+}
+.review-love-freq-bar-wrap{
+  position:relative;
+  width:100%;
+  height:120px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+}
+.review-love-freq-val{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  font-style:normal;
+  font-size:11px;
+  font-weight:500;
+  color:rgba(0,0,0,0.45);
+  line-height:1;
+  white-space:nowrap;
+  pointer-events:none;
+}
+.review-love-freq-chart.is-dense .review-love-freq-val{
+  font-size:9px;
+}
+.review-love-freq-col.is-cur .review-love-freq-val{
+  color:var(--my-brand-red);
+}
+.review-love-freq-tip{
+  position:absolute;
+  top:-17px;
+  left:50%;
+  transform:translateX(-50%);
+  padding:2px 7px;
+  border-radius:8px;
+  background:var(--my-brand-red);
+  color:#fff;
+  font-size:10px;
+  font-weight:500;
+  white-space:nowrap;
+  line-height:1.2;
+}
+.review-love-freq-bar{
+  width:100%;
+  max-width:23px;
+  border-radius:7px 7px 4px 4px;
+  background:linear-gradient(180deg, #FFA5C4, #FFD6E4);
+}
+.review-love-freq-chart.is-dense .review-love-freq-bar{
+  max-width:14px;
+  border-radius:5px 5px 3px 3px;
+}
+.review-love-freq-col.is-cur .review-love-freq-bar{
+  background:linear-gradient(180deg, #ff4d88, #FF9BBE);
+}
+.review-love-freq-label{
+  font-size:11px;
+  color:rgba(0,0,0,0.4);
+  line-height:1.29;
+}
+.review-love-freq-chart.is-dense .review-love-freq-label{
+  font-size:9px;
+  transform:scale(0.92);
+  transform-origin:center top;
+  white-space:nowrap;
+}
+.review-love-freq-col.is-cur .review-love-freq-label{
+  color:var(--my-brand-red);
+  font-weight:500;
+}
+.review-love-hero-metrics{
+  position:relative;
+  display:flex;
+  margin-top:12px;
+}
+.review-love-hero-metrics > div{
+  flex:1 1 0;
+  min-width:0;
+  text-align:center;
+}
+.review-love-hero-metrics > div + div{
+  border-left:0.5px solid rgba(255,255,255,0.28);
+}
+.review-love-hero-metrics b{
+  display:block;
+  font-size:17px;
+  font-weight:500;
+  color:#fff;
+  line-height:1.19;
+}
+.review-love-hero-metrics b.is-trend{
+  font-size:15px;
+  padding-top:2px;
+}
+.review-love-hero-metrics small{
+  margin-left:1px;
+  font-size:11px;
+  font-weight:400;
+  opacity:0.85;
+}
+.review-love-hero-metrics span{
+  display:block;
+  margin-top:2px;
+  font-size:11px;
+  color:rgba(255,255,255,0.85);
+  line-height:1.29;
+}
+.review-love-hero-body{
+  padding:16px;
+}
+.review-love-section-head{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  margin-bottom:12px;
+}
+.review-love-section-head.is-detail{
+  margin-top:16px;
+}
+.review-love-section-title-wrap{
+  flex:1 1 auto;
+  min-width:0;
+}
+.review-love-section-title{
+  font-size:15px;
+  font-weight:500;
+  color:var(--my-text-primary);
+  line-height:1.19;
+}
+.review-love-section-sub{
+  margin:4px 0 0;
+  font-size:12px;
+  color:rgba(0,0,0,0.4);
+  line-height:1.29;
+}
+.review-love-section-head em{
+  flex:0 0 auto;
+  margin-left:auto;
+  margin-top:1px;
+  font-style:normal;
+  font-size:11px;
+  font-weight:500;
+  color:#9B6BD6;
+  background:rgba(155,107,214,0.1);
+  padding:2px 7px;
+  border-radius:4px;
+  line-height:1.29;
+  white-space:nowrap;
+}
+.review-love-cycle-compare{
+  margin-bottom:12px;
+}
+.review-love-cycle-plot{
+  display:flex;
+  align-items:flex-end;
+  gap:6px;
+}
+.review-love-cycle-axis{
+  position:relative;
+  flex:0 0 14px;
+  width:14px;
+  height:112px;
+  margin-bottom:18px;
+}
+.review-love-cycle-axis-tick{
+  position:absolute;
+  right:0;
+  transform:translateY(50%);
+  font-size:10px;
+  color:#c0c0c5;
+  line-height:1;
+  white-space:nowrap;
+}
+.review-love-cycle-axis-tick.is-zero{
+  transform:translateY(0);
+}
+.review-love-cycle-axis-tick.is-max{
+  transform:translateY(100%);
+}
+.review-love-cycle-main{
+  flex:1 1 auto;
+  min-width:0;
+}
+.review-love-cycle-bars{
+  position:relative;
+  display:flex;
+  height:140px;
+  align-items:flex-end;
+  gap:4px;
+  border-bottom:0.5px solid rgba(0,0,0,0.07);
+}
+.review-love-cycle-grid{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:112px;
+  pointer-events:none;
+  z-index:0;
+}
+.review-love-cycle-grid-line{
+  position:absolute;
+  left:0;
+  right:0;
+  height:0;
+  border-top:1px dashed rgba(0,0,0,0.06);
+}
+.review-love-cycle-group{
+  position:relative;
+  z-index:1;
+  flex:1 1 0;
+  min-width:0;
+  height:100%;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  gap:3px;
+  padding:0 4px 0;
+  box-sizing:border-box;
+}
+.review-love-cycle-group.is-hot{
+  height:88px;
+  align-self:flex-end;
+  padding:24px 4px 0;
+  background:rgba(155,107,214,0.1);
+  border-radius:8px 8px 0 0;
+}
+.review-love-cycle-hot-tag{
+  position:absolute;
+  top:5px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:1;
+  padding:2px 7px;
+  border-radius:80px;
+  background:#9B6BD6;
+  color:#fff;
+  font-size:10px;
+  font-weight:500;
+  line-height:1.29;
+  white-space:nowrap;
+}
+.review-love-cycle-bar-wrap{
+  position:relative;
+  width:11px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-end;
+}
+.review-love-cycle-bar-wrap em{
+  position:absolute;
+  top:-14px;
+  left:50%;
+  transform:translateX(-50%);
+  font-style:normal;
+  font-size:11px;
+  font-weight:500;
+  color:var(--my-brand-red);
+  line-height:1;
+}
+.review-love-cycle-bar{
+  width:11px;
+  border-radius:4px 4px 0 0;
+  display:block;
+}
+.review-love-cycle-bar.is-cur{background:#ff4d88}
+.review-love-cycle-bar.is-prev{background:#FFA5C4}
+.review-love-cycle-bar.is-prev2{background:#FFD6E4}
+.review-love-cycle-x{
+  display:flex;
+  margin-top:4px;
+}
+.review-love-cycle-x span{
+  flex:1 1 0;
+  text-align:center;
+  font-size:11px;
+  color:rgba(0,0,0,0.55);
+  line-height:1.29;
+}
+.review-love-cycle-x span.is-hot{
+  color:#9B6BD6;
+  font-weight:500;
+}
+.review-love-cycle-legend{
+  display:flex;
+  gap:12px;
+  margin-top:8px;
+  margin-left:20px;
+  font-size:11px;
+  color:rgba(0,0,0,0.55);
+}
+.review-love-cycle-legend span{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+}
+.review-love-cycle-legend i{
+  width:10px;
+  height:10px;
+  border-radius:3px;
+  display:inline-block;
+}
+.review-love-cycle-legend i.is-cur{background:#ff4d88}
+.review-love-cycle-legend i.is-prev{background:#FFA5C4}
+.review-love-cycle-legend i.is-prev2{background:#FFD6E4}
+.review-love-insight{
+  margin-top:12px;
+  padding:10px 12px;
+  border-radius:8px;
+  background:rgba(255,77,136,0.05);
+  font-size:12px;
+  line-height:1.5;
+  color:rgba(0,0,0,0.7);
+}
+.review-love-insight b{
+  font-weight:500;
+  color:var(--my-brand-red);
+}
+.review-love-dist-block{
+  margin-top:4px;
+}
+.review-love-dist-wrap{
+  position:relative;
+  width:100%;
+  max-width:200px;
+  margin:4px auto 12px;
+  aspect-ratio:1;
+}
+.review-love-dist-wrap svg{
+  width:100%;
+  height:100%;
+  display:block;
+  overflow:visible;
+}
+.review-love-dist-center{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  gap:2px;
+  pointer-events:none;
+}
+.review-love-dist-center span{
+  font-size:12px;
+  color:rgba(0,0,0,0.4);
+  line-height:1.2;
+}
+.review-love-dist-center b{
+  font-size:28px;
+  font-weight:500;
+  color:var(--my-brand-red);
+  line-height:1.1;
+  font-variant-numeric:tabular-nums;
+}
+.review-love-dist-center b small{
+  margin-left:1px;
+  font-size:12px;
+  font-weight:400;
+  color:rgba(0,0,0,0.55);
+}
+.review-love-dist-label{
+  position:absolute;
+  transform:translate(-50%, -50%);
+  font-size:11px;
+  font-weight:500;
+  white-space:nowrap;
+  pointer-events:none;
+  z-index:2;
+}
+.review-love-dist-bars{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding:0 4px;
+}
+.review-love-dist-bar-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.review-love-dist-bar-name{
+  flex:0 0 42px;
+  font-size:12px;
+  color:rgba(0,0,0,0.45);
+  line-height:1.29;
+}
+.review-love-dist-bar-name.is-hot{
+  color:#9B6BD6;
+  font-weight:500;
+}
+.review-love-dist-bar-track{
+  flex:1 1 auto;
+  min-width:0;
+  height:10px;
+  border-radius:80px;
+  background:rgba(0,0,0,0.04);
+  display:flex;
+  overflow:hidden;
+}
+.review-love-dist-bar-track i{
+  display:block;
+  height:100%;
+}
+.review-love-dist-bar-track i.is-safe{
+  background:#FFC4D9;
+}
+.review-love-dist-bar-track i.is-risk{
+  background:#ff4d88;
+}
+.review-love-dist-bar-row b{
+  flex:0 0 36px;
+  text-align:right;
+  font-size:12px;
+  font-weight:400;
+  color:rgba(0,0,0,0.45);
+  line-height:1.29;
+  font-variant-numeric:tabular-nums;
+}
+.review-love-dist-legend{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  margin-top:12px;
+  padding:0 4px;
+  font-size:12px;
+  color:rgba(0,0,0,0.55);
+  line-height:1.29;
+}
+.review-love-dist-legend span{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+}
+.review-love-dist-legend-heart{
+  width:14px;
+  height:14px;
+  display:block;
+  flex:0 0 auto;
+}
+.review-love-phase-grid{
+  display:flex;
+  gap:8px;
+}
+.review-love-phase-card{
+  flex:1 1 0;
+  min-width:0;
+  border-radius:8px;
+  padding:8px 4px;
+  text-align:center;
+}
+.review-love-phase-card > span{
+  display:block;
+  margin-bottom:4px;
+  font-size:11px;
+  font-weight:500;
+  line-height:1.19;
+}
+.review-love-phase-card b{
+  display:block;
+  font-size:15px;
+  font-weight:500;
+  line-height:1.19;
+}
+.review-love-phase-card small{
+  margin-left:1px;
+  font-size:10px;
+  font-weight:400;
+}
+.review-love-phase-card em{
+  display:block;
+  margin-top:3px;
+  font-style:normal;
+  font-size:10px;
+  color:rgba(0,0,0,0.38);
+  line-height:1.29;
+}
+.review-love-phase-card.is-menstrual{
+  background:#FFEEF2;
+  color:#F6577E;
+}
+.review-love-phase-card.is-follicular{
+  background:#EAF9F3;
+  color:#22C08A;
+}
+.review-love-phase-card.is-ovulation{
+  background:#F3EDFB;
+  color:#9B6BD6;
+}
+.review-love-phase-card.is-luteal{
+  background:#EEF3FE;
+  color:#7C9CF0;
+}
+.review-love-phase-warn{
+  display:inline-block;
+  margin-top:3px;
+  padding:1px 4px;
+  border-radius:4px;
+  background:#E8951A;
+  color:#fff;
+  font-size:10px;
+  font-weight:500;
+  font-style:normal;
+  line-height:1.2;
+}
+.review-love-footnote{
+  margin:12px 0 0;
+  text-align:center;
+  font-size:11px;
+  color:rgba(0,0,0,0.38);
+  line-height:1.29;
 }
