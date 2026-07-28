@@ -596,6 +596,26 @@ function CycleDetailChart({range}){
   );
 }
 
+function CycleDetailBarChart({range}){
+  const source = range === '6m' ? REVIEW_CYCLE_ALL_DATA.slice(-6) : range === '1y' ? REVIEW_CYCLE_ALL_DATA.slice(-12) : range === '3y' ? REVIEW_CYCLE_ALL_DATA.slice(-36) : REVIEW_CYCLE_ALL_DATA;
+  const data = source.slice(-12).map((item, index)=>({label:item[0], cycle:item[1], period:[5,6,5,7,5,4][index % 6]}));
+  const W = 340, H = 190, padL = 30, padR = 12, padT = 20, padB = 28, maxDays = 36;
+  const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB, band = (x1 - x0) / data.length, bw = Math.min(22, band - 5);
+  const X = i => x0 + band * i + band / 2;
+  const Y = days => y1 - days / maxDays * (y1 - y0);
+  return <svg viewBox="0 0 340 190" preserveAspectRatio="xMidYMid meet" role="img" aria-label="月经周期经期与非经期天数柱状图">
+    {[0,10,20,30].map(v=><React.Fragment key={v}><line x1={x0} y1={Y(v)} x2={x1} y2={Y(v)} stroke="rgba(0,0,0,.05)"/><text x={x0-5} y={Y(v)+3} textAnchor="end" fontSize="9" fill="#aaa">{v}</text></React.Fragment>)}
+    {data.map((item,i)=>{ const x=X(i)-bw/2, darkY=Y(item.period), topY=Y(item.cycle); return <g key={item.label}>
+      <rect x={x} y={topY} width={bw} height={Y(0)-topY} rx="4" fill="#ffd6e5"/>
+      <rect x={x} y={darkY} width={bw} height={Y(0)-darkY} rx="4" fill="#ff4d88"/>
+      <text x={X(i)} y={topY-6} textAnchor="middle" fontSize="8.5" fontWeight="600" fill="#b85f83">{item.cycle}天</text>
+      <text x={X(i)} y={(darkY+y1)/2+3} textAnchor="middle" fontSize="8.5" fill="#fff">{item.period}天</text>
+      {i===data.length-1 ? <text x={X(i)} y={topY-18} textAnchor="middle" fontSize="9" fontWeight="600" fill="#ff4d88">进行中</text> : null}
+      <text x={X(i)} y={H-9} textAnchor="middle" fontSize="8.5" fill="#aaa">{item.label}</text>
+    </g>;})}
+  </svg>;
+}
+
 function ReviewShareQr(){
   const modules = [];
   const isFinder = (x, y, ox, oy)=>x >= ox && x < ox + 7 && y >= oy && y < oy + 7;
@@ -956,10 +976,12 @@ function ReviewShareHubPage({open, onClose, cycleShared, onCycleManage, sharedCa
 }
 
 function CycleDetailPage({open, onClose}){
-  const [range, setRange] = useState('3y');
+  const [range, setRange] = useState('6m');
+  const [chartMode, setChartMode] = useState('line');
   const ranges = [
-    {key:'1y', label:'最近1年'},
-    {key:'3y', label:'最近3年'},
+    {key:'6m', label:'近半年'},
+    {key:'1y', label:'近1年'},
+    {key:'3y', label:'近3年'},
     {key:'all', label:'全部'},
   ];
   const analysisCopy = {
@@ -1039,7 +1061,7 @@ function CycleDetailPage({open, onClose}){
       summary:'从全部记录看，你的周期长期规律，只有一次孤立的偏长记录。近几年周期缓慢缩短、波动范围同步收窄，目前没有明显异常信号。长期趋势适合持续观察，不用于替代医学诊断。',
     },
   };
-  const currentAnalysis = analysisCopy[range];
+  const currentAnalysis = analysisCopy[range] || analysisCopy['1y'];
 
   return (
     <section className={'review-cycle-detail is-cycle-ai-detail' + (open ? ' is-open' : '')} aria-hidden={!open} aria-label="月经周期详情">
@@ -1047,7 +1069,7 @@ function CycleDetailPage({open, onClose}){
         <button type="button" className="review-detail-back" aria-label="返回" onClick={onClose}>
           <ReviewBackIcon/>
         </button>
-        <span className="review-detail-title">月经周期AI趋势分析</span>
+        <span className="review-detail-title">月经周期</span>
       </div>
       <div className="review-detail-content">
         <div className="review-segment" role="tablist" aria-label="时间范围">
@@ -1066,20 +1088,25 @@ function CycleDetailPage({open, onClose}){
 
         <div className="review-cycle-sample-area">
         <div className="review-detail-card">
-          <div className="review-chart review-detail-chart"><CycleDetailChart range={range}/></div>
+          <div className="review-cycle-chart-toolbar">
+            <span>周期变化</span>
+            <div className="review-segment review-chart-mode" role="tablist" aria-label="图表视图">
+              <button type="button" className={chartMode === 'line' ? 'is-active' : ''} onClick={()=>setChartMode('line')}>曲线</button>
+              <button type="button" className={chartMode === 'bar' ? 'is-active' : ''} onClick={()=>setChartMode('bar')}>柱状图</button>
+            </div>
+          </div>
+          <div className="review-chart review-detail-chart">{chartMode === 'line' ? <CycleDetailChart range={range}/> : <CycleDetailBarChart range={range}/>}</div>
           <div className="review-legend">
-            <span className="review-legend-item is-cycle"><i></i>周期天数</span>
-            <span className="review-legend-item is-trend"><i></i>趋势</span>
-            <span className="review-legend-item is-warning"><i></i>偏长周期</span>
+            {chartMode === 'bar' ? <><span className="review-legend-item is-period"><i></i>经期天数</span><span className="review-legend-item is-cycle"><i></i>非经期天数</span></> : <><span className="review-legend-item is-cycle"><i></i>周期天数</span><span className="review-legend-item is-trend"><i></i>趋势</span></>}
           </div>
         </div>
 
-        <div className="review-detail-card review-ai-insight-card">
+        <div className={'review-detail-card review-ai-insight-card' + (range !== '6m' ? ' is-vip-locked' : '')}>
           <div className="review-insight-head">
             <span className="review-ai-badge" aria-hidden="true">AI</span>
             <span>趋势分析</span>
           </div>
-          <div className="review-insight-body">
+          {range !== '6m' ? <div className="review-vip-lock-content"><span className="review-ai-unlock-vip">VIP</span><b>解锁长期趋势洞察</b><p>近1年、近3年及全部数据的规律性与稳定性对比</p><button type="button">立即查看</button></div> : <div className="review-insight-body">
             {currentAnalysis.items.map((item, index)=>(
               <div className={'review-insight-item ' + item.tone} key={index}>
                 <span className="review-insight-dot"></span>
@@ -1093,18 +1120,11 @@ function CycleDetailPage({open, onClose}){
               <div className="review-summary-head">总结</div>
               <p className="review-summary-text">{currentAnalysis.summary}</p>
             </div>
-          </div>
+          </div>}
         </div>
-        <div className="review-cycle-sample-mask" aria-hidden="true">
-          <span>示例数据</span>
+        <div className="review-detail-card review-membership-entry"><img src="assets/period-health-detail.png" alt="经期健康度详情" /></div>
+        <div className="review-detail-card review-next-period-card"><img src="assets/period-prediction-detail.jpg" alt="经期预测" /></div>
         </div>
-        </div>
-      </div>
-      <div className="review-ai-floating-action">
-        <button type="button" className="review-ai-unlock-btn">
-          <span className="review-ai-unlock-vip">VIP</span>
-          <span>查看分析</span>
-        </button>
       </div>
     </section>
   );
@@ -1136,53 +1156,44 @@ function ReviewMoodValue({kind, word, trend}){
 }
 
 function CycleChart(){
-  const data = REVIEW_CYCLE_ALL_DATA.slice(-24);
-  const vals = data.map(d=>d[1]);
-  const n = vals.length;
-  const normalMax = 35;
-  const W = 340, H = 168, padL = 24, padR = 14, padT = 14, padB = 26;
+  const data = [
+    {label:'1月', cycle:31, period:5},
+    {label:'2月', cycle:29, period:6},
+    {label:'3月', cycle:30, period:5},
+    {label:'4月', cycle:30, period:7},
+    {label:'5月', cycle:30, period:5},
+    {label:'6月', cycle:28, period:4},
+  ];
+  const W = 340, H = 168, padL = 28, padR = 12, padT = 12, padB = 26;
   const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
-  const yMin = 26, yMax = 37;
-  const X = i => x0 + (x1 - x0) * (i / (n - 1));
-  const Y = v => y1 - (v - yMin) / (yMax - yMin) * (y1 - y0);
-  const pts = vals.map((v, i)=>[X(i), Y(v)]);
-  const sx = vals.reduce((s, _v, i)=>s + i, 0);
-  const sy = vals.reduce((s, v)=>s + v, 0);
-  const sxy = vals.reduce((s, v, i)=>s + i * v, 0);
-  const sxx = vals.reduce((s, _v, i)=>s + i * i, 0);
-  const b = (n * sxy - sx * sy) / (n * sxx - sx * sx);
-  const a = (sy - b * sx) / n;
-  let anomalyIdx = -1, anomalyVal = 0;
-  vals.forEach((v, i)=>{ if(v > normalMax && v > anomalyVal){ anomalyVal = v; anomalyIdx = i; } });
-  const lastVal = vals[n - 1];
-  const labels = {0:'24.6', 7:'25.1', 13:'25.7', 19:'26.1', 23:'26.5'};
+  const maxDays = 35;
+  const band = (x1 - x0) / data.length;
+  const barWidth = 24;
+  const X = i => x0 + band * i + band / 2;
+  const Y = v => y1 - v / maxDays * (y1 - y0);
   return (
-    <svg viewBox="0 0 340 168" preserveAspectRatio="xMidYMid meet" role="img" aria-label="月经周期长度趋势曲线">
-      <rect x={x0} y={y0} width={x1 - x0} height={Y(normalMax) - y0} fill="rgba(255,149,0,0.06)"/>
-      {[28,32,36].map(g=>(
+    <svg viewBox="0 0 340 168" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近6次月经周期构成图">
+      {[0,10,20,30].map(g=>(
         <React.Fragment key={g}>
           <line x1={x0} y1={Y(g)} x2={x1} y2={Y(g)} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/>
           <text x={x0 - 5} y={Y(g) + 3} textAnchor="end" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{g}</text>
         </React.Fragment>
       ))}
-      <line x1={x0} y1={Y(normalMax)} x2={x1} y2={Y(normalMax)} stroke="#ffb15a" strokeWidth="1" strokeDasharray="3 3"/>
-      <text x={x1} y={Y(normalMax) - 4} textAnchor="end" fontSize="9" fill="#e8930f" fontFamily="PingFang SC">正常上限 35天</text>
-      <line x1={X(0)} y1={Y(a)} x2={X(n - 1)} y2={Y(a + b * (n - 1))} stroke="#c2c2c8" strokeWidth="1.5" strokeDasharray="4 3" strokeLinecap="round"/>
-      <path d={reviewSmoothPath(pts)} fill="none" stroke="#ff4d88" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round"/>
-      {vals.map((v, i)=>{
-        const isAnomaly = i === anomalyIdx;
-        const isLast = i === n - 1;
+      {data.map((item, i)=>{
+        const x = X(i) - barWidth / 2;
+        const periodY = Y(item.period);
+        const cycleY = Y(item.cycle);
         return (
-          <React.Fragment key={i}>
-            <circle cx={X(i)} cy={Y(v)} r={isLast ? 4.5 : (isAnomaly ? 4 : 2.4)} fill={isAnomaly ? '#ff9500' : '#ff4d88'} stroke={isLast || isAnomaly ? '#fff' : 'none'} strokeWidth={isLast ? 2 : 1.5}/>
-            {isAnomaly ? <text x={X(i)} y={Y(v) - 8} textAnchor="middle" fontSize="9.5" fontWeight="600" fill="#e8930f" fontFamily="PingFang SC">{anomalyVal}天</text> : null}
-            {isLast ? <text x={X(i)} y={Y(v) + 15} textAnchor="end" fontSize="9.5" fontWeight="600" fill="#ff4d88" fontFamily="PingFang SC">{lastVal}天</text> : null}
-          </React.Fragment>
+          <g key={item.label}>
+            <rect x={x} y={cycleY} width={barWidth} height={Y(0) - cycleY} rx="5" fill="#ffd6e5"/>
+            <rect x={x} y={periodY} width={barWidth} height={Y(0) - periodY} rx="5" fill="#ff4d88"/>
+            <text x={X(i)} y={cycleY - 6} textAnchor="middle" fontSize="9" fontWeight="600" fill="#c66b8b" fontFamily="PingFang SC">{item.cycle}天</text>
+            <text x={X(i)} y={(periodY + y1) / 2 + 3} textAnchor="middle" fontSize="9" fontWeight="600" fill="#fff" fontFamily="PingFang SC">{item.period}天</text>
+            {i === data.length - 1 ? <text x={X(i)} y={cycleY - 18} textAnchor="middle" fontSize="9" fontWeight="600" fill="#ff4d88" fontFamily="PingFang SC">进行中</text> : null}
+            <text x={X(i)} y={H - 8} textAnchor="middle" fontSize="9" fill={i === data.length - 1 ? '#ff4d88' : '#bbbbbf'} fontFamily="PingFang SC">{item.label}</text>
+          </g>
         );
       })}
-      {Object.keys(labels).map(k=>(
-        <text key={k} x={X(+k)} y={H - 8} textAnchor="middle" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{labels[k]}</text>
-      ))}
     </svg>
   );
 }
@@ -7074,9 +7085,8 @@ function LoveDetailPage({open, onClose}){
   );
 }
 
-function ReviewPage({mode='经期', shareState, onShareStateChange, onOpenPartnerPreview}){
+function ReviewPage({mode='经期', isMember=false, shareState, onShareStateChange, onOpenPartnerPreview}){
   const [reviewSearchOpen, setReviewSearchOpen] = useState(false);
-  const [shareFlowOpen, setShareFlowOpen] = useState(false);
   const [cycleDetailOpen, setCycleDetailOpen] = useState(false);
   const [cycleLandscapeOpen, setCycleLandscapeOpen] = useState(false);
   const [dietDistDetailOpen, setDietDistDetailOpen] = useState(false);
@@ -7096,9 +7106,6 @@ function ReviewPage({mode='经期', shareState, onShareStateChange, onOpenPartne
   const weightDelta = weightData[weightData.length - 1] - weightData[0];
   const I = window.Icon;
   const ReviewSearchOverlay = window.ReviewSearchOverlay;
-  const ReviewShareFlow = window.ReviewShareFlow;
-  const shareStatus = shareState?.status || 'idle';
-  const shareActive = shareStatus === 'invited' || shareStatus === 'accepted';
 
   return (
     <main className={'review-page' + (reviewSearchOpen ? ' is-review-search-open' : '')} aria-label="回顾">
@@ -7113,56 +7120,30 @@ function ReviewPage({mode='经期', shareState, onShareStateChange, onOpenPartne
           <I name="search" size={20} stroke={1.7}/>
         </button>
         <span className="review-nav-title">回顾</span>
-        <button
-          type="button"
-          className={'review-nav-share' + (shareActive ? ' is-shared' : '')}
-          aria-label="共享回顾"
-          onClick={()=>setShareFlowOpen(true)}
-        >
-          <ReviewShareIcon/>
-          <span>{shareStatus === 'accepted' ? '共享中' : shareStatus === 'invited' ? '待接受' : '共享'}</span>
-          {shareActive ? <span className="review-nav-share-avatar" aria-hidden="true">👨🏻</span> : null}
-        </button>
       </div>
       <div className="review-content">
         <p className="review-page-greeting">已记录 <b>350 天</b>，共 <b>{isPeriodMode ? 9 : 5} 项</b>可回顾</p>
 
-      {isPeriodMode ? <PeriodHealthImageCard/> : null}
+      {isPeriodMode && isMember ? <PeriodHealthImageCard/> : null}
 
       <ReviewCard
-        title={isPeriodMode ? '周期' : '月经周期'}
+        title="月经周期"
         icon={<ReviewDropletIcon/>}
-        headAction={(
-          <button
-            type="button"
-            className="review-cycle-expand-btn"
-            aria-label="横屏展开全部周期"
-            onKeyDown={event=>event.stopPropagation()}
-            onClick={event=>{
-              event.stopPropagation();
-              setCycleLandscapeOpen(true);
-            }}
-          >
-            <ReviewExpandIcon/>
-          </button>
-        )}
         chart={<CycleChart/>}
         legend={(
           <>
-            <span className="review-legend-item is-cycle"><i></i>周期天数</span>
-            <span className="review-legend-item is-trend"><i></i>趋势</span>
-            <span className="review-legend-item is-warning"><i></i>偏长周期</span>
+            <span className="review-legend-item is-period"><i></i>经期天数</span>
+            <span className="review-legend-item is-cycle"><i></i>非经期天数</span>
           </>
         )}
         metrics={(
           <>
-            <ReviewMetric value={cycleData[cycleData.length - 1]} unit="天" label="最近周期"/>
-            <ReviewMetric value={reviewFmt1(cycleAvg)} unit="天" label="近一年平均"/>
+            <ReviewMetric value="28" unit="天" label="最近周期"/>
+            <ReviewMetric value="29.7" unit="天" label="近6次平均"/>
             <ReviewMetric value="↘ 缩短" label="整体趋势" trend/>
           </>
         )}
-        more="查看AI趋势分析"
-        moreBadge="VIP"
+        more="查看趋势分析"
         onOpen={()=>{
           setCycleDetailOpen(true);
         }}
@@ -7217,7 +7198,6 @@ function ReviewPage({mode='经期', shareState, onShareStateChange, onOpenPartne
         open={cycleDetailOpen}
         onClose={()=>setCycleDetailOpen(false)}
       />
-      {ReviewShareFlow ? <ReviewShareFlow open={shareFlowOpen} shareState={shareState} onShareStateChange={onShareStateChange} onClose={()=>setShareFlowOpen(false)} onOpenPartnerPreview={onOpenPartnerPreview}/> : null}
       {reviewSearchOpen && ReviewSearchOverlay ? (
         <ReviewSearchOverlay onClose={()=>setReviewSearchOpen(false)}/>
       ) : null}
