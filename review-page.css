@@ -3648,7 +3648,7 @@
 }
 .review-mood-trend-card .review-mood-chart-legend{
   margin-top:8px;
-  margin-bottom:0;
+  margin-bottom:12px;
 }
 .review-mood-trend-card .review-mood-cycle-phase-legend{
   margin-top:12px;
@@ -5166,6 +5166,78 @@
 .review-love-detail-top .review-segment{
   margin-bottom:8px;
 }
+.review-mood-detail-content{
+  padding:0;
+  background:#fff;
+}
+.review-mood-detail-top{
+  padding:8px 16px 0;
+  background:#fff;
+}
+.review-mood-detail-top .review-segment{
+  margin-bottom:8px;
+}
+.review-mood-trend-block{
+  padding:4px 16px 0;
+  background:#fff;
+}
+.review-mood-trend-head-main{
+  margin-bottom:8px;
+}
+.review-mood-trend-main-title{
+  font-size:17px;
+  font-weight:500;
+  color:var(--my-text-primary);
+  line-height:1.19;
+}
+.review-mood-trend-range{
+  margin-top:4px;
+  font-size:12px;
+  color:rgba(0,0,0,0.4);
+  line-height:1.29;
+}
+.review-mood-trend-block .review-mood-chart-legend{
+  margin-top:8px;
+  margin-bottom:0;
+}
+.review-mood-trend-metrics{
+  margin-top:12px;
+  padding:14px 0 16px;
+  border-top:0.5px solid var(--my-line);
+  display:flex;
+  align-items:stretch;
+}
+.review-mood-trend-metric{
+  flex:1;
+  min-width:0;
+  text-align:center;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+}
+.review-mood-trend-metric + .review-mood-trend-metric::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:8px;
+  bottom:8px;
+  width:0.5px;
+  background:var(--my-line);
+}
+.review-mood-trend-metric-label{
+  font-size:11px;
+  color:rgba(0,0,0,0.45);
+  line-height:1.29;
+}
+.review-mood-detail-lower{
+  background:var(--my-bg);
+  padding:16px 16px calc(28px + var(--my-safe-bottom, 0px));
+}
+.review-mood-share-card .review-mood-insight-grid{
+  margin-top:12px;
+}
 .review-love-trend-block{
   padding:4px 16px 0;
   background:#fff;
@@ -5251,7 +5323,7 @@
 .review-love-trend-svg{
   display:block;
   width:100%;
-  height:auto;
+  height:164px;
 }
 .review-love-detail-lower{
   background:var(--my-bg);
@@ -5358,67 +5430,223 @@
   line-height:1.29;
   font-variant-numeric:tabular-nums;
 }
-.review-love-habit-grid{
+.review-love-habit-chart{
   display:flex;
   flex-direction:column;
-  gap:8px;
+  align-items:stretch;
+  gap:12px;
+}
+.review-love-habit-rows{
+  display:flex;
+  flex-direction:column;
+  gap:0;
 }
 .review-love-habit-row{
-  display:flex;
+  display:grid;
+  grid-template-columns:76px minmax(0, 1fr) 40px;
   align-items:center;
-  gap:10px;
-  min-height:44px;
-  padding:8px 10px;
-  border-radius:8px;
-  background:var(--row-bg, #f7f7f9);
+  gap:8px;
+  min-height:52px;
+  padding:8px 6px;
+  border-bottom:0.5px dashed rgba(0,0,0,0.1);
+}
+.review-love-habit-row:last-child{
+  border-bottom:0;
 }
 .review-love-habit-label{
-  flex:0 0 72px;
   display:flex;
-  flex-direction:column;
   align-items:center;
-  gap:2px;
+  gap:6px;
+  min-width:0;
 }
 .review-love-habit-label svg{
   width:22px;
   height:22px;
+  flex:0 0 auto;
   display:block;
 }
-.review-love-habit-label span{
+.review-love-habit-label strong{
+  font-size:12px;
+  font-weight:500;
+  color:rgba(0,0,0,0.8);
+  line-height:1.29;
+}
+.review-love-habit-hours{
+  display:grid;
+  grid-template-columns:repeat(6, minmax(0, 1fr));
+  align-items:center;
+  justify-items:center;
+  gap:2px;
+  min-width:0;
+}
+.review-love-habit-hour{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+}
+.review-love-habit-hour > em{
+  font-style:normal;
+  font-size:10px;
+  color:rgba(0,0,0,0.35);
+  line-height:1;
+  font-variant-numeric:tabular-nums;
+  min-height:10px;
+}
+.review-love-habit-hour > em.is-empty{
+  visibility:hidden;
+}
+.review-love-habit-hour > i{
+  position:relative;
+  display:block;
+  border-radius:50%;
+  box-sizing:border-box;
+}
+.review-love-habit-hour > i.is-0,
+.review-love-habit-legend i.is-0{
+  width:8px;
+  height:8px;
+  background:rgba(0,0,0,0.12);
+  border:0;
+}
+.review-love-habit-hour > i.is-1,
+.review-love-habit-legend i.is-1{
+  width:8px;
+  height:8px;
+  background:#FFB3CD;
+  border:0;
+}
+.review-love-habit-hour > i.is-2,
+.review-love-habit-legend i.is-2{
+  width:10px;
+  height:10px;
+  background:#FF7AA8;
+  border:0;
+}
+.review-love-habit-hour > i.is-3,
+.review-love-habit-legend i.is-3{
+  width:16px;
+  height:16px;
+  background:var(--my-brand-red);
+  border:0;
+}
+.review-love-habit-count{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  justify-content:center;
+  gap:2px;
+  min-width:0;
+}
+.review-love-habit-count > b{
+  font-size:12px;
+  font-weight:500;
+  color:rgba(0,0,0,0.45);
+  line-height:1.29;
+  white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+}
+.review-love-habit-insight b{
+  color:rgba(0,0,0,0.45);
+  font-weight:500;
+}
+.review-love-habit-legend{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:flex-start;
+  align-items:center;
+  gap:10px 14px;
   font-size:11px;
   color:rgba(0,0,0,0.55);
   line-height:1.29;
-  white-space:nowrap;
 }
-.review-love-habit-dots{
-  flex:1 1 auto;
-  min-width:0;
-  display:flex;
-  flex-wrap:wrap;
+.review-love-habit-legend > span{
+  display:inline-flex;
   align-items:center;
-  gap:5px;
+  gap:4px;
 }
-.review-love-habit-dots i{
+.review-love-habit-legend i{
+  position:relative;
+  display:inline-block;
+  flex:0 0 auto;
+  border-radius:50%;
+  box-sizing:border-box;
+}
+.review-love-habit-legend i.is-0{
   width:8px;
   height:8px;
-  border-radius:50%;
-  display:block;
-  flex:0 0 auto;
 }
-.review-love-habit-dots i.is-on{
-  background:var(--my-brand-red);
+.review-love-habit-legend i.is-1{
+  width:8px;
+  height:8px;
 }
-.review-love-habit-dots i.is-off{
-  background:rgba(0,0,0,0.08);
+.review-love-habit-legend i.is-2{
+  width:10px;
+  height:10px;
 }
-.review-love-habit-count{
-  flex:0 0 32px;
-  text-align:right;
+.review-love-habit-legend i.is-3{
+  width:16px;
+  height:16px;
+}
+.review-love-interval-chart{
+  margin-top:4px;
+}
+.review-love-interval-bars{
+  display:grid;
+  grid-template-columns:repeat(6, minmax(0, 1fr));
+  align-items:end;
+  gap:6px;
+  min-height:132px;
+  padding-bottom:2px;
+  border-bottom:0.5px solid rgba(0,0,0,0.08);
+}
+.review-love-interval-col{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-end;
+  min-width:0;
+  height:100%;
+  gap:4px;
+}
+.review-love-interval-track{
+  width:100%;
+  max-width:28px;
+  height:100px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-end;
+  gap:4px;
+}
+.review-love-interval-track > em{
   font-style:normal;
-  font-size:12px;
-  color:rgba(0,0,0,0.45);
+  font-size:11px;
+  color:rgba(0,0,0,0.55);
   line-height:1.29;
   font-variant-numeric:tabular-nums;
+}
+.review-love-interval-track > span{
+  display:block;
+  width:100%;
+  min-height:4px;
+  border-radius:80px 80px 0 0;
+  background:#FFC4D9;
+}
+.review-love-interval-col.is-top .review-love-interval-track > span{
+  background:var(--my-brand-red);
+}
+.review-love-interval-col.is-top .review-love-interval-track > em{
+  color:var(--my-brand-red);
+  font-weight:500;
+}
+.review-love-interval-col > b{
+  font-weight:400;
+  font-size:11px;
+  color:rgba(0,0,0,0.55);
+  line-height:1.29;
+  text-align:center;
+  white-space:nowrap;
 }
 .review-love-cycle-subhead{
   margin-bottom:12px;

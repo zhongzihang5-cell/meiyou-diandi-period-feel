@@ -2710,6 +2710,8 @@ const MOOD_YEAR_SERIES = buildMoodYearSeries(365);
 const MOOD_YEAR_VALS = MOOD_YEAR_SERIES.vals;
 const MOOD_YEAR_DATES = MOOD_YEAR_SERIES.dates;
 const MOOD_YEAR_XLABELS = MOOD_YEAR_SERIES.xLabels;
+const MOOD_HALF_SERIES = buildMoodYearSeries(183);
+const MOOD_ALL_SERIES = buildMoodYearSeries(730);
 
 function moodWordFromAvg(avg){
   const level = Math.max(1, Math.min(5, Math.round(avg)));
@@ -3073,6 +3075,121 @@ const MOOD_YEAR_WEEK_XLABELS = (()=>{
   keys.forEach((k, i)=>{ map[k] = labels[i]; });
   return map;
 })();
+const MOOD_HALF_WEEK_VALS = buildMoodYearWeeklyVals(MOOD_HALF_SERIES.vals);
+const MOOD_HALF_WEEK_XLABELS = (()=>{
+  const n = MOOD_HALF_WEEK_VALS.length;
+  const map = {};
+  const keys = [0, Math.round((n - 1) * 0.33), Math.round((n - 1) * 0.66), n - 1]
+    .filter((v, i, arr)=>arr.indexOf(v) === i);
+  const labels = ['1月', '3月', '5月', '今天'];
+  keys.forEach((k, i)=>{ map[k] = labels[Math.min(i, labels.length - 1)]; });
+  return map;
+})();
+const MOOD_ALL_WEEK_VALS = buildMoodYearWeeklyVals(MOOD_ALL_SERIES.vals);
+const MOOD_ALL_WEEK_XLABELS = (()=>{
+  const n = MOOD_ALL_WEEK_VALS.length;
+  const map = {};
+  const keys = [0, Math.round((n - 1) * 0.25), Math.round((n - 1) * 0.5), Math.round((n - 1) * 0.75), n - 1];
+  const labels = ['24.7', '25.1', '25.7', '26.1', '今天'];
+  keys.forEach((k, i)=>{ map[k] = labels[i]; });
+  return map;
+})();
+
+const MOOD_RANGE_META = {
+  d30:{
+    label:'近30天',
+    dateText:'2026年6月14日至7月13日',
+    shareTitle:'近30天心情占比',
+    recordDaysMain:'26',
+    recordDaysTotal:'30',
+    streakDays:12,
+    compareValue:'周末',
+    trend:'↗ 更积极',
+  },
+  half:{
+    label:'近半年',
+    dateText:'2026年1月13日至7月13日',
+    shareTitle:'近半年心情占比',
+    recordDaysMain:'142',
+    recordDaysTotal:'183',
+    streakDays:18,
+    compareValue:'春季',
+    trend:'↗ 更积极',
+  },
+  year:{
+    label:'近1年',
+    dateText:'2025年7月14日至2026年7月13日',
+    shareTitle:'近1年心情占比',
+    recordDaysMain:'286',
+    recordDaysTotal:'365',
+    streakDays:42,
+    compareValue:'夏季',
+    trend:'→ 平稳',
+  },
+  all:{
+    label:'全部',
+    dateText:'2024年7月14日至2026年7月13日',
+    shareTitle:'全部心情占比',
+    recordDaysMain:'520',
+    recordDaysTotal:'730',
+    streakDays:42,
+    compareValue:'夏季',
+    trend:'↗ 更积极',
+  },
+};
+
+function moodTrendChartProps(range){
+  if(range === 'half'){
+    return {
+      vals:MOOD_HALF_WEEK_VALS,
+      xLabels:MOOD_HALF_WEEK_XLABELS,
+      height:148,
+      gradientId:'moodDetailTrendHalf',
+      compact:true,
+      triScale:true,
+      showDots:true,
+      dotStep:2,
+      ariaLabel:'近半年心情趋势',
+    };
+  }
+  if(range === 'year'){
+    return {
+      vals:MOOD_YEAR_WEEK_VALS,
+      xLabels:MOOD_YEAR_WEEK_XLABELS,
+      height:148,
+      gradientId:'moodDetailTrendYear',
+      compact:true,
+      triScale:true,
+      showDots:true,
+      dotStep:2,
+      ariaLabel:'近1年心情趋势',
+    };
+  }
+  if(range === 'all'){
+    return {
+      vals:MOOD_ALL_WEEK_VALS,
+      xLabels:MOOD_ALL_WEEK_XLABELS,
+      height:148,
+      gradientId:'moodDetailTrendAll',
+      compact:true,
+      triScale:true,
+      showDots:true,
+      dotStep:2,
+      ariaLabel:'全部心情趋势',
+    };
+  }
+  return {
+    vals:MOOD_MONTH_VALS,
+    dates:MOOD_MONTH_DATES,
+    height:168,
+    gradientId:'moodDetailTrend',
+    markToday:true,
+    showDots:true,
+    dotStep:2,
+    triScale:true,
+    ariaLabel:'近30天心情趋势',
+  };
+}
 
 function MoodBarChart({vals = MOOD_MONTH_VALS, height = 150, ariaLabel = '本月心情柱状图'}){
   const n = vals.length;
@@ -3488,38 +3605,41 @@ function MoodTimeGrid({data = MOOD_TIME_GRID_DATA}){
   );
 }
 
-function MoodTimeDistributionCard({range = 'cycle'}){
-  const isYear = range === 'year';
-  const gridData = isYear ? MOOD_TIME_GRID_DATA_YEAR : MOOD_TIME_GRID_DATA;
+function MoodTimeDistributionCard({range = 'd30'}){
+  const isLong = range === 'year' || range === 'all' || range === 'half';
+  const gridData = isLong ? MOOD_TIME_GRID_DATA_YEAR : MOOD_TIME_GRID_DATA;
   const bestPct = gridData[0][0];
   const lowPct = gridData[4][2];
+  const rangeLabel = (MOOD_RANGE_META[range] && MOOD_RANGE_META[range].label) || '近30天';
   return (
-    <div className="review-detail-card review-mood-time-card">
-      <div className="review-mood-detail-head">按时段心情分布</div>
-      <MoodTimeGrid data={gridData}/>
-      <div className="review-mood-time-summary">
-        <div className="review-mood-time-summary-card">
-          <span>最佳时段</span>
-          <div className="review-mood-time-summary-main">
-            <MoodTimePeriodIcon type="sunrise"/>
-            <b>早晨</b>
+    <div className="review-love-cycle-combined-wrap">
+      <div className="review-love-trend-title">按时段心情分布</div>
+      <div className="review-detail-card review-mood-time-card review-love-mini-card">
+        <MoodTimeGrid data={gridData}/>
+        <div className="review-mood-time-summary">
+          <div className="review-mood-time-summary-card">
+            <span>最佳时段</span>
+            <div className="review-mood-time-summary-main">
+              <MoodTimePeriodIcon type="sunrise"/>
+              <b>早晨</b>
+            </div>
+            <em>积极心情占比最高 <i>{bestPct}%</i></em>
           </div>
-          <em>积极心情占比最高 <i>{bestPct}%</i></em>
-        </div>
-        <div className="review-mood-time-summary-card">
-          <span>低谷时段</span>
-          <div className="review-mood-time-summary-main">
-            <MoodTimePeriodIcon type="boat"/>
-            <b>夜间</b>
+          <div className="review-mood-time-summary-card">
+            <span>低谷时段</span>
+            <div className="review-mood-time-summary-main">
+              <MoodTimePeriodIcon type="boat"/>
+              <b>夜间</b>
+            </div>
+            <em>消极心情占比最高 <i className="is-neg">{lowPct}%</i></em>
           </div>
-          <em>消极心情占比最高 <i className="is-neg">{lowPct}%</i></em>
         </div>
+        <p className="review-mood-time-tip">
+          {isLong
+            ? (rangeLabel + '夜间更容易出现低落情绪，建议睡前放松一下，给自己 10 分钟的安静时光 🌙')
+            : '夜间更容易出现低落情绪，建议睡前放松一下，给自己 10 分钟的安静时光 🌙'}
+        </p>
       </div>
-      <p className="review-mood-time-tip">
-        {isYear
-          ? '这一年夜间更容易出现低落情绪，建议睡前放松一下，给自己 10 分钟的安静时光 🌙'
-          : '夜间更容易出现低落情绪，建议睡前放松一下，给自己 10 分钟的安静时光 🌙'}
-      </p>
     </div>
   );
 }
@@ -3603,35 +3723,37 @@ function MoodMonthStackChart({items = MOOD_MONTH_STACK_DATA}){
 
 function MoodMonthDistributionCard(){
   return (
-    <div className="review-detail-card review-mood-month-dist-card">
-      <div className="review-mood-detail-head">按月分布</div>
-      <MoodMonthStackChart/>
-      <div className="review-mood-stack-legend is-left" aria-hidden="true">
-        {MOOD_MONTH_STACK_COLORS.map(it=>(
-          <span key={it.key}><i style={{background:it.color}}/>{it.label}</span>
-        ))}
+    <div className="review-love-cycle-combined-wrap">
+      <div className="review-love-trend-title">按月分布</div>
+      <div className="review-detail-card review-mood-month-dist-card review-love-mini-card">
+        <MoodMonthStackChart/>
+        <div className="review-mood-stack-legend is-left" aria-hidden="true">
+          {MOOD_MONTH_STACK_COLORS.map(it=>(
+            <span key={it.key}><i style={{background:it.color}}/>{it.label}</span>
+          ))}
+        </div>
+        <div className="review-mood-time-insight-grid">
+          <div className="review-mood-time-insight">
+            <span>最积极月份</span>
+            <b>5月</b>
+          </div>
+          <div className="review-mood-time-insight">
+            <span>心情满电日</span>
+            <b>5月21日</b>
+          </div>
+          <div className="review-mood-time-insight">
+            <span>最易消极月份</span>
+            <b>3月</b>
+          </div>
+          <div className="review-mood-time-insight">
+            <span>记录最多月份</span>
+            <b>7月</b>
+          </div>
+        </div>
+        <p className="review-mood-time-tip">
+          你在春季更容易出现低落情绪，5月的积极状态最多。情绪没有好坏之分，试着找到属于自己的调节方式，让每一天都更舒服一些 ✨
+        </p>
       </div>
-      <div className="review-mood-time-insight-grid">
-        <div className="review-mood-time-insight">
-          <span>最积极月份</span>
-          <b>5月</b>
-        </div>
-        <div className="review-mood-time-insight">
-          <span>心情满电日</span>
-          <b>5月21日</b>
-        </div>
-        <div className="review-mood-time-insight">
-          <span>最易消极月份</span>
-          <b>3月</b>
-        </div>
-        <div className="review-mood-time-insight">
-          <span>记录最多月份</span>
-          <b>7月</b>
-        </div>
-      </div>
-      <p className="review-mood-time-tip">
-        你在春季更容易出现低落情绪，5月的积极状态最多。情绪没有好坏之分，试着找到属于自己的调节方式，让每一天都更舒服一些 ✨
-      </p>
     </div>
   );
 }
@@ -3915,18 +4037,20 @@ function MoodRecordScatterChart(){
 
 function MoodRecordCard(){
   return (
-    <div className="review-detail-card review-mood-record-card">
-      <div className="review-mood-detail-head">心情记录</div>
-      <div className="review-mood-record-bubbles">
-        <img
-          className="review-mood-record-bubbles-img"
-          src="assets/mood-share-jar-row.png"
-          alt="本周期共5种心情：兴奋1次、挺开心1次、惊喜1次"
-        />
+    <div className="review-love-cycle-combined-wrap">
+      <div className="review-love-trend-title">心情记录</div>
+      <div className="review-detail-card review-mood-record-card review-love-mini-card">
+        <div className="review-mood-record-bubbles">
+          <img
+            className="review-mood-record-bubbles-img"
+            src="assets/mood-share-jar-row.png"
+            alt="本周期共5种心情：兴奋1次、挺开心1次、惊喜1次"
+          />
+        </div>
+        <div className="review-mood-record-divider" role="presentation"/>
+        <MoodRecordScatterChart/>
+        <MoodCyclePhaseLegend/>
       </div>
-      <div className="review-mood-record-divider" role="presentation"/>
-      <MoodRecordScatterChart/>
-      <MoodCyclePhaseLegend/>
     </div>
   );
 }
@@ -4034,19 +4158,47 @@ function MoodTodayEmotionCard({playKey}){
   );
 }
 
-function MoodCycleTrendCard({range = 'cycle', periodOffset = 0}){
-  const [chartMode, setChartMode] = React.useState('line');
-  const isYear = range === 'year';
-  const isCapsule = !isYear && chartMode === 'capsule';
-  const recordDaysMain = isYear ? '286' : '15';
-  const recordDaysTotal = isYear ? '365' : '28';
-  const streakDays = isYear ? 42 : 12;
-  const periodMoodVals = isYear ? MOOD_YEAR_VALS : MOOD_CYCLE_VALS;
+function MoodTrendSummary({range = 'd30'}){
+  const meta = MOOD_RANGE_META[range] || MOOD_RANGE_META.d30;
+  const chartProps = moodTrendChartProps(range);
+  const periodMoodVals = chartProps.vals;
+  const periodMoodAvg = periodMoodVals.reduce((s, v)=>s + v, 0) / periodMoodVals.length;
+  const lastLevel = Math.max(1, Math.min(5, Math.round(periodMoodVals[periodMoodVals.length - 1])));
+  const isCompact = !!chartProps.compact;
+  return (
+    <div className="review-mood-trend-block">
+      <div className="review-mood-trend-head-main">
+        <div className="review-mood-trend-main-title">心情频次</div>
+        <div className="review-mood-trend-range">{meta.dateText}</div>
+      </div>
+      <div className={'review-chart review-detail-chart review-mood-trend-chart' + (isCompact ? ' is-compact' : '')}>
+        <MoodLineChart {...chartProps}/>
+      </div>
+      <MoodChartLegend/>
+      <div className="review-mood-trend-metrics" aria-label="心情趋势概览">
+        <div className="review-mood-trend-metric">
+          <ReviewMoodValue word={MOOD_WORD_BY_LEVEL[lastLevel - 1]}/>
+          <div className="review-mood-trend-metric-label">最近心情</div>
+        </div>
+        <div className="review-mood-trend-metric">
+          <ReviewMoodValue word={moodWordFromAvg(periodMoodAvg)}/>
+          <div className="review-mood-trend-metric-label">{meta.label}心情</div>
+        </div>
+        <div className="review-mood-trend-metric">
+          <ReviewMoodValue word={meta.trend} trend/>
+          <div className="review-mood-trend-metric-label">整体趋势</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MoodShareCombinedCard({range = 'd30'}){
+  const meta = MOOD_RANGE_META[range] || MOOD_RANGE_META.d30;
+  const chartProps = moodTrendChartProps(range);
+  const periodMoodVals = chartProps.vals;
   const periodMoodAvg = periodMoodVals.reduce((s, v)=>s + v, 0) / periodMoodVals.length;
   const periodMoodWord = moodWordFromAvg(periodMoodAvg);
-  const periodMoodLabel = '记录最多的是';
-  const compareLabel = '最常出现在';
-  const compareValue = isYear ? '夏季' : '黄体期';
   const periodMoodFace = periodMoodWord === '超开心' ? '😄'
     : periodMoodWord === '挺开心' ? '😊'
     : periodMoodWord === '中性' ? '😐'
@@ -4054,122 +4206,46 @@ function MoodCycleTrendCard({range = 'cycle', periodOffset = 0}){
     : periodMoodWord === '好伤心' ? '😢'
     : '';
   return (
-    <div className="review-detail-card review-mood-trend-card">
-      <div className="review-mood-trend-head">
-        <div className="review-mood-trend-title review-mood-section-title">
-          心情趋势
+    <div className="review-love-cycle-combined-wrap">
+      <div className="review-love-trend-title">心情占比</div>
+      <div className="review-detail-card review-love-mini-card review-mood-share-card">
+        <MoodShareBarList title={null} />
+        <div className="review-mood-insight-grid">
+          <div className="review-mood-insight">
+            <span>记录心情天数</span>
+            <b>{meta.recordDaysMain}<small>/{meta.recordDaysTotal}天</small></b>
+          </div>
+          <div className="review-mood-insight">
+            <span>连续记录天数</span>
+            <b>{meta.streakDays}<small>天</small></b>
+          </div>
         </div>
-        {isYear ? null : (
-          <button
-            type="button"
-            className={'review-mood-trend-switch' + (isCapsule ? ' is-capsule' : '')}
-            aria-label={isCapsule ? '切换为折线图' : '切换为胶囊图'}
-            aria-pressed={isCapsule}
-            onClick={()=>setChartMode(isCapsule ? 'line' : 'capsule')}
-          >
-            <i className="is-line" aria-hidden="true"/>
-            <i className="is-capsule" aria-hidden="true"/>
-          </button>
-        )}
-      </div>
-      <div className={'review-chart review-detail-chart review-mood-trend-chart' + (isYear ? ' is-compact' : '')}>
-        {isYear ? (
-          <MoodLineChart
-            vals={MOOD_YEAR_WEEK_VALS}
-            xLabels={MOOD_YEAR_WEEK_XLABELS}
-            height={132}
-            gradientId="moodDetailTrendYear"
-            compact
-            triScale
-            showDots
-            dotStep={2}
-            ariaLabel="近一年心情趋势"
-          />
-        ) : isCapsule ? (
-          <MoodCapsuleRangeChart
-            vals={MOOD_CYCLE_VALS}
-            dates={MOOD_CYCLE_DATES}
-            phaseBands={MOOD_CYCLE_PHASES}
-            dayCount={7}
-            height={168}
-            ariaLabel="本周期近7天心情胶囊分布"
-          />
-        ) : (
-          <MoodLineChart
-            vals={MOOD_CYCLE_VALS}
-            dates={MOOD_CYCLE_DATES}
-            height={168}
-            gradientId="moodDetailTrend"
-            markToday={periodOffset === 0}
-            showDots
-            dotStep={2}
-            triScale
-            phaseBands={MOOD_CYCLE_PHASES}
-            ariaLabel="本周期心情趋势"
-          />
-        )}
-      </div>
-      {isYear ? null : <MoodCyclePhaseLegend/>}
-      <div className="review-mood-insight-grid">
-        <div className="review-mood-insight">
-          <span>记录心情天数</span>
-          <b>{recordDaysMain}<small>/{recordDaysTotal}天</small></b>
-        </div>
-        <div className="review-mood-insight">
-          <span>连续记录天数</span>
-          <b>{streakDays}<small>天</small></b>
-        </div>
-      </div>
-      <MoodShareBarList title={isYear ? '本年心情占比' : '本周期心情占比'}/>
-      <div className="review-mood-insight-grid">
-        <div className="review-mood-insight">
-          <span>{periodMoodLabel}</span>
-          <b>{periodMoodWord}{periodMoodFace ? <span className="review-mood-insight-face">{periodMoodFace}</span> : null}</b>
-        </div>
-        <div className="review-mood-insight">
-          <span>{compareLabel}</span>
-          <b>{compareValue}</b>
+        <div className="review-mood-insight-grid">
+          <div className="review-mood-insight">
+            <span>记录最多的是</span>
+            <b>{periodMoodWord}{periodMoodFace ? <span className="review-mood-insight-face">{periodMoodFace}</span> : null}</b>
+          </div>
+          <div className="review-mood-insight">
+            <span>最常出现在</span>
+            <b>{meta.compareValue}</b>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-function MoodKindOverviewCard({periodPrefix, kindCount = 20, items = MOOD_KIND_TOP}){
-  return (
-    <div className="review-detail-card review-mood-kind-card">
-      <div className="review-mood-kind-visual" aria-hidden="true">
-        <img src="assets/mood-bubble-jar.png" alt=""/>
-      </div>
-      <div className="review-mood-kind-copy">
-        <p className="review-mood-kind-title">
-          <span>{periodPrefix}</span>
-          <b>{kindCount}</b>
-          <span>种心情</span>
-        </p>
-        {items.map(it=>(
-          <p className="review-mood-kind-row" key={it.label}>
-            <span>{it.label}</span>
-            <b>{it.count}</b>
-            <span>次</span>
-          </p>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function MoodDetailBody({range, playKey, periodOffset = 0}){
-  const isCycle = range === 'cycle';
-  const isCurrent = periodOffset === 0;
+function MoodDetailBody({range}){
+  const showMonthDist = range === 'half' || range === 'year' || range === 'all';
   return (
     <>
-      {isCycle && isCurrent ? <MoodTodayEmotionCard playKey={playKey}/> : null}
-      <MoodCycleTrendCard range={range} periodOffset={periodOffset}/>
-      {isCycle ? <MoodPhaseHormoneBlock/> : null}
-      {isCycle ? null : <MoodMonthDistributionCard/>}
-      <MoodTimeDistributionCard range={range}/>
-      <MoodRecordCard/>
+      <MoodTrendSummary range={range}/>
+      <div className="review-mood-detail-lower">
+        <MoodShareCombinedCard range={range}/>
+        {showMonthDist ? <MoodMonthDistributionCard/> : null}
+        <MoodTimeDistributionCard range={range}/>
+        <MoodRecordCard/>
+      </div>
     </>
   );
 }
@@ -4222,16 +4298,17 @@ function MoodPeriodNav({range, offset, onChange}){
 }
 
 function MoodDetailPage({open, onClose}){
-  const [range, setRange] = React.useState('cycle');
-  const [periodOffset, setPeriodOffset] = React.useState(0);
+  const [range, setRange] = React.useState('d30');
   const ranges = [
-    {key:'cycle', label:'按周期'},
-    {key:'year', label:'按年'},
+    {key:'d30', label:'近30天'},
+    {key:'half', label:'近半年'},
+    {key:'year', label:'近1年'},
+    {key:'all', label:'全部'},
   ];
-  const switchRange = (key)=>{
-    setRange(key);
-    setPeriodOffset(0);
-  };
+  React.useEffect(()=>{
+    if(!open) return;
+    setRange('d30');
+  }, [open]);
   return (
     <section className={'review-cycle-detail is-fullscreen-detail' + (open ? ' is-open' : '')} aria-hidden={!open} aria-label="心情详情">
       <div className="review-detail-nav">
@@ -4240,34 +4317,31 @@ function MoodDetailPage({open, onClose}){
         </button>
         <span className="review-detail-title">心情</span>
       </div>
-      <div className="review-detail-content">
-        <div className="review-segment" role="tablist" aria-label="时间范围">
-          {ranges.map(item=>(
-            <button
-              key={item.key}
-              type="button"
-              className={range === item.key ? 'is-active' : ''}
-              aria-selected={range === item.key}
-              onClick={()=>switchRange(item.key)}
-            >
-              {item.label}
-            </button>
-          ))}
+      <div className="review-detail-content review-mood-detail-content">
+        <div className="review-mood-detail-top">
+          <div className="review-segment" role="tablist" aria-label="时间范围">
+            {ranges.map(item=>(
+              <button
+                key={item.key}
+                type="button"
+                className={range === item.key ? 'is-active' : ''}
+                aria-selected={range === item.key}
+                onClick={()=>setRange(item.key)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
         </div>
-        <MoodPeriodNav range={range} offset={periodOffset} onChange={setPeriodOffset}/>
-        <MoodDetailBody
-          range={range}
-          periodOffset={periodOffset}
-          playKey={open ? (range + '-' + periodOffset) : 0}
-        />
+        <MoodDetailBody range={range}/>
       </div>
     </section>
   );
 }
 
 function MoodReviewCard({onOpen, onLandscapeOpen}){
-  const cycleAvg = MOOD_CYCLE_VALS.reduce((s, v)=>s + v, 0) / MOOD_CYCLE_VALS.length;
-  const lastLevel = MOOD_CYCLE_VALS[MOOD_CYCLE_VALS.length - 1];
+  const monthAvg = MOOD_MONTH_VALS.reduce((s, v)=>s + v, 0) / MOOD_MONTH_VALS.length;
+  const lastLevel = MOOD_MONTH_VALS[MOOD_MONTH_VALS.length - 1];
 
   return (
     <ReviewCard
@@ -4288,7 +4362,7 @@ function MoodReviewCard({onOpen, onLandscapeOpen}){
           <ReviewExpandIcon/>
         </button>
       ) : null}
-      chart={<MoodLineChart vals={MOOD_CYCLE_VALS} dates={MOOD_CYCLE_DATES} gradientId="moodCardGrad" markToday showDots dotStep={2} triScale ariaLabel="本周期心情波动折线图"/>}
+      chart={<MoodLineChart vals={MOOD_MONTH_VALS} dates={MOOD_MONTH_DATES} gradientId="moodCardGrad" markToday showDots dotStep={2} triScale ariaLabel="近30天心情波动折线图"/>}
       legend={<MoodChartLegend/>}
       metrics={(
         <>
@@ -4297,12 +4371,12 @@ function MoodReviewCard({onOpen, onLandscapeOpen}){
             <div className="review-metric-label">最近心情</div>
           </div>
           <div className="review-metric">
-            <ReviewMoodValue word={moodWordFromAvg(cycleAvg)}/>
-            <div className="review-metric-label">本周期心情</div>
+            <ReviewMoodValue word={moodWordFromAvg(monthAvg)}/>
+            <div className="review-metric-label">近30天心情</div>
           </div>
           <div className="review-metric">
             <ReviewMoodValue word="↗ 更积极" trend/>
-            <div className="review-metric-label">较上周期</div>
+            <div className="review-metric-label">整体趋势</div>
           </div>
         </>
       )}
@@ -5827,7 +5901,8 @@ function StoolReviewCard({onOpen, onLandscapeOpen}){
 const LOVE_CARD_VALUES = [2, 4, 3, 5, 3, 4];
 const LOVE_CARD_LABELS = ['2月', '3月', '4月', '5月', '6月', '7月'];
 const LOVE_ALL_MONTHS = (()=>{
-  const seed = [2, 3, 4, 5, 3, 2, 4, 3, 5, 4, 2, 3, 4, 2, 5, 3, 4, 3, 2, 4, 3, 5, 3, 4];
+  // 合计 86 = LOVE_ALL_TOTAL
+  const seed = [2, 3, 4, 5, 3, 2, 4, 3, 5, 4, 2, 3, 4, 2, 5, 3, 4, 3, 2, 4, 4, 5, 5, 5];
   const end = new Date(2026, 6, 1); // 2026-07
   return seed.map((count, i)=>{
     const d = new Date(end.getFullYear(), end.getMonth() - (seed.length - 1 - i), 1);
@@ -6075,10 +6150,28 @@ function LoveReviewCard({onOpen, onLandscapeOpen}){
   );
 }
 
+// 爱爱二级页统一口径：近半年 21 / 近1年 45 / 全部 86；本周期 14（仅近半年展示）
+const LOVE_HALF_YEAR_TOTAL = 21;
+const LOVE_YEAR_TOTAL = 45;
+const LOVE_ALL_TOTAL = 86;
+const LOVE_CYCLE_TOTAL = 14;
+
+const LOVE_RANGE_LABEL = {
+  half:'近半年',
+  year:'近1年',
+  all:'全部',
+};
+
+function loveRangeTotal(range){
+  if(range === 'year') return LOVE_YEAR_TOTAL;
+  if(range === 'all') return LOVE_ALL_TOTAL;
+  return LOVE_HALF_YEAR_TOTAL;
+}
+
 const LOVE_FREQ_MONTHS = [
   {m:'2月', v:2}, {m:'3月', v:4}, {m:'4月', v:3},
   {m:'5月', v:5}, {m:'6月', v:3}, {m:'7月', v:4, cur:true},
-];
+]; // 合计 21 = LOVE_HALF_YEAR_TOTAL
 const LOVE_FREQ_MONTHS_YEAR = (()=>{
   // 去年7月 → 今年7月（含两端，共13个月）
   const vals = [3, 4, 2, 5, 3, 4, 3, 2, 4, 3, 5, 3, 4];
@@ -6097,17 +6190,18 @@ const LOVE_FREQ_MONTHS_YEAR = (()=>{
     };
   });
 })();
+// 最近3个周期对比：本次合计 = 本周期 14
 const LOVE_CYCLE_PHASES = [
   {name:'月经期', cur:3, prev:2, prev2:3},
   {name:'卵泡期', cur:1, prev:2, prev2:1},
   {name:'排卵期', cur:2, prev:1, prev2:2},
-  {name:'黄体期', cur:5, prev:4, prev2:3},
+  {name:'黄体期', cur:8, prev:4, prev2:3},
 ];
 const LOVE_PHASE_DETAIL = [
-  {name:'月经期', count:1, range:'01.27-02.01', tone:'menstrual'},
-  {name:'卵泡期', count:2, range:'02.02-02.11', tone:'follicular'},
+  {name:'月经期', count:3, range:'01.27-02.01', tone:'menstrual'},
+  {name:'卵泡期', count:1, range:'02.02-02.11', tone:'follicular'},
   {name:'排卵期', count:2, range:'02.12-02.14', tone:'ovulation', warn:'无措施1次'},
-  {name:'黄体期', count:5, range:'02.15-02.26', tone:'luteal'},
+  {name:'黄体期', count:8, range:'02.15-02.26', tone:'luteal'},
 ];
 
 const LOVE_DIST_PHASES = [
@@ -6117,7 +6211,7 @@ const LOVE_DIST_PHASES = [
   {key:'luteal', label:'黄体期', short:'黄体期', days:11, arc:'rgba(126,168,240,0.28)', fill:'rgba(126,168,240,0.08)', text:'#7C9CF0', pos:{top:'46%', left:'4%'}},
 ];
 
-// day -> 'safe'(有措施/空心) | 'risk'(无措施/实心)
+// day -> 'safe'(有措施/空心) | 'risk'(无措施/实心)；合计 14 = LOVE_CYCLE_TOTAL
 const LOVE_DIST_BY_DAY = {
   2:'safe', 3:'safe', 5:'safe',
   10:'safe',
@@ -6129,8 +6223,8 @@ const LOVE_DIST_PHASE_BARS = [
   {key:'follicular', short:'卵泡期', safe:1, risk:0},
   {key:'ovulation', short:'排卵期', safe:1, risk:1, hot:true},
   {key:'luteal', short:'黄体期', safe:5, risk:3},
-];
-const LOVE_DIST_TOTAL = Object.keys(LOVE_DIST_BY_DAY).length;
+]; // 合计 14
+const LOVE_DIST_TOTAL = LOVE_CYCLE_TOTAL;
 const LOVE_DIST_UNPROTECTED = Object.keys(LOVE_DIST_BY_DAY).filter(d=>LOVE_DIST_BY_DAY[d] === 'risk').length;
 const LOVE_DIST_IN_OVULATION = LOVE_DIST_PHASE_BARS.find(p=>p.key === 'ovulation').safe
   + LOVE_DIST_PHASE_BARS.find(p=>p.key === 'ovulation').risk;
@@ -6536,10 +6630,10 @@ function LoveTrendSummary({range = 'half'}){
     ? '2024年8月1日至2026年7月27日'
     : (isYear ? '2025年7月1日至2026年7月27日' : '2026年2月1日至7月27日');
   const metrics = isAll
-    ? {avg:'3.6', total:'86', totalLabel:'全部爱爱次数', trend:'↗ 增长', tone:'up'}
+    ? {avg:'3.6', total:String(LOVE_ALL_TOTAL), totalLabel:'全部爱爱次数', trend:'↗ 增长', tone:'up'}
     : (isYear
-      ? {avg:'3.5', total:'45', totalLabel:'近1年爱爱次数', trend:'→ 平稳', tone:'flat'}
-      : {avg:'3.5', total:'21', totalLabel:'近半年爱爱次数', trend:'↗ 增长', tone:'up'});
+      ? {avg:'3.5', total:String(LOVE_YEAR_TOTAL), totalLabel:'近1年爱爱次数', trend:'→ 平稳', tone:'flat'}
+      : {avg:'3.5', total:String(LOVE_HALF_YEAR_TOTAL), totalLabel:'近半年爱爱次数', trend:'↗ 增长', tone:'up'});
   return (
     <div className="review-love-trend-block">
       <div className="review-love-trend-head">
@@ -6592,12 +6686,41 @@ function LoveCycleCombinedCard(){
   );
 }
 
-const LOVE_MEASURE_ROWS = [
-  {key:'condom', label:'避孕套', count:7, color:'#5B9CFF'},
-  {key:'pill', label:'短效避孕药', count:2, color:'#9B6BD6'},
-  {key:'withdraw', label:'体外排精', count:1, color:'#3EC19A'},
-  {key:'none', label:'无措施', count:4, color:'#ff4d88'},
-];
+// 措施 / 习惯 / 间隔：按时间范围切换
+const LOVE_MEASURE_BY_RANGE = {
+  half:[
+    {key:'condom', label:'避孕套', count:10, color:'#5B9CFF'},
+    {key:'pill', label:'短效避孕药', count:3, color:'#9B6BD6'},
+    {key:'withdraw', label:'体外排精', count:2, color:'#3EC19A'},
+    {key:'none', label:'无措施', count:6, color:'#ff4d88'},
+  ],
+  year:[
+    {key:'condom', label:'避孕套', count:22, color:'#5B9CFF'},
+    {key:'pill', label:'短效避孕药', count:6, color:'#9B6BD6'},
+    {key:'withdraw', label:'体外排精', count:4, color:'#3EC19A'},
+    {key:'none', label:'无措施', count:13, color:'#ff4d88'},
+  ],
+  all:[
+    {key:'condom', label:'避孕套', count:41, color:'#5B9CFF'},
+    {key:'pill', label:'短效避孕药', count:12, color:'#9B6BD6'},
+    {key:'withdraw', label:'体外排精', count:8, color:'#3EC19A'},
+    {key:'none', label:'无措施', count:25, color:'#ff4d88'},
+  ],
+};
+
+function loveMeasureStats(range = 'half'){
+  const rows = LOVE_MEASURE_BY_RANGE[range] || LOVE_MEASURE_BY_RANGE.half;
+  const total = loveRangeTotal(range);
+  const unprotected = rows.find(r=>r.key === 'none')?.count || 0;
+  const protectedCount = total - unprotected;
+  return {
+    rows,
+    total,
+    protectedCount,
+    unprotected,
+    protectedPct: Math.round(protectedCount / total * 100),
+  };
+}
 
 function LoveMeasureIconGlyph({type, color = '#ff4d88'}){
   if(type === 'condom'){
@@ -6639,15 +6762,15 @@ function LoveMeasureIcon({type, color = '#ff4d88'}){
   );
 }
 
-function LoveMeasureDonut(){
-  const rows = LOVE_MEASURE_ROWS;
-  const total = rows.reduce((s, r)=>s + r.count, 0) || 1;
-  const safeTotal = total - (rows.find(r=>r.key === 'none')?.count || 0);
+function LoveMeasureDonut({rows}){
+  const list = rows || LOVE_MEASURE_BY_RANGE.half;
+  const total = list.reduce((s, r)=>s + r.count, 0) || 1;
+  const safeTotal = total - (list.find(r=>r.key === 'none')?.count || 0);
   const safePct = Math.round(safeTotal / total * 100);
   const CX = 60, R = 48, SW = 16, GAP = 3;
   const C = 2 * Math.PI * R;
   let acc = 0;
-  const segs = rows.map(row=>{
+  const segs = list.map(row=>{
     const frac = row.count / total;
     const full = frac * C;
     const vis = Math.max(full - GAP, 0.5);
@@ -6696,7 +6819,7 @@ function LoveMeasureDonut(){
         </div>
       </div>
       <div className="review-love-measure-donut-legend">
-        {rows.map(row=>(
+        {list.map(row=>(
           <div className="review-love-measure-donut-row" key={row.label}>
             <span className="review-love-measure-donut-ico" style={{background:row.color + '22'}}>
               <LoveMeasureIcon type={row.key} color={row.color}/>
@@ -6710,14 +6833,16 @@ function LoveMeasureDonut(){
   );
 }
 
-function LoveMeasureCombinedCard(){
+function LoveMeasureCombinedCard({range = 'half'}){
+  const stats = loveMeasureStats(range);
+  const rangeLabel = LOVE_RANGE_LABEL[range] || LOVE_RANGE_LABEL.half;
   return (
     <div className="review-love-cycle-combined-wrap">
       <div className="review-love-trend-title">爱爱措施</div>
       <div className="review-detail-card review-love-mini-card review-love-cycle-combined">
-        <LoveMeasureDonut/>
+        <LoveMeasureDonut rows={stats.rows}/>
         <div className="review-love-insight">
-          近半年记录 <b>{LOVE_DIST_TOTAL}</b> 次爱爱，其中 <b>{LOVE_DIST_TOTAL - LOVE_DIST_UNPROTECTED}</b> 次采取了措施（<b>{Math.round((LOVE_DIST_TOTAL - LOVE_DIST_UNPROTECTED) / LOVE_DIST_TOTAL * 100)}%</b>），以避孕套为主；另有 <b>{LOVE_DIST_UNPROTECTED}</b> 次无措施。
+          {rangeLabel}记录 <b>{stats.total}</b> 次爱爱，其中 <b>{stats.protectedCount}</b> 次采取了措施（<b>{stats.protectedPct}%</b>），以避孕套为主；另有 <b>{stats.unprotected}</b> 次无措施。
         </div>
       </div>
     </div>
@@ -6725,62 +6850,168 @@ function LoveMeasureCombinedCard(){
 }
 
 const LOVE_HABIT_PERIODS = [
-  {key:'p1', range:'6–9时', icon:'sunrise', bg:'#FFF1F5'},
-  {key:'p2', range:'9–12时', icon:'sun', bg:'#FFF7EC'},
-  {key:'p3', range:'12–18时', icon:'cloud', bg:'#F3F8FF'},
-  {key:'p4', range:'18–21时', icon:'moon', bg:'#F5F2FF'},
-  {key:'p5', range:'21–6时', icon:'night', bg:'#F0F4FA'},
+  {key:'night', name:'深夜', icon:'moon', start:0},
+  {key:'am', name:'早晨', icon:'sunrise', start:6},
+  {key:'pm', name:'下午', icon:'sun', start:12},
+  {key:'eve', name:'夜晚', icon:'night', start:18},
 ];
 
-// 近半年 14 次爱爱各自所属时段（有记录=彩色点，其余行同列为灰点）
-const LOVE_HABIT_EVENTS = [
-  'p5', 'p4', 'p5', 'p1', 'p5', 'p4', 'p3', 'p5', 'p4', 'p2', 'p5', 'p4', 'p5', 'p3',
-];
+// 按时段次数；合计 = 对应范围总数，高峰在夜晚
+const LOVE_HABIT_HOURLY_BY_RANGE = {
+  half:[
+    0, 2, 3, 0, 0, 1,
+    0, 0, 0, 2, 0, 0,
+    0, 2, 0, 0, 0, 2,
+    1, 2, 1, 2, 2, 1,
+  ], // 21，夜晚 9
+  year:[
+    1, 3, 4, 1, 0, 2,
+    0, 1, 0, 3, 1, 1,
+    1, 3, 0, 1, 1, 3,
+    2, 4, 3, 4, 3, 3,
+  ], // 45，夜晚 19
+  all:[
+    2, 5, 6, 2, 1, 4,
+    1, 2, 1, 5, 2, 2,
+    2, 5, 2, 2, 2, 5,
+    5, 7, 6, 7, 5, 5,
+  ], // 86，夜晚 35
+};
 
-function LoveHabitTimeChart(){
+const LOVE_INTERVAL_BY_RANGE = {
+  half:[
+    {label:'1天', pct:18},
+    {label:'2-3天', pct:28},
+    {label:'4-7天', pct:22},
+    {label:'8-14天', pct:15},
+    {label:'15-30天', pct:12},
+    {label:'30天以上', pct:5},
+  ],
+  year:[
+    {label:'1天', pct:15},
+    {label:'2-3天', pct:30},
+    {label:'4-7天', pct:24},
+    {label:'8-14天', pct:16},
+    {label:'15-30天', pct:10},
+    {label:'30天以上', pct:5},
+  ],
+  all:[
+    {label:'1天', pct:14},
+    {label:'2-3天', pct:32},
+    {label:'4-7天', pct:23},
+    {label:'8-14天', pct:15},
+    {label:'15-30天', pct:11},
+    {label:'30天以上', pct:5},
+  ],
+};
+
+function loveHabitDotClass(n){
+  if(n >= 3) return 'is-3';
+  if(n === 2) return 'is-2';
+  if(n === 1) return 'is-1';
+  return 'is-0';
+}
+
+function loveHabitHourLabel(hour){
+  return String(hour).padStart(2, '0') + ':00';
+}
+
+function LoveHabitTimeChart({hourly}){
+  const data = hourly || LOVE_HABIT_HOURLY_BY_RANGE.half;
+  const periodRows = LOVE_HABIT_PERIODS.map(period=>{
+    const hours = data.slice(period.start, period.start + 6);
+    const count = hours.reduce((s, n)=>s + n, 0);
+    return {...period, hours, count};
+  });
   return (
-    <div className="review-love-habit-grid" aria-label="爱爱时段分布">
-      {LOVE_HABIT_PERIODS.map(period=>{
-        const count = LOVE_HABIT_EVENTS.filter(k=>k === period.key).length;
-        return (
+    <div className="review-love-habit-chart" aria-label="爱爱时段分布">
+      <div className="review-love-habit-rows">
+        {periodRows.map(row=>(
           <div
             className="review-love-habit-row"
-            key={period.key}
-            style={{'--row-bg': period.bg}}
+            key={row.key}
           >
             <div className="review-love-habit-label">
-              <MoodTimePeriodIcon type={period.icon}/>
-              <span>{period.range}</span>
+              <MoodTimePeriodIcon type={row.icon}/>
+              <strong>{row.name}</strong>
             </div>
-            <div className="review-love-habit-dots">
-              {LOVE_HABIT_EVENTS.map((ev, i)=>(
-                <i
-                  key={period.key + '-' + i}
-                  className={ev === period.key ? 'is-on' : 'is-off'}
-                />
-              ))}
+            <div className="review-love-habit-hours">
+              {row.hours.map((n, i)=>{
+                const hour = row.start + i;
+                const showLabel = i === 0 || i === row.hours.length - 1;
+                return (
+                  <div className="review-love-habit-hour" key={row.key + '-' + hour}>
+                    <em className={showLabel ? '' : 'is-empty'}>
+                      {showLabel ? loveHabitHourLabel(hour) : ''}
+                    </em>
+                    <i className={loveHabitDotClass(n)} title={loveHabitHourLabel(hour) + ' ' + n + '次'}/>
+                  </div>
+                );
+              })}
             </div>
-            <em className="review-love-habit-count">{count}次</em>
+            <div className="review-love-habit-count">
+              <b>{row.count}次</b>
+            </div>
           </div>
-        );
-      })}
+        ))}
+      </div>
+      <div className="review-love-habit-legend">
+        <span><i className="is-0"/>无记录</span>
+        <span><i className="is-1"/>1次</span>
+        <span><i className="is-2"/>2次</span>
+        <span><i className="is-3"/>3次及以上</span>
+      </div>
     </div>
   );
 }
 
-function LoveHabitCombinedCard(){
-  const top = LOVE_HABIT_PERIODS
-    .map(p=>({...p, count:LOVE_HABIT_EVENTS.filter(k=>k === p.key).length}))
-    .sort((a, b)=>b.count - a.count)[0];
+function LoveIntervalBarChart({rows}){
+  const list = rows || LOVE_INTERVAL_BY_RANGE.half;
+  const maxPct = Math.max(...list.map(r=>r.pct), 1);
+  return (
+    <div className="review-love-interval-chart" aria-label="爱爱间隔分布">
+      <div className="review-love-interval-bars">
+        {list.map(row=>{
+          const isTop = row.pct === maxPct;
+          return (
+            <div className={'review-love-interval-col' + (isTop ? ' is-top' : '')} key={row.label}>
+              <div className="review-love-interval-track">
+                <em>{row.pct}%</em>
+                <span style={{height:(row.pct / maxPct * 100) + '%'}}/>
+              </div>
+              <b>{row.label}</b>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function LoveHabitCombinedCard({range = 'half'}){
+  const rangeLabel = LOVE_RANGE_LABEL[range] || LOVE_RANGE_LABEL.half;
+  const total = loveRangeTotal(range);
+  const hourly = LOVE_HABIT_HOURLY_BY_RANGE[range] || LOVE_HABIT_HOURLY_BY_RANGE.half;
+  const intervals = LOVE_INTERVAL_BY_RANGE[range] || LOVE_INTERVAL_BY_RANGE.half;
+  const peakCount = hourly.slice(18, 24).reduce((s, n)=>s + n, 0);
+  const topInterval = intervals.reduce((a, b)=>a.pct >= b.pct ? a : b);
   return (
     <div className="review-love-cycle-combined-wrap">
       <div className="review-love-trend-title">爱爱习惯</div>
       <div className="review-detail-card review-love-mini-card review-love-cycle-combined">
         <div className="review-love-cycle-block">
           <div className="review-love-cycle-subhead">爱爱时段分布</div>
-          <LoveHabitTimeChart/>
+          <LoveHabitTimeChart hourly={hourly}/>
+          <div className="review-love-insight review-love-habit-insight">
+            {rangeLabel}共记录 <b>{total}</b> 次爱爱，其中 <b>{peakCount}</b> 次发生在夜晚（18–24 时）。
+          </div>
+        </div>
+        <div className="review-love-cycle-divider" aria-hidden="true"/>
+        <div className="review-love-cycle-block">
+          <div className="review-love-cycle-subhead">爱爱间隔</div>
+          <LoveIntervalBarChart rows={intervals}/>
           <div className="review-love-insight">
-            近半年 <b>{LOVE_HABIT_EVENTS.length}</b> 次爱爱中，最多集中在 <b>{top.range}</b>（<b>{top.count}</b> 次），夜间时段更活跃。
+            {rangeLabel}爱爱间隔以 <b>{topInterval.label}</b> 为主（<b>{topInterval.pct}%</b>），整体节奏较规律。
           </div>
         </div>
       </div>
@@ -6789,13 +7020,14 @@ function LoveHabitCombinedCard(){
 }
 
 function LoveDetailBody({range}){
+  const showCycle = range === 'half';
   return (
     <>
       <LoveTrendSummary range={range}/>
       <div className="review-love-detail-lower">
-        <LoveCycleCombinedCard/>
-        <LoveMeasureCombinedCard/>
-        <LoveHabitCombinedCard/>
+        {showCycle ? <LoveCycleCombinedCard/> : null}
+        <LoveMeasureCombinedCard range={range}/>
+        <LoveHabitCombinedCard range={range}/>
       </div>
     </>
   );
