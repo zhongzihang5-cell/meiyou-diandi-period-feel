@@ -702,6 +702,9 @@ function App(){
           habit: 'habit',
           weight: 'weight',
           diet: 'diet',
+          beverage: 'beverage',
+          skin: 'skin',
+          cosmetic: 'cosmetic',
         };
         const normalizeDietItems = (payload)=>{
           const items = Array.isArray(payload.dietItems) ? payload.dietItems : [];
@@ -749,22 +752,60 @@ function App(){
                 },
               };
             }
+            if(type === 'diet' && item.kind === 'record-group' && item.primary?.kind === 'image'){
+              const dietItems = normalizeDietItems(payload);
+              const totalKcal = Number(payload.totalKcal) || dietItems.reduce((sum, food)=>sum + (Number(food.kcal) || 0), 0);
+              return {
+                ...item,
+                primary:{
+                  ...item.primary,
+                  time:payload.time || item.primary.time,
+                  label:payload.mealType || item.primary.label || '午餐',
+                  mealType:payload.mealType || item.primary.mealType || '',
+                  dietItems,
+                  text:dietItems.map(food=>`${food.name}${food.amount ? ` ${food.amount}` : ''}`).join('；'),
+                  totalKcal,
+                },
+              };
+            }
             if(!item.primary) return item;
+            const nextPrimary = {
+              ...item.primary,
+              time: payload.time || item.primary?.time,
+              kind:'daily-record',
+              recordType:type,
+              recordLabel:label,
+              recordValue:value,
+              recordDetail:detail,
+              icon,
+              iconText: payload.iconText || item.primary?.iconText || '',
+              brand:payload.brand ?? item.primary?.brand,
+              beverageName:payload.beverageName ?? item.primary?.beverageName,
+              spec:payload.spec ?? item.primary?.spec,
+              calories:payload.calories ?? item.primary?.calories,
+              caffeineMg:payload.caffeineMg ?? item.primary?.caffeineMg,
+              area:payload.area ?? item.primary?.area,
+              acne:payload.acne ?? item.primary?.acne,
+              redness:payload.redness ?? item.primary?.redness,
+              acneMarks:payload.acneMarks ?? item.primary?.acneMarks,
+              product:payload.product ?? item.primary?.product,
+              managementStatus:payload.managementStatus ?? item.primary?.managementStatus,
+              text:`${label}：${detail}`,
+              tags:[{ label, cat:label, val:value, icon }],
+            };
+            const nextAi = type === 'beverage' ? {
+              ...item.ai,
+              chartData:{
+                ...(item.ai?.chartData || {}),
+                totalCalories:(Number(nextPrimary.calories) || 286) + 300,
+                totalCaffeineMg:(Number(nextPrimary.caffeineMg) || 95) + 100,
+              },
+              note:`近7天记录饮品3天；饮品摄入总热量${(Number(nextPrimary.calories) || 286) + 300}千卡，咖啡因${(Number(nextPrimary.caffeineMg) || 95) + 100}毫克。`,
+            } : item.ai;
             return {
               ...item,
-              primary:{
-                ...item.primary,
-                time: payload.time || item.primary?.time,
-                kind:'daily-record',
-                recordType:type,
-                recordLabel:label,
-                recordValue:value,
-                recordDetail:detail,
-                icon,
-                iconText: payload.iconText || item.primary?.iconText || '',
-                text:`${label}：${detail}`,
-                tags:[{ label, cat:label, val:value, icon }],
-              },
+              primary:nextPrimary,
+              ai:nextAi,
             };
           });
           return { ...block, items: nextItems, entries: undefined };
@@ -1783,16 +1824,46 @@ function App(){
         label:'饮品',
         icon:'beverage',
         buildDetail:(data)=>`${data.brand || ''}${data.beverageName || ''} · ${(data.spec || '').replace(/\s*\/\s*/g, '/')}`,
+        buildAi:(data)=>{
+          const totalCalories = (Number(data.calories) || 286) + 300;
+          const totalCaffeineMg = (Number(data.caffeineMg) || 95) + 100;
+          return {
+            title:'近7天饮品摄入',
+            chartType:'beverageWeek',
+            chartData:{
+              days:[
+                { label:'周二', consumed:false },
+                { label:'周三', consumed:true },
+                { label:'周四', consumed:false },
+                { label:'周五', consumed:false },
+                { label:'周六', consumed:true },
+                { label:'周日', consumed:false },
+                { label:'今天', consumed:true, isToday:true },
+              ],
+              totalCalories,
+              totalCaffeineMg,
+            },
+            note:`近7天记录饮品3天；饮品摄入总热量${totalCalories}千卡，咖啡因${totalCaffeineMg}毫克。`,
+          };
+        },
       },
       skin:{
         label:'皮肤状态',
         icon:'skin',
         buildDetail:(data)=>`${data.area || ''}有${data.acne || ''}痘痘，${data.redness || ''}泛红`,
+        buildAi:()=>({
+          title:'AI 皮肤状态反馈',
+          note:'你在黄体后期，雌激素下降，该时期长痘是常见现象。',
+        }),
       },
       cosmetic:{
         label:'化妆品',
         icon:'cosmetic',
         buildDetail:(data)=>`${data.brand || ''} ${data.product || ''} · ${data.managementStatus || ''}`,
+        buildAi:()=>({
+          title:'AI 化妆品反馈',
+          note:'这款精华水适合油性肤质，很适合你最近的皮肤状态。',
+        }),
       },
       stool:{ label:'便便', icon:'stool', detail:'布里斯托 2 型，黄褐色' },
     }[payload?.mode];
@@ -1802,10 +1873,13 @@ function App(){
       const detail = detectedRecordMeta.buildDetail?.(payload)
         || payload?.summary
         || detectedRecordMeta.detail;
+      const aiFeedback = detectedRecordMeta.buildAi?.(payload);
       const entry = {
         kind:'record-group',
         id:`e-${payload.mode}-camera-${stamp}-g`,
         isNew:true,
+        staggerReveal:!!aiFeedback,
+        aiDefaultOpen:!!aiFeedback,
         cameraSource:payload.mode,
         photoUrl:payload.photoUrl || null,
         primary:{
@@ -1818,8 +1892,25 @@ function App(){
           recordDetail:detail,
           text:`${detectedRecordMeta.label}：${detail}`,
           photoUrl:payload.photoUrl || null,
+          brand:payload.brand,
+          beverageName:payload.beverageName,
+          spec:payload.spec,
+          calories:payload.calories,
+          caffeineMg:payload.caffeineMg,
+          area:payload.area,
+          acne:payload.acne,
+          redness:payload.redness,
+          acneMarks:payload.acneMarks,
+          product:payload.product,
+          managementStatus:payload.managementStatus,
           tags:[],
         },
+        ai:aiFeedback ? {
+          id:`e-${payload.mode}-camera-${stamp}-ai`,
+          time:window.formatNowTime(),
+          kind:'camera-ai-feedback',
+          ...aiFeedback,
+        } : null,
       };
       const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
         || window.resolveEntryDayId('', timeline);

@@ -1039,10 +1039,16 @@
     font-style: normal;
     font-weight: 500;
   }
-  .option-sheet.is-health-picker.is-diet-picker {
+  .option-sheet.is-health-picker.is-diet-picker,
+  .option-sheet.is-health-picker.is-beverage-picker,
+  .option-sheet.is-health-picker.is-skin-picker,
+  .option-sheet.is-health-picker.is-cosmetic-picker {
     max-height: 86%;
   }
-  .option-sheet.is-health-picker.is-diet-picker .sheet-body {
+  .option-sheet.is-health-picker.is-diet-picker .sheet-body,
+  .option-sheet.is-health-picker.is-beverage-picker .sheet-body,
+  .option-sheet.is-health-picker.is-skin-picker .sheet-body,
+  .option-sheet.is-health-picker.is-cosmetic-picker .sheet-body {
     padding-top: 12px;
   }
   .edit-diet-card {
@@ -1128,6 +1134,51 @@
     color: #8e8e93;
     font-size: 13px;
     text-align: right;
+  }
+  .edit-camera-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .edit-camera-field {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .edit-camera-field.is-wide {
+    grid-column: 1 / -1;
+  }
+  .edit-camera-field label {
+    font-size: 13px;
+    color: var(--my-text-tertiary);
+  }
+  .edit-camera-input-wrap {
+    min-width: 0;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 12px;
+    border: 0.5px solid var(--my-line-strong);
+    border-radius: 8px;
+    background: #f8f8fa;
+  }
+  .edit-camera-input {
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--my-text-primary);
+    font: inherit;
+    font-size: 15px;
+  }
+  .edit-camera-unit {
+    flex-shrink: 0;
+    color: var(--my-text-tertiary);
+    font-size: 13px;
   }
   .symptom-picker-mask {
     position: absolute;
@@ -2015,6 +2066,9 @@
     stool: { label: '便便', className: 'diet', emoji: '💩', options: ['舒畅', '有残便感', '排便困难', '硬球状', '凹凸香肠状', '裂纹香肠状', '平滑香蕉状', '软块状', '糊状', '水液状', '较少', '适中', '较多'] },
     weight: { label: '体重', className: 'weight', emoji: '', options: [] },
     diet: { label: '饮食', className: 'diet', emoji: '', options: [] },
+    beverage: { label: '饮品', className: 'diet', emoji: '', options: [] },
+    skin: { label: '皮肤状态', className: 'emotion', emoji: '', options: [] },
+    cosmetic: { label: '化妆品', className: 'diet', emoji: '', options: [] },
   };
   const DAILY_RECORD_SHEET_SECTIONS = {
     love: [
@@ -2430,6 +2484,9 @@
     sheet.classList.remove('is-temp-picker');
     sheet.classList.remove('is-weight-picker');
     sheet.classList.remove('is-diet-picker');
+    sheet.classList.remove('is-beverage-picker');
+    sheet.classList.remove('is-skin-picker');
+    sheet.classList.remove('is-cosmetic-picker');
     confirm.textContent = '完成';
     confirm.disabled = false;
   }
@@ -2630,6 +2687,17 @@
         totalKcal: dailyRecordState.totalKcal,
         mealType: dailyRecordState.mealType,
         photoUrl: dailyRecordState.photoUrl,
+        brand: dailyRecordState.brand,
+        beverageName: dailyRecordState.beverageName,
+        spec: dailyRecordState.spec,
+        calories: dailyRecordState.calories,
+        caffeineMg: dailyRecordState.caffeineMg,
+        area: dailyRecordState.area,
+        acne: dailyRecordState.acne,
+        redness: dailyRecordState.redness,
+        acneMarks: dailyRecordState.acneMarks,
+        product: dailyRecordState.product,
+        managementStatus: dailyRecordState.managementStatus,
       };
     }
     if(activeScene?.id !== 'scene-period-detail') return null;
@@ -2786,7 +2854,7 @@
   }
 
   function getDailyRecordConfig(type) {
-    return DAILY_RECORD_OPTIONS[type] || DAILY_RECORD_OPTIONS.love;
+    return DAILY_RECORD_OPTIONS[type] || { label:'记录', className:'diet', emoji:'', options:[] };
   }
 
   function normalizeDailyRecordValue(type, value) {
@@ -2849,6 +2917,15 @@
   function renderDailyRecordIconHtml() {
     if(dailyRecordState.recordType === 'diet'){
       return '<img src="assets/record-diet.png" alt="" draggable="false">';
+    }
+    if(dailyRecordState.recordType === 'beverage'){
+      return '<img src="assets/record-beverage.svg" alt="" draggable="false">';
+    }
+    if(dailyRecordState.recordType === 'skin'){
+      return '<img src="assets/record-symptom.png" alt="" draggable="false">';
+    }
+    if(dailyRecordState.recordType === 'cosmetic'){
+      return '<img src="assets/record-cosmetic.svg" alt="" draggable="false">';
     }
     if(dailyRecordState.recordType === 'weight'){
       return '<img src="assets/record-weight.png" alt="" draggable="false">';
@@ -3113,6 +3190,64 @@
     if(target) target.textContent = total ? `合计 ${Math.round(total)} kcal` : '合计 0 kcal';
   }
 
+  function renderDailyCameraPicker(type) {
+    const fields = type === 'beverage'
+      ? [
+          { key:'brand', label:'品牌', value:dailyRecordState.brand, wide:true, placeholder:'例如：星巴克' },
+          { key:'beverageName', label:'饮品名称', value:dailyRecordState.beverageName, wide:true, placeholder:'例如：红茶咖啡拿铁鸳鸯' },
+          { key:'spec', label:'规格', value:dailyRecordState.spec, placeholder:'例如：大杯 / 冰' },
+          { key:'calories', label:'热量', value:dailyRecordState.calories, unit:'千卡', numeric:true },
+          { key:'caffeineMg', label:'咖啡因', value:dailyRecordState.caffeineMg, unit:'毫克', numeric:true },
+        ]
+      : type === 'skin'
+        ? [
+            { key:'area', label:'部位', value:dailyRecordState.area, wide:true, placeholder:'例如：额头、下巴' },
+            { key:'acne', label:'痘痘', value:dailyRecordState.acne, placeholder:'例如：3 颗' },
+            { key:'redness', label:'泛红', value:dailyRecordState.redness, placeholder:'例如：轻微' },
+            { key:'acneMarks', label:'痘印', value:dailyRecordState.acneMarks, wide:true, placeholder:'例如：少量浅色痘印' },
+          ]
+        : [
+            { key:'brand', label:'品牌', value:dailyRecordState.brand, wide:true, placeholder:'例如：黛珂' },
+            { key:'product', label:'产品名称', value:dailyRecordState.product, wide:true, placeholder:'例如：紫苏精华水' },
+            { key:'managementStatus', label:'管理状态', value:dailyRecordState.managementStatus, wide:true, placeholder:'例如：已加入护肤品管理' },
+          ];
+    const title = type === 'beverage' ? '饮品信息' : type === 'skin' ? '皮肤状态' : '化妆品信息';
+    return `
+      <section class="edit-diet-card">
+        <h3 class="edit-diet-title">${title}</h3>
+        <div class="edit-camera-grid">
+          ${fields.map(field => `
+            <div class="edit-camera-field${field.wide ? ' is-wide' : ''}">
+              <label for="edit-camera-${field.key}">${field.label}</label>
+              <div class="edit-camera-input-wrap">
+                <input
+                  id="edit-camera-${field.key}"
+                  class="edit-camera-input"
+                  data-field="${field.key}"
+                  value="${escapeHtml(field.value ?? '')}"
+                  placeholder="${field.placeholder || ''}"
+                  ${field.numeric ? 'inputmode="decimal"' : ''}
+                >
+                ${field.unit ? `<span class="edit-camera-unit">${field.unit}</span>` : ''}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </section>
+    `;
+  }
+
+  function collectDailyCameraFields() {
+    return [...document.querySelectorAll('#optionList .edit-camera-input')].reduce((result, input) => {
+      const key = input.dataset.field;
+      const value = input.value.trim();
+      result[key] = ['calories', 'caffeineMg'].includes(key)
+        ? (Number(value.replace(/[^\d.]/g, '')) || 0)
+        : value;
+      return result;
+    }, {});
+  }
+
   function renderDailyRecordEditor() {
     const list = document.getElementById('dailyRecordList');
     const title = document.getElementById('dailyRecordTitle');
@@ -3216,6 +3351,8 @@
         });
       });
       syncEditDietTotal();
+    } else if(['beverage', 'skin', 'cosmetic'].includes(dailyRecordState.recordType)){
+      document.getElementById('optionList').innerHTML = renderDailyCameraPicker(dailyRecordState.recordType);
     } else {
       document.getElementById('optionList').innerHTML = renderDailyHealthPicker(
         dailyRecordState.recordType,
@@ -3321,6 +3458,27 @@
         dailyRecordState.dietItems = dietItems;
         dailyRecordState.totalKcal = totalKcal;
         dailyRecordState.mealType = mealType;
+      } else if(['beverage', 'skin', 'cosmetic'].includes(dailyRecordState.recordType)){
+        const fields = collectDailyCameraFields();
+        Object.assign(dailyRecordState, fields);
+        if(dailyRecordState.recordType === 'beverage'){
+          if(!fields.beverageName) return;
+          nextValue = `${fields.brand || ''}${fields.beverageName}`.trim();
+          nextDetail = `${nextValue}${fields.spec ? ` · ${fields.spec.replace(/\s*\/\s*/g, '/')}` : ''}`;
+        } else if(dailyRecordState.recordType === 'skin'){
+          if(!fields.area) return;
+          const conditions = [
+            fields.acne ? `${fields.acne}痘痘` : '',
+            fields.redness ? `${fields.redness}泛红` : '',
+            fields.acneMarks || '',
+          ].filter(Boolean);
+          nextValue = fields.area;
+          nextDetail = `${fields.area}${conditions.length ? `：${conditions.join('，')}` : ''}`;
+        } else {
+          if(!fields.product) return;
+          nextValue = `${fields.brand || ''} ${fields.product}`.trim();
+          nextDetail = `${nextValue}${fields.managementStatus ? ` · ${fields.managementStatus}` : ''}`;
+        }
       } else {
         const selectedValues = [...document.querySelectorAll('#optionList .edit-hrp-option.active, #optionList .edit-hrp-list-option.active')]
           .map(btn => btn.dataset.value)
@@ -3377,6 +3535,17 @@
         totalKcal: Number(payload.totalKcal) || 0,
         mealType: payload.mealType || '',
         photoUrl: payload.photoUrl || null,
+        brand: payload.brand || '',
+        beverageName: payload.beverageName || '',
+        spec: payload.spec || '',
+        calories: Number(payload.calories) || 0,
+        caffeineMg: Number(payload.caffeineMg) || 0,
+        area: payload.area || '',
+        acne: payload.acne || '',
+        redness: payload.redness || '',
+        acneMarks: payload.acneMarks || '',
+        product: payload.product || '',
+        managementStatus: payload.managementStatus || '',
       };
       document.getElementById('recordTime-daily-record').textContent = formatPeriodDetailTime(dailyRecordState.time);
       renderDailyRecordEditor();

@@ -3031,6 +3031,144 @@
   color:#323232;
   line-height:1.6;
 }
+.v3-camera-insight{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  min-width:0;
+}
+.v3-camera-insight-heading{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:10px;
+  font-size:16px;
+  line-height:1.5;
+  color:#323232;
+}
+.v3-camera-insight-heading img{
+  width:24px;
+  height:24px;
+  display:block;
+  border-radius:7px;
+}
+.v3-camera-insight-photo{
+  width:128px;
+  height:128px;
+  margin-bottom:10px;
+  border-radius:10px;
+  overflow:hidden;
+  background:#f2f2f5;
+}
+.v3-camera-insight-photo img{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+}
+.v3-camera-insight-title{
+  margin:0 0 8px;
+  max-width:100%;
+  font-size:16px;
+  line-height:1.5;
+  color:#323232;
+  overflow-wrap:anywhere;
+}
+.v3-camera-insight-details{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+}
+.v3-camera-insight-detail{
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+  min-width:0;
+  font-size:14px;
+  line-height:1.5;
+}
+.v3-camera-insight-detail span{
+  min-width:58px;
+  color:rgba(0,0,0,0.45);
+}
+.v3-camera-insight-detail strong{
+  min-width:0;
+  color:#323232;
+  font-weight:400;
+  overflow-wrap:anywhere;
+}
+.v3-camera-insight-detail strong.is-accent{
+  color:#ff4d88;
+  font-weight:500;
+}
+.v3-beverage-week{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.v3-beverage-week-grid{
+  display:grid;
+  grid-template-columns:repeat(7, minmax(0, 1fr));
+  gap:5px;
+}
+.v3-beverage-week-day{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:5px;
+}
+.v3-beverage-week-status{
+  width:100%;
+  aspect-ratio:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:6px;
+  background:#f3f3f5;
+  color:#b6b6bc;
+  font-size:11px;
+  font-weight:500;
+}
+.v3-beverage-week-day.has-beverage .v3-beverage-week-status{
+  background:#dff5f0;
+  color:#2cae98;
+}
+.v3-beverage-week-day.is-today .v3-beverage-week-status{
+  background:#2cae98;
+  color:#fff;
+  box-shadow:0 3px 8px rgba(44,174,152,0.18);
+}
+.v3-beverage-week-label{
+  max-width:100%;
+  color:#9a9aa0;
+  font-size:9px;
+  white-space:nowrap;
+}
+.v3-beverage-week-day.is-today .v3-beverage-week-label{
+  color:#2cae98;
+  font-weight:600;
+}
+.v3-beverage-week-total{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:6px;
+  font-size:12px;
+  line-height:1.5;
+  color:#8e8e93;
+}
+.v3-beverage-week-total strong{
+  color:#323232;
+  font-weight:500;
+}
+.v3-beverage-week-total i{
+  width:3px;
+  height:3px;
+  border-radius:50%;
+  background:#c8c8cc;
+}
 .v3-period-detail-record{
   padding:2px 0 4px;
 }

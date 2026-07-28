@@ -136,6 +136,7 @@ function EditableTimelineBody({item, editPayload, children}){
   const open = React.useCallback((event)=>{
     if(!canEdit) return;
     if(event.target.closest('button,a,input,textarea,select')) return;
+    event.stopPropagation();
     window.openEditModal(item.id, editPayload.kind || item.kind, editPayload);
   }, [canEdit, item?.id, item?.kind, editPayload]);
   const keyOpen = React.useCallback((event)=>{

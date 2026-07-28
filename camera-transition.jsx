@@ -6,14 +6,6 @@ const OVERLAY_FADE_DURATION = Math.round(TRANSITION_DURATION * 0.55);
 
 const CAMERA_RECOGNITION_MODES = [
   {
-    id: 'weight',
-    label: '体重',
-    capturePhoto: '体重秤.webp',
-    iconSrc: 'assets/record-weight.png',
-    resultTitle: '识别为体重记录',
-    resultDescription: '已读取体重秤屏幕数值，请确认后保存',
-  },
-  {
     id: 'period',
     label: '月经',
     capturePhoto: '使用过的量大卫生巾.jpg',
@@ -43,8 +35,8 @@ const CAMERA_RECOGNITION_MODES = [
     capturePhoto: '星巴克红茶拿铁.webp',
     iconSrc: 'assets/record-beverage.svg',
     resultTitle: '识别为饮品记录',
-    resultDescription: '已识别饮品品牌、品名、规格和定制',
-    resultNote: '未知营养值未自动推断',
+    resultDescription: '已识别饮品名称、规格、热量和咖啡因',
+    resultNote: '热量与咖啡因根据图片信息估算，请以实际配方为准',
     saveLabel: '保存记录',
   },
   {
@@ -83,7 +75,7 @@ const CAMERA_RECOGNITION_MODE_MAP = CAMERA_RECOGNITION_MODES.reduce((map, mode) 
 }, {});
 
 function getCameraRecognitionMode(modeId) {
-  return CAMERA_RECOGNITION_MODE_MAP[modeId] || CAMERA_RECOGNITION_MODE_MAP.weight;
+  return CAMERA_RECOGNITION_MODE_MAP[modeId] || CAMERA_RECOGNITION_MODE_MAP.period;
 }
 
 const AUTO_DETECT_DEMO_PHOTOS = CAMERA_RECOGNITION_MODES.map((mode, index) => ({
@@ -112,7 +104,6 @@ function inferCameraRecognitionMode(photo) {
 function buildCameraRecognitionResult(payload) {
   const mode = inferCameraRecognitionMode(payload?.photo || payload);
   const base = { ...payload, mode };
-  if (mode === 'weight') return { ...base, value: 108.4, unit: 'jin' };
   if (mode === 'period') {
     return {
       ...base,
@@ -139,13 +130,14 @@ function buildCameraRecognitionResult(payload) {
       brand: '星巴克',
       beverageName: '红茶咖啡拿铁鸳鸯',
       spec: '大杯 / 冰',
-      customization: '换巴旦木奶',
+      calories: 286,
+      caffeineMg: 95,
       summary: '星巴克红茶咖啡拿铁鸳鸯 · 大杯/冰',
       summaryItems: [
-        { label: '品牌', value: '星巴克' },
-        { label: '饮品', value: '红茶咖啡拿铁鸳鸯' },
+        { label: '饮品', value: '星巴克 · 红茶咖啡拿铁鸳鸯' },
         { label: '规格', value: '大杯 / 冰' },
-        { label: '定制', value: '换巴旦木奶' },
+        { label: '热量', value: '286 千卡' },
+        { label: '咖啡因', value: '95 毫克' },
       ],
     };
   }
@@ -463,7 +455,7 @@ function CameraPermissionDialog({ onAllow, onDeny }) {
       <div className="camera-perm-dialog">
         <CameraPermissionIcon/>
         <h2 id="camera-perm-title" className="camera-perm-title">美柚想访问相机</h2>
-        <p className="camera-perm-subtitle">用于智能识别体重、饮食、饮品、皮肤、化妆品等记录，请允许美柚访问相机</p>
+        <p className="camera-perm-subtitle">用于智能识别饮食、饮品、皮肤、化妆品等记录，请允许美柚访问相机</p>
         <div className="camera-perm-actions">
           <button type="button" className="camera-perm-btn" onClick={onDeny}>不允许</button>
           <button type="button" className="camera-perm-btn" onClick={onAllow}>允许</button>
@@ -933,7 +925,7 @@ function CameraView({
               <span className="camera-frame-corner br"/>
             </div>
             <div className="camera-hint camera-auto-detect-hint">
-              快速拍照记录体重、饮食、饮品、皮肤、化妆品等情况
+              快速拍照记录饮食、饮品、皮肤、化妆品等情况
             </div>
           </>
         )}

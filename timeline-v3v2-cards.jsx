@@ -476,6 +476,37 @@ function ChartTodayMoodWave({data, compact = false}){
   );
 }
 
+function ChartBeverageWeek({data}){
+  const days = Array.isArray(data?.days) ? data.days : [];
+  return (
+    <div className="v3-beverage-week">
+      <div className="v3-beverage-week-grid" role="img" aria-label="近7天饮品记录日历">
+        {days.map((day, index) => (
+          <div
+            className={
+              'v3-beverage-week-day'
+              + (day.consumed ? ' has-beverage' : '')
+              + (day.isToday ? ' is-today' : '')
+            }
+            key={day.label + index}
+          >
+            <span className="v3-beverage-week-status">
+              {day.consumed ? '有' : '无'}
+            </span>
+            <span className="v3-beverage-week-label">{day.label}</span>
+          </div>
+        ))}
+      </div>
+      <div className="v3-beverage-week-total">
+        <span>近7天合计</span>
+        <strong>{data?.totalCalories || 0} 千卡</strong>
+        <i aria-hidden="true"/>
+        <strong>{data?.totalCaffeineMg || 0} 毫克咖啡因</strong>
+      </div>
+    </div>
+  );
+}
+
 function WeightAnalysisNote({ noteParts, note }){
   if(noteParts){
     return (
@@ -648,6 +679,7 @@ function TLChart({type, compact = false, data, weightUnit}){
   if(type === 'caloriePanel') return <ChartCaloriePanel compact={compact}/>;
   if(type === 'symptomDots') return <ChartSymptomDots data={data}/>;
   if(type === 'todayMoodWave') return <ChartTodayMoodWave data={data} compact={compact}/>;
+  if(type === 'beverageWeek') return <ChartBeverageWeek data={data}/>;
   return null;
 }
 
@@ -685,7 +717,8 @@ function V3v2Header({time, title, isNew, entryId, entryKind, editPayload}){
 
 function V3EditableRecordArea({entryId, entryKind, editPayload, children}){
   const canEdit = !!(entryId && window.openEditModal);
-  const handleClick = React.useCallback(()=>{
+  const handleClick = React.useCallback((event)=>{
+    event.stopPropagation();
     if(canEdit) window.openEditModal(entryId, entryKind, editPayload);
   }, [canEdit, entryId, entryKind, editPayload]);
   const handleKeyDown = React.useCallback((event)=>{
@@ -932,6 +965,53 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
   }
   if(entry.kind === 'daily-record'){
     const iconKey = entry.icon || entry.recordType;
+    const isCameraInsight = ['beverage', 'skin', 'cosmetic'].includes(entry.recordType);
+    if(isCameraInsight){
+      const detailRows = entry.recordType === 'beverage'
+        ? [
+            { label:'规格', value:entry.spec },
+            { label:'总热量', value:`${entry.calories || 0} 千卡`, accent:true },
+            { label:'咖啡因', value:`${entry.caffeineMg || 0} 毫克` },
+          ]
+        : entry.recordType === 'skin'
+          ? [
+              { label:'部位', value:entry.area },
+              { label:'可见状态', value:`${entry.acne || ''}痘痘，${entry.redness || ''}泛红` },
+              { label:'痘印', value:entry.acneMarks },
+            ]
+          : [
+              { label:'品牌', value:entry.brand },
+              { label:'产品', value:entry.product },
+              { label:'管理状态', value:entry.managementStatus },
+            ];
+      const headline = entry.recordType === 'beverage'
+        ? `${entry.brand || ''}${entry.beverageName || ''}`
+        : entry.recordType === 'skin'
+          ? '本次皮肤状态'
+          : `${entry.brand || ''} ${entry.product || ''}`;
+      return (
+        <section className={'v3-camera-insight is-' + entry.recordType}>
+          <div className="v3-camera-insight-heading">
+            <img src={recordIconSrc(iconKey)} alt="" aria-hidden="true"/>
+            <span>{entry.recordLabel || '记录'}：</span>
+          </div>
+          {entry.photoUrl ? (
+            <div className="v3-camera-insight-photo">
+              <img src={entry.photoUrl} alt={entry.recordLabel || '拍照记录'}/>
+            </div>
+          ) : null}
+          <p className="v3-camera-insight-title">{headline}</p>
+          <div className="v3-camera-insight-details">
+            {detailRows.filter(row => row.value).map((row) => (
+              <div className="v3-camera-insight-detail" key={row.label}>
+                <span>{row.label}</span>
+                <strong className={row.accent ? 'is-accent' : ''}>{row.value}</strong>
+              </div>
+            ))}
+          </div>
+        </section>
+      );
+    }
     return (
       <div className="v3-weight-record">
         <span className="v3-weight-record-icon" aria-hidden="true">
@@ -1126,10 +1206,30 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
   const p = normalizeV3Entry(primary);
   const a = normalizeV3Entry(ai);
   const isPeriodQuick = p?.kind === 'period';
+  const isDietImage = p?.kind === 'image' && (!!p?.label || Number(p?.totalKcal) > 0);
+  const dietImageParts = isDietImage
+    ? String(p.text || '').split(/[；;]/).map(part => part.trim()).filter(Boolean)
+    : [];
+  const dietImageTotal = Number(p?.totalKcal) || 0;
+  const dietImageBaseKcal = dietImageParts.length ? Math.floor(dietImageTotal / dietImageParts.length) : 0;
+  const dietImageRemainder = dietImageParts.length ? dietImageTotal - dietImageBaseKcal * dietImageParts.length : 0;
+  const dietImageItems = Array.isArray(p?.dietItems) && p.dietItems.length
+    ? p.dietItems
+    : dietImageParts.map((part, index) => {
+        const amountMatch = part.match(/(\d+(?:\.\d+)?\s*(?:g|克|盘|碗|杯|份|个))$/i);
+        return {
+          id:`food-${index + 1}`,
+          name:amountMatch ? part.slice(0, amountMatch.index).trim() : part,
+          amount:amountMatch?.[1] || '',
+          kcal:dietImageBaseKcal + (index < dietImageRemainder ? 1 : 0),
+        };
+      });
   const derivedKind = p?.kind === 'period-detail'
     ? 'period-detail'
     : p?.kind === 'daily-record'
       ? 'daily-record'
+      : isDietImage
+        ? 'daily-record'
       : (p?.kind === 'weight' || p?.kind === 'weight-text')
         ? 'daily-record'
         : (isPeriodQuick || p?.kind === 'symptom') ? 'quick' : primary?.voice ? 'mixed' : primary?.photo ? 'image' : primary?.body || primary?.text ? 'text' : 'quick';
@@ -1140,6 +1240,21 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
         time: p.time,
         periodDetailItems: p.periodDetailItems || [],
       }
+    : isDietImage
+      ? {
+          kind:'daily-record',
+          time:p.time,
+          recordType:'diet',
+          recordLabel:'饮食',
+          recordValue:dietImageItems.map(item => item.name).join('、'),
+          recordDetail:dietImageItems.map(item => item.name).join('、'),
+          icon:'diet',
+          iconText:'',
+          dietItems:dietImageItems,
+          totalKcal:dietImageTotal,
+          mealType:p.mealType || p.label || '午餐',
+          photoUrl:p.photo?.src || p.photoUrl || null,
+        }
     : p?.kind === 'daily-record'
       ? {
           kind: 'daily-record',
@@ -1150,6 +1265,21 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
           recordDetail: p.recordDetail,
           icon: p.icon,
           iconText: p.iconText || '',
+          brand: p.brand,
+          beverageName: p.beverageName,
+          spec: p.spec,
+          calories: p.calories,
+          caffeineMg: p.caffeineMg,
+          area: p.area,
+          acne: p.acne,
+          redness: p.redness,
+          acneMarks: p.acneMarks,
+          product: p.product,
+          managementStatus: p.managementStatus,
+          dietItems: p.dietItems,
+          totalKcal: p.totalKcal,
+          mealType: p.mealType,
+          photoUrl: p.photoUrl,
         }
     : (p?.kind === 'weight' || p?.kind === 'weight-text')
         ? {
