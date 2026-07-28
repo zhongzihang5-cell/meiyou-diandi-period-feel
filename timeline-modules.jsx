@@ -1024,7 +1024,7 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
       <VoiceRecordCard
         entry={item}
         isNew={isNew}
-        animateAnalysis={isFeedLast}
+        animateAnalysis={isFeedLast && isNew}
         analysisProps={sisterItem ? {
           playAnimation: sisterPlayAnimation,
           onCycleComplete: onSisterCycleComplete,

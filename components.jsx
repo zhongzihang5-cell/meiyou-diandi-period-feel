@@ -1,12 +1,20 @@
 // ============ Status bar ============
-function StatusBar({isMember=false, onMemberChange}){
+function StatusBar({isMember=false, onMemberChange, showMemberSwitch=false, plan='plan1', onPlanChange, showPlanSwitch=false}){
   return (
     <div className="statusbar">
       <span>9:41</span>
-      <div className="demo-member-switch" role="group" aria-label="会员演示切换">
-        <button type="button" className={!isMember ? 'is-active' : ''} onClick={()=>onMemberChange?.(false)}>非会员</button>
-        <button type="button" className={isMember ? 'is-active' : ''} onClick={()=>onMemberChange?.(true)}>会员</button>
-      </div>
+      {showMemberSwitch ? (
+        <div className="demo-member-switch" role="group" aria-label="会员演示切换">
+          <button type="button" className={!isMember ? 'is-active' : ''} onClick={()=>onMemberChange?.(false)}>非会员</button>
+          <button type="button" className={isMember ? 'is-active' : ''} onClick={()=>onMemberChange?.(true)}>会员</button>
+        </div>
+      ) : null}
+      {showPlanSwitch ? (
+        <div className="demo-plan-switch" role="group" aria-label="点滴方案切换">
+          <button type="button" className={plan === 'plan1' ? 'is-active' : ''} onClick={()=>onPlanChange?.('plan1')}>方案1</button>
+          <button type="button" className={plan === 'plan2' ? 'is-active' : ''} onClick={()=>onPlanChange?.('plan2')}>方案2</button>
+        </div>
+      ) : null}
       <span className="sb-right">
         <svg width="17" height="11" viewBox="0 0 17 11" aria-hidden="true">
           <rect x="0" y="6" width="3" height="5" rx="1" fill="currentColor"/>

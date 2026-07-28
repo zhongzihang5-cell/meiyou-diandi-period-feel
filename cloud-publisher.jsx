@@ -1,5 +1,24 @@
 // ============ 底部 Dock — 输入栏 + 右下悬浮快捷发布 ============
 
+function UnifiedQuickIcon({type}){
+  const key = type === 'period-feel' ? 'menses' : type;
+  const colors = {
+    menses:['#ff8fb4','#ff5f8f','#ff3d7a'], weight:['#c5a3f8','#ac78f3','#9b5ef0'],
+    symptom:['#8fcdff','#4fb0f7','#2e9bf0'], mood:['#ffeb93','#ffd849','#ffc700'],
+    diet:['#ffb68e','#ff7d47','#ff5f22'], water:['#8fe8c4','#34cf99','#16b981'],
+  }[key] || ['#c9c9cf','#aaaab0','#888990'];
+  const id = 'quick-' + key;
+  const body = {
+    menses:<><path d="M32 11.5c8.8 9.9 15 17.6 15 24.8A15 15 0 0 1 17 36.3c0-7.2 6.2-14.9 15-24.8z" fill={'url(#b-'+id+')'}/><g stroke="#fff" strokeLinecap="round" fill="none" opacity=".72"><path d="M25.4 33.6v6.4" strokeWidth="3.1"/><path d="M32 29.6v14.6" strokeWidth="3.4"/><path d="M38.6 32.4v8.8" strokeWidth="3.1"/></g><ellipse cx="25.8" cy="25.4" rx="3.4" ry="5.2" fill={'url(#h-'+id+')'} transform="rotate(-28 25.8 25.4)"/></>,
+    weight:<><rect x="10" y="24" width="44" height="27" rx="10" fill={'url(#b-'+id+')'}/><path d="M21 42a11 11 0 0 1 22 0z" fill="#fff" opacity=".85"/><path d="M32 42l6.2-7.2" stroke="#7b3fd6" strokeWidth="2.6" strokeLinecap="round"/><circle cx="32" cy="42" r="1.9" fill="#7b3fd6"/></>,
+    symptom:<><path d="M26 16h12a5 5 0 0 1 5 5v3H21v-3a5 5 0 0 1 5-5z" fill={'url(#b-'+id+')'} opacity=".85"/><rect x="11" y="22" width="42" height="30" rx="10" fill={'url(#b-'+id+')'}/><g fill="#fff" opacity=".92"><rect x="28.6" y="29" width="6.8" height="16" rx="3.4"/><rect x="24" y="33.6" width="16" height="6.8" rx="3.4"/></g></>,
+    mood:<><circle cx="32" cy="33" r="20" fill={'url(#b-'+id+')'}/><g fill="#c98600"><ellipse cx="25" cy="29.5" rx="2.7" ry="3.4"/><ellipse cx="39" cy="29.5" rx="2.7" ry="3.4"/></g><path d="M24.5 38.5c2 3.4 4.6 5.1 7.5 5.1s5.5-1.7 7.5-5.1" stroke="#c98600" strokeWidth="3.2" strokeLinecap="round" fill="none"/></>,
+    diet:<><g fill="#fff4e6"><rect x="33" y="35" width="20" height="8.6" rx="4.3" transform="rotate(42 33 35)"/><circle cx="46.5" cy="47.5" r="5.4"/><circle cx="50.5" cy="43.5" r="4.6"/></g><path d="M17.6 17.4c7-6.4 17.4-5.6 22.4.6s4.2 15.4-2.4 21-16.6 5.4-21.4-1.2-5.6-14 1.4-20.4z" fill={'url(#b-'+id+')'}/></>,
+    water:<><path d="M18.5 17h27a2 2 0 0 1 2 2.2l-3.1 28.4A6.5 6.5 0 0 1 38 53.4H26a6.5 6.5 0 0 1-6.4-5.8L16.5 19.2a2 2 0 0 1 2-2.2z" fill={'url(#g-'+id+')'}/><path d="M21 31.5h22l-1.8 16.1a6.5 6.5 0 0 1-6.4 5.8H29.2a6.5 6.5 0 0 1-6.4-5.8z" fill={'url(#b-'+id+')'}/></>,
+  }[key];
+  return <svg className="dock-unified-quick-icon" viewBox="0 0 64 64" width="44" height="44" aria-hidden="true"><defs><linearGradient id={'b-'+id} x1="24%" y1="4%" x2="78%" y2="96%"><stop stopColor={colors[0]}/><stop offset=".52" stopColor={colors[1]}/><stop offset="1" stopColor={colors[2]}/></linearGradient><linearGradient id={'g-'+id} x1="20%" y1="0%" x2="85%" y2="100%"><stop stopColor={colors[0]} stopOpacity=".55"/><stop offset="1" stopColor={colors[1]} stopOpacity=".38"/></linearGradient><radialGradient id={'h-'+id}><stop stopColor="#fff" stopOpacity=".95"/><stop offset="1" stopColor="#fff" stopOpacity="0"/></radialGradient></defs><circle cx="32" cy="32" r="32" fill="#fff"/><ellipse cx="32" cy="54" rx="15" ry="4.6" fill={colors[2]} opacity=".2"/>{body}</svg>;
+}
+
 /** 圆形语音图标（含音波弧线 — 参考附件还原） */
 function DockVoiceCircleIco({size=22}){
   /* 三段同心弧，从左侧发射点向右辐射，粗描边 */
@@ -223,6 +242,8 @@ function DockPublisher({
   highlightScheme3Input, dockPlaceholder, defaultInputMode = 'voice',
   demoPhase, isDemoRunning, hideQuickFan = false, hideQuickFab = false,
   feedingQuickItems = null, feedingQuickLabel = '快捷记录', onFeedingQuickSelect,
+  onPeriodFeelSelect, onVoiceStart,
+  periodFeelLabel = '月经感受',
   emptyPreviewGuideStep = 0, onEmptyPreviewGuideAdvance, onEmptyPreviewGuideDismiss, fabGuidePulse = false,
 }){
   const I = window.Icon;
@@ -356,7 +377,7 @@ function DockPublisher({
     return ()=>clearInterval(recTimer.current);
   }, [recording]);
 
-  const startRec = ()=> setRecording(true);
+  const startRec = ()=>{ setRecording(true); onVoiceStart?.(); };
   const stopRec = ()=>{
     if(!recording) return;
     setRecording(false);
@@ -455,6 +476,10 @@ function DockPublisher({
   };
 
   const handleDockQuickItemSelect = (item)=>{
+    if(item?.action === 'period-feel'){
+      onPeriodFeelSelect?.();
+      return;
+    }
     if(item?.action === 'weight'){
       setWeightPickerKey(k=>k + 1);
       setQuickOpen(false);
@@ -577,13 +602,13 @@ function DockPublisher({
                     <button
                       key={item.id}
                       type="button"
-                      className="dock-feeding-quick-item"
+                      className={'dock-feeding-quick-item'+(item.pulse ? ' is-period-feel-pulse' : '')}
                       onClick={()=>handleDockQuickItemSelect(item)}
                     >
                       <span className="dock-feeding-quick-icon" aria-hidden="true">
                         {item.iconNode || item.icon || '🍼'}
                       </span>
-                      <span className="dock-feeding-quick-label">{item.label}</span>
+                      <span className="dock-feeding-quick-label">{item.id === 'period-feel' ? periodFeelLabel : item.label}</span>
                     </button>
                   ))}
                 </div>
@@ -701,4 +726,4 @@ function DockPublisher({
   );
 }
 
-Object.assign(window, { DockPublisher, CloudPublisher: DockPublisher });
+Object.assign(window, { DockPublisher, CloudPublisher: DockPublisher, UnifiedQuickIcon });

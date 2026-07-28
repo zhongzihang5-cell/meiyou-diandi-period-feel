@@ -17,7 +17,24 @@ const DEMO_SCENES = {
           if(it?.kind === 'guide' && it.id === 'g-518-post') it.noAnimate = true;
         });
       });
-      // d-5-17 不在初始 timeline 中，演示流程触发时由 app.jsx 动态插入
+      const today = window.buildTodayDayBlock ? window.buildTodayDayBlock(window.SCENE_CONTEXT.period) : {
+        type:'day', id:'d-today', date:'今天', weekday:'周三', isToday:true, items:[]
+      };
+      today.weekday = '周三';
+      const todayBlock = blocks.find(block=>block.type === 'day' && block.isToday) || today;
+      if(!blocks.includes(todayBlock)) blocks.push(todayBlock);
+      const now = window.formatNowTime?.() || '09:41';
+      todayBlock.items = [
+        ...(todayBlock.items || []),
+        {
+          kind:'sync-card', id:'e-period-default', time:now,
+          cardLabel:'自动同步', cardLabelKind:'sync', body:'今天月经来了。',
+          tagLayout:'v3', isNew:false,
+          tags:[{label:'月经来了', cat:'period', val:'', icon:'period'}],
+          periodSummaryLabel:'月经来了', analysisKind:'period-start',
+        },
+        {kind:'sister-card', id:'e-sister-default', time:now, railDot:'ai', analysisKind:'period-start'},
+      ];
       return blocks;
     },
     calendar: {
@@ -31,7 +48,7 @@ const DEMO_SCENES = {
       showHealthCard: false,
       sisterAnalysis: {
         trigger: 'float-notice',
-        initialDone: false,
+        initialDone: true,
       },
       todayGuide: true,
       recordFeedback: true,
