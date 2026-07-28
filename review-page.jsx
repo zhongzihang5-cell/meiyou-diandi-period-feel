@@ -45,6 +45,14 @@ function ReviewDietTargetIcon(){
   return <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22"/></svg>;
 }
 
+function ReviewBeverageIcon(){
+  return <svg viewBox="0 0 24 24"><path d="M6 7h12l-1 12H7z"/><path d="M8 4h8M14.5 4l2.5-2"/><path d="M8.5 11.5h7"/></svg>;
+}
+
+function ReviewSkinIcon(){
+  return <svg viewBox="0 0 24 24"><path d="M12 3c4.7 0 8 3.4 8 8.2 0 5.2-3.5 9.8-8 9.8s-8-4.6-8-9.8C4 6.4 7.3 3 12 3z"/><path d="M8.5 10h.01M15.5 10h.01"/><path d="M9 15c1.7.9 4.3.9 6 0"/><circle cx="16.8" cy="13.2" r="1.1"/></svg>;
+}
+
 function ReviewPeriodIcon(){
   return <svg viewBox="0 0 24 24"><path d="M12 3c3 3.3 4.8 5.8 4.8 8.3A4.8 4.8 0 1 1 7.2 11.3C7.2 8.8 9 6.3 12 3z"/><path d="M9.5 16c1.4.8 3.4.8 4.8-.2"/></svg>;
 }
@@ -782,6 +790,8 @@ const REVIEW_CARD_SHARE_INFO = {
   '症状':['症状类型','记录时间','症状趋势'],
   '心情':['心情记录','心情趋势','变化分析'],
   '饮食':['饮食记录','热量摄入','饮食趋势'],
+  '饮品':['饮品记录','饮品热量','咖啡因趋势'],
+  '皮肤状态':['皮肤照片','可见状态','周期变化'],
   '饮食图集':['饮食照片','记录日期','饮食回顾'],
   '热量目标':['每日目标','摄入热量','达标情况'],
   '便便':['记录时间','每日次数','规律趋势'],
@@ -892,6 +902,8 @@ const REVIEW_SHARE_HUB_ITEMS = [
   {title:'症状', desc:'症状类型、记录时间和症状趋势'},
   {title:'心情', desc:'心情记录、心情趋势和变化分析'},
   {title:'饮食', desc:'饮食记录、热量摄入和饮食趋势'},
+  {title:'饮品', desc:'饮品记录、饮品热量和咖啡因趋势'},
+  {title:'皮肤状态', desc:'皮肤照片、可见状态和周期变化'},
   {title:'便便', desc:'记录时间、每日次数和规律趋势'},
   {title:'爱爱', desc:'记录日期、记录次数和变化趋势'},
   {title:'喂奶', desc:'喂奶时间、喂奶方式和喂奶量'},
@@ -4649,6 +4661,272 @@ function SymptomReviewCard(){
   );
 }
 
+const BEVERAGE_WEEK_DATA = [
+  {label:'周二', calories:0, caffeine:0},
+  {label:'周三', calories:138, caffeine:40},
+  {label:'周四', calories:0, caffeine:0},
+  {label:'周五', calories:0, caffeine:0},
+  {label:'周六', calories:162, caffeine:60},
+  {label:'周日', calories:0, caffeine:0},
+  {label:'今天', calories:286, caffeine:95, current:true},
+];
+
+function BeverageTrendChart({detail=false}){
+  const data = BEVERAGE_WEEK_DATA;
+  const W = 340, H = detail ? 190 : 164, padL = 34, padR = 18, padT = 22, padB = 28;
+  const x0 = padL, x1 = W - padR, y1 = H - padB;
+  const band = (x1 - x0) / data.length;
+  const X = i => x0 + band * i + band / 2;
+  const YCalories = value => y1 - value / 320 * (y1 - padT);
+  const YCaffeine = value => y1 - value / 110 * (y1 - padT);
+  const caffeinePoints = data.map((item, index)=>[X(index), YCaffeine(item.caffeine)]);
+  return (
+    <svg viewBox={'0 0 340 ' + H} preserveAspectRatio="xMidYMid meet" role="img" aria-label="近7天饮品热量和咖啡因趋势">
+      <defs>
+        <linearGradient id={detail ? 'beverageDetailBars' : 'beverageCardBars'} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#ffb45c"/>
+          <stop offset="100%" stopColor="#ffe0a8"/>
+        </linearGradient>
+      </defs>
+      {[100,200,300].map(value=>(
+        <React.Fragment key={value}>
+          <line x1={x0} y1={YCalories(value)} x2={x1} y2={YCalories(value)} stroke="rgba(0,0,0,.055)" strokeWidth="1"/>
+          <text x={x0 - 6} y={YCalories(value) + 3} textAnchor="end" fontSize="9" fill="#b9b9be" fontFamily="PingFang SC">{value}</text>
+        </React.Fragment>
+      ))}
+      {data.map((item, index)=>(
+        <React.Fragment key={item.label}>
+          <rect
+            x={X(index) - 10}
+            y={YCalories(item.calories)}
+            width="20"
+            height={Math.max(item.calories ? 5 : 0, y1 - YCalories(item.calories))}
+            rx="7"
+            fill={item.current ? '#ff9d3f' : 'url(#' + (detail ? 'beverageDetailBars' : 'beverageCardBars') + ')'}
+          />
+          <text x={X(index)} y={H - 8} textAnchor="middle" fontSize="9" fontWeight={item.current ? '600' : '400'} fill={item.current ? '#e8822a' : '#b7b7bd'} fontFamily="PingFang SC">{item.label}</text>
+        </React.Fragment>
+      ))}
+      <path d={reviewSmoothPath(caffeinePoints)} fill="none" stroke="#29b7ad" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+      {data.map((item, index)=> item.caffeine ? (
+        <circle key={item.label + '-caffeine'} cx={X(index)} cy={YCaffeine(item.caffeine)} r={item.current ? 4.5 : 3} fill="#29b7ad" stroke="#fff" strokeWidth="1.5"/>
+      ) : null)}
+      {detail ? <text x={X(6)} y={Math.max(12, YCalories(286) - 9)} textAnchor="middle" fontSize="10" fontWeight="600" fill="#e8822a" fontFamily="PingFang SC">286 kcal</text> : null}
+    </svg>
+  );
+}
+
+function BeverageReviewCard({onOpen}){
+  return (
+    <ReviewCard
+      title="饮品"
+      iconClass="is-beverage"
+      icon={<ReviewBeverageIcon/>}
+      chart={<BeverageTrendChart/>}
+      legend={(
+        <>
+          <span className="review-legend-item is-beverage-calories"><i></i>饮品热量</span>
+          <span className="review-legend-item is-beverage-caffeine"><i></i>咖啡因</span>
+        </>
+      )}
+      metrics={(
+        <>
+          <ReviewMetric value="586" unit="kcal" label="近7天总热量"/>
+          <ReviewMetric value="195" unit="mg" label="近7天咖啡因"/>
+          <ReviewMetric value="3" unit="天" label="记录天数"/>
+        </>
+      )}
+      more="查看完整饮品回顾"
+      onOpen={onOpen}
+    />
+  );
+}
+
+const BEVERAGE_COMPOSITION = [
+  {label:'咖啡类', value:42, color:'#29b7ad'},
+  {label:'茶饮', value:33, color:'#ff9d3f'},
+  {label:'乳饮', value:17, color:'#7fa8e8'},
+  {label:'其他', value:8, color:'#b7a4d8'},
+];
+
+function BeverageDetailPage({open, onClose}){
+  const [range, setRange] = React.useState('week');
+  const ranges = [
+    {key:'week', label:'近7天'},
+    {key:'month', label:'近30天'},
+    {key:'all', label:'全部'},
+  ];
+  React.useEffect(()=>{ if(open) setRange('week'); }, [open]);
+  return (
+    <section className={'review-cycle-detail is-fullscreen-detail' + (open ? ' is-open' : '')} aria-hidden={!open} aria-label="饮品详情">
+      <div className="review-detail-nav">
+        <button type="button" className="review-detail-back" aria-label="返回" onClick={onClose}><ReviewBackIcon/></button>
+        <span className="review-detail-title">饮品</span>
+      </div>
+      <div className="review-detail-content review-camera-detail-content">
+        <div className="review-segment" role="tablist" aria-label="时间范围">
+          {ranges.map(item=>(
+            <button key={item.key} type="button" className={range === item.key ? 'is-active' : ''} aria-selected={range === item.key} onClick={()=>setRange(item.key)}>{item.label}</button>
+          ))}
+        </div>
+        <div className="review-detail-card">
+          <div className="review-camera-detail-head"><b>饮品摄入趋势</b><span>{range === 'week' ? '近7天' : range === 'month' ? '近30天' : '全部记录'}</span></div>
+          <BeverageTrendChart detail/>
+          <div className="review-camera-summary-grid">
+            <div><span>摄入总热量</span><b>586<em>kcal</em></b></div>
+            <div><span>咖啡因总量</span><b>195<em>mg</em></b></div>
+          </div>
+          <p className="review-camera-insight">本周共记录 3 天饮品，咖啡因主要来自咖啡类饮品，记录时间集中在上午。</p>
+        </div>
+        <div className="review-detail-card">
+          <div className="review-camera-detail-head"><b>饮品构成</b><span>按记录次数</span></div>
+          <div className="review-camera-bars">
+            {BEVERAGE_COMPOSITION.map(item=>(
+              <div className="review-camera-bar-row" key={item.label}>
+                <span>{item.label}</span>
+                <div><i style={{width:item.value + '%', background:item.color}}></i></div>
+                <b>{item.value}%</b>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="review-detail-card">
+          <div className="review-camera-detail-head"><b>最近一次记录</b><span>今天 10:42</span></div>
+          <div className="review-camera-latest">
+            <img src="星巴克红茶拿铁.webp" alt="最近一次饮品记录"/>
+            <div><b>红茶咖啡拿铁鸳鸯</b><span>大杯 / 冰</span><p>286 千卡 · 咖啡因 95 毫克</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+const SKIN_TREND = [2,1,0,0,1,0,1,2,2,1,0,1,2,3,2,1,1,0,1,2,3,2,1,1,0,1,2,1];
+
+function SkinTrendChart({detail=false}){
+  const values = SKIN_TREND;
+  const W = 340, H = detail ? 190 : 164, padL = 34, padR = 16, padT = 20, padB = 28;
+  const x0 = padL, x1 = W - padR, y1 = H - padB;
+  const X = index => x0 + (x1 - x0) * index / (values.length - 1);
+  const Y = value => y1 - value / 3 * (y1 - padT);
+  const points = values.map((value, index)=>[X(index), Y(value)]);
+  const labels = [{index:0,text:'7/1'},{index:9,text:'7/10'},{index:18,text:'7/19'},{index:27,text:'今天'}];
+  return (
+    <svg viewBox={'0 0 340 ' + H} preserveAspectRatio="xMidYMid meet" role="img" aria-label="近28天皮肤状态程度趋势">
+      <defs>
+        <linearGradient id={detail ? 'skinDetailArea' : 'skinCardArea'} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#eb7891" stopOpacity=".26"/>
+          <stop offset="100%" stopColor="#eb7891" stopOpacity=".02"/>
+        </linearGradient>
+      </defs>
+      {[0,1,2,3].map(value=>(
+        <React.Fragment key={value}>
+          <line x1={x0} y1={Y(value)} x2={x1} y2={Y(value)} stroke="rgba(0,0,0,.055)" strokeWidth="1"/>
+          <text x={x0 - 7} y={Y(value) + 3} textAnchor="end" fontSize="9" fill="#b9b9be" fontFamily="PingFang SC">{['稳定','轻微','明显','集中'][value]}</text>
+        </React.Fragment>
+      ))}
+      <path d={reviewSmoothPath(points) + 'L' + x1 + ' ' + y1 + 'L' + x0 + ' ' + y1 + 'Z'} fill={'url(#' + (detail ? 'skinDetailArea' : 'skinCardArea') + ')'}/>
+      <path d={reviewSmoothPath(points)} fill="none" stroke="#eb7891" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"/>
+      {values.map((value, index)=> index % 3 === 0 || index === values.length - 1 ? (
+        <circle key={index} cx={X(index)} cy={Y(value)} r={index === values.length - 1 ? 4.5 : 2.5} fill="#eb7891" stroke="#fff" strokeWidth="1.3"/>
+      ) : null)}
+      {labels.map(label=><text key={label.index} x={X(label.index)} y={H - 8} textAnchor={label.index === 0 ? 'start' : label.index === 27 ? 'end' : 'middle'} fontSize="9" fill={label.index === 27 ? '#d85e79' : '#b7b7bd'} fontFamily="PingFang SC">{label.text}</text>)}
+    </svg>
+  );
+}
+
+function SkinReviewCard({onOpen}){
+  return (
+    <ReviewCard
+      title="皮肤状态"
+      iconClass="is-skin"
+      icon={<ReviewSkinIcon/>}
+      chart={<SkinTrendChart/>}
+      legend={<span className="review-legend-item is-skin"><i></i>可见状态程度</span>}
+      metrics={(
+        <>
+          <ReviewMetric value="轻微" label="最近状态"/>
+          <ReviewMetric value="8" unit="天" label="近30天记录"/>
+          <ReviewMetric value="↘ 改善" label="整体趋势" trend/>
+        </>
+      )}
+      more="查看完整皮肤状态回顾"
+      onOpen={onOpen}
+    />
+  );
+}
+
+const SKIN_STATE_ROWS = [
+  {label:'痘痘', count:5, value:82, color:'#eb7891'},
+  {label:'泛红', count:4, value:66, color:'#f1a25d'},
+  {label:'痘印', count:3, value:50, color:'#9b87d2'},
+  {label:'干燥', count:2, value:34, color:'#6cb7c6'},
+];
+
+function SkinDetailPage({open, onClose}){
+  const [range, setRange] = React.useState('month');
+  const ranges = [
+    {key:'month', label:'近30天'},
+    {key:'cycle', label:'近3个周期'},
+    {key:'all', label:'全部'},
+  ];
+  React.useEffect(()=>{ if(open) setRange('month'); }, [open]);
+  return (
+    <section className={'review-cycle-detail is-fullscreen-detail' + (open ? ' is-open' : '')} aria-hidden={!open} aria-label="皮肤状态详情">
+      <div className="review-detail-nav">
+        <button type="button" className="review-detail-back" aria-label="返回" onClick={onClose}><ReviewBackIcon/></button>
+        <span className="review-detail-title">皮肤状态</span>
+      </div>
+      <div className="review-detail-content review-camera-detail-content">
+        <div className="review-segment" role="tablist" aria-label="时间范围">
+          {ranges.map(item=>(
+            <button key={item.key} type="button" className={range === item.key ? 'is-active' : ''} aria-selected={range === item.key} onClick={()=>setRange(item.key)}>{item.label}</button>
+          ))}
+        </div>
+        <div className="review-detail-card">
+          <div className="review-camera-detail-head"><b>皮肤状态变化</b><span>{range === 'month' ? '近30天' : range === 'cycle' ? '近3个周期' : '全部记录'}</span></div>
+          <SkinTrendChart detail/>
+          <p className="review-camera-insight is-skin">最近一周可见状态较前一周缓和，记录中的痘痘和泛红次数均有下降。</p>
+        </div>
+        <div className="review-detail-card">
+          <div className="review-camera-detail-head"><b>主要可见状态</b><span>共记录 8 天</span></div>
+          <div className="review-camera-bars">
+            {SKIN_STATE_ROWS.map(item=>(
+              <div className="review-camera-bar-row" key={item.label}>
+                <span>{item.label}</span>
+                <div><i style={{width:item.value + '%', background:item.color}}></i></div>
+                <b>{item.count}次</b>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="review-detail-card review-skin-cycle-card">
+          <div className="review-camera-detail-head"><b>周期关联</b><span>基于近3个周期记录</span></div>
+          <div className="review-skin-phase-grid">
+            {[
+              {label:'月经期', value:1, tone:'period'},
+              {label:'卵泡期', value:1, tone:'follicular'},
+              {label:'排卵期', value:2, tone:'ovulation'},
+              {label:'黄体期', value:5, tone:'luteal'},
+            ].map(item=>(
+              <div key={item.label}><span>{item.label}</span><i className={item.tone} style={{height:(20 + item.value * 12) + 'px'}}></i><b>{item.value}次</b></div>
+            ))}
+          </div>
+          <p className="review-camera-insight is-skin">记录显示，痘痘更常出现在黄体后期；这是基于你的历史照片记录形成的观察，不作为皮肤诊断。</p>
+        </div>
+        <div className="review-detail-card">
+          <div className="review-camera-detail-head"><b>最近一次记录</b><span>今天 09:36</span></div>
+          <div className="review-camera-latest">
+            <img src="长痘.jpg" alt="最近一次皮肤状态记录"/>
+            <div><b>面颊轻微泛红</b><span>少量可见痘痘</span><p>黄体后期 · 状态轻微</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /** 近 28 天每日次数：6/3 — 今天；多为 1–2 次，中段有一次 3 次峰值 */
 const STOOL_CARD_VALUES = [
   1,1,2,1,1,2,1,
@@ -7097,6 +7375,8 @@ function ReviewPage({mode='经期', isMember=false, shareState, onShareStateChan
   const [stoolLandscapeOpen, setStoolLandscapeOpen] = useState(false);
   const [loveLandscapeOpen, setLoveLandscapeOpen] = useState(false);
   const [loveDetailOpen, setLoveDetailOpen] = useState(false);
+  const [beverageDetailOpen, setBeverageDetailOpen] = useState(false);
+  const [skinDetailOpen, setSkinDetailOpen] = useState(false);
   const isPeriodMode = mode === '经期';
   const cycleData = [29,34,31,30,33,31,32,36,31,30,32,30,31,29,30,31,29,30,29,31,30,30,28,28];
   const cycleLast12 = cycleData.slice(-12);
@@ -7122,7 +7402,7 @@ function ReviewPage({mode='经期', isMember=false, shareState, onShareStateChan
         <span className="review-nav-title">回顾</span>
       </div>
       <div className="review-content">
-        <p className="review-page-greeting">已记录 <b>350 天</b>，共 <b>{isPeriodMode ? 9 : 5} 项</b>可回顾</p>
+        <p className="review-page-greeting">已记录 <b>350 天</b>，共 <b>{isPeriodMode ? 11 : 7} 项</b>可回顾</p>
 
       {isPeriodMode && isMember ? <PeriodHealthImageCard/> : null}
 
@@ -7173,6 +7453,9 @@ function ReviewPage({mode='经期', isMember=false, shareState, onShareStateChan
       />
       {!isPeriodMode ? <DietPhotoWallCard/> : null}
 
+      <BeverageReviewCard onOpen={()=>setBeverageDetailOpen(true)}/>
+      <SkinReviewCard onOpen={()=>setSkinDetailOpen(true)}/>
+
       {isPeriodMode ? <SymptomReviewCard/> : null}
 
       <MoodReviewCard
@@ -7208,6 +7491,8 @@ function ReviewPage({mode='经期', isMember=false, shareState, onShareStateChan
       <StoolLandscapePage open={stoolLandscapeOpen} onClose={()=>setStoolLandscapeOpen(false)}/>
       <LoveLandscapePage open={loveLandscapeOpen} onClose={()=>setLoveLandscapeOpen(false)}/>
       <LoveDetailPage open={loveDetailOpen} onClose={()=>setLoveDetailOpen(false)}/>
+      <BeverageDetailPage open={beverageDetailOpen} onClose={()=>setBeverageDetailOpen(false)}/>
+      <SkinDetailPage open={skinDetailOpen} onClose={()=>setSkinDetailOpen(false)}/>
       <DietLandscapePage open={dietLandscapeOpen} onClose={()=>setDietLandscapeOpen(false)}/>
       <CycleLandscapePage open={cycleLandscapeOpen} onClose={()=>setCycleLandscapeOpen(false)}/>
     </main>

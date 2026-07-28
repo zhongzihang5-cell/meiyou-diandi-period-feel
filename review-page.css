@@ -296,6 +296,14 @@
   background:rgba(255,77,136,0.10);
   color:var(--my-brand-red);
 }
+.review-card-icon.is-beverage{
+  background:rgba(41,183,173,0.12);
+  color:#239f97;
+}
+.review-card-icon.is-skin{
+  background:rgba(235,120,145,0.13);
+  color:#d95f7a;
+}
 .review-card-head-btn{
   height:24px;
   padding:0 10px;
@@ -696,6 +704,9 @@
   border-radius:2px;
   background:rgba(255,149,0,0.14);
 }
+.review-legend-item.is-beverage-calories i{border-top:2px solid #ff9d3f}
+.review-legend-item.is-beverage-caffeine i{border-top:2px solid #29b7ad}
+.review-legend-item.is-skin i{border-top:2px solid #eb7891}
 .review-legend-item.is-period i{border-top:2px solid #ff6f9f}
 .review-legend-item.is-symptom-pain i,
 .review-legend-item.is-symptom-back i,
@@ -6379,4 +6390,171 @@
   font-size:11px;
   color:rgba(0,0,0,0.38);
   line-height:1.29;
+}
+
+.review-camera-detail-content{
+  padding-top:8px;
+}
+.review-camera-detail-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
+}
+.review-camera-detail-head b{
+  font-size:15px;
+  font-weight:600;
+  color:var(--my-text-primary);
+}
+.review-camera-detail-head span{
+  font-size:12px;
+  color:var(--my-text-tertiary);
+}
+.review-camera-summary-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:8px;
+  margin-top:14px;
+}
+.review-camera-summary-grid > div{
+  min-width:0;
+  padding:10px 11px;
+  border-radius:8px;
+  background:#f7f7f8;
+}
+.review-camera-summary-grid span{
+  display:block;
+  margin-bottom:4px;
+  font-size:11px;
+  color:var(--my-text-tertiary);
+}
+.review-camera-summary-grid b{
+  font-size:18px;
+  font-weight:600;
+  color:var(--my-text-primary);
+  font-variant-numeric:tabular-nums;
+}
+.review-camera-summary-grid em{
+  margin-left:2px;
+  font-size:10px;
+  font-weight:400;
+  font-style:normal;
+  color:var(--my-text-tertiary);
+}
+.review-camera-insight{
+  margin:12px 0 0;
+  padding:10px 12px;
+  border-left:3px solid #29b7ad;
+  border-radius:0 8px 8px 0;
+  background:rgba(41,183,173,0.08);
+  color:#36736f;
+  font-size:12px;
+  line-height:1.6;
+}
+.review-camera-insight.is-skin{
+  border-left-color:#eb7891;
+  background:rgba(235,120,145,0.09);
+  color:#945668;
+}
+.review-camera-bars{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.review-camera-bar-row{
+  display:grid;
+  grid-template-columns:58px minmax(0, 1fr) 42px;
+  align-items:center;
+  gap:8px;
+}
+.review-camera-bar-row > span{
+  font-size:12px;
+  color:var(--my-text-secondary);
+}
+.review-camera-bar-row > div{
+  height:8px;
+  overflow:hidden;
+  border-radius:80px;
+  background:rgba(0,0,0,0.05);
+}
+.review-camera-bar-row i{
+  display:block;
+  height:100%;
+  border-radius:inherit;
+  background:#29b7ad;
+}
+.review-camera-bar-row > b{
+  text-align:right;
+  font-size:12px;
+  font-weight:500;
+  color:var(--my-text-secondary);
+}
+.review-camera-latest{
+  display:grid;
+  grid-template-columns:92px minmax(0, 1fr);
+  gap:12px;
+  align-items:center;
+}
+.review-camera-latest img{
+  width:92px;
+  height:92px;
+  object-fit:cover;
+  border-radius:8px;
+}
+.review-camera-latest div{
+  min-width:0;
+}
+.review-camera-latest b{
+  display:block;
+  margin-bottom:4px;
+  font-size:14px;
+  color:var(--my-text-primary);
+}
+.review-camera-latest span{
+  display:block;
+  margin-bottom:6px;
+  font-size:11px;
+  color:var(--my-text-tertiary);
+}
+.review-camera-latest p{
+  margin:0;
+  font-size:12px;
+  line-height:1.55;
+  color:var(--my-text-secondary);
+}
+.review-skin-phase-grid{
+  height:142px;
+  display:grid;
+  grid-template-columns:repeat(4, minmax(0, 1fr));
+  gap:8px;
+  align-items:end;
+}
+.review-skin-phase-grid > div{
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-end;
+  gap:6px;
+}
+.review-skin-phase-grid i{
+  display:block;
+  width:24px;
+  min-height:12px;
+  border-radius:8px 8px 4px 4px;
+}
+.review-skin-phase-grid span{
+  font-size:11px;
+  color:var(--my-text-tertiary);
+  white-space:nowrap;
+}
+.review-skin-phase-grid i.period{background:#f6a3b7}
+.review-skin-phase-grid i.follicular{background:#76d5b2}
+.review-skin-phase-grid i.ovulation{background:#b797dc}
+.review-skin-phase-grid i.luteal{background:#8ca7ed}
+.review-skin-phase-grid b{
+  font-size:11px;
+  font-weight:500;
+  color:var(--my-text-secondary);
 }
