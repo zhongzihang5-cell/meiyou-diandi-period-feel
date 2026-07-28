@@ -4743,11 +4743,242 @@ function BeverageReviewCard({onOpen}){
 }
 
 const BEVERAGE_COMPOSITION = [
-  {label:'咖啡类', value:42, color:'#29b7ad'},
-  {label:'茶饮', value:33, color:'#ff9d3f'},
-  {label:'乳饮', value:17, color:'#7fa8e8'},
-  {label:'其他', value:8, color:'#b7a4d8'},
+  {label:'咖啡类', value:28, color:'#29b7ad'},
+  {label:'奶茶类', value:25, color:'#ff9d3f'},
+  {label:'果茶类', value:21, color:'#ef7f9a'},
+  {label:'纯茶类', value:17, color:'#7fa8e8'},
+  {label:'其他', value:9, color:'#b7a4d8'},
 ];
+
+const BEVERAGE_WEEK_RECORDS = [
+  {time:'今天 10:42', image:'星巴克红茶拿铁.webp', name:'红茶咖啡拿铁鸳鸯', meta:'大杯 / 冰', calories:286, caffeine:95},
+  {time:'周六 15:18', image:'七分甜奶茶.jpeg', name:'杨枝甘露奶茶', meta:'中杯 / 少冰', calories:162, caffeine:60},
+  {time:'周三 09:25', image:'水杯.jpg', name:'茉莉纯茶', meta:'中杯 / 无糖', calories:138, caffeine:40},
+];
+
+const BEVERAGE_MONTHS = [
+  {key:'june', label:'6月', days:[2,6,10,14,18,23,27], calories:1118, caffeine:365},
+  {key:'july', label:'7月', days:[1,4,8,11,15,19,22,25,28], calories:1436, caffeine:440},
+  {key:'august', label:'8月', days:[2,5,8,12,14,18,21,24,27,28,30], calories:1680, caffeine:520},
+];
+
+const BEVERAGE_ALL_MONTHS = [
+  {label:'1月', value:7, caffeine:320, color:'#2db6ad'},
+  {label:'2月', value:9, caffeine:410, color:'#58c7b6'},
+  {label:'3月', value:11, caffeine:385, color:'#86d2b2'},
+  {label:'4月', value:8, caffeine:280, color:'#ffb15a'},
+  {label:'5月', value:10, caffeine:360, color:'#ff9960'},
+  {label:'6月', value:12, caffeine:440, color:'#f0818f'},
+  {label:'7月', value:14, caffeine:510, color:'#9d91d8'},
+  {label:'8月', value:6, caffeine:195, color:'#7da7e5'},
+];
+
+function BeverageComposition(){
+  return (
+    <div className="review-detail-card">
+      <div className="review-camera-detail-head"><b>饮品构成</b><span>按记录次数</span></div>
+      <div className="review-camera-bars">
+        {BEVERAGE_COMPOSITION.map(item=>(
+          <div className="review-camera-bar-row" key={item.label}>
+            <span>{item.label}</span>
+            <div><i style={{width:item.value + '%', background:item.color}}></i></div>
+            <b>{item.value}%</b>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function BeverageCaffeineBars({values, labels, max=120, threshold}){
+  const W = 340, H = 170, padL = 30, padR = 12, padT = 22, padB = 30;
+  const x0 = padL, x1 = W - padR, y1 = H - padB;
+  const band = (x1 - x0) / values.length;
+  const X = index => x0 + band * index + band / 2;
+  const Y = value => y1 - Math.min(value, max) / max * (y1 - padT);
+  return (
+    <svg viewBox="0 0 340 170" role="img" aria-label="咖啡因摄入分析图">
+      {[0, Math.round(max / 2), max].map(value=>(
+        <React.Fragment key={value}>
+          <line x1={x0} y1={Y(value)} x2={x1} y2={Y(value)} stroke="rgba(0,0,0,.055)" strokeWidth="1"/>
+          <text x={x0 - 5} y={Y(value) + 3} textAnchor="end" fontSize="9" fill="#b5b5bb">{value}</text>
+        </React.Fragment>
+      ))}
+      {threshold ? <><line x1={x0} y1={Y(threshold)} x2={x1} y2={Y(threshold)} stroke="#e6a04b" strokeDasharray="4 3"/><text x={x1} y={Y(threshold) - 5} textAnchor="end" fontSize="9" fill="#d28a32">建议线</text></> : null}
+      {values.map((value, index)=>(
+        <React.Fragment key={labels[index]}>
+          <rect x={X(index) - 10} y={Y(value)} width="20" height={Math.max(value ? 5 : 0, y1 - Y(value))} rx="7" fill={index === values.length - 1 ? '#29b7ad' : '#9eddd7'}/>
+          {value ? <text x={X(index)} y={Y(value) - 6} textAnchor="middle" fontSize="9" fontWeight="600" fill="#258f88">{value}</text> : null}
+          <text x={X(index)} y={H - 9} textAnchor="middle" fontSize="9" fill={index === values.length - 1 ? '#258f88' : '#aaaab0'}>{labels[index]}</text>
+        </React.Fragment>
+      ))}
+    </svg>
+  );
+}
+
+function BeverageMonthCalendar({month, onMonthChange}){
+  const monthIndex = BEVERAGE_MONTHS.findIndex(item=>item.key === month);
+  const current = BEVERAGE_MONTHS[monthIndex];
+  const firstWeekday = {june:1, july:3, august:6}[month];
+  const dayCount = {june:30, july:31, august:31}[month];
+  const cells = Array.from({length:firstWeekday}, ()=>null).concat(Array.from({length:dayCount}, (_item,index)=>index + 1));
+  return (
+    <div className="review-detail-card">
+      <div className="review-camera-detail-head"><b>饮品记录月历</b><span>左右滑动查看月份</span></div>
+      <div className="review-beverage-month-switch" role="tablist" aria-label="选择月份">
+        {BEVERAGE_MONTHS.map(item=>(
+          <button key={item.key} type="button" className={month === item.key ? 'is-active' : ''} onClick={()=>onMonthChange(item.key)}>{item.label}</button>
+        ))}
+      </div>
+      <div className="review-beverage-calendar">
+        <div className="review-beverage-calendar-week">{['一','二','三','四','五','六','日'].map(item=><span key={item}>{item}</span>)}</div>
+        <div className="review-beverage-calendar-grid">
+          {cells.map((day,index)=>(
+            <span key={index} className={day && current.days.includes(day) ? 'has-record' : ''}>{day || ''}</span>
+          ))}
+        </div>
+      </div>
+      <div className="review-camera-summary-grid">
+        <div><span>{current.label}记录饮品</span><b>{current.days.length}<em>天</em></b></div>
+        <div><span>饮品摄入热量</span><b>{current.calories}<em>kcal</em></b></div>
+      </div>
+    </div>
+  );
+}
+
+function BeverageWeekRecords(){
+  return (
+    <div className="review-detail-card">
+      <div className="review-camera-detail-head"><b>本周饮品</b><span>共 3 条记录</span></div>
+      <div className="review-beverage-record-list">
+        {BEVERAGE_WEEK_RECORDS.map(item=>(
+          <div className="review-camera-latest" key={item.time}>
+            <img src={item.image} alt={item.name}/>
+            <div><b>{item.name}</b><span>{item.time} · {item.meta}</span><p>{item.calories} 千卡 · 咖啡因 {item.caffeine} 毫克</p></div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function BeverageWeeklyStats(){
+  const rows = [
+    {label:'第1周', records:3, calories:418, width:56},
+    {label:'第2周', records:4, calories:536, width:72},
+    {label:'第3周', records:2, calories:302, width:40},
+    {label:'第4周', records:3, calories:424, width:57},
+  ];
+  return (
+    <div className="review-detail-card">
+      <div className="review-camera-detail-head"><b>每周饮品统计</b><span>8月</span></div>
+      <div className="review-beverage-stat-list">
+        {rows.map(row=>(
+          <div className="review-beverage-stat-row" key={row.label}>
+            <span>{row.label}</span><div><i style={{width:row.width + '%'}}></i></div><b>{row.records}杯</b><em>{row.calories} kcal</em>
+          </div>
+        ))}
+      </div>
+      <p className="review-camera-insight">第 2 周饮品记录和热量都相对较高，其余周分布较均匀。</p>
+    </div>
+  );
+}
+
+function BeverageMonthCaffeine(){
+  return (
+    <div className="review-detail-card">
+      <div className="review-camera-detail-head"><b>咖啡因分析</b><span>按周汇总 · mg</span></div>
+      <BeverageCaffeineBars values={[135,120,165,100]} labels={['第1周','第2周','第3周','第4周']} max={200}/>
+      <p className="review-camera-insight">8 月咖啡因共摄入 520mg，单周最高 165mg；摄入较分散，没有连续高摄入周。</p>
+    </div>
+  );
+}
+
+function BeverageAllDonut(){
+  const total = BEVERAGE_ALL_MONTHS.reduce((sum,item)=>sum + item.value, 0);
+  let cursor = 0;
+  const stops = BEVERAGE_ALL_MONTHS.map(item=>{
+    const start = cursor;
+    cursor += item.value / total * 100;
+    return item.color + ' ' + start.toFixed(1) + '% ' + cursor.toFixed(1) + '%';
+  }).join(',');
+  return (
+    <div className="review-detail-card">
+      <div className="review-camera-detail-head"><b>每月饮品占比</b><span>1月—8月 · 共 {total} 杯</span></div>
+      <div className="review-beverage-donut-layout">
+        <div className="review-beverage-donut" style={{background:'conic-gradient(' + stops + ')'}}><span><b>{total}</b><em>杯</em></span></div>
+        <div className="review-beverage-donut-legend">
+          {BEVERAGE_ALL_MONTHS.map(item=><div key={item.label}><i style={{background:item.color}}></i><span>{item.label}</span><b>{Math.round(item.value / total * 100)}%</b></div>)}
+        </div>
+      </div>
+      <p className="review-camera-insight">截至 8 月，7 月饮品记录最多，占全部记录约 18%；9—12 月尚未到来，因此不纳入统计。</p>
+    </div>
+  );
+}
+
+function BeverageAllCaffeine(){
+  return (
+    <div className="review-detail-card">
+      <div className="review-camera-detail-head"><b>咖啡因分析</b><span>每月摄入量 · mg</span></div>
+      <BeverageCaffeineBars values={BEVERAGE_ALL_MONTHS.map(item=>item.caffeine)} labels={BEVERAGE_ALL_MONTHS.map(item=>item.label)} max={600}/>
+      <p className="review-camera-insight">今年累计咖啡因 2900mg，月均约 363mg。7 月最高，8 月目前记录到 195mg，整体仍保持平稳。</p>
+    </div>
+  );
+}
+
+function BeverageMonthlyStats(){
+  const max = Math.max(...BEVERAGE_ALL_MONTHS.map(item=>item.value));
+  return (
+    <div className="review-detail-card">
+      <div className="review-camera-detail-head"><b>每月饮品统计</b><span>记录杯数</span></div>
+      <div className="review-beverage-month-bars">
+        {BEVERAGE_ALL_MONTHS.map(item=>(
+          <div key={item.label}><b>{item.value}</b><i style={{height:(item.value / max * 92) + 'px', background:item.color}}></i><span>{item.label}</span></div>
+        ))}
+      </div>
+      <p className="review-camera-insight">近 3 个月记录逐步增加，奶茶类和果茶类占比上升，纯茶类保持稳定。</p>
+    </div>
+  );
+}
+
+function BeverageWeekView(){
+  return (
+    <>
+      <div className="review-detail-card">
+        <div className="review-camera-detail-head"><b>饮品摄入趋势</b><span>近7天</span></div>
+        <BeverageTrendChart detail/>
+        <div className="review-camera-summary-grid">
+          <div><span>摄入总热量</span><b>586<em>kcal</em></b></div>
+          <div><span>咖啡因总量</span><b>195<em>mg</em></b></div>
+        </div>
+        <p className="review-camera-insight">本周共记录 3 天饮品，饮品摄入总热量 586 千卡，咖啡因 195 毫克。</p>
+      </div>
+      <BeverageComposition/>
+      <div className="review-detail-card">
+        <div className="review-camera-detail-head"><b>咖啡因分析</b><span>每日摄入量 · mg</span></div>
+        <BeverageCaffeineBars values={[0,40,0,0,60,0,95]} labels={['周二','周三','周四','周五','周六','周日','今天']} max={120}/>
+        <p className="review-camera-insight">本周咖啡因共摄入 195mg，属于正常范围。摄入分布在 3 天，没有出现单日集中摄入。</p>
+      </div>
+      <BeverageWeekRecords/>
+    </>
+  );
+}
+
+function BeverageMonthView(){
+  const [month, setMonth] = React.useState('august');
+  return (
+    <>
+      <BeverageMonthCalendar month={month} onMonthChange={setMonth}/>
+      <BeverageComposition/>
+      <BeverageMonthCaffeine/>
+      <BeverageWeeklyStats/>
+    </>
+  );
+}
+
+function BeverageAllView(){
+  return <><BeverageAllDonut/><BeverageComposition/><BeverageAllCaffeine/><BeverageMonthlyStats/></>;
+}
 
 function BeverageDetailPage({open, onClose}){
   const [range, setRange] = React.useState('week');
@@ -4769,34 +5000,7 @@ function BeverageDetailPage({open, onClose}){
             <button key={item.key} type="button" className={range === item.key ? 'is-active' : ''} aria-selected={range === item.key} onClick={()=>setRange(item.key)}>{item.label}</button>
           ))}
         </div>
-        <div className="review-detail-card">
-          <div className="review-camera-detail-head"><b>饮品摄入趋势</b><span>{range === 'week' ? '近7天' : range === 'month' ? '近30天' : '全部记录'}</span></div>
-          <BeverageTrendChart detail/>
-          <div className="review-camera-summary-grid">
-            <div><span>摄入总热量</span><b>586<em>kcal</em></b></div>
-            <div><span>咖啡因总量</span><b>195<em>mg</em></b></div>
-          </div>
-          <p className="review-camera-insight">本周共记录 3 天饮品，咖啡因主要来自咖啡类饮品，记录时间集中在上午。</p>
-        </div>
-        <div className="review-detail-card">
-          <div className="review-camera-detail-head"><b>饮品构成</b><span>按记录次数</span></div>
-          <div className="review-camera-bars">
-            {BEVERAGE_COMPOSITION.map(item=>(
-              <div className="review-camera-bar-row" key={item.label}>
-                <span>{item.label}</span>
-                <div><i style={{width:item.value + '%', background:item.color}}></i></div>
-                <b>{item.value}%</b>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="review-detail-card">
-          <div className="review-camera-detail-head"><b>最近一次记录</b><span>今天 10:42</span></div>
-          <div className="review-camera-latest">
-            <img src="星巴克红茶拿铁.webp" alt="最近一次饮品记录"/>
-            <div><b>红茶咖啡拿铁鸳鸯</b><span>大杯 / 冰</span><p>286 千卡 · 咖啡因 95 毫克</p></div>
-          </div>
-        </div>
+        {range === 'week' ? <BeverageWeekView/> : range === 'month' ? <BeverageMonthView/> : <BeverageAllView/>}
       </div>
     </section>
   );
@@ -4858,11 +5062,211 @@ function SkinReviewCard({onOpen}){
 }
 
 const SKIN_STATE_ROWS = [
+  {label:'正常', count:12, value:100, color:'#63c7a5'},
   {label:'痘痘', count:5, value:82, color:'#eb7891'},
   {label:'泛红', count:4, value:66, color:'#f1a25d'},
   {label:'痘印', count:3, value:50, color:'#9b87d2'},
   {label:'干燥', count:2, value:34, color:'#6cb7c6'},
 ];
+
+const SKIN_CYCLES = [
+  {label:'第1周期', date:'5/2—5/31', normal:52, acne:21, redness:17, dry:10},
+  {label:'第2周期', date:'6/1—6/29', normal:61, acne:18, redness:13, dry:8},
+  {label:'本周期', date:'6/30—7/27', normal:69, acne:14, redness:11, dry:6},
+];
+
+const SKIN_PHASE_MATRIX = [
+  {label:'第1周期', values:[2,0,1,3]},
+  {label:'第2周期', values:[1,0,1,2]},
+  {label:'本周期', values:[1,0,0,2]},
+];
+
+function SkinStateBars({caption='共记录 26 次'}){
+  return (
+    <div className="review-detail-card">
+      <div className="review-camera-detail-head"><b>主要可见状态</b><span>{caption}</span></div>
+      <div className="review-camera-bars">
+        {SKIN_STATE_ROWS.map(item=>(
+          <div className="review-camera-bar-row" key={item.label}>
+            <span>{item.label}</span>
+            <div><i style={{width:item.value + '%', background:item.color}}></i></div>
+            <b>{item.count}次</b>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SkinCycleStackedChart(){
+  const legend = [
+    {label:'正常', key:'normal', color:'#63c7a5'},
+    {label:'痘痘', key:'acne', color:'#eb7891'},
+    {label:'泛红', key:'redness', color:'#f1a25d'},
+    {label:'干燥', key:'dry', color:'#7eb9c7'},
+  ];
+  return (
+    <div>
+      <div className="review-skin-cycle-stack">
+        {SKIN_CYCLES.map(cycle=>(
+          <div className="review-skin-cycle-row" key={cycle.label}>
+            <div><b>{cycle.label}</b><span>{cycle.date}</span></div>
+            <div className="review-skin-cycle-track">
+              {legend.map(item=><i key={item.key} style={{width:cycle[item.key] + '%', background:item.color}} title={item.label + ' ' + cycle[item.key] + '%'}></i>)}
+            </div>
+            <strong>{cycle.normal}%正常</strong>
+          </div>
+        ))}
+      </div>
+      <div className="review-skin-cycle-legend">
+        {legend.map(item=><span key={item.key}><i style={{background:item.color}}></i>{item.label}</span>)}
+      </div>
+    </div>
+  );
+}
+
+function SkinPhaseMatrix(){
+  const phaseLabels = ['月经期','卵泡期','排卵期','黄体期'];
+  const stateText = ['稳定','轻微','明显','集中'];
+  return (
+    <div className="review-skin-matrix">
+      <div className="review-skin-matrix-head"><span></span>{phaseLabels.map(label=><b key={label}>{label}</b>)}</div>
+      {SKIN_PHASE_MATRIX.map(row=>(
+        <div className="review-skin-matrix-row" key={row.label}>
+          <span>{row.label}</span>
+          {row.values.map((value,index)=><i key={index} className={'level-' + value}>{stateText[value]}</i>)}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SkinAllCombinedChart(){
+  const cycles = [
+    {label:'1月', days:31, issue:42, period:6},
+    {label:'2月', days:30, issue:38, period:5},
+    {label:'3月', days:31, issue:46, period:6},
+    {label:'4月', days:30, issue:35, period:5},
+    {label:'5月', days:30, issue:32, period:5},
+    {label:'6月', days:29, issue:27, period:5},
+    {label:'7月', days:28, issue:24, period:4},
+    {label:'8月', days:28, issue:19, period:4},
+  ];
+  const W = 340, H = 205, padL = 32, padR = 18, padT = 24, padB = 34;
+  const x0 = padL, x1 = W - padR, y1 = H - padB;
+  const band = (x1 - x0) / cycles.length;
+  const X = index => x0 + band * index + band / 2;
+  const YDays = value => y1 - value / 35 * (y1 - padT);
+  const YIssue = value => y1 - value / 60 * (y1 - padT);
+  const issuePoints = cycles.map((item,index)=>[X(index),YIssue(item.issue)]);
+  return (
+    <svg viewBox="0 0 340 205" role="img" aria-label="月经周期与皮肤状态联合趋势">
+      {[10,20,30].map(value=>(
+        <React.Fragment key={value}>
+          <line x1={x0} y1={YDays(value)} x2={x1} y2={YDays(value)} stroke="rgba(0,0,0,.055)"/>
+          <text x={x0 - 6} y={YDays(value) + 3} textAnchor="end" fontSize="9" fill="#b6b6bc">{value}</text>
+        </React.Fragment>
+      ))}
+      {cycles.map((item,index)=>(
+        <React.Fragment key={item.label}>
+          <rect x={X(index)-9} y={YDays(item.days)} width="18" height={y1-YDays(item.days)} rx="6" fill="#f8cedd"/>
+          <rect x={X(index)-9} y={YDays(item.period)} width="18" height={y1-YDays(item.period)} rx="5" fill="#eb7891"/>
+          <text x={X(index)} y={H-10} textAnchor="middle" fontSize="9" fill={index === cycles.length-1 ? '#d95f7a' : '#aaaab0'}>{item.label}</text>
+        </React.Fragment>
+      ))}
+      <path d={reviewSmoothPath(issuePoints)} fill="none" stroke="#29b7ad" strokeWidth="2.4" strokeLinecap="round"/>
+      {cycles.map((item,index)=><circle key={item.label} cx={X(index)} cy={YIssue(item.issue)} r={index === cycles.length-1 ? 4.5 : 3} fill="#29b7ad" stroke="#fff" strokeWidth="1.5"/>)}
+      <text x={X(7)} y={YIssue(19)-9} textAnchor="end" fontSize="9" fontWeight="600" fill="#258f88">异常率 19%</text>
+    </svg>
+  );
+}
+
+function SkinPhaseAggregate(){
+  const rows = [
+    {label:'月经期', value:36, note:'泛红为主', color:'#f6a3b7'},
+    {label:'卵泡期', value:14, note:'状态最稳定', color:'#76d5b2'},
+    {label:'排卵期', value:25, note:'偶有出油', color:'#b797dc'},
+    {label:'黄体期', value:58, note:'痘痘较集中', color:'#8ca7ed'},
+  ];
+  return (
+    <div className="review-skin-phase-summary">
+      {rows.map(row=>(
+        <div key={row.label}><span>{row.label}</span><div><i style={{width:row.value + '%',background:row.color}}></i></div><b>{row.value}%</b><em>{row.note}</em></div>
+      ))}
+    </div>
+  );
+}
+
+function SkinMonthView(){
+  return (
+    <>
+      <div className="review-detail-card">
+        <div className="review-camera-detail-head"><b>皮肤状态变化</b><span>近30天</span></div>
+        <SkinTrendChart detail/>
+        <p className="review-camera-insight is-skin">最近一周可见状态较前一周缓和，记录中的痘痘和泛红次数均有下降。</p>
+      </div>
+      <SkinStateBars caption="共记录 26 次"/>
+      <div className="review-detail-card review-skin-cycle-card">
+        <div className="review-camera-detail-head"><b>本周期关联</b><span>当前周期阶段分布</span></div>
+        <div className="review-skin-phase-grid">
+          {[
+            {label:'月经期', value:1, tone:'period'},
+            {label:'卵泡期', value:1, tone:'follicular'},
+            {label:'排卵期', value:2, tone:'ovulation'},
+            {label:'黄体期', value:5, tone:'luteal'},
+          ].map(item=>(
+            <div key={item.label}><span>{item.label}</span><i className={item.tone} style={{height:(20 + item.value * 12) + 'px'}}></i><b>{item.value}次</b></div>
+          ))}
+        </div>
+        <p className="review-camera-insight is-skin">本周期的可见状态更常出现在黄体后期；这是基于照片记录形成的观察，不作为皮肤诊断。</p>
+      </div>
+      <div className="review-detail-card">
+        <div className="review-camera-detail-head"><b>最近一次记录</b><span>今天 09:36</span></div>
+        <div className="review-camera-latest">
+          <img src="长痘.jpg" alt="最近一次皮肤状态记录"/>
+          <div><b>面颊轻微泛红</b><span>少量可见痘痘</span><p>黄体后期 · 状态轻微</p></div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function SkinCycleView(){
+  return (
+    <>
+      <div className="review-detail-card">
+        <div className="review-camera-detail-head"><b>近3个周期皮肤构成</b><span>按记录状态占比</span></div>
+        <SkinCycleStackedChart/>
+        <p className="review-camera-insight is-skin">三个周期中正常状态占比从 52% 提升到 69%，痘痘、泛红和干燥的占比均在下降。</p>
+      </div>
+      <SkinStateBars caption="近3个周期汇总"/>
+      <div className="review-detail-card">
+        <div className="review-camera-detail-head"><b>周期阶段关联</b><span>3个周期联合分析</span></div>
+        <SkinPhaseMatrix/>
+        <p className="review-camera-insight is-skin">三个周期都在黄体期出现更明显的皮肤波动，但程度逐次减轻；卵泡期始终最稳定。</p>
+      </div>
+    </>
+  );
+}
+
+function SkinAllView(){
+  return (
+    <>
+      <div className="review-detail-card">
+        <div className="review-camera-detail-head"><b>周期与皮肤联合趋势</b><span>1月—8月</span></div>
+        <SkinAllCombinedChart/>
+        <div className="review-skin-combined-legend"><span><i className="is-cycle"></i>周期天数</span><span><i className="is-period"></i>经期天数</span><span><i className="is-skin"></i>皮肤异常率</span></div>
+        <p className="review-camera-insight is-skin">随着周期从 31 天逐渐稳定在 28 天，皮肤异常记录占比从约 42% 降至 19%，整体同步改善。</p>
+      </div>
+      <SkinStateBars caption="全部记录汇总"/>
+      <div className="review-detail-card">
+        <div className="review-camera-detail-head"><b>长期周期阶段关联</b><span>基于全部周期记录</span></div>
+        <SkinPhaseAggregate/>
+        <p className="review-camera-insight is-skin">长期记录显示黄体期仍是皮肤波动最集中的阶段，卵泡期最稳定。周期长度与皮肤状态目前呈弱相关，更适合继续观察。</p>
+      </div>
+    </>
+  );
+}
 
 function SkinDetailPage({open, onClose}){
   const [range, setRange] = React.useState('month');
@@ -4884,44 +5288,7 @@ function SkinDetailPage({open, onClose}){
             <button key={item.key} type="button" className={range === item.key ? 'is-active' : ''} aria-selected={range === item.key} onClick={()=>setRange(item.key)}>{item.label}</button>
           ))}
         </div>
-        <div className="review-detail-card">
-          <div className="review-camera-detail-head"><b>皮肤状态变化</b><span>{range === 'month' ? '近30天' : range === 'cycle' ? '近3个周期' : '全部记录'}</span></div>
-          <SkinTrendChart detail/>
-          <p className="review-camera-insight is-skin">最近一周可见状态较前一周缓和，记录中的痘痘和泛红次数均有下降。</p>
-        </div>
-        <div className="review-detail-card">
-          <div className="review-camera-detail-head"><b>主要可见状态</b><span>共记录 8 天</span></div>
-          <div className="review-camera-bars">
-            {SKIN_STATE_ROWS.map(item=>(
-              <div className="review-camera-bar-row" key={item.label}>
-                <span>{item.label}</span>
-                <div><i style={{width:item.value + '%', background:item.color}}></i></div>
-                <b>{item.count}次</b>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="review-detail-card review-skin-cycle-card">
-          <div className="review-camera-detail-head"><b>周期关联</b><span>基于近3个周期记录</span></div>
-          <div className="review-skin-phase-grid">
-            {[
-              {label:'月经期', value:1, tone:'period'},
-              {label:'卵泡期', value:1, tone:'follicular'},
-              {label:'排卵期', value:2, tone:'ovulation'},
-              {label:'黄体期', value:5, tone:'luteal'},
-            ].map(item=>(
-              <div key={item.label}><span>{item.label}</span><i className={item.tone} style={{height:(20 + item.value * 12) + 'px'}}></i><b>{item.value}次</b></div>
-            ))}
-          </div>
-          <p className="review-camera-insight is-skin">记录显示，痘痘更常出现在黄体后期；这是基于你的历史照片记录形成的观察，不作为皮肤诊断。</p>
-        </div>
-        <div className="review-detail-card">
-          <div className="review-camera-detail-head"><b>最近一次记录</b><span>今天 09:36</span></div>
-          <div className="review-camera-latest">
-            <img src="长痘.jpg" alt="最近一次皮肤状态记录"/>
-            <div><b>面颊轻微泛红</b><span>少量可见痘痘</span><p>黄体后期 · 状态轻微</p></div>
-          </div>
-        </div>
+        {range === 'month' ? <SkinMonthView/> : range === 'cycle' ? <SkinCycleView/> : <SkinAllView/>}
       </div>
     </section>
   );

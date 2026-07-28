@@ -6558,3 +6558,363 @@
   font-weight:500;
   color:var(--my-text-secondary);
 }
+
+.review-beverage-month-switch{
+  display:flex;
+  gap:8px;
+  margin:0 -2px 14px;
+  padding:2px;
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+.review-beverage-month-switch::-webkit-scrollbar{display:none}
+.review-beverage-month-switch button{
+  min-width:76px;
+  height:32px;
+  padding:0 18px;
+  border:0;
+  border-radius:16px;
+  background:#f3f3f5;
+  color:var(--my-text-secondary);
+  font:500 12px/1 inherit;
+  cursor:pointer;
+}
+.review-beverage-month-switch button.is-active{
+  background:#29b7ad;
+  color:#fff;
+}
+.review-beverage-calendar{
+  padding:10px 8px 8px;
+  border-radius:8px;
+  background:#f8f8f9;
+}
+.review-beverage-calendar-week,
+.review-beverage-calendar-grid{
+  display:grid;
+  grid-template-columns:repeat(7,minmax(0,1fr));
+  gap:5px;
+  text-align:center;
+}
+.review-beverage-calendar-week{
+  margin-bottom:7px;
+  color:var(--my-text-tertiary);
+  font-size:10px;
+}
+.review-beverage-calendar-grid span{
+  position:relative;
+  height:32px;
+  display:grid;
+  place-items:center;
+  border-radius:8px;
+  color:var(--my-text-secondary);
+  font-size:11px;
+  font-variant-numeric:tabular-nums;
+}
+.review-beverage-calendar-grid span.has-record{
+  background:rgba(41,183,173,.12);
+  color:#258f88;
+  font-weight:600;
+}
+.review-beverage-calendar-grid span.has-record::after{
+  content:"";
+  position:absolute;
+  bottom:3px;
+  width:4px;
+  height:4px;
+  border-radius:50%;
+  background:#29b7ad;
+}
+.review-beverage-record-list{
+  display:flex;
+  flex-direction:column;
+}
+.review-beverage-record-list .review-camera-latest{
+  padding:10px 0;
+}
+.review-beverage-record-list .review-camera-latest:first-child{padding-top:0}
+.review-beverage-record-list .review-camera-latest:last-child{padding-bottom:0}
+.review-beverage-record-list .review-camera-latest + .review-camera-latest{
+  border-top:1px solid rgba(0,0,0,.055);
+}
+.review-beverage-stat-list{
+  display:flex;
+  flex-direction:column;
+  gap:13px;
+}
+.review-beverage-stat-row{
+  display:grid;
+  grid-template-columns:42px minmax(0,1fr) 32px 54px;
+  align-items:center;
+  gap:7px;
+  font-size:11px;
+}
+.review-beverage-stat-row > span{color:var(--my-text-secondary)}
+.review-beverage-stat-row > div{
+  height:9px;
+  overflow:hidden;
+  border-radius:80px;
+  background:#f1f1f3;
+}
+.review-beverage-stat-row i{
+  display:block;
+  height:100%;
+  border-radius:inherit;
+  background:linear-gradient(90deg,#91d9d2,#29b7ad);
+}
+.review-beverage-stat-row b{
+  text-align:right;
+  font-weight:600;
+  color:#258f88;
+}
+.review-beverage-stat-row em{
+  text-align:right;
+  font-style:normal;
+  color:var(--my-text-tertiary);
+}
+.review-beverage-donut-layout{
+  display:grid;
+  grid-template-columns:132px minmax(0,1fr);
+  align-items:center;
+  gap:18px;
+}
+.review-beverage-donut{
+  position:relative;
+  width:132px;
+  height:132px;
+  border-radius:50%;
+}
+.review-beverage-donut::after{
+  content:"";
+  position:absolute;
+  inset:26px;
+  border-radius:50%;
+  background:#fff;
+}
+.review-beverage-donut > span{
+  position:absolute;
+  z-index:1;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--my-text-primary);
+}
+.review-beverage-donut b{
+  font-size:22px;
+  font-weight:600;
+}
+.review-beverage-donut em{
+  margin-left:2px;
+  font-size:10px;
+  font-style:normal;
+  color:var(--my-text-tertiary);
+}
+.review-beverage-donut-legend{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px 12px;
+}
+.review-beverage-donut-legend div{
+  min-width:0;
+  display:grid;
+  grid-template-columns:7px minmax(0,1fr) auto;
+  align-items:center;
+  gap:5px;
+  font-size:10px;
+}
+.review-beverage-donut-legend i{
+  width:7px;
+  height:7px;
+  border-radius:2px;
+}
+.review-beverage-donut-legend span{color:var(--my-text-secondary)}
+.review-beverage-donut-legend b{
+  font-weight:500;
+  color:var(--my-text-tertiary);
+}
+.review-beverage-month-bars{
+  height:130px;
+  display:grid;
+  grid-template-columns:repeat(8,minmax(0,1fr));
+  align-items:end;
+  gap:7px;
+  padding:0 4px;
+}
+.review-beverage-month-bars > div{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:5px;
+}
+.review-beverage-month-bars b{
+  font-size:10px;
+  font-weight:600;
+  color:var(--my-text-secondary);
+}
+.review-beverage-month-bars i{
+  width:100%;
+  max-width:24px;
+  min-height:8px;
+  border-radius:7px 7px 3px 3px;
+}
+.review-beverage-month-bars span{
+  font-size:9px;
+  color:var(--my-text-tertiary);
+  white-space:nowrap;
+}
+.review-skin-cycle-stack{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+.review-skin-cycle-row{
+  display:grid;
+  grid-template-columns:66px minmax(0,1fr) 48px;
+  align-items:center;
+  gap:9px;
+}
+.review-skin-cycle-row > div:first-child b{
+  display:block;
+  font-size:11px;
+  font-weight:600;
+  color:var(--my-text-secondary);
+}
+.review-skin-cycle-row > div:first-child span{
+  display:block;
+  margin-top:2px;
+  font-size:8px;
+  color:var(--my-text-tertiary);
+  white-space:nowrap;
+}
+.review-skin-cycle-track{
+  height:18px;
+  display:flex;
+  overflow:hidden;
+  border-radius:6px;
+  background:#f2f2f4;
+}
+.review-skin-cycle-track i{
+  display:block;
+  height:100%;
+}
+.review-skin-cycle-row > strong{
+  text-align:right;
+  font-size:9px;
+  font-weight:600;
+  color:#4eaa8b;
+}
+.review-skin-cycle-legend{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px 14px;
+  margin-top:14px;
+  color:var(--my-text-tertiary);
+  font-size:10px;
+}
+.review-skin-cycle-legend span{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+}
+.review-skin-cycle-legend i{
+  width:7px;
+  height:7px;
+  border-radius:2px;
+}
+.review-skin-matrix{
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+.review-skin-matrix::-webkit-scrollbar{display:none}
+.review-skin-matrix-head,
+.review-skin-matrix-row{
+  min-width:320px;
+  display:grid;
+  grid-template-columns:58px repeat(4,minmax(58px,1fr));
+  gap:5px;
+  align-items:center;
+}
+.review-skin-matrix-head{
+  margin-bottom:6px;
+  color:var(--my-text-tertiary);
+  font-size:9px;
+  text-align:center;
+}
+.review-skin-matrix-head b{font-weight:500}
+.review-skin-matrix-row + .review-skin-matrix-row{margin-top:6px}
+.review-skin-matrix-row > span{
+  font-size:10px;
+  color:var(--my-text-secondary);
+}
+.review-skin-matrix-row > i{
+  height:34px;
+  display:grid;
+  place-items:center;
+  border-radius:6px;
+  font-size:9px;
+  font-style:normal;
+}
+.review-skin-matrix-row > i.level-0{background:#eaf8f3;color:#3ba980}
+.review-skin-matrix-row > i.level-1{background:#fceef2;color:#d8728a}
+.review-skin-matrix-row > i.level-2{background:#f8d7df;color:#c95672}
+.review-skin-matrix-row > i.level-3{background:#eb7891;color:#fff}
+.review-skin-combined-legend{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  margin-top:6px;
+  font-size:10px;
+  color:var(--my-text-tertiary);
+}
+.review-skin-combined-legend span{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+}
+.review-skin-combined-legend i{
+  width:12px;
+  height:7px;
+  border-radius:2px;
+}
+.review-skin-combined-legend i.is-cycle{background:#f8cedd}
+.review-skin-combined-legend i.is-period{background:#eb7891}
+.review-skin-combined-legend i.is-skin{
+  height:0;
+  border-top:2px solid #29b7ad;
+  border-radius:0;
+}
+.review-skin-phase-summary{
+  display:flex;
+  flex-direction:column;
+  gap:13px;
+}
+.review-skin-phase-summary > div{
+  display:grid;
+  grid-template-columns:46px minmax(0,1fr) 34px 62px;
+  align-items:center;
+  gap:7px;
+  font-size:10px;
+}
+.review-skin-phase-summary span{color:var(--my-text-secondary)}
+.review-skin-phase-summary > div > div{
+  height:9px;
+  overflow:hidden;
+  border-radius:80px;
+  background:#f1f1f3;
+}
+.review-skin-phase-summary i{
+  display:block;
+  height:100%;
+  border-radius:inherit;
+}
+.review-skin-phase-summary b{
+  text-align:right;
+  font-weight:600;
+  color:var(--my-text-secondary);
+}
+.review-skin-phase-summary em{
+  text-align:right;
+  font-style:normal;
+  color:var(--my-text-tertiary);
+}
