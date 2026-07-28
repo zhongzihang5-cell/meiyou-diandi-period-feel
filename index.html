@@ -18,7 +18,7 @@
 <link rel="stylesheet" href="camera-diet.css?v=20260728-beverage-nutrition">
 <link rel="stylesheet" href="diet-feedback.css?v=20260710-diet-meal-inline">
 <link rel="stylesheet" href="path-flyout.css?v=20260616-v105">
-<link rel="stylesheet" href="review-page.css?v=20260714-diet-fullscreen">
+<link rel="stylesheet" href="review-page.css?v=20260728-mood-love-layout">
 <link rel="stylesheet" href="review-share-flow.css?v=20260714-family-share-card">
 <link rel="stylesheet" href="me-page.css?v=20260714-partner-app-preview">
 <link rel="stylesheet" href="home-page.css?v=20260703-baby-voice-coach">
@@ -102,9 +102,38 @@ html,body{
 .statusbar{
   height:44px;
   display:flex;align-items:center;justify-content:space-between;
+  position:relative;
   padding:0 18px;
   background:var(--my-bg);
   font-size:14px;font-weight:600;color:var(--my-text-primary);
+}
+.demo-member-switch{
+  position:absolute;
+  left:50%;
+  top:50%;
+  display:flex;
+  gap:2px;
+  padding:2px;
+  border-radius:999px;
+  background:rgba(0,0,0,.07);
+  transform:translate(-50%,-50%);
+  z-index:2;
+}
+.demo-member-switch button{
+  border:0;
+  border-radius:999px;
+  padding:3px 8px;
+  background:transparent;
+  color:var(--my-text-tertiary);
+  font-family:inherit;
+  font-size:11px;
+  line-height:16px;
+  cursor:pointer;
+}
+.demo-member-switch button.is-active{
+  background:var(--my-surface);
+  color:var(--my-brand-red);
+  box-shadow:0 1px 3px rgba(0,0,0,.12);
 }
 .sb-right{display:flex;align-items:center;gap:6px}
 .statusbar svg{display:block}
@@ -1146,7 +1175,7 @@ window.__BUILD__ = '20260522-v101-dev';
 <script type="text/babel" src="search-filter.jsx?v=20260707-person-panel-filter"></script>
 <script type="text/babel" src="search-page.jsx?v=20260714-review-search-recommendations"></script>
 <script type="text/babel" src="review-share-flow.jsx?v=20260714-family-share-card"></script>
-<script type="text/babel" src="review-page.jsx?v=20260714-diet-fullscreen"></script>
+<script type="text/babel" src="review-page.jsx?v=20260728-mood-love-layout"></script>
 <script type="text/babel" src="me-page.jsx?v=20260714-partner-four-tabs"></script>
 <script type="text/babel" src="home-page.jsx?v=20260706-feeding-entry"></script>
 <script type="text/babel" src="cloud-publisher.jsx?v=20260720-auto-detect"></script>
@@ -1161,7 +1190,7 @@ window.__BUILD__ = '20260522-v101-dev';
 <script type="text/babel" src="path-flyout.jsx?v=20260611"></script>
 <script type="text/babel" src="demo-scenes.jsx?v=20260703-baby-default"></script>
 <script type="text/babel" src="tweaks-panel.jsx?v=20260602-v102"></script>
-<script type="text/babel" src="app.jsx?v=20260728-camera-record-edit"></script>
+<script type="text/babel" src="app.jsx?v=20260728-camera-main-integration"></script>
 
 <!-- ====== 隐藏重置按钮（?dev=1 时显示）====== -->
 <button id="resetDemo" style="
