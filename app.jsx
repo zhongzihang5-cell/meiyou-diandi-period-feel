@@ -2618,6 +2618,13 @@ function App(){
           onPeriodFeelSelect={()=>{
             setPeriodFeelGuideVisible(false);
             setPeriodFeelReady(false);
+            if(periodPlan === 'plan4'){
+              setTimeline(blocks=>blocks.map(block=>({
+                ...block,
+                items:block.items ? block.items.filter(item=>item.kind !== 'period-feel-guide') : block.items,
+                entries:block.entries ? block.entries.filter(item=>item.kind !== 'period-feel-guide') : block.entries,
+              })));
+            }
             setPeriodFeelModalOpen(true);
           }}
           periodFeelLabel={periodPlan === 'plan4' ? '经期感受' : (periodPlan === 'plan3' ? '经期小记' : '经期感受')}
