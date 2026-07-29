@@ -1350,6 +1350,7 @@ const DIET_MEAL_COLORS = {
 };
 
 const DIET_MEAL_ORDER = ['breakfast', 'lunch', 'dinner', 'snack', 'drink', 'other'];
+const DIET_CARD_MEAL_ORDER = ['breakfast', 'lunch', 'dinner', 'snack', 'other'];
 
 const DIET_MEAL_LABELS = {
   breakfast: '早餐',
@@ -1404,8 +1405,9 @@ function buildDietAllDays(count = 120){
 }
 
 const REVIEW_DIET_ALL_DAYS = buildDietAllDays(120);
-const DIET_CARD_DAYS = REVIEW_DIET_ALL_DAYS.slice(-30);
+const DIET_CARD_DAYS = REVIEW_DIET_ALL_DAYS.slice(-7);
 const DIET_STACK_DAYS = REVIEW_DIET_ALL_DAYS.slice(-7);
+const DIET_D30_DAYS = REVIEW_DIET_ALL_DAYS.slice(-30);
 
 function reviewDietAvg(days){
   const recorded = days.filter(day=>!day.empty);
@@ -1420,60 +1422,89 @@ function reviewDietDeltaText(delta){
 }
 
 const DIET_CARD_AVG = reviewDietAvg(DIET_CARD_DAYS);
-const DIET_CARD_DELTA = reviewDietAvg(DIET_CARD_DAYS) - reviewDietAvg(REVIEW_DIET_ALL_DAYS.slice(-60, -30));
+const DIET_CARD_DELTA = reviewDietAvg(DIET_CARD_DAYS) - reviewDietAvg(REVIEW_DIET_ALL_DAYS.slice(-14, -7));
 const DIET_CARD_RECORD_DAYS = DIET_CARD_DAYS.filter(day=>!day.empty).length;
+const DIET_D30_AVG = reviewDietAvg(DIET_D30_DAYS);
+const DIET_D30_DELTA = reviewDietAvg(DIET_D30_DAYS) - reviewDietAvg(REVIEW_DIET_ALL_DAYS.slice(-60, -30));
 
-function DietMealStackedChart({days, ariaLabel='热量分布堆叠柱状图'}){
-  const W = 340, H = 188, padL = 34, padR = 10, padT = 22, padB = 26;
+function DietMealStackedChart({
+  days,
+  mealOrder = DIET_MEAL_ORDER,
+  ariaLabel='热量分布堆叠柱状图',
+  height = 188,
+  width = 340,
+  wide = false,
+  showTotals = true,
+  labelStep = 1,
+}){
+  const W = width, H = height, padL = wide ? 36 : 34, padR = wide ? 20 : 10, padT = 22, padB = wide ? 32 : 26;
   const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
   const yMax = 2500;
   const band = (x1 - x0) / Math.max(days.length, 1);
-  const barWidth = days.length > 14 ? 14 : 20;
+  const barWidth = Math.min(wide ? 16 : 20, Math.max(6, band * (wide ? 0.62 : 0.72)));
   const gap = 2;
-  const radius = 4;
+  const radius = wide ? 3 : 4;
   const X = i => x0 + band * i + band / 2;
   const Y = value => y1 - value / yMax * (y1 - y0);
-  const stackFromBottom = [...DIET_MEAL_ORDER].reverse();
+  const stackFromBottom = [...mealOrder].reverse();
+  const mealValue = (day, type)=>{
+    if(type === 'other' && mealOrder.indexOf('drink') < 0){
+      return (day.meals.other || 0) + (day.meals.drink || 0);
+    }
+    return day.meals[type] || 0;
+  };
   return (
-    <svg viewBox={'0 0 ' + W + ' ' + H} preserveAspectRatio="xMidYMid meet" role="img" aria-label={ariaLabel}>
+    <svg
+      viewBox={'0 0 ' + W + ' ' + H}
+      style={wide ? {width:W + 'px'} : undefined}
+      preserveAspectRatio={wide ? 'none' : 'xMidYMid meet'}
+      role="img"
+      aria-label={ariaLabel}
+    >
       {[500,1000,1500,2000,2500].map(tick=>(
         <React.Fragment key={tick}>
           <line x1={x0} y1={Y(tick)} x2={x1} y2={Y(tick)} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/>
-          <text x={x0 - 5} y={Y(tick) + 3} textAnchor="end" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{tick}</text>
+          <text x={x0 - 5} y={Y(tick) + 3} textAnchor="end" fontSize={wide ? 10 : 9} fill="#bbbbbf" fontFamily="PingFang SC">{tick}</text>
         </React.Fragment>
       ))}
       <line x1={x0} y1={y1} x2={x1} y2={y1} stroke="rgba(0,0,0,0.06)" strokeWidth="1"/>
       {days.map((day, i)=>{
+        const showLabel = i % labelStep === 0 || i === days.length - 1;
         if(day.empty){
-          return (
-            <text key={day.date + '-' + i} x={X(i)} y={H - 8} textAnchor="middle" fontSize="9" fontWeight={day.highlight ? '600' : '400'} fill={day.highlight ? '#ff7a3d' : '#bbbbbf'} fontFamily="PingFang SC">{day.date}</text>
-          );
+          return showLabel ? (
+            <text key={day.date + '-' + i} x={X(i)} y={H - 8} textAnchor="middle" fontSize={wide ? 9.5 : 9} fontWeight={day.highlight ? '600' : '400'} fill={day.highlight ? '#ff7a3d' : '#bbbbbf'} fontFamily="PingFang SC">{day.date}</text>
+          ) : null;
         }
         let stacked = 0;
+        const dayTotal = mealOrder.reduce((sum, type)=>sum + mealValue(day, type), 0);
         const segments = stackFromBottom
-          .map(type=>({type, value:day.meals[type] || 0}))
+          .map(type=>({type, value:mealValue(day, type)}))
           .filter(segment=>segment.value > 0);
         return (
           <React.Fragment key={day.date + '-' + i}>
-            <text x={X(i)} y={Y(day.total) - 6} textAnchor="middle" fontSize="9" fontWeight={day.highlight ? '600' : '500'} fill={day.highlight ? '#ff7a3d' : 'rgba(0,0,0,0.55)'} fontFamily="PingFang SC">{day.total}</text>
+            {showTotals ? (
+              <text x={X(i)} y={Y(dayTotal) - 6} textAnchor="middle" fontSize={wide ? 9.5 : 9} fontWeight={day.highlight ? '600' : '500'} fill={day.highlight ? '#ff7a3d' : 'rgba(0,0,0,0.55)'} fontFamily="PingFang SC">{dayTotal}</text>
+            ) : null}
             {segments.map((segment)=>{
               const bottom = Y(stacked);
               stacked += segment.value;
               const top = Y(stacked);
-              const height = Math.max(bottom - top - gap, 3);
+              const heightSeg = Math.max(bottom - top - gap, 2);
               return (
                 <rect
                   key={segment.type}
                   x={X(i) - barWidth / 2}
                   y={top}
                   width={barWidth}
-                  height={height}
+                  height={heightSeg}
                   rx={radius}
                   fill={DIET_MEAL_COLORS[segment.type]}
                 />
               );
             })}
-            <text x={X(i)} y={H - 8} textAnchor="middle" fontSize="9" fontWeight={day.highlight ? '600' : '400'} fill={day.highlight ? '#ff7a3d' : '#bbbbbf'} fontFamily="PingFang SC">{day.date}</text>
+            {showLabel ? (
+              <text x={X(i)} y={H - 8} textAnchor="middle" fontSize={wide ? 9.5 : 9} fontWeight={day.highlight ? '600' : '400'} fill={day.highlight ? '#ff7a3d' : '#bbbbbf'} fontFamily="PingFang SC">{day.date}</text>
+            ) : null}
           </React.Fragment>
         );
       })}
@@ -1552,26 +1583,30 @@ function DietCalorieLineChart({
 }
 
 function DietDistributionChart(){
-  return <DietCalorieLineChart days={DIET_CARD_DAYS} ariaLabel="近30天每日热量趋势曲线"/>;
+  return (
+    <DietMealStackedChart
+      days={DIET_CARD_DAYS}
+      mealOrder={DIET_CARD_MEAL_ORDER}
+      height={176}
+      ariaLabel="近7天餐次热量堆叠柱状图"
+    />
+  );
 }
 
 function ExpandedDietCalorieChart(){
-  const days = REVIEW_DIET_ALL_DAYS.filter(day=>!day.empty);
+  const days = REVIEW_DIET_ALL_DAYS;
   const n = days.length;
   const width = Math.max(1160, n * 22);
-  const labelIndexes = days.map((_day, i)=>i).filter(i=>i % 4 === 0 || i === n - 1);
   return (
-    <DietCalorieLineChart
+    <DietMealStackedChart
       days={days}
+      mealOrder={DIET_CARD_MEAL_ORDER}
       width={width}
       height={250}
-      padL={36}
-      padR={34}
-      padT={18}
-      padB={32}
-      labelIndexes={labelIndexes}
-      ariaLabel="全部饮食热量趋势曲线"
       wide={true}
+      showTotals={false}
+      labelStep={4}
+      ariaLabel="全部饮食餐次热量堆叠柱状图"
     />
   );
 }
@@ -1607,8 +1642,11 @@ function DietLandscapePage({open, onClose}){
           <button type="button" className="review-cycle-landscape-close" aria-label="关闭横屏图表" onClick={onClose}>×</button>
         </header>
         <div className="review-cycle-landscape-legend">
-          <span className="review-legend-item is-diet"><i></i>每日热量</span>
-          <span className="review-legend-item is-diet-band"><i></i>均衡参考区间</span>
+          {DIET_CARD_MEAL_ORDER.map(type=>(
+            <span className={'review-legend-item is-diet-meal is-' + type} key={type}>
+              <i style={{background:DIET_MEAL_COLORS[type]}}></i>{DIET_MEAL_LABELS[type]}
+            </span>
+          ))}
           <span className="review-cycle-landscape-tip">← 滑动查看更多 →</span>
         </div>
         <div className="review-cycle-landscape-scroll" ref={scrollerRef}>
@@ -1644,15 +1682,15 @@ const DIET_CALENDAR_DAYS_IN_MONTH = 31;
 const DIET_CALENDAR_START_WEEKDAY = 3; // 0=周日
 const DIET_CALENDAR_PHOTO_DAYS = new Set([1, 2, 3, 5, 6, 8, 9, 11, 12, 13, 14, 16, 17, 19, 20, 22, 23, 25]);
 
-const DIET_TARGET_GOAL = 1237;
+const DIET_TARGET_GOAL = 1800;
 const DIET_TARGET_DAYS = [
-  {date:'7.7', intake:980, burn:120},
-  {date:'7.8', intake:1310, burn:0},
-  {date:'7.9', intake:1050, burn:80},
-  {date:'7.10', intake:1420, burn:40},
-  {date:'7.11', intake:1100, burn:0},
-  {date:'7.12', intake:1180, burn:160},
-  {date:'今天', intake:898, burn:0, highlight:true},
+  {date:'7/7', intake:1188, burn:0},
+  {date:'7/8', intake:1620, burn:0},
+  {date:'7/9', intake:1782, burn:0},
+  {date:'7/10', intake:1350, burn:0},
+  {date:'7/11', intake:2340, burn:0},
+  {date:'7/12', intake:1980, burn:0},
+  {date:'今天', intake:1566, burn:0, highlight:true},
 ].map((day)=>{
   const goal = DIET_TARGET_GOAL;
   const remain = Math.max(goal - day.intake + (day.burn || 0), 0);
@@ -1663,6 +1701,25 @@ const DIET_TARGET_DAYS = [
 });
 
 const DIET_DAILY_WEEK_LABEL = '7.7—7.13';
+const DIET_GOAL_STATUS_COLORS = {
+  ok:{ring:'#3ECF96', track:'#E8F8F0', bar:'#9BE3C4', barSoft:'#C9F0DC', barTop:'#3ECF96'},
+  near:{ring:'#FFA833', track:'#FFF3E0', bar:'#FFD59A', barSoft:'#FFE6C2', barTop:'#FFA833'},
+  over:{ring:'#FF6B7D', track:'#FFE8EC', bar:'#FFB0BA', barSoft:'#FFD0D6', barTop:'#FF6B7D'},
+};
+
+function dietGoalStatusBand(pct){
+  if(pct <= 100) return 'ok';
+  if(pct <= 110) return 'near';
+  return 'over';
+}
+
+function buildDietGoalStatusDays(goal = DIET_TARGET_GOAL){
+  return DIET_TARGET_DAYS.map((day)=>{
+    const pct = day.empty || goal <= 0 ? 0 : Math.round((day.intake / goal) * 100);
+    const band = dietGoalStatusBand(pct);
+    return {...day, goal, pct, band, remain:Math.max(goal - day.intake, 0), over:day.intake > goal};
+  });
+}
 
 function DietBudgetHeadAction({goal = DIET_TARGET_GOAL, onOpen}){
   return (
@@ -1932,15 +1989,18 @@ function DietDistributionCard({onOpen, onLandscapeOpen, title='饮食', more='�
       chart={<DietDistributionChart/>}
       legend={(
         <>
-          <span className="review-legend-item is-diet"><i></i>每日热量</span>
-          <span className="review-legend-item is-diet-band"><i></i>均衡参考区间 {DIET_BALANCE_LOW}—{DIET_BALANCE_HIGH}</span>
+          {DIET_CARD_MEAL_ORDER.map(type=>(
+            <span className={'review-legend-item is-diet-meal is-' + type} key={type}>
+              <i style={{background:DIET_MEAL_COLORS[type]}}></i>{DIET_MEAL_LABELS[type]}
+            </span>
+          ))}
         </>
       )}
       metrics={(
         <>
-          <ReviewMetric value={String(DIET_CARD_AVG)} unit="kcal" label="近30天日均"/>
-          <ReviewMetric value={reviewDietDeltaText(DIET_CARD_DELTA)} unit="kcal" label="较上月"/>
-          <ReviewMetric value={String(DIET_CARD_RECORD_DAYS)} unit="天" label="记录天数"/>
+          <ReviewMetric value={String(DIET_CARD_AVG)} unit="kcal" label="近7天日均"/>
+          <ReviewMetric value={reviewDietDeltaText(DIET_CARD_DELTA)} unit="kcal" label="较上周"/>
+          <ReviewMetric value="↘ 下降" label="整体趋势" trend tone="down"/>
         </>
       )}
       more={more}
@@ -2128,20 +2188,22 @@ function DietNutrientComposeBar({ring}){
   );
 }
 
-function DietNutrientAnalysisSection({data}){
+function DietNutrientAnalysisSection({data, hideTitle = false, hideCompose = false}){
   if(!data) return null;
   const rowMap = {};
   data.rows.forEach((row)=>{ rowMap[row.key] = row; });
   const listRows = data.ring.map((item)=> rowMap[item.key]).filter(Boolean);
   return (
     <div className="review-nutrient-section">
-      <div className="review-nutrient-head">
-        <div className="review-nutrient-title-wrap">
-          <span className="review-nutrient-title">关键营养素分析</span>
+      {hideTitle ? null : (
+        <div className="review-nutrient-head">
+          <div className="review-nutrient-title-wrap">
+            <span className="review-nutrient-title">关键营养素分析</span>
+          </div>
         </div>
-      </div>
+      )}
 
-      <DietNutrientComposeBar ring={data.ring}/>
+      {hideCompose ? null : <DietNutrientComposeBar ring={data.ring}/>}
 
       <div className="review-nutrient-list" aria-label="关键营养素摄入明细">
         {listRows.map((row)=>{
@@ -2228,159 +2290,546 @@ function DietDailyWeekStrip({selectedIndex, onSelect}){
   );
 }
 
-function DietDailyReportCard({goal = 1440, onOpenBudget}){
-  const [selectedIndex, setSelectedIndex] = useState(DIET_TARGET_DAYS.length - 1);
-  const selected = DIET_TARGET_DAYS[selectedIndex] || DIET_TARGET_DAYS[DIET_TARGET_DAYS.length - 1];
-  const nutrientData = getDietDailyNutrientData(selected.date);
+function DietDailyStatusChart({days, goal}){
+  const maxIntake = Math.max(goal * 1.25, ...days.map((d)=> d.intake || 0), 1);
+  const goalBottom = Math.max(0, Math.min(100, (goal / maxIntake) * 100));
   return (
-    <div className="review-detail-card review-diet-daily-card">
-      <div className="review-mood-detail-head review-diet-daily-head">
-        <span>每日摄入</span>
-        <DietBudgetHeadAction goal={goal} onOpen={onOpenBudget}/>
+    <div className="review-diet-goal-status-chart" aria-label="每日达标情况图表">
+      <div className="review-diet-goal-status-rings">
+        {days.map((day)=>{
+          const colors = DIET_GOAL_STATUS_COLORS[day.band] || DIET_GOAL_STATUS_COLORS.ok;
+          return (
+            <div className={'review-diet-goal-status-ring-cell is-' + day.band} key={'ring-' + day.date}>
+              <div className="review-diet-goal-status-ring">
+                <DietTargetRing
+                  ratio={day.empty ? 0 : Math.min(day.pct / 100, 1)}
+                  size={34}
+                  stroke={3}
+                  color={colors.ring}
+                  track={colors.track}
+                />
+                <span style={{color:colors.ring}}>{day.pct}%</span>
+              </div>
+            </div>
+          );
+        })}
       </div>
-
-      <DietDailyWeekStrip selectedIndex={selectedIndex} onSelect={setSelectedIndex}/>
-      <DietDailyIntakePanel day={selected}/>
-
-      <div className="review-diet-daily-divider" aria-hidden="true"></div>
-
-      <DietNutrientAnalysisSection data={nutrientData}/>
+      <div className="review-diet-goal-status-plot">
+        <div className="review-diet-goal-status-goal" style={{bottom:goalBottom + '%'}} aria-hidden="true">
+          <em>目标 {goal}</em>
+          <i/>
+        </div>
+        <div className="review-diet-goal-status-bars">
+          {days.map((day)=>{
+            const colors = DIET_GOAL_STATUS_COLORS[day.band] || DIET_GOAL_STATUS_COLORS.ok;
+            const barPct = ((day.intake || 0) / maxIntake) * 100;
+            const basePct = Math.min(barPct, (goal / maxIntake) * 100);
+            const topPct = Math.max(0, barPct - basePct);
+            return (
+              <div className={'review-diet-goal-status-bar-cell is-' + day.band} key={'bar-' + day.date}>
+                <div className="review-diet-goal-status-bar-area">
+                  <div className="review-diet-goal-status-bar" style={{height:Math.max(barPct, 3) + '%'}}>
+                    {topPct > 0.4 ? (
+                      <i className="is-top" style={{flex:topPct + ' 0 0', background:colors.barTop}}/>
+                    ) : null}
+                    <i className="is-base" style={{flex:Math.max(basePct, 0.1) + ' 0 0', background: day.band === 'ok' ? colors.bar : colors.barSoft}}/>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <div className="review-diet-goal-status-dates">
+        {days.map((day)=>(
+          <div className={'review-diet-goal-status-date' + (day.highlight ? ' is-today' : '')} key={'date-' + day.date}>
+            {day.date}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
 
-function DietWeeklyAnalysisCard(){
+function DietCalorieGoalCard({goal = DIET_TARGET_GOAL, onOpenBudget}){
+  const days = buildDietGoalStatusDays(goal);
+  const avg = Math.round(days.reduce((s, d)=> s + (d.intake || 0), 0) / Math.max(days.length, 1));
+  const okDays = days.filter((d)=> d.band === 'ok').length;
+  const overDays = days.filter((d)=> d.band !== 'ok').length;
   return (
-    <div className="review-detail-card review-diet-weekly-card">
-      <div className="review-mood-detail-head">餐次分布</div>
-      <div className="review-chart review-detail-chart">
-        <DietMealStackedChart days={DIET_STACK_DAYS} ariaLabel="近7天热量餐次分布堆叠柱状图"/>
-      </div>
-      <div className="review-legend"><DietMealLegend/></div>
-      <div className="review-mood-time-summary review-diet-phase-summary">
-        <div className="review-mood-time-summary-card">
-          <span>热量摄入最高餐次</span>
-          <div className="review-mood-time-summary-main">
-            <i style={{background:DIET_MEAL_COLORS.dinner}}/>
-            <b>晚餐</b>
-          </div>
-          <em>约占全天热量的 <i style={{color:'#ff7a3d'}}>38%</i></em>
+    <div className="review-love-cycle-combined-wrap">
+      <div className="review-love-trend-title">热量目标</div>
+      <div className="review-detail-card review-love-mini-card review-diet-goal-status-card">
+        <button
+          type="button"
+          className="review-diet-goal-banner"
+          onClick={()=>{ if(typeof onOpenBudget === 'function') onOpenBudget(); }}
+        >
+          <span>目标 {goal} kcal/天 · 活动量:轻度</span>
+          <em>调整目标 ›</em>
+        </button>
+
+        <DietDailyStatusChart days={days} goal={goal}/>
+
+        <div className="review-diet-goal-status-legend" aria-hidden="true">
+          <span><i className="is-ok"/>达标 ≤100%</span>
+          <span><i className="is-near"/>接近 100-110%</span>
+          <span><i className="is-over"/>超出 &gt;110%</span>
         </div>
-        <div className="review-mood-time-summary-card">
-          <span>热量摄入最低餐次</span>
-          <div className="review-mood-time-summary-main">
-            <i style={{background:DIET_MEAL_COLORS.breakfast}}/>
-            <b>早餐</b>
-          </div>
-          <em>约占全天热量的 <i style={{color:'#ffa940'}}>14%</i></em>
+
+        <div className="review-love-insight review-diet-goal-status-insight">
+          近7天平均摄入 <b>{avg}</b> kcal，整体接近每日目标；共
+          <b>{okDays}天达标</b>，<b>{overDays}天超标</b>，超标主要集中在
+          <b>7/11、7/12</b>，注意高热量餐的摄入控制。
         </div>
       </div>
     </div>
   );
 }
 
-const DIET_TREND_VALUES = [
-  1740,1690,1820,1880,1900,1830,1860,
-  1840,1900,1870,1930,1890,1950,1960,
-  1900,2040,1960,2050,1930,2089,1950,
-  2050,1980,2010,1970,2000,1900,1731,
-];
-const DIET_TREND_START = new Date(2026, 5, 16); // 6/16
-const DIET_TREND_LABEL_INDEXES = [0, 7, 14, 21, 27];
-const DIET_TREND_DATES = DIET_TREND_VALUES.map((_v, i)=>{
-  const d = new Date(DIET_TREND_START);
-  d.setDate(DIET_TREND_START.getDate() + i);
-  const isLast = i === DIET_TREND_VALUES.length - 1;
-  return isLast ? '今天' : ((d.getMonth() + 1) + '/' + d.getDate());
-});
-const DIET_TREND_PHASES = [
-  'menstrual','menstrual','menstrual','menstrual','menstrual',
-  'follicular','follicular','follicular','follicular','follicular','follicular','follicular','follicular',
-  'ovulationDay','ovulation','ovulation','ovulation',
-  'luteal','luteal','luteal','luteal','luteal','luteal','luteal','luteal','luteal','luteal','luteal',
-];
+const DIET_MEAL_SHARE_ROWS = (()=>{
+  const sums = {breakfast:0, lunch:0, dinner:0, snack:0, other:0};
+  DIET_STACK_DAYS.forEach(day=>{
+    if(day.empty) return;
+    DIET_CARD_MEAL_ORDER.forEach(type=>{
+      let v = day.meals[type] || 0;
+      if(type === 'other') v += (day.meals.drink || 0);
+      sums[type] += v;
+    });
+  });
+  const total = Object.values(sums).reduce((a, b)=>a + b, 0) || 1;
+  const softBg = {
+    breakfast:'#FFF6E8',
+    lunch:'#FFF0DE',
+    dinner:'#FFE8DA',
+    snack:'#FFECEF',
+    other:'#F2F0ED',
+  };
+  return DIET_CARD_MEAL_ORDER.map(type=>({
+    key:type,
+    label:DIET_MEAL_LABELS[type],
+    count:sums[type],
+    pct:Math.round(sums[type] / total * 100),
+    color:DIET_MEAL_COLORS[type],
+    bg:softBg[type],
+  }));
+})();
 
-function dietPhaseBandFill(phase){
-  if(phase === 'menstrual') return 'rgba(255,77,136,0.10)';
-  if(phase === 'ovulation' || phase === 'ovulationDay') return 'rgba(179,136,232,0.14)';
-  return 'rgba(0,204,153,0.08)';
-}
-
-function DietCalorieTrendCard(){
-  const values = DIET_TREND_VALUES;
-  const n = values.length;
-  const W = 340, H = 186;
-  const padL = 40, padR = 16, padT = 24, padB = 24;
-  const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
-  const plotH = y1 - y0;
-  const yMin = 1550, yMax = 2250;
-  const X = i => x0 + (n <= 1 ? 0 : (x1 - x0) * (i / (n - 1)));
-  const Y = v => y1 - (v - yMin) / (yMax - yMin) * plotH;
-  const pts = values.map((v, i)=>[X(i), Y(v)]);
-  const linePath = reviewSmoothPath(pts);
-  const color = '#ff7a3d';
-  const yTicks = [1600, 1800, 2000, 2200];
-  const phases = DIET_TREND_PHASES;
+function DietMealShareDonut({rows = DIET_MEAL_SHARE_ROWS}){
+  const list = rows;
+  const total = list.reduce((s, r)=>s + r.count, 0) || 1;
+  const top = list.reduce((a, b)=>b.count >= a.count ? b : a);
+  const CX = 60, R = 48, SW = 16, GAP = 2.5;
+  const C = 2 * Math.PI * R;
+  let acc = 0;
+  const segs = list.map(row=>{
+    const frac = row.count / total;
+    const full = frac * C;
+    const vis = Math.max(full - GAP, 0.5);
+    const start = acc;
+    const seg = {color:row.color, dash:vis, offset:-start, key:row.key};
+    acc += full;
+    return seg;
+  });
   return (
-    <div className="review-detail-card review-mood-trend-card review-diet-trend-card">
-      <div className="review-mood-detail-head">热量趋势</div>
-      <div className="review-chart review-detail-chart review-mood-trend-chart">
-        <svg viewBox={'0 0 ' + W + ' ' + H} preserveAspectRatio="xMidYMid meet" role="img" aria-label="热量摄入趋势">
-          <defs>
-            <linearGradient id="dietTrendFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity="0.26"/>
-              <stop offset="60%" stopColor={color} stopOpacity="0.08"/>
-              <stop offset="100%" stopColor={color} stopOpacity="0.02"/>
-            </linearGradient>
-          </defs>
-          {phases.map((ph, i)=>{
-            const xLeft = i === 0 ? x0 : (X(i - 1) + X(i)) / 2;
-            const xRight = i === n - 1 ? x1 : (X(i) + X(i + 1)) / 2;
-            return <rect key={'ph' + i} x={xLeft} y={y0} width={Math.max(0.5, xRight - xLeft)} height={plotH} fill={dietPhaseBandFill(ph)}/>;
-          })}
-          {yTicks.map(t=>(
-            <g key={t}>
-              <line x1={x0} y1={Y(t)} x2={x1} y2={Y(t)} stroke="rgba(0,0,0,0.06)" strokeWidth="1" strokeDasharray="3 3"/>
-              <text x={x0 - 6} y={Y(t) + 3} textAnchor="end" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{t}</text>
-            </g>
-          ))}
-          <path d={linePath + ' L' + pts[n - 1][0].toFixed(1) + ' ' + y1.toFixed(1) + ' L' + pts[0][0].toFixed(1) + ' ' + y1.toFixed(1) + ' Z'} fill="url(#dietTrendFill)"/>
-          <path d={linePath} fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round"/>
-          {values.map((v, i)=>{
-            const isLast = i === n - 1;
-            return <circle key={i} cx={X(i)} cy={Y(v)} r={isLast ? 4.5 : 2} fill={color} stroke={isLast ? '#fff' : 'none'} strokeWidth={isLast ? 2 : 0}/>;
-          })}
-          {DIET_TREND_LABEL_INDEXES.map(i=>(
-            <text key={i} x={X(i)} y={H - 7} textAnchor="middle" fontSize="9" fill={i === n - 1 ? color : '#bbbbbf'} fontFamily="PingFang SC">{DIET_TREND_DATES[i]}</text>
+    <div className="review-love-measure-donut-wrap review-stool-shape-donut-wrap">
+      <div className="review-love-measure-donut">
+        <svg viewBox="0 0 120 120" role="img" aria-label="热量摄入分布环形图">
+          {segs.map(s=>(
+            <circle
+              key={'arc-' + s.key}
+              cx={CX}
+              cy={CX}
+              r={R}
+              fill="none"
+              stroke={s.color}
+              strokeWidth={SW}
+              strokeDasharray={s.dash.toFixed(2) + ' ' + (C - s.dash).toFixed(2)}
+              strokeDashoffset={s.offset.toFixed(2)}
+              transform={'rotate(-90 ' + CX + ' ' + CX + ')'}
+            />
           ))}
         </svg>
-      </div>
-      <div className="review-mood-cycle-phase-legend" aria-hidden="true">
-        <span><i className="is-menstrual"/>月经期</span>
-        <span><i className="is-foll-luteal"/>卵泡期 / 黄体期</span>
-        <span><i className="is-ovulation"/>排卵期</span>
-        <span><i className="is-ovulation-day"/>排卵日</span>
-      </div>
-      <div className="review-mood-insight-grid">
-        <div className="review-mood-insight">
-          <span>日均热量</span>
-          <b>1908<small>kcal</small></b>
-        </div>
-        <div className="review-mood-insight">
-          <span>较上月</span>
-          <b className="is-down">↘ 18<small>kcal</small></b>
+        <div className="review-love-measure-donut-center">
+          <span>{top.label}热量摄入</span>
+          <b>{top.pct}<small>%</small></b>
         </div>
       </div>
-      <div className="review-mood-time-summary review-diet-phase-summary">
-        <div className="review-mood-time-summary-card">
-          <span>热量摄入最高阶段</span>
-          <div className="review-mood-time-summary-main"><b>黄体期</b></div>
-          <em>日均 <i style={{color:'#3ec19a'}}>1969 kcal</i></em>
+      <div className="review-love-measure-donut-legend">
+        {list.map(row=>(
+          <div className="review-love-measure-donut-row" key={row.key}>
+            <span className="review-love-measure-donut-ico" style={{background:row.color}}/>
+            <span>{row.label}</span>
+            <em>{row.pct}%</em>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DietMealShareCard(){
+  const top = DIET_MEAL_SHARE_ROWS.reduce((a, b)=>b.count >= a.count ? b : a);
+  return (
+    <div className="review-love-cycle-block">
+      <div className="review-love-cycle-subhead">热量摄入</div>
+      <DietMealShareDonut rows={DIET_MEAL_SHARE_ROWS}/>
+      <div className="review-love-insight">
+        近7天餐次热量以 <span className="review-key-emphasis">{top.label}</span> 为主（<b>{top.pct}%</b>）；早餐占比偏低时，可适当提前补能。
+      </div>
+    </div>
+  );
+}
+
+const DIET_NUTRIENT_RANGE_ROWS = [
+  {key:'carb', name:'碳水化合物', value:220, unit:'g', status:'ok', scaleMax:350, recMin:150, recMax:250},
+  {key:'protein', name:'蛋白质', value:68, unit:'g', status:'ok', scaleMax:150, recMin:55, recMax:90},
+  {key:'fat', name:'脂肪', value:62, unit:'g', status:'ok', scaleMax:120, recMin:40, recMax:70},
+  {key:'sodium', name:'钠', value:2600, unit:'mg', status:'high', scaleMax:4000, recMin:1200, recMax:2000},
+  {key:'sugar', name:'添加糖', value:45, unit:'g', status:'high', scaleMax:80, recMin:0, recMax:25},
+  {key:'fiber', name:'膳食纤维', value:14, unit:'g', status:'low', scaleMax:40, recMin:25, recMax:30},
+];
+
+function dietNutrientStatusLabel(status){
+  if(status === 'ok') return '达标';
+  if(status === 'high') return '超标';
+  return '不足';
+}
+
+function DietNutrientRangeRows({rows = DIET_NUTRIENT_RANGE_ROWS}){
+  return (
+    <div className="review-love-habit-chart review-mood-trend-chart review-diet-nutrient-range-chart" aria-label="营养素达标">
+      <div className="review-love-habit-rows">
+        {rows.map((row)=>{
+          const scale = row.scaleMax || 1;
+          const zoneLeft = Math.max(0, Math.min(100, (row.recMin / scale) * 100));
+          const zoneRight = Math.max(zoneLeft, Math.min(100, (row.recMax / scale) * 100));
+          const pos = Math.max(2, Math.min(98, (row.value / scale) * 100));
+          return (
+            <div className={'review-love-habit-row is-' + row.status} key={row.key}>
+              <div className="review-love-habit-label">
+                <strong>{row.name}</strong>
+              </div>
+              <div className="review-mood-trend-mid">
+                <div
+                  className={'review-diet-nutrient-range-track is-' + row.status}
+                  role="img"
+                  aria-label={row.name + ' ' + row.value + row.unit + ' ' + dietNutrientStatusLabel(row.status)}
+                >
+                  <i
+                    className="review-diet-nutrient-range-zone"
+                    style={{left:zoneLeft + '%', width:(zoneRight - zoneLeft) + '%'}}
+                    aria-hidden="true"
+                  />
+                  <span style={{left:pos + '%'}}/>
+                </div>
+              </div>
+              <div className="review-diet-nutrient-range-meta">
+                <b>{row.value}{row.unit}</b>
+                <em className={'is-' + row.status}>{dietNutrientStatusLabel(row.status)}</em>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function DietNutrientIntakeCard(){
+  return (
+    <div className="review-love-cycle-block">
+      <div className="review-love-cycle-subhead">营养素摄入</div>
+      <DietNutrientRangeRows rows={DIET_NUTRIENT_RANGE_ROWS}/>
+      <div className="review-love-insight review-love-habit-insight">
+        三大营养素基本达标，但
+        <span className="review-diet-nutrient-em is-high">钠、添加糖偏高</span>、
+        <span className="review-diet-nutrient-em is-low">膳食纤维不足</span>
+        ——多吃蔬果杂粮、少放盐与含糖饮品会更均衡。
+      </div>
+    </div>
+  );
+}
+
+function DietFoodStructureCard(){
+  return (
+    <div className="review-love-cycle-combined-wrap">
+      <div className="review-love-trend-title">食物结构</div>
+      <div className="review-detail-card review-love-mini-card review-love-cycle-combined review-diet-food-structure-card">
+        <DietMealShareCard/>
+        <div className="review-love-cycle-divider" aria-hidden="true"/>
+        <DietNutrientIntakeCard/>
+      </div>
+    </div>
+  );
+}
+
+const DIET_RANGE_META = {
+  d7:{
+    dateText:'2026年7月7日至7月13日',
+    avg:String(DIET_CARD_AVG),
+    avgLabel:'近7天日均',
+    delta:(DIET_CARD_DELTA < 0 ? '↘ ' : DIET_CARD_DELTA > 0 ? '↗ ' : '→ ') + Math.abs(Math.round(DIET_CARD_DELTA)),
+    deltaLabel:'较上周',
+    trend:'↘ 下降',
+    tone:'down',
+    dayCount:7,
+  },
+  d30:{
+    dateText:'2026年6月14日至7月13日',
+    avg:String(DIET_D30_AVG),
+    avgLabel:'近30天日均',
+    delta:(DIET_D30_DELTA < 0 ? '↘ ' : DIET_D30_DELTA > 0 ? '↗ ' : '→ ') + Math.abs(Math.round(DIET_D30_DELTA)),
+    deltaLabel:'较上月',
+    trend:'↘ 下降',
+    tone:'down',
+    dayCount:30,
+  },
+  half:{
+    dateText:'2026年1月1日至7月13日',
+    avg:'1924',
+    avgLabel:'近半年日均',
+    delta:'↘ 36',
+    deltaLabel:'较上月',
+    trend:'↘ 下降',
+    tone:'down',
+    dayCount:120,
+  },
+  year:{
+    dateText:'2025年7月1日至2026年7月13日',
+    avg:'1948',
+    avgLabel:'近一年日均',
+    delta:'→ 12',
+    deltaLabel:'较上月',
+    trend:'→ 平稳',
+    tone:'flat',
+    dayCount:120,
+  },
+  all:{
+    dateText:'2024年8月1日至2026年7月13日',
+    avg:'1962',
+    avgLabel:'全部日均',
+    delta:'↗ 28',
+    deltaLabel:'较上月',
+    trend:'↗ 上升',
+    tone:'up',
+    dayCount:120,
+  },
+};
+
+// 长周期：周级波动折线（类似心情趋势），X 轴只标稀疏日期
+function buildDietWaveSeries({count, base, drift, amp, seed, labelMap}){
+  let s = seed;
+  const rnd = ()=>{
+    s = (s * 9301 + 49297) % 233280;
+    return s / 233280;
+  };
+  const out = [];
+  for(let i = 0; i < count; i++){
+    const t = i / Math.max(count - 1, 1);
+    const trend = base + drift * t;
+    const wave = Math.sin(i * 0.9) * amp * 0.55 + Math.sin(i * 0.33 + 0.4) * amp * 0.4;
+    const noise = (rnd() - 0.48) * amp * 0.75;
+    const total = Math.round(Math.max(1520, Math.min(2280, trend + wave + noise)));
+    out.push({
+      date: labelMap[i] || '',
+      total,
+      empty:false,
+      highlight:i === count - 1,
+    });
+  }
+  return out;
+}
+
+function dietSparseLabelMap(count, labels){
+  const map = {};
+  const keys = labels.length <= 2
+    ? [0, count - 1]
+    : labels.map((_, i)=> Math.round(i * (count - 1) / (labels.length - 1)));
+  keys.forEach((k, i)=>{ map[k] = labels[Math.min(i, labels.length - 1)]; });
+  return map;
+}
+
+const DIET_WAVE_TREND = {
+  half: buildDietWaveSeries({
+    count:26,
+    base:2010,
+    drift:-140,
+    amp:160,
+    seed:260114,
+    labelMap:dietSparseLabelMap(26, ['1月', '3月', '5月', '今天']),
+  }),
+  year: buildDietWaveSeries({
+    count:52,
+    base:2020,
+    drift:-150,
+    amp:170,
+    seed:250714,
+    labelMap:dietSparseLabelMap(52, ['25.7', '25.10', '26.1', '26.4', '今天']),
+  }),
+  all: buildDietWaveSeries({
+    count:96,
+    base:2060,
+    drift:-190,
+    amp:180,
+    seed:240801,
+    labelMap:dietSparseLabelMap(96, ['24.8', '25.2', '25.8', '26.2', '今天']),
+  }),
+};
+
+function dietRangeDays(range){
+  const meta = DIET_RANGE_META[range] || DIET_RANGE_META.d30;
+  const all = REVIEW_DIET_ALL_DAYS;
+  const n = Math.min(meta.dayCount, all.length);
+  return all.slice(-n);
+}
+
+function dietTrendPoints(range){
+  if(DIET_WAVE_TREND[range]) return DIET_WAVE_TREND[range];
+  return dietRangeDays(range);
+}
+
+function DietTrendMainChart({days, range = 'd7'}){
+  const isWave = range === 'half' || range === 'year' || range === 'all';
+  const points = days.filter(day=>!day.empty);
+  const n = points.length;
+  const showValues = range === 'd7';
+  const showDots = range === 'd7' || range === 'd30';
+  const softDots = range === 'd30';
+  const W = 340, H = showValues ? 176 : 168;
+  const padL = 36, padR = 14, padT = showValues ? 24 : 16, padB = 26;
+  if(n < 2){
+    return <svg viewBox={'0 0 ' + W + ' ' + H} preserveAspectRatio="xMidYMid meet" role="img" aria-label="热量趋势"/>;
+  }
+  const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
+  const totals = points.map(day=>day.total);
+  const dataMin = Math.min(...totals);
+  const dataMax = Math.max(...totals);
+  const yPad = isWave ? 60 : 120;
+  const yMin = Math.max(1000, Math.floor((dataMin - yPad) / 100) * 100);
+  const yMax = Math.ceil((dataMax + yPad) / 100) * 100;
+  const X = i => x0 + (x1 - x0) * (i / (n - 1));
+  const Y = v => y1 - (v - yMin) / (yMax - yMin) * (y1 - y0);
+  const pts = totals.map((v, i)=>[X(i), Y(v)]);
+  const linePath = reviewSmoothPath(pts);
+  const color = '#ff7a3d';
+  const step = Math.max(1, Math.round((yMax - yMin) / 3 / 100) * 100) || 200;
+  const yTicks = [];
+  for(let t = yMin; t <= yMax; t += step) yTicks.push(t);
+  if(yTicks[yTicks.length - 1] !== yMax) yTicks.push(yMax);
+  const labelIndexes = isWave
+    ? points.map((p, i)=>p.date ? i : -1).filter(i=>i >= 0)
+    : (n <= 8
+      ? points.map((_p, i)=>i)
+      : [0, Math.round((n - 1) / 3), Math.round((n - 1) * 2 / 3), n - 1]
+        .filter((v, i, arr)=>arr.indexOf(v) === i));
+  return (
+    <div className="review-chart review-detail-chart">
+      <svg viewBox={'0 0 ' + W + ' ' + H} preserveAspectRatio="xMidYMid meet" role="img" aria-label="热量趋势">
+        <defs>
+          <linearGradient id={'dietDetailTrendFill-' + range} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity="0.22"/>
+            <stop offset="100%" stopColor={color} stopOpacity="0.02"/>
+          </linearGradient>
+        </defs>
+        {yTicks.map(t=>(
+          <g key={t}>
+            <line x1={x0} y1={Y(t)} x2={x1} y2={Y(t)} stroke="rgba(0,0,0,0.06)" strokeWidth="1" strokeDasharray="3 3"/>
+            <text x={x0 - 6} y={Y(t) + 3} textAnchor="end" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{t}</text>
+          </g>
+        ))}
+        <path
+          d={linePath + ' L' + pts[n - 1][0].toFixed(1) + ' ' + y1.toFixed(1) + ' L' + pts[0][0].toFixed(1) + ' ' + y1.toFixed(1) + ' Z'}
+          fill={'url(#dietDetailTrendFill-' + range + ')'}
+        />
+        <path d={linePath} fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round"/>
+        {showDots ? totals.map((v, i)=>{
+          const isLast = i === n - 1;
+          return (
+            <g key={i}>
+              <circle
+                cx={X(i)}
+                cy={Y(v)}
+                r={softDots ? (isLast ? 2.6 : 1.6) : (isLast ? 4 : 3.2)}
+                fill={color}
+                fillOpacity={softDots && !isLast ? 0.55 : 1}
+                stroke={softDots ? 'none' : '#fff'}
+                strokeWidth={softDots ? 0 : 1.5}
+              />
+              {showValues ? (
+                <text
+                  x={X(i)}
+                  y={Y(v) - 8}
+                  textAnchor="middle"
+                  fontSize="9"
+                  fontWeight="500"
+                  fill={color}
+                  fontFamily="PingFang SC, -apple-system, sans-serif"
+                >{v}</text>
+              ) : null}
+            </g>
+          );
+        }) : null}
+        {labelIndexes.map(i=>(
+          <text
+            key={'lb' + i}
+            x={X(i)}
+            y={H - 7}
+            textAnchor="middle"
+            fontSize="9"
+            fill={i === n - 1 ? color : '#bbbbbf'}
+            fontFamily="PingFang SC"
+          >{points[i].date}</text>
+        ))}
+      </svg>
+    </div>
+  );
+}
+
+function DietTrendSummary({range = 'd7'}){
+  const meta = DIET_RANGE_META[range] || DIET_RANGE_META.d7;
+  const days = dietRangeDays(range);
+  const trendDays = dietTrendPoints(range);
+  const isStacked = range === 'd7';
+  return (
+    <div className="review-love-trend-block is-detail-main is-diet-main">
+      <div className="review-love-trend-head">
+        <div className="review-love-trend-title">热量趋势</div>
+        <div className="review-love-trend-range">{meta.dateText}</div>
+      </div>
+      {isStacked ? (
+        <div className="review-chart review-detail-chart">
+          <DietMealStackedChart
+            days={days}
+            mealOrder={DIET_CARD_MEAL_ORDER}
+            height={176}
+            ariaLabel="近7天餐次热量堆叠柱状图"
+          />
         </div>
-        <div className="review-mood-time-summary-card">
-          <span>热量摄入最低阶段</span>
-          <div className="review-mood-time-summary-main"><b>月经期</b></div>
-          <em>日均 <i style={{color:'#ef6f8f'}}>1740 kcal</i></em>
+      ) : (
+        <DietTrendMainChart days={trendDays} range={range}/>
+      )}
+      <div className="review-legend">
+        {isStacked ? DIET_CARD_MEAL_ORDER.map(type=>(
+          <span className={'review-legend-item is-diet-meal is-' + type} key={type}>
+            <i style={{background:DIET_MEAL_COLORS[type]}}></i>{DIET_MEAL_LABELS[type]}
+          </span>
+        )) : (
+          <span className="review-legend-item is-diet"><i></i>每日热量</span>
+        )}
+      </div>
+      <div className="review-love-trend-metrics" aria-label="热量趋势概览">
+        <div className="review-love-trend-metric">
+          <div className="review-love-trend-metric-value">{meta.avg}<small>kcal</small></div>
+          <div className="review-love-trend-metric-label">{meta.avgLabel}</div>
+        </div>
+        <div className="review-love-trend-metric">
+          <div className="review-love-trend-metric-value">{meta.delta}<small>kcal</small></div>
+          <div className="review-love-trend-metric-label">{meta.deltaLabel}</div>
+        </div>
+        <div className="review-love-trend-metric">
+          <div className={'review-love-trend-metric-value is-trend is-' + meta.tone}>{meta.trend}</div>
+          <div className="review-love-trend-metric-label">整体趋势</div>
         </div>
       </div>
     </div>
@@ -2388,15 +2837,20 @@ function DietCalorieTrendCard(){
 }
 
 function DietDistributionDetailPage({open, onClose}){
-  const [timelineOpen, setTimelineOpen] = useState(false);
   const [budgetOpen, setBudgetOpen] = useState(false);
-  const [calorieGoal, setCalorieGoal] = useState(1440);
-  const [periodOffset, setPeriodOffset] = useState(0);
-  const nestedOpen = timelineOpen || budgetOpen;
+  const [calorieGoal, setCalorieGoal] = useState(DIET_TARGET_GOAL);
+  const [range, setRange] = useState('d7');
+  const ranges = [
+    {key:'d7', label:'近7天'},
+    {key:'d30', label:'近30天'},
+    {key:'half', label:'近半年'},
+    {key:'year', label:'近一年'},
+    {key:'all', label:'全部'},
+  ];
+  const nestedOpen = budgetOpen;
   React.useEffect(()=>{
     if(!open) return;
-    setPeriodOffset(0);
-    setTimelineOpen(false);
+    setRange('d7');
     setBudgetOpen(false);
   }, [open]);
   return (
@@ -2407,14 +2861,29 @@ function DietDistributionDetailPage({open, onClose}){
         </button>
         <span className="review-detail-title">饮食</span>
       </div>
-      <div className="review-detail-content">
-        <MoodPeriodNav range="cycle" offset={periodOffset} onChange={setPeriodOffset}/>
-        <DietDailyReportCard goal={calorieGoal} onOpenBudget={()=>setBudgetOpen(true)}/>
-        <DietCalorieTrendCard/>
-        <DietWeeklyAnalysisCard/>
-        <DietMonthStickerCard onOpenAll={()=>setTimelineOpen(true)}/>
+      <div className="review-detail-content review-love-detail-content">
+        <div className="review-love-detail-top">
+          <div className="review-segment" role="tablist" aria-label="时间范围">
+            {ranges.map(item=>(
+              <button
+                key={item.key}
+                type="button"
+                className={range === item.key ? 'is-active' : ''}
+                aria-selected={range === item.key}
+                onClick={()=>setRange(item.key)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <DietTrendSummary range={range}/>
+        <div className="review-love-detail-lower">
+          <DietCalorieGoalCard goal={calorieGoal} onOpenBudget={()=>setBudgetOpen(true)}/>
+          <DietFoodStructureCard/>
+          <DietMonthStickerCard/>
+        </div>
       </div>
-      <DietTimelinePage open={timelineOpen} onClose={()=>setTimelineOpen(false)}/>
       <DietBudgetSettingsPage
         open={budgetOpen}
         onClose={()=>setBudgetOpen(false)}
@@ -2430,11 +2899,12 @@ const DIET_WEEKDAY_SHORT = ['周日', '周一', '周二', '周三', '周四', '�
 
 function buildDietStickerDays(){
   const today = new Date(2026, 6, 13);
-  const photoDays = [...DIET_CALENDAR_PHOTO_DAYS].sort((a, b)=>b - a);
-  return photoDays.map((day)=>{
+  // 近 7 天有食物记录的日期（7/7 — 7/13）
+  const foodDays = [13, 12, 11, 10, 9, 8, 7];
+  return foodDays.map((day)=>{
     const d = new Date(2026, 6, day);
     const isToday = day === today.getDate();
-    const count = 3 + ((day * 3) % 4);
+    const count = 2 + ((day * 3) % 3);
     const stickers = Array.from({length:count}, (_, i)=>{
       const photo = DIET_REVIEW_PHOTOS[(day + i * 3) % DIET_REVIEW_PHOTOS.length];
       return {photo, bg:DIET_STICKER_BG[(day + i) % DIET_STICKER_BG.length]};
@@ -2469,20 +2939,17 @@ function DietStickerRow({row}){
   );
 }
 
-function DietMonthStickerCard({onOpenAll}){
-  const preview = DIET_STICKER_DAYS.slice(0, 5);
+function DietMonthStickerCard(){
   return (
-    <div className="review-detail-card review-diet-sticker-card">
-      <div className="review-mood-detail-head">食物照片墙</div>
-      <div className="review-diet-sticker-list">
-        {preview.map(row=>(
-          <DietStickerRow row={row} key={row.key}/>
-        ))}
+    <div className="review-love-cycle-combined-wrap">
+      <div className="review-love-trend-title">食物照片墙</div>
+      <div className="review-detail-card review-love-mini-card review-diet-sticker-card">
+        <div className="review-diet-sticker-list">
+          {DIET_STICKER_DAYS.map(row=>(
+            <DietStickerRow row={row} key={row.key}/>
+          ))}
+        </div>
       </div>
-      <button type="button" className="review-diet-sticker-more" onClick={onOpenAll}>
-        查看全部 {DIET_STICKER_DAYS.length} 天
-        <span aria-hidden="true">›</span>
-      </button>
     </div>
   );
 }

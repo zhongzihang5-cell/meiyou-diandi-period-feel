@@ -859,6 +859,9 @@
 .review-metric-value.is-trend.is-up{
   color:var(--my-brand-red);
 }
+.review-metric-value.is-trend.is-down{
+  color:var(--my-warning);
+}
 .review-metric-value.is-diet-trend{
   font-size:15px;
   color:var(--my-text-primary);
@@ -2291,12 +2294,198 @@
 .review-diet-daily-card{
   padding-bottom:12px;
 }
-.review-diet-daily-head{
+.review-diet-daily-card .review-diet-daily-head{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:10px;
+  margin-bottom:12px;
+}
+.review-diet-daily-card .review-nutrient-section{
+  margin-top:0;
+}
+
+/* 热量目标：每日达标情况 */
+.review-diet-goal-status-card{
+  padding-bottom:12px;
+}
+.review-diet-goal-banner{
+  width:100%;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:10px;
-  margin-bottom:12px;
+  gap:8px;
+  min-height:36px;
+  margin:0 0 12px;
+  padding:8px 12px;
+  border:0;
+  border-radius:8px;
+  background:#f2f2f5;
+  cursor:pointer;
+  text-align:left;
+  font-family:inherit;
+}
+.review-diet-goal-banner span{
+  font-size:12px;
+  color:rgba(0,0,0,0.65);
+  line-height:1.29;
+}
+.review-diet-goal-banner em{
+  flex:0 0 auto;
+  font-style:normal;
+  font-size:12px;
+  font-weight:500;
+  color:#E8912A;
+  line-height:1.29;
+  white-space:nowrap;
+}
+.review-diet-goal-status-chart{
+  margin:0 0 8px;
+}
+.review-diet-goal-status-rings,
+.review-diet-goal-status-bars,
+.review-diet-goal-status-dates{
+  display:flex;
+  align-items:stretch;
+  gap:2px;
+}
+.review-diet-goal-status-ring-cell,
+.review-diet-goal-status-bar-cell,
+.review-diet-goal-status-date{
+  flex:1;
+  min-width:0;
+  display:flex;
+  justify-content:center;
+}
+.review-diet-goal-status-rings{
+  margin-bottom:8px;
+}
+.review-diet-goal-status-ring{
+  position:relative;
+  width:34px;
+  height:34px;
+  flex:0 0 34px;
+}
+.review-diet-goal-status-ring svg{
+  display:block;
+}
+.review-diet-goal-status-ring span{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:9px;
+  font-weight:500;
+  line-height:1;
+  font-variant-numeric:tabular-nums;
+}
+.review-diet-goal-status-plot{
+  position:relative;
+}
+.review-diet-goal-status-goal{
+  position:absolute;
+  left:0;
+  right:0;
+  z-index:2;
+  pointer-events:none;
+  transform:translateY(50%);
+}
+.review-diet-goal-status-goal em{
+  position:absolute;
+  left:2px;
+  bottom:calc(100% + 2px);
+  padding:0 4px;
+  border-radius:4px;
+  background:rgba(255,255,255,0.92);
+  font-style:normal;
+  font-size:10px;
+  font-weight:500;
+  color:#E8912A;
+  line-height:1.2;
+  white-space:nowrap;
+}
+.review-diet-goal-status-goal i{
+  display:block;
+  width:100%;
+  height:0;
+  border-top:1px dashed #E8912A;
+  opacity:0.85;
+}
+.review-diet-goal-status-bar-area{
+  position:relative;
+  width:100%;
+  height:96px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  z-index:1;
+}
+.review-diet-goal-status-bar{
+  width:12px;
+  min-height:4px;
+  border-radius:80px 80px 3px 3px;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+}
+.review-diet-goal-status-bar i{
+  display:block;
+  width:100%;
+  min-height:0;
+}
+.review-diet-goal-status-bar i.is-top{
+  border-radius:80px 80px 0 0;
+}
+.review-diet-goal-status-dates{
+  margin-top:6px;
+}
+.review-diet-goal-status-date{
+  font-size:10px;
+  color:rgba(0,0,0,0.4);
+  line-height:1.2;
+  white-space:nowrap;
+}
+.review-diet-goal-status-date.is-today{
+  color:#E8912A;
+  font-weight:500;
+}
+.review-diet-goal-status-legend{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:flex-start;
+  gap:8px 12px;
+  margin:4px 0 12px;
+}
+.review-diet-goal-status-legend span{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  font-size:11px;
+  color:rgba(0,0,0,0.45);
+  line-height:1.29;
+  white-space:nowrap;
+}
+.review-diet-goal-status-legend i{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  flex:0 0 auto;
+}
+.review-diet-goal-status-legend i.is-ok{background:#3ECF96;}
+.review-diet-goal-status-legend i.is-near{background:#FFA833;}
+.review-diet-goal-status-legend i.is-over{background:#FF6B7D;}
+.review-diet-goal-status-insight{
+  margin-top:0;
+}
+.review-diet-goal-status-insight b{
+  font-weight:500;
+  color:#ff4d88;
+}
+.review-diet-sticker-card.review-love-mini-card{
+  padding-top:12px;
 }
 .review-diet-weekly-card .review-mood-detail-head{
   margin-bottom:12px;
@@ -2981,6 +3170,117 @@
   font-size:12px;
   line-height:1.29;
   color:rgba(0,0,0,0.55);
+}
+
+/* 营养摄入：心情时段分布外壳 + 营养素达标区间条 */
+.review-diet-nutrient-range-chart{
+  gap:0;
+}
+.review-diet-nutrient-range-chart .review-love-habit-row{
+  grid-template-columns:70px minmax(0, 1fr) 70px;
+  align-items:center;
+  gap:8px;
+  min-height:48px;
+  padding:10px 0;
+  overflow:visible;
+}
+.review-diet-nutrient-range-chart .review-love-habit-label{
+  gap:0;
+  min-width:0;
+}
+.review-diet-nutrient-range-chart .review-love-habit-label strong{
+  font-size:13px;
+  font-weight:500;
+  color:rgba(0,0,0,0.72);
+  line-height:1.29;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.review-diet-nutrient-range-track{
+  position:relative;
+  height:6px;
+  border-radius:80px;
+  background:#F2F2F5;
+}
+.review-diet-nutrient-range-zone{
+  position:absolute;
+  top:50%;
+  height:10px;
+  border-radius:80px;
+  transform:translateY(-50%);
+  background:rgba(94,214,168,0.28);
+  pointer-events:none;
+}
+.review-diet-nutrient-range-track.is-high .review-diet-nutrient-range-zone{
+  background:rgba(255,122,138,0.22);
+}
+.review-diet-nutrient-range-track.is-low .review-diet-nutrient-range-zone{
+  background:rgba(94,214,168,0.28);
+}
+.review-diet-nutrient-range-track > span{
+  position:absolute;
+  top:50%;
+  width:3px;
+  height:14px;
+  border-radius:80px;
+  transform:translate(-50%, -50%);
+  background:#3ECF96;
+  box-shadow:none;
+}
+.review-diet-nutrient-range-track.is-high > span{
+  background:#FF6B7D;
+}
+.review-diet-nutrient-range-track.is-low > span{
+  background:#FFA833;
+}
+.review-diet-nutrient-range-meta{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  justify-content:center;
+  gap:4px;
+  min-width:0;
+  width:70px;
+}
+.review-diet-nutrient-range-meta b{
+  font-size:12px;
+  font-weight:500;
+  color:rgba(0,0,0,0.72);
+  line-height:1;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+}
+.review-diet-nutrient-range-meta em{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height:18px;
+  padding:0 6px;
+  border-radius:4px;
+  font-style:normal;
+  font-size:11px;
+  font-weight:400;
+  line-height:1;
+  white-space:nowrap;
+  max-width:100%;
+  box-sizing:border-box;
+}
+.review-diet-nutrient-range-meta em.is-ok{
+  background:rgba(62,207,150,0.12);
+  color:#2DB87F;
+}
+.review-diet-nutrient-range-meta em.is-high{
+  background:rgba(255,107,125,0.12);
+  color:#F05666;
+}
+.review-diet-nutrient-range-meta em.is-low{
+  background:rgba(255,168,51,0.14);
+  color:#E8912A;
+}
+.review-diet-nutrient-em{
+  font-weight:500;
+  color:#ff4d88;
 }
 
 /* ===== 心情回顾卡 / 全屏详情 ===== */
@@ -5495,6 +5795,10 @@
 .review-love-detail-top .review-segment{
   margin-bottom:8px;
 }
+.review-love-detail-top .review-segment button{
+  font-size:12px;
+  padding:0 2px;
+}
 .review-mood-detail-content{
   padding:0;
   background:#fff;
@@ -5677,6 +5981,12 @@
 }
 .review-love-trend-metric-value.is-trend.is-down{
   color:#00cc99;
+}
+.review-love-trend-block.is-diet-main .review-love-trend-metric-value.is-trend.is-down{
+  color:var(--my-warning);
+}
+.review-love-trend-block.is-diet-main .review-love-trend-metric-value.is-trend.is-flat{
+  color:var(--my-warning);
 }
 .review-love-trend-metric-label{
   font-size:11px;
@@ -6837,6 +7147,19 @@
 }
 .review-mood-trend-chart .review-love-habit-row{
   grid-template-columns:76px minmax(0, 1fr) 40px;
+}
+.review-mood-trend-chart.review-diet-nutrient-range-chart .review-love-habit-row{
+  grid-template-columns:70px minmax(0, 1fr) 70px;
+  gap:8px;
+  overflow:visible;
+}
+.review-mood-trend-chart.review-diet-nutrient-range-chart .review-mood-trend-mid{
+  max-width:100%;
+  padding-right:4px;
+}
+.review-mood-trend-chart.review-diet-nutrient-range-chart .review-diet-nutrient-range-meta{
+  width:70px;
+  max-width:70px;
 }
 .review-mood-trend-mid{
   position:relative;
