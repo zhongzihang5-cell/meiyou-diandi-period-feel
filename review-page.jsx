@@ -4884,6 +4884,45 @@ function BeverageWeeklyStats(){
   );
 }
 
+const BEVERAGE_WEEK_PHOTO_ROWS = [
+  {label:'第4周', sub:'8/22—8/28', photos:['星巴克红茶拿铁.webp','七分甜奶茶.jpeg','水杯.jpg']},
+  {label:'第3周', sub:'8/15—8/21', photos:['七分甜奶茶.jpeg','水杯.jpg']},
+  {label:'第2周', sub:'8/8—8/14', photos:['水杯.jpg','星巴克红茶拿铁.webp','七分甜奶茶.jpeg','星巴克红茶拿铁.webp']},
+  {label:'第1周', sub:'8/1—8/7', photos:['星巴克红茶拿铁.webp','水杯.jpg','七分甜奶茶.jpeg']},
+];
+
+const BEVERAGE_MONTH_PHOTO_ROWS = [
+  {label:'8月', sub:'6杯', photos:['星巴克红茶拿铁.webp','七分甜奶茶.jpeg','水杯.jpg']},
+  {label:'7月', sub:'14杯', photos:['七分甜奶茶.jpeg','星巴克红茶拿铁.webp','水杯.jpg','七分甜奶茶.jpeg']},
+  {label:'6月', sub:'12杯', photos:['水杯.jpg','七分甜奶茶.jpeg','星巴克红茶拿铁.webp']},
+  {label:'5月', sub:'10杯', photos:['星巴克红茶拿铁.webp','水杯.jpg','七分甜奶茶.jpeg']},
+  {label:'4月', sub:'8杯', photos:['七分甜奶茶.jpeg','水杯.jpg']},
+  {label:'3月', sub:'11杯', photos:['水杯.jpg','星巴克红茶拿铁.webp','七分甜奶茶.jpeg']},
+];
+
+function BeveragePhotoWall({title, rows, caption}){
+  return (
+    <div className="review-detail-card review-beverage-photo-card">
+      <div className="review-camera-detail-head"><b>{title}</b><span>{caption}</span></div>
+      <div className="review-beverage-photo-list">
+        {rows.map((row)=>(
+          <div className="review-beverage-photo-row" key={row.label}>
+            <div className="review-beverage-photo-time"><b>{row.label}</b><span>{row.sub}</span></div>
+            <div className="review-beverage-photo-stack">
+              {row.photos.map((photo,index)=>(
+                <span key={index} style={{zIndex:row.photos.length-index}}>
+                  <img src={photo} alt="" style={{objectPosition:index % 2 ? 'center center' : 'center 42%'}}/>
+                </span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+      <p className="review-beverage-photo-note">照片按记录时间自动归组，后续新增饮品照片会继续补充到对应{title.includes('每周') ? '周' : '月'}。</p>
+    </div>
+  );
+}
+
 function BeverageMonthCaffeine(){
   return (
     <div className="review-detail-card">
@@ -4972,12 +5011,21 @@ function BeverageMonthView(){
       <BeverageComposition/>
       <BeverageMonthCaffeine/>
       <BeverageWeeklyStats/>
+      <BeveragePhotoWall title="每周饮品记录" rows={BEVERAGE_WEEK_PHOTO_ROWS} caption="8月 · 按周查看"/>
     </>
   );
 }
 
 function BeverageAllView(){
-  return <><BeverageAllDonut/><BeverageComposition/><BeverageAllCaffeine/><BeverageMonthlyStats/></>;
+  return (
+    <>
+      <BeverageAllDonut/>
+      <BeverageMonthlyStats/>
+      <BeverageComposition/>
+      <BeverageAllCaffeine/>
+      <BeveragePhotoWall title="每月饮品记录" rows={BEVERAGE_MONTH_PHOTO_ROWS} caption="3月—8月"/>
+    </>
+  );
 }
 
 function BeverageDetailPage({open, onClose}){
