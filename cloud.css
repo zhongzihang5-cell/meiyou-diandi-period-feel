@@ -1271,6 +1271,7 @@
 .dock-feeding-quick{
   width:100%;
   min-width:0;
+  position:relative;
 }
 .dock-feeding-handle{
   width:100%;
@@ -1321,6 +1322,57 @@
 }
 .dock-feeding-quick-item.is-period-feel-pulse .dock-feeding-quick-icon{
   animation:periodFeelPulse 1.8s ease-in-out infinite;
+}
+.dock-feeding-quick-item.is-period-feel-enter{
+  animation:periodFeelQuickEnter .55s cubic-bezier(.2,.9,.25,1.2) both;
+}
+.dock-feeding-quick-item.is-period-feel-drop{
+  animation:periodFeelQuickDrop 1s .32s cubic-bezier(.2,.85,.3,1.2) both;
+}
+.dock-feeding-quick-item.is-period-feel-plan3-shift{
+  animation:periodFeelQuickShift .32s ease-out both;
+}
+@keyframes periodFeelQuickEnter{
+  from{opacity:0;transform:translateY(10px) scale(.82)}
+  70%{opacity:1;transform:translateY(-2px) scale(1.04)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+@keyframes periodFeelQuickDrop{
+  from{opacity:0;transform:translateY(-34px) scale(.84)}
+  68%{opacity:1;transform:translateY(4px) scale(1.04)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+@keyframes periodFeelQuickShift{
+  from{transform:translateX(0)}
+  55%{transform:translateX(12px)}
+  to{transform:translateX(0)}
+}
+.period-feel-guide-bubble{
+  position:absolute;
+  left:-12px;
+  bottom:calc(100% + 3px);
+  max-width:250px;
+  padding:9px 12px;
+  border-radius:13px;
+  background:#fff1f4;
+  color:#5f5360;
+  font-size:13px;
+  line-height:1.45;
+  box-shadow:0 5px 18px rgba(84,45,72,.14);
+  animation:periodFeelGuideIn .45s cubic-bezier(.2,.9,.25,1.2) both;
+}
+.period-feel-guide-arrow{
+  position:absolute;
+  left:37px;
+  bottom:-6px;
+  width:11px;
+  height:11px;
+  background:#fff1f4;
+  transform:rotate(45deg);
+}
+@keyframes periodFeelGuideIn{
+  from{opacity:0;transform:translateY(8px) scale(.94)}
+  to{opacity:1;transform:translateY(0) scale(1)}
 }
 @keyframes periodFeelPulse{
   0%,100%{transform:translateY(0);box-shadow:0 0 0 0 rgba(255,77,136,.35)}

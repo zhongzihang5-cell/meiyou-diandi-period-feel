@@ -96,7 +96,7 @@ function TimelineRailNode({phaseKind, railDot, isFeedLast, nodeKind, children, d
   const RecordBlankAxisDropAnim = window.RecordBlankAxisDropAnim;
   const isDrop = !!dropAnim;
   return (
-    <div className={'tl-rail-node'+(isFeedLast?' is-feed-last':'')+(nodeKind==='guide'?' is-guide':'')+(isDrop?' is-axis-drop':'')}>
+    <div className={'tl-rail-node'+(isFeedLast?' is-feed-last':'')+(nodeKind==='guide'?' is-guide':'')+(nodeKind==='period-feel-guide'?' is-period-feel-guide':'')+(isDrop?' is-axis-drop':'')}>
       <div className="tl-rail-marker" aria-hidden="true">
         {isDrop && RecordBlankAxisDropAnim ? (
           <RecordBlankAxisDropAnim onLand={onDropLand} onComplete={onDropComplete}/>
@@ -962,7 +962,7 @@ function BabyFeedingTimelineCard({item, isNew}){
   );
 }
 
-function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPlayAnimation, onSisterCycleComplete, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
+function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPlayAnimation, onSisterCycleComplete, onPeriodFeelGuideComplete, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
   const cycleDay = item.cycleDay;
   const guideAnimate = item.kind === 'guide' && !item.noAnimate && (
     isNew || item.hiddenUntilSisterDone
@@ -1013,6 +1013,16 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
     body = item.pendingDrop ? null : <V3RecordGroupCard group={item} isNew={isNew}/>;
   } else if(item.kind === 'guide'){
     body = <TodayGuideCard item={item} isNew={isNew} animate={guideAnimate}/>;
+  } else if(item.kind === 'period-feel-guide'){
+    const PeriodFeelGuideOutside = window.PeriodFeelGuideOutside;
+    body = PeriodFeelGuideOutside ? (
+      <PeriodFeelGuideOutside
+        playAnimation={sisterPlayAnimation}
+        animateText={!!isNew}
+        guideLabel={item.periodFeelGuideLabel || '经期感受'}
+        onComplete={onPeriodFeelGuideComplete}
+      />
+    ) : null;
   } else if(item.kind === 'mood-insight'){
     body = item.pendingDrop ? null : <MoodInsightCard item={item} isNew={isNew}/>;
   } else if(item.kind === 'baby-feeding-card'){
@@ -1029,6 +1039,8 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
           playAnimation: sisterPlayAnimation,
           onCycleComplete: onSisterCycleComplete,
           analysisKind: sisterItem.analysisKind || item.analysisKind,
+          showPeriodFeelPrompt: sisterItem.periodFeelPrompt !== false,
+          periodFeelGuideVariant: sisterItem.periodFeelGuideVariant,
         } : null}
       />
     );
@@ -1038,6 +1050,7 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
         item={item}
         playAnimation={sisterPlayAnimation}
         onCycleComplete={onSisterCycleComplete}
+        animateText={!!isNew}
       />
     );
   } else if(item.module) {
