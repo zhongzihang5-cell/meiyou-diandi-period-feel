@@ -243,7 +243,8 @@ function DockPublisher({
   demoPhase, isDemoRunning, hideQuickFan = false, hideQuickFab = false,
   feedingQuickItems = null, feedingQuickLabel = '快捷记录', onFeedingQuickSelect,
   onPeriodFeelSelect, onVoiceStart,
-  periodFeelLabel = '月经感受',
+  periodFeelLabel = '经期感受', periodFeelGuide = false,
+  periodFeelGuideText = '这次经期有什么特别的感受么？试试把它记录下来',
   emptyPreviewGuideStep = 0, onEmptyPreviewGuideAdvance, onEmptyPreviewGuideDismiss, fabGuidePulse = false,
 }){
   const I = window.Icon;
@@ -588,6 +589,12 @@ function DockPublisher({
           <div className={'dock-bar is-path-dock'+(showFeedingQuick ? ' has-feeding-quick' : '')}>
             {showFeedingQuick ? (
               <div className="dock-feeding-quick" aria-label={feedingQuickLabel}>
+                {periodFeelGuide && (
+                  <div className="period-feel-guide-bubble" role="status">
+                    {periodFeelGuideText}
+                    <span className="period-feel-guide-arrow" aria-hidden="true" />
+                  </div>
+                )}
                 <button
                   type="button"
                   className="dock-feeding-handle"
@@ -602,7 +609,7 @@ function DockPublisher({
                     <button
                       key={item.id}
                       type="button"
-                      className={'dock-feeding-quick-item'+(item.pulse ? ' is-period-feel-pulse' : '')}
+                      className={'dock-feeding-quick-item'+(item.id === 'period-feel' ? ' is-period-feel-enter' : '')+(item.drop ? ' is-period-feel-drop' : '')+(item.plan3Shift ? ' is-period-feel-plan3-shift' : '')+(item.pulse ? ' is-period-feel-pulse' : '')}
                       onClick={()=>handleDockQuickItemSelect(item)}
                     >
                       <span className="dock-feeding-quick-icon" aria-hidden="true">

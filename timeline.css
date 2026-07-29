@@ -248,6 +248,12 @@
 .tl-rail-node.is-guide .tl-rail-marker{
   padding-top:6px;
 }
+.tl-rail-node.is-period-feel-guide .tl-rail-marker{
+  padding-top:8px;
+}
+.tl-rail-node.is-period-feel-guide .tl-rail-body{
+  margin-top:0;
+}
 .tl-rail-marker{
   width:14px;
   flex-shrink:0;
@@ -286,6 +292,12 @@
 .tl-rail-dot.baby{
   background:#ff9f43;
   box-shadow:0 0 0 2px var(--my-bg), 0 0 0 5px rgba(255,159,67,0.12);
+}
+.tl-rail-node.is-period-feel-guide .tl-rail-dot{
+  width:8px;
+  height:8px;
+  background:#ff4d88;
+  box-shadow:0 0 0 2px var(--my-bg), 0 0 0 5px rgba(255,77,136,.14);
 }
 .tl-rail-body{
   flex:1;
@@ -2014,12 +2026,63 @@
   letter-spacing:0.01em;
 }
 .tl-t5-insight .tl-t5-analysis-lead,
-.tl-t5-insight .tl-t5-analysis-text{
+.tl-t5-insight .tl-t5-analysis-text,
+.tl-t5-insight .tl-t5-analysis-prompt{
   margin:0 0 10px;
   font-size:13px;
   line-height:1.55;
   color:rgba(0,0,0,0.55);
 }
+.tl-t5-insight .tl-t5-analysis-prompt{
+  margin-top:2px;
+  color:rgba(0,0,0,0.62);
+  white-space:pre-line;
+}
+.tl-t5-insight .period-feel-highlight{
+  color:var(--my-brand-red, #ff4d88);
+  font-weight:600;
+}
+.tl-period-feel-guide-outside{
+  position:relative;
+  margin:0 16px 2px 0;
+  padding:0 0 62px;
+  color:#5f5360;
+  font-size:16px;
+  line-height:1.55;
+  text-align:left;
+  white-space:pre-line;
+  animation:periodFeelGuideOutsideIn .35s ease-out both;
+}
+.tl-period-feel-guide-outside p{margin:0}
+.tl-period-feel-guide-outside b,
+.tl-period-feel-guide-outside strong{
+  color:var(--my-brand-red, #ff4d88);
+  font-weight:600;
+}
+.tl-period-feel-guide-arrow{
+  position:fixed;
+  inset:0;
+  z-index:145;
+  width:100vw;
+  height:100vh;
+  margin:0;
+  pointer-events:none;
+  overflow:visible;
+  animation:none;
+}
+.tl-period-feel-guide-arrow > path{
+  fill:none;
+  stroke:var(--my-brand-red, #ff4d88);
+  stroke-width:2.2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.tl-period-feel-guide-arrow-head{
+  fill:var(--my-brand-red, #ff4d88);
+  stroke:none;
+}
+@keyframes periodFeelGuideOutsideIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes periodFeelGuideArrow{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
 .tl-t5-insight .tl-t5-analysis-body b,
 .tl-t5-insight .tl-t5-analysis-body strong{
   font-weight:500;
@@ -2043,7 +2106,8 @@
 }
 .tl-t5-card.has-period-summary .tl-t5-analysis-body,
 .tl-t5-card.has-period-summary .tl-t5-analysis-lead,
-.tl-t5-card.has-period-summary .tl-t5-analysis-text{
+.tl-t5-card.has-period-summary .tl-t5-analysis-text,
+.tl-t5-card.has-period-summary .tl-t5-analysis-prompt{
   font-size:16px;
   line-height:1.6;
   color:#323232;
