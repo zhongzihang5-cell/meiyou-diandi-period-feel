@@ -1456,7 +1456,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
           photoUrl:p.photo?.src || p.photoUrl || null,
         }
     : p?.kind === 'daily-record'
-      ? (p.recordType === 'photo' ? null : {
+      ? {
           kind: 'daily-record',
           time: p.time,
           recordType: p.recordType,
@@ -1484,7 +1484,9 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
           totalKcal: p.totalKcal,
           mealType: p.mealType,
           photoUrl: p.photoUrl,
-        })
+          note: p.note || '',
+          dayLabel: p.dayLabel || '今天',
+        }
     : (p?.kind === 'weight' || p?.kind === 'weight-text')
         ? {
             kind: 'daily-record',

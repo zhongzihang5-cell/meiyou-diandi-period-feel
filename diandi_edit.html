@@ -1288,6 +1288,52 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
   }
+  .edit-photo-record {
+    padding: 0 16px 16px;
+  }
+  .edit-photo-preview {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #f1f1f4;
+  }
+  .edit-photo-preview img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+  }
+  .edit-photo-note-label {
+    display: block;
+    margin: 16px 0 8px;
+    color: var(--my-text-tertiary);
+    font-size: 13px;
+  }
+  .edit-photo-note {
+    width: 100%;
+    min-height: 120px;
+    resize: none;
+    border: 0.5px solid var(--my-line-strong);
+    border-radius: 10px;
+    outline: none;
+    padding: 12px;
+    background: #f8f8fa;
+    color: var(--my-text-primary);
+    font: inherit;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  .edit-photo-note:focus {
+    border-color: rgba(255, 77, 136, 0.45);
+    background: #ffffff;
+  }
+  .edit-photo-note-count {
+    margin-top: 6px;
+    color: var(--my-text-quaternary);
+    font-size: 11px;
+    text-align: right;
+  }
   .symptom-picker-mask {
     position: absolute;
     inset: 0;
@@ -2335,6 +2381,7 @@
   };
   let dailyRecordState = {
     time: '今天 09:15',
+    dayLabel: '今天',
     recordType: 'love',
     recordLabel: '爱爱',
     recordValue: '无措施',
@@ -2804,6 +2851,8 @@
         spec: dailyRecordState.spec,
         calories: dailyRecordState.calories,
         caffeineMg: dailyRecordState.caffeineMg,
+        note: dailyRecordState.note || '',
+        dayLabel: dailyRecordState.dayLabel || '今天',
         area: dailyRecordState.area,
         acne: dailyRecordState.acne,
         redness: dailyRecordState.redness,
@@ -2869,6 +2918,7 @@
       }
       if(currentTimeTarget.id === 'recordTime-daily-record'){
         dailyRecordState.time = `${hour}:${min}`;
+        dailyRecordState.dayLabel = day || '今天';
         renderDailyRecordEditor();
       }
       markDirty();
@@ -2880,9 +2930,14 @@
     const days = ['前天', '昨天', '今天'];
     const hours = Array.from({length: 24}, (_, i) => String(i).padStart(2, '0'));
     const mins = Array.from({length: 60}, (_, i) => String(i).padStart(2, '0'));
-    fillCol('dayCol', days, 2);
-    fillCol('hourCol', hours, 12);
-    fillCol('minCol', mins, 0);
+    const currentValue = currentTimeTarget?.textContent || '';
+    const selectedDay = days.find(day => currentValue.includes(day)) || '今天';
+    const timeMatch = currentValue.match(/(\d{1,2}):(\d{2})/);
+    const selectedHour = timeMatch ? Number(timeMatch[1]) : 12;
+    const selectedMinute = timeMatch ? Number(timeMatch[2]) : 0;
+    fillCol('dayCol', days, Math.max(0, days.indexOf(selectedDay)));
+    fillCol('hourCol', hours, Math.max(0, Math.min(23, selectedHour)));
+    fillCol('minCol', mins, Math.max(0, Math.min(59, selectedMinute)));
   }
   function fillCol(colId, items, defaultIdx) {
     const col = document.getElementById(colId);
@@ -3440,6 +3495,27 @@
     const title = document.getElementById('dailyRecordTitle');
     const config = getDailyRecordConfig(dailyRecordState.recordType);
     const label = dailyRecordState.recordLabel || config.label;
+    if(dailyRecordState.recordType === 'photo'){
+      const note = dailyRecordState.note || '';
+      title.textContent = '照片备注';
+      list.innerHTML = `
+        <div class="edit-photo-record">
+          <div class="edit-photo-preview">
+            <img src="${escapeHtml(dailyRecordState.photoUrl || '')}" alt="生活照片" draggable="false">
+          </div>
+          <label class="edit-photo-note-label" for="editPhotoNote">备注</label>
+          <textarea
+            id="editPhotoNote"
+            class="edit-photo-note"
+            maxlength="160"
+            placeholder="写下拍照时发生的事情或此刻的想法"
+            oninput="updatePhotoNote(this)"
+          >${escapeHtml(note)}</textarea>
+          <div class="edit-photo-note-count" id="editPhotoNoteCount">${note.length}/160</div>
+        </div>
+      `;
+      return;
+    }
     const displayLabel = dailyRecordState.recordType === 'beverage' && dailyRecordState.beverageCategory
       ? `${label}（${dailyRecordState.beverageCategory}）`
       : label;
@@ -3452,7 +3528,7 @@
         <div class="record-main">
           <div class="record-type">${displayLabel}</div>
           <div class="record-value">${value}</div>
-          <div class="record-time">${formatPeriodDetailTime(dailyRecordState.time)}</div>
+          <div class="record-time">${dailyRecordState.dayLabel || '今天'} ${normalizePeriodDetailTime(dailyRecordState.time)}</div>
         </div>
         <div class="record-actions">
           <button class="record-edit" onclick="openDailyOptionPicker()" aria-label="编辑${label}">
@@ -3471,6 +3547,13 @@
         </div>
       </div>
     `;
+  }
+
+  function updatePhotoNote(input) {
+    dailyRecordState.note = input.value;
+    const count = document.getElementById('editPhotoNoteCount');
+    if(count) count.textContent = `${input.value.length}/160`;
+    markDirty();
   }
 
   function getQuickRecordTarget(index){
@@ -3734,6 +3817,7 @@
       const config = getDailyRecordConfig(payload.recordType);
       dailyRecordState = {
         time: payload.time || '09:15',
+        dayLabel: payload.dayLabel || '今天',
         recordType: payload.recordType || 'love',
         recordLabel: payload.recordLabel || config.label,
         recordValue: payload.recordValue || payload.recordDetail || config.options[0] || '',
@@ -3753,6 +3837,7 @@
         spec: payload.spec || '',
         calories: Number(payload.calories) || 0,
         caffeineMg: Number(payload.caffeineMg) || 0,
+        note: payload.note || '',
         area: payload.area || '',
         acne: payload.acne || '',
         redness: payload.redness || '',
@@ -3760,7 +3845,8 @@
         product: payload.product || '',
         managementStatus: payload.managementStatus || '',
       };
-      document.getElementById('recordTime-daily-record').textContent = formatPeriodDetailTime(dailyRecordState.time);
+      document.getElementById('recordTime-daily-record').textContent =
+        `${dailyRecordState.dayLabel} ${normalizePeriodDetailTime(dailyRecordState.time)}`;
       renderDailyRecordEditor();
       resetDirty();
       return;

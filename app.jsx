@@ -709,6 +709,7 @@ function App(){
           beverage: 'beverage',
           skin: 'skin',
           cosmetic: 'cosmetic',
+          photo: 'photo',
         };
         const normalizeDietItems = (payload)=>{
           const items = Array.isArray(payload.dietItems) ? payload.dietItems : [];
@@ -726,11 +727,15 @@ function App(){
             .filter(Boolean)
             .map((name, index)=>({ id:`food-${index + 1}`, name, amount:'', kcal:0 }));
         };
-        setTimeline(blocks=>blocks.map(block=>{
-          if(block.type !== 'day') return block;
-          const nextItems = (block.items || block.entries || []).map(item=>{
+        setTimeline(blocks=>{
+          let editedItem = null;
+          let sourceDayId = null;
+          const updatedBlocks = blocks.map(block=>{
+            if(block.type !== 'day') return block;
+            const nextItems = (block.items || block.entries || []).map(item=>{
             const primaryId = item?.primary?.id;
             if(item?.id !== entryId && primaryId !== entryId) return item;
+            sourceDayId = block.id;
             const type = payload.recordType || item.primary?.recordType;
             const label = payload.recordLabel || item.primary?.recordLabel || '记录';
             const value = payload.recordValue || item.primary?.recordValue || '';
@@ -798,6 +803,8 @@ function App(){
               acneMarks:payload.acneMarks ?? item.primary?.acneMarks,
               product:payload.product ?? item.primary?.product,
               managementStatus:payload.managementStatus ?? item.primary?.managementStatus,
+              note:payload.note ?? item.primary?.note,
+              dayLabel:payload.dayLabel ?? item.primary?.dayLabel,
               text:`${label}：${detail}`,
               tags:[{ label, cat:label, val:value, icon }],
             };
@@ -813,14 +820,28 @@ function App(){
               },
               note:'',
             } : item.ai;
-            return {
+            editedItem = {
               ...item,
               primary:nextPrimary,
               ai:nextAi,
             };
+            return editedItem;
           });
           return { ...block, items: nextItems, entries: undefined };
-        }));
+          });
+          if(!editedItem || !sourceDayId || !payload.dayLabel) return updatedBlocks;
+          const targetDayId = window.resolveEntryDayId(payload.dayLabel, updatedBlocks);
+          if(!targetDayId || targetDayId === sourceDayId) return updatedBlocks;
+          const withoutEditedItem = updatedBlocks.map(block=>{
+            if(block.type !== 'day' || block.id !== sourceDayId) return block;
+            return {
+              ...block,
+              items:(block.items || []).filter(item=>item?.id !== entryId && item?.primary?.id !== entryId),
+              entries:undefined,
+            };
+          });
+          return window.appendTimelineEntry(withoutEditedItem, editedItem, { dayId:targetDayId });
+        });
         return;
       }
       if(payload.kind === 'quick'){
@@ -1857,6 +1878,7 @@ function App(){
           text:'',
           photoUrl:payload.photoUrl || null,
           note:'',
+          dayLabel:'今天',
           tags:[],
         },
       };
