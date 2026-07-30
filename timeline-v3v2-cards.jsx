@@ -1154,7 +1154,11 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
         <section className={'v3-camera-insight is-' + entry.recordType}>
           <div className="v3-camera-insight-heading">
             <img src={recordIconSrc(iconKey)} alt="" aria-hidden="true"/>
-            <span>{entry.recordLabel || '记录'}：</span>
+            <span>
+              {entry.recordType === 'beverage' && entry.beverageCategory
+                ? `${entry.recordLabel || '饮品'}（${entry.beverageCategory}）：`
+                : `${entry.recordLabel || '记录'}：`}
+            </span>
           </div>
           {entry.photoUrl ? (
             <div className="v3-camera-insight-photo">
@@ -1463,6 +1467,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
           iconText: p.iconText || '',
           brand: p.brand,
           beverageName: p.beverageName,
+          beverageCategory: p.beverageCategory,
           capacityMl: p.capacityMl,
           iceLevel: p.iceLevel,
           sugarLevel: p.sugarLevel,

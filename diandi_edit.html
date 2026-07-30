@@ -1225,6 +1225,26 @@
     color: #8e8e93;
     font-size: 13px;
   }
+  .edit-beverage-category-scroll {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 1px 2px 6px;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .edit-beverage-category-scroll::-webkit-scrollbar {
+    display: none;
+  }
+  .edit-beverage-category-scroll .edit-beverage-segment {
+    min-width: 76px;
+    flex: 0 0 auto;
+    padding: 0 14px;
+    border-radius: 18px;
+    scroll-snap-align: start;
+    white-space: nowrap;
+  }
   .edit-beverage-segments {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -2761,6 +2781,7 @@
         photoUrl: dailyRecordState.photoUrl,
         brand: dailyRecordState.brand,
         beverageName: dailyRecordState.beverageName,
+        beverageCategory: dailyRecordState.beverageCategory,
         capacityMl: dailyRecordState.capacityMl,
         iceLevel: dailyRecordState.iceLevel,
         sugarLevel: dailyRecordState.sugarLevel,
@@ -3268,6 +3289,7 @@
   function renderDailyCameraPicker(type) {
     if(type === 'beverage'){
       const capacity = Math.max(100, Math.min(1000, Number(dailyRecordState.capacityMl) || 500));
+      const categoryOptions = ['奶茶', '咖啡', '果茶', '纯茶', '果汁', '果蔬汁', '纯奶饮品'];
       const iceOptions = ['热', '常温', '去冰', '少冰', '正常冰'];
       const sugarOptions = ['0%', '30%', '50%', '70%', '100%'];
       return `
@@ -3285,6 +3307,12 @@
               <div class="edit-camera-input-wrap">
                 <input id="edit-camera-beverageName" class="edit-camera-input" data-field="beverageName" value="${escapeHtml(dailyRecordState.beverageName || '')}" placeholder="例如：红茶咖啡拿铁鸳鸯">
               </div>
+            </div>
+          </div>
+          <div class="edit-beverage-segment-group">
+            <span class="edit-beverage-segment-label">品类标签</span>
+            <div class="edit-beverage-category-scroll" data-beverage-group="beverageCategory" aria-label="饮品品类">
+              ${categoryOptions.map(option=>`<button type="button" class="edit-beverage-segment${dailyRecordState.beverageCategory === option ? ' active' : ''}" data-value="${option}">${option}</button>`).join('')}
             </div>
           </div>
           <div class="edit-beverage-capacity">
@@ -3373,6 +3401,7 @@
       return {
         brand:valueOf('brand'),
         beverageName:valueOf('beverageName'),
+        beverageCategory:activeValue('beverageCategory'),
         capacityMl:Number(document.getElementById('editBeverageCapacity')?.value) || 0,
         iceLevel:activeValue('iceLevel'),
         sugarLevel:activeValue('sugarLevel'),
@@ -3395,14 +3424,17 @@
     const title = document.getElementById('dailyRecordTitle');
     const config = getDailyRecordConfig(dailyRecordState.recordType);
     const label = dailyRecordState.recordLabel || config.label;
+    const displayLabel = dailyRecordState.recordType === 'beverage' && dailyRecordState.beverageCategory
+      ? `${label}（${dailyRecordState.beverageCategory}）`
+      : label;
     const value = dailyRecordState.recordDetail || dailyRecordState.recordValue || '';
     const iconHtml = renderDailyRecordIconHtml();
-    title.textContent = label;
+    title.textContent = displayLabel;
     list.innerHTML = `
       <div class="record-item" data-record-kind="daily">
         <div class="record-icon ${config.className}">${iconHtml}</div>
         <div class="record-main">
-          <div class="record-type">${label}</div>
+          <div class="record-type">${displayLabel}</div>
           <div class="record-value">${value}</div>
           <div class="record-time">${formatPeriodDetailTime(dailyRecordState.time)}</div>
         </div>
@@ -3698,6 +3730,7 @@
         photoUrl: payload.photoUrl || null,
         brand: payload.brand || '',
         beverageName: payload.beverageName || '',
+        beverageCategory: payload.beverageCategory || '',
         capacityMl: Number(payload.capacityMl) || 0,
         iceLevel: payload.iceLevel || '',
         sugarLevel: payload.sugarLevel || '',

@@ -146,6 +146,7 @@ function buildCameraRecognitionResult(payload) {
       ...base,
       brand: '星巴克',
       beverageName: '红茶咖啡拿铁鸳鸯',
+      beverageCategory: '咖啡',
       capacityMl: 500,
       iceLevel: '正常冰',
       sugarLevel: '',
@@ -155,6 +156,7 @@ function buildCameraRecognitionResult(payload) {
       summary: '星巴克红茶咖啡拿铁鸳鸯 · 500ml/正常冰',
       summaryItems: [
         { label: '饮品', value: '星巴克 · 红茶咖啡拿铁鸳鸯' },
+        { label: '品类', value: '咖啡' },
         { label: '容量', value: '500ml' },
         { label: '冰度', value: '正常冰' },
         { label: '糖度', value: '' },
