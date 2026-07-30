@@ -1381,6 +1381,8 @@
 
 .period-feel-overlay{position:fixed;inset:0;z-index:220;background:rgba(0,0,0,.26);display:flex;align-items:flex-end;justify-content:center}
 .period-feel-sheet{width:100%;max-width:390px;height:min(510px,66.666vh);background:var(--my-surface);border-radius:18px 18px 0 0;overflow:hidden;display:flex;flex-direction:column;animation:periodFeelSheetIn .3s cubic-bezier(.2,0,0,1)}
+.period-feel-overlay.is-scheme1 .period-feel-sheet,
+.period-feel-overlay.is-compact .period-feel-sheet{height:min(450px,60vh)}
 @keyframes periodFeelSheetIn{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .period-feel-nav{height:44px;flex:0 0 44px;display:flex;align-items:center;justify-content:center;position:relative;font-size:17px;font-weight:600;border-bottom:.5px solid var(--my-line)}
 .period-feel-nav button{position:absolute;left:8px;top:3px;width:38px;height:38px;border:0;background:transparent;color:var(--my-text-secondary);font-size:28px;line-height:1;font-family:inherit}
@@ -1410,6 +1412,75 @@
 .period-feel-demo-quote{margin:0;font-size:15px;line-height:1.85;color:var(--my-text-primary)}
 .period-feel-demo-title{display:block;margin-bottom:8px;font-size:15px;line-height:1.5;color:var(--my-brand-red)}
 .period-feel-demo-quote strong{font-weight:600;color:var(--my-text-primary);background:transparent;border-radius:0;padding:0}
+.period-feel-example-carousel{
+  min-height:92px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:0;
+  padding:8px 0;
+}
+.period-feel-example-carousel p{
+  margin:0;
+  font-size:18px;
+  line-height:1.5;
+  color:var(--my-text-primary);
+  animation:periodFeelExampleIn .28s ease both;
+}
+.period-feel-example-carousel strong{font-weight:600;color:var(--my-brand-red)}
+@keyframes periodFeelExampleIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.period-feel-top.is-scheme1-content .period-feel-intro,
+.period-feel-top.is-scheme1-content .period-feel-example-carousel{
+  transform:translateY(48px);
+}
+.period-feel-top.is-scheme1-content .period-feel-intro{margin-bottom:8px}
+.period-feel-top.is-scheme2-content .period-feel-intro,
+.period-feel-top.is-scheme2-content .period-feel-demo{display:none}
+.period-feel-top.is-scheme2-content{display:none}
+.period-feel-question-module{
+  margin:14px 30px 8px;
+  padding:12px 14px;
+  background:#fff;
+  border:1px solid rgba(255,77,136,.16);
+  border-radius:12px;
+}
+.period-feel-question-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-height:38px;
+}
+.period-feel-question-row + .period-feel-question-row{margin-top:8px}
+.period-feel-question-row svg{width:38px;height:38px;flex:0 0 38px;display:block}
+.period-feel-question-icon{
+  width:38px;
+  height:38px;
+  flex:0 0 38px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  border-radius:50%;
+  background:#fff;
+}
+.period-feel-question-icon.is-symptom{box-shadow:0 3px 9px rgba(91,174,230,.2)}
+.period-feel-question-icon.is-mood{box-shadow:0 3px 9px rgba(255,180,65,.2)}
+.period-feel-question-icon .dock-unified-quick-icon{width:38px;height:38px}
+.period-feel-question-row p{margin:0;font-size:15px;line-height:1.5;color:var(--my-text-primary)}
+.period-feel-question-row em{font-style:normal;font-weight:600;color:var(--my-brand-red)}
+.period-feel-speak-guide{
+  position:absolute;
+  left:0;
+  right:0;
+  top:-72px;
+  z-index:8;
+  margin:0 auto;
+  color:var(--my-text-secondary);
+  font-size:14px;
+  line-height:1.45;
+  text-align:center;
+}
 .period-feel-demo-tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}
 .v3-tag[data-cat="经期"]{color:#ff4d88}
 .period-feel-demo small{display:block;margin-top:14px;color:var(--my-text-tertiary);font-size:12px;line-height:1.7}
@@ -1418,6 +1489,7 @@
 .period-feel-bars{height:58px;display:flex;align-items:center;gap:3px;margin-bottom:18px;opacity:0}
 .period-feel-stage.is-recording .period-feel-bars{opacity:1}
 .period-feel-real-dock{flex:0 0 auto;width:100%;padding:0 10px 14px;background:linear-gradient(180deg,#fff 0%,#fff7fa 100%)}
+.period-feel-real-dock.is-scheme2{margin-top:auto;position:relative}
 .period-feel-real-dock .dock-wrap{position:static;transform:none;width:100%;max-width:none}
 .period-feel-real-dock .dock-panel{border:0;border-radius:0;box-shadow:none;background:transparent}
 .period-feel-real-dock .dock-camera-btn{display:none}
@@ -1435,6 +1507,39 @@
   z-index:3;
   color:#333;
   opacity:1;
+}
+.period-feel-real-dock.is-scheme1-motion .dock-input-pill{
+  position:relative;
+  top:-45px;
+  isolation:isolate;
+  padding:7px 10px;
+  min-height:58px;
+  border-radius:30px;
+  background:linear-gradient(180deg,#fff 0%,#fff5f8 100%);
+  border:1px solid rgba(255,77,136,.2);
+  animation:periodFeelInputBreath 2.4s ease-in-out infinite;
+}
+.period-feel-real-dock.is-scheme1-motion .dock-input-pill::before{
+  content:"";
+  position:absolute;
+  inset:-7px;
+  border:1.5px solid rgba(255,77,136,.34);
+  border-radius:36px;
+  pointer-events:none;
+  z-index:0;
+  animation:periodFeelInputRing 2.4s ease-in-out infinite;
+}
+.period-feel-real-dock.is-scheme1-motion .dock-voice-wrap{
+  background:linear-gradient(180deg,#fff5f8 0%,#ffeaf1 100%);
+  box-shadow:none;
+}
+@keyframes periodFeelInputBreath{
+  0%,100%{transform:scale(1);box-shadow:0 3px 14px rgba(255,77,136,.14),inset 0 1px 0 rgba(255,255,255,.95)}
+  50%{transform:scale(1.012);box-shadow:0 8px 26px rgba(255,77,136,.3),inset 0 1px 0 rgba(255,255,255,.95)}
+}
+@keyframes periodFeelInputRing{
+  0%,100%{opacity:.2;transform:scale(1)}
+  50%{opacity:.58;transform:scale(1.045)}
 }
 .period-feel-bars i{width:3px;height:8px;border-radius:3px;background:var(--my-brand-red);animation:periodFeelBar .7s ease-in-out infinite alternate}
 @keyframes periodFeelBar{to{height:48px}}
