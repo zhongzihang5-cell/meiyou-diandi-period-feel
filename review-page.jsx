@@ -474,6 +474,41 @@ function ReviewExpandIcon(){
   return <svg viewBox="0 0 24 24"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5"/><path d="M3 8l6-6M21 8l-6-6M21 16l-6 6M3 16l6 6"/></svg>;
 }
 
+function PhaseChartLandscapePage({open, onClose, title, subtitle, legend, children}){
+  const scrollerRef = React.useRef(null);
+  React.useEffect(()=>{
+    if(!open) return undefined;
+    const scroller = scrollerRef.current;
+    if(scroller) scroller.scrollLeft = 0;
+    const handleKeyDown = event=>{ if(event.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handleKeyDown);
+    return ()=>document.removeEventListener('keydown', handleKeyDown);
+  }, [open, onClose]);
+  return (
+    <section
+      className={'review-cycle-landscape is-over-detail' + (open ? ' is-open' : '')}
+      aria-hidden={!open}
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+    >
+      <div className="review-cycle-landscape-surface">
+        <header className="review-cycle-landscape-head">
+          <div>
+            <h2>{title}</h2>
+            {subtitle ? <p>{subtitle}</p> : null}
+          </div>
+          <button type="button" className="review-cycle-landscape-close" aria-label="关闭横屏图表" onClick={onClose}>×</button>
+        </header>
+        {legend ? <div className="review-cycle-landscape-legend">{legend}</div> : null}
+        <div className="review-cycle-landscape-scroll is-phase-traj" ref={scrollerRef}>
+          {children}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function ReviewWechatIcon(){
   return <svg viewBox="0 0 24 24"><path d="M10.2 5.2c-4 0-7.2 2.5-7.2 5.7 0 1.8 1 3.4 2.7 4.5l-.7 2.3 2.6-1.3c.8.2 1.7.3 2.6.3.4 0 .8 0 1.2-.1-.5-.7-.8-1.6-.8-2.5 0-2.9 2.7-5.3 6.2-5.3h.3c-1-2.1-3.7-3.6-6.9-3.6z"/><path d="M17 9.8c-3.3 0-6 2-6 4.6s2.7 4.6 6 4.6c.7 0 1.4-.1 2-.3l2.1 1-.5-1.9c1.5-.8 2.4-2 2.4-3.4 0-2.6-2.7-4.6-6-4.6z"/><path d="M7.5 9.5h.01M12.3 9.5h.01M15 13.7h.01M19 13.7h.01"/></svg>;
 }
@@ -2860,6 +2895,7 @@ function DietDistributionDetailPage({open, onClose}){
           <ReviewBackIcon/>
         </button>
         <span className="review-detail-title">饮食</span>
+        <button type="button" className="review-detail-all-records">所有记录</button>
       </div>
       <div className="review-detail-content review-love-detail-content">
         <div className="review-love-detail-top">
@@ -3141,7 +3177,7 @@ function DietTargetCard(){
 
 const MOOD_AXIS_LABELS = ['很消极', '偏消极', '中性', '偏积极', '很积极'];
 const MOOD_WORD_BY_LEVEL = ['好伤心', '不开心', '中性', '挺开心', '超开心'];
-const MOOD_MONTH_VALS = [3,4,3,2,3,4,3,4,3,3,4,3,2,4,3,4,4,3,4,4,3,4,4,3,4,5,4,4,4,4];
+const MOOD_MONTH_VALS = [3,4,3,2,3,4,3,4,3,3,4,3,2,4,3,4,4,3,4,4,3,4,4,3,5,4,4,4,4,4];
 const MOOD_CYCLE_VALS = [3,4,3,2,3,4,3,4,3,3,4,3,2,4,3,4,4,3,4,4,3,4,4,3,4,5,4,4];
 const MOOD_TODAY_PTS = [
   {time:'08:30', label:'兴奋', level:5, face:'🤩', via:'语音'},
@@ -3363,6 +3399,7 @@ function MoodLineChart({
   triScale = false,
   showTrend = true,
   showArea = true,
+  showExtremes = false,
   ariaLabel = '本月心情波动折线图',
 }){
   const n = vals.length;
@@ -3370,7 +3407,7 @@ function MoodLineChart({
   // triScale 时固定边距，避免切换 Tab 时「积极/中性/消极」轴位跳动
   const padL = triScale ? 36 : (compact ? 40 : 48);
   const padR = triScale ? 12 : (compact ? 10 : 12);
-  const padT = triScale ? 14 : (compact ? 10 : 14);
+  const padT = showExtremes ? 24 : (triScale ? 14 : (compact ? 10 : 14));
   const padB = (xLabels || dates) ? (triScale ? 24 : (compact ? 20 : 24)) : 16;
   const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
   const plotH = y1 - y0;
@@ -3413,6 +3450,26 @@ function MoodLineChart({
     trendB = denom ? (n * sxy - sx * sy) / denom : 0;
     trendA = (sy - trendB * sx) / n;
   }
+  const extremeMarks = (()=>{
+    if(!showExtremes || n < 2) return [];
+    let maxI = 0;
+    let minI = 0;
+    for(let i = 1; i < n; i++){
+      if(vals[i] > vals[maxI]) maxI = i;
+      if(vals[i] < vals[minI]) minI = i;
+    }
+    const labelAt = (i)=>{
+      if(dates && dates[i]) return dates[i];
+      if(xLabels && xLabels[i] != null) return xLabels[i];
+      return String(i + 1);
+    };
+    const marks = [
+      {key:'max', i:maxI, label:labelAt(maxI), color:colorAt(vals[maxI])},
+      {key:'min', i:minI, label:labelAt(minI), color:colorAt(vals[minI])},
+    ];
+    if(maxI === minI) return marks.slice(0, 1);
+    return marks;
+  })();
 
   return (
     <svg viewBox={'0 0 ' + W + ' ' + H} preserveAspectRatio="xMidYMid meet" role="img" aria-label={ariaLabel}>
@@ -3504,6 +3561,7 @@ function MoodLineChart({
       <path d={path} fill="none" stroke={'url(#' + gradientId + ')'} strokeWidth={strokeW} strokeLinejoin="round" strokeLinecap="round"/>
       {showDots && dotIndexes ? pts.map((p, i)=>{
         if(markToday && i === n - 1) return null;
+        if(showExtremes && extremeMarks.some(m=>m.i === i)) return null;
         if(!dotIndexes.has(i)) return null;
         return (
           <circle
@@ -3516,13 +3574,37 @@ function MoodLineChart({
           />
         );
       }) : null}
-      {last && markToday && !compact ? (
+      {last && markToday && !compact && !(showExtremes && extremeMarks.some(m=>m.i === n - 1)) ? (
         <circle cx={last[0]} cy={last[1]} r={lastR} fill={lastColor}/>
-      ) : last && !compact ? (
+      ) : last && !compact && !(showExtremes && extremeMarks.some(m=>m.i === n - 1)) ? (
         <circle cx={last[0]} cy={last[1]} r={dotR} fill={lastColor}/>
-      ) : last && compact ? (
+      ) : last && compact && !(showExtremes && extremeMarks.some(m=>m.i === n - 1)) ? (
         <circle cx={last[0]} cy={last[1]} r={lastR} fill={lastColor}/>
       ) : null}
+      {extremeMarks.map(mark=>{
+        const p = pts[mark.i];
+        const isMin = mark.key === 'min';
+        const labelY = isMin ? Math.min(H - 10, p[1] + 14) : Math.max(11, p[1] - 10);
+        const anchor = mark.i <= 1 ? 'start' : (mark.i >= n - 2 ? 'end' : 'middle');
+        const tx = Math.max(padL, Math.min(W - padR, p[0]));
+        return (
+          <g key={'ext-' + mark.key}>
+            <circle cx={p[0]} cy={p[1]} r="3.4" fill={mark.color} stroke="#fff" strokeWidth="1.6"/>
+            <text
+              x={tx}
+              y={labelY}
+              textAnchor={anchor}
+              fontSize="10"
+              fontWeight="500"
+              fill={mark.color}
+              fontFamily="PingFang SC, -apple-system, sans-serif"
+              stroke="#fff"
+              strokeWidth="2"
+              paintOrder="stroke fill"
+            >{mark.label}</text>
+          </g>
+        );
+      })}
       {axisLabels ? Object.keys(axisLabels).map(k=>(
         <text
           key={k}
@@ -3548,7 +3630,26 @@ function buildMoodYearWeeklyVals(dailyVals){
   return out;
 }
 
+function buildMoodWeeklyDateLabels(dayCount){
+  const today = new Date(2026, 6, 13);
+  const start = new Date(today);
+  start.setDate(today.getDate() - dayCount + 1);
+  const labels = [];
+  for(let i = 0; i < dayCount; i += 7){
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    labels.push({
+      y:d.getFullYear(),
+      label:(d.getMonth() + 1) + '/' + d.getDate(),
+      labelWithYear:String(d.getFullYear()).slice(2) + '/' + (d.getMonth() + 1) + '/' + d.getDate(),
+    });
+  }
+  const crossYear = labels.length >= 2 && labels[0].y !== labels[labels.length - 1].y;
+  return labels.map(item=>crossYear ? item.labelWithYear : item.label);
+}
+
 const MOOD_YEAR_WEEK_VALS = buildMoodYearWeeklyVals(MOOD_YEAR_VALS);
+const MOOD_YEAR_WEEK_DATES = buildMoodWeeklyDateLabels(MOOD_YEAR_VALS.length);
 const MOOD_YEAR_WEEK_XLABELS = (()=>{
   const n = MOOD_YEAR_WEEK_VALS.length;
   const map = {};
@@ -3558,6 +3659,7 @@ const MOOD_YEAR_WEEK_XLABELS = (()=>{
   return map;
 })();
 const MOOD_HALF_WEEK_VALS = buildMoodYearWeeklyVals(MOOD_HALF_SERIES.vals);
+const MOOD_HALF_WEEK_DATES = buildMoodWeeklyDateLabels(MOOD_HALF_SERIES.vals.length);
 const MOOD_HALF_WEEK_XLABELS = (()=>{
   const n = MOOD_HALF_WEEK_VALS.length;
   const map = {};
@@ -3568,6 +3670,7 @@ const MOOD_HALF_WEEK_XLABELS = (()=>{
   return map;
 })();
 const MOOD_ALL_WEEK_VALS = buildMoodYearWeeklyVals(MOOD_ALL_SERIES.vals);
+const MOOD_ALL_WEEK_DATES = buildMoodWeeklyDateLabels(MOOD_ALL_SERIES.vals.length);
 const MOOD_ALL_WEEK_XLABELS = (()=>{
   const n = MOOD_ALL_WEEK_VALS.length;
   const map = {};
@@ -3587,6 +3690,14 @@ const MOOD_RANGE_META = {
     streakDays:12,
     compareValue:'周末',
     trend:'↗ 更积极',
+    freqHint:'差不多每两天记一次',
+    triShare:[
+      {key:'pos', label:'积极', pct:54, color:MOOD_TRI_POS},
+      {key:'neu', label:'中性', pct:7, color:MOOD_TRI_NEU},
+      {key:'neg', label:'消极', pct:39, color:MOOD_TRI_NEG},
+    ],
+    recoverHighlight:'2-3',
+    recoverDetail:'这 30 天出现过 4 次低落，每一次都回升了',
   },
   half:{
     label:'近半年',
@@ -3597,6 +3708,14 @@ const MOOD_RANGE_META = {
     streakDays:18,
     compareValue:'春季',
     trend:'↗ 更积极',
+    freqHint:'平均约每 1.3 天记一次',
+    triShare:[
+      {key:'pos', label:'积极', pct:55, color:MOOD_TRI_POS},
+      {key:'neu', label:'中性', pct:28, color:MOOD_TRI_NEU},
+      {key:'neg', label:'消极', pct:17, color:MOOD_TRI_NEG},
+    ],
+    recoverHighlight:'2-3',
+    recoverDetail:'近半年出现过多次低落，大多数都能较快回升',
   },
   year:{
     label:'近1年',
@@ -3607,6 +3726,14 @@ const MOOD_RANGE_META = {
     streakDays:42,
     compareValue:'夏季',
     trend:'→ 平稳',
+    freqHint:'平均约每 1.3 天记一次',
+    triShare:[
+      {key:'pos', label:'积极', pct:52, color:MOOD_TRI_POS},
+      {key:'neu', label:'中性', pct:29, color:MOOD_TRI_NEU},
+      {key:'neg', label:'消极', pct:19, color:MOOD_TRI_NEG},
+    ],
+    recoverHighlight:'3',
+    recoverDetail:'近1年低落之后，多数时候都能在几天内缓过来',
   },
   all:{
     label:'全部',
@@ -3617,6 +3744,14 @@ const MOOD_RANGE_META = {
     streakDays:42,
     compareValue:'夏季',
     trend:'↗ 更积极',
+    freqHint:'长期保持较稳定的记录节奏',
+    triShare:[
+      {key:'pos', label:'积极', pct:54, color:MOOD_TRI_POS},
+      {key:'neu', label:'中性', pct:29, color:MOOD_TRI_NEU},
+      {key:'neg', label:'消极', pct:17, color:MOOD_TRI_NEG},
+    ],
+    recoverHighlight:'2-3',
+    recoverDetail:'从全部记录看，低落之后通常都能回升过来',
   },
 };
 
@@ -3626,6 +3761,7 @@ function moodTrendChartProps(range){
   if(range === 'half'){
     return {
       vals:MOOD_HALF_WEEK_VALS,
+      dates:MOOD_HALF_WEEK_DATES,
       xLabels:MOOD_HALF_WEEK_XLABELS,
       height:chartH,
       gradientId:'moodDetailTrendHalf',
@@ -3634,12 +3770,14 @@ function moodTrendChartProps(range){
       showArea:false,
       showDots:true,
       dotStep:2,
+      showExtremes:true,
       ariaLabel:'近半年心情趋势',
     };
   }
   if(range === 'year'){
     return {
       vals:MOOD_YEAR_WEEK_VALS,
+      dates:MOOD_YEAR_WEEK_DATES,
       xLabels:MOOD_YEAR_WEEK_XLABELS,
       height:chartH,
       gradientId:'moodDetailTrendYear',
@@ -3648,12 +3786,14 @@ function moodTrendChartProps(range){
       showArea:false,
       showDots:true,
       dotStep:2,
+      showExtremes:true,
       ariaLabel:'近1年心情趋势',
     };
   }
   if(range === 'all'){
     return {
       vals:MOOD_ALL_WEEK_VALS,
+      dates:MOOD_ALL_WEEK_DATES,
       xLabels:MOOD_ALL_WEEK_XLABELS,
       height:chartH,
       gradientId:'moodDetailTrendAll',
@@ -3662,6 +3802,7 @@ function moodTrendChartProps(range){
       showArea:false,
       showDots:true,
       dotStep:2,
+      showExtremes:true,
       ariaLabel:'全部心情趋势',
     };
   }
@@ -3675,6 +3816,7 @@ function moodTrendChartProps(range){
     dotStep:2,
     triScale:true,
     showArea:false,
+    showExtremes:true,
     ariaLabel:'近30天心情趋势',
   };
 }
@@ -4042,6 +4184,153 @@ function MoodTimePeriodIcon({type}){
   );
 }
 
+function MoodTimeSlotCards({rows = [], ariaLabel = '心情时段分布'}){
+  return (
+    <div className="review-mood-slot-cards" aria-label={ariaLabel}>
+      {rows.map(row=>(
+        <div
+          className="review-mood-slot-card"
+          key={row.name}
+          style={{background:row.bg || '#FAFAFB'}}
+        >
+          <div className="review-mood-slot-card-head">
+            <div className="review-mood-slot-card-period">
+              <MoodTimePeriodIcon type={row.icon}/>
+              <strong>{row.name}</strong>
+            </div>
+            {(row.start || row.end) ? (
+              <span className="review-mood-slot-card-range">{row.start}–{row.end}</span>
+            ) : null}
+          </div>
+          <div className="review-mood-slot-card-foot">
+            <b style={{color:row.moodColor || 'rgba(0,0,0,0.8)'}}>{row.moodLabel}</b>
+            <em>{row.count}次</em>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function MoodWeekBarChart({rows = [], ariaLabel = '心情星期分布'}){
+  const W = 340, H = 220;
+  const padL = 36, padR = 10, padT = 40, padB = 30;
+  const x0 = padL, x1 = W - padR;
+  const yTop = padT, yBot = H - padB;
+  const plotH = yBot - yTop;
+  // 纵坐标沿用「本周期心情变化」轴色；柱色用原先三档色
+  const levels = [
+    {key:'pos', label:'积极', t:0.88, color:'#8EB4D8'},
+    {key:'neu', label:'中性', t:0.50, color:'#D4B06A'},
+    {key:'neg', label:'消极', t:0.16, color:'#E06B6B'},
+  ];
+  const Y = t => yBot - Math.max(0.08, Math.min(1, t)) * plotH;
+  const n = rows.length || 7;
+  const band = (x1 - x0) / n;
+  const bw = Math.min(18, Math.max(12, band * 0.42));
+  const weekendStart = Math.max(0, n - 2);
+  const weekendX = x0 + weekendStart * band;
+  const weekendW = band * 2;
+  const colorOf = (mood)=>{
+    if(mood === 'pos') return {top:MOOD_TRI_POS, bot:'#D9ECFC'};
+    if(mood === 'neg') return {top:MOOD_TRI_NEG, bot:'#FCE8EE'};
+    return {top:MOOD_TRI_NEU, bot:'#FFF6D6'};
+  };
+  const heightT = (row)=>{
+    const p = typeof row.pos === 'number' ? row.pos : (row.mood === 'pos' ? 70 : row.mood === 'neg' ? 35 : 50);
+    return Math.max(0.14, Math.min(0.95, (p - 25) / 55));
+  };
+  const shortLabel = (name)=>{
+    if(!name) return '';
+    return String(name).replace(/^周/, '');
+  };
+  return (
+    <svg className="review-mood-week-bars" viewBox={'0 0 ' + W + ' ' + H} preserveAspectRatio="xMidYMid meet" role="img" aria-label={ariaLabel}>
+      <defs>
+        {rows.map((row, i)=>{
+          const c = colorOf(row.mood);
+          return (
+            <linearGradient key={'wg' + i} id={'moodWeekGrad' + i} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor={c.top}/>
+              <stop offset="1" stopColor={c.bot}/>
+            </linearGradient>
+          );
+        })}
+      </defs>
+      <rect
+        x={weekendX + 2}
+        y={yTop - 28}
+        width={weekendW - 4}
+        height={plotH + 40}
+        rx="14"
+        fill="rgba(107,168,245,0.10)"
+      />
+      <text
+        x={weekendX + weekendW / 2}
+        y={yTop - 10}
+        textAnchor="middle"
+        fontSize="11"
+        fill="#3D7BC8"
+        fontFamily="PingFang SC"
+        fontWeight={500}
+      >周末</text>
+      {levels.map(lv=>(
+        <g key={lv.key}>
+          <line
+            x1={x0}
+            y1={Y(lv.t)}
+            x2={x1}
+            y2={Y(lv.t)}
+            stroke="rgba(0,0,0,0.08)"
+            strokeWidth="1"
+            strokeDasharray="3 4"
+          />
+          <text
+            x={x0 - 8}
+            y={Y(lv.t) + 4}
+            textAnchor="end"
+            fontSize="11"
+            fill={lv.color}
+            fontFamily="PingFang SC"
+          >{lv.label}</text>
+        </g>
+      ))}
+      <line x1={x0} y1={yBot} x2={x1} y2={yBot} stroke="rgba(0,0,0,0.1)" strokeWidth="1"/>
+      {rows.map((row, i)=>{
+        const t = heightT(row);
+        const cx = x0 + i * band + band / 2;
+        const barX = cx - bw / 2;
+        const barTop = Y(t);
+        const barH = Math.max(bw, yBot - barTop);
+        const isWeekend = i >= weekendStart;
+        return (
+          <g key={row.name || i}>
+            <rect
+              x={barX}
+              y={barTop}
+              width={bw}
+              height={barH}
+              rx={bw / 2}
+              fill={'url(#moodWeekGrad' + i + ')'}
+              stroke={isWeekend ? 'rgba(255,255,255,0.9)' : 'none'}
+              strokeWidth={isWeekend ? 1.5 : 0}
+            />
+            <text
+              x={cx}
+              y={yBot + 18}
+              textAnchor="middle"
+              fontSize="12"
+              fill="rgba(0,0,0,0.4)"
+              fontFamily="PingFang SC"
+              fontWeight={400}
+            >{shortLabel(row.name)}</text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
 function MoodTimeDistributionCard({range = 'd30'}){
   const dist = MOOD_DIST_BY_RANGE[range] || MOOD_DIST_BY_RANGE.d30;
   const timeRows = dist.timeRows;
@@ -4052,7 +4341,7 @@ function MoodTimeDistributionCard({range = 'd30'}){
       <div className="review-detail-card review-mood-time-card review-love-mini-card">
         <div className="review-love-cycle-block">
           <div className="review-love-cycle-subhead">心情时段分布</div>
-          <MoodTrendLineRows rows={timeRows} showTime={true} ariaLabel="心情时段分布"/>
+          <MoodTimeSlotCards rows={timeRows} ariaLabel="心情时段分布"/>
           <div className="review-love-insight review-love-habit-insight">
             {dist.timeInsight}
           </div>
@@ -4060,7 +4349,7 @@ function MoodTimeDistributionCard({range = 'd30'}){
         <div className="review-love-cycle-divider" aria-hidden="true"/>
         <div className="review-love-cycle-block">
           <div className="review-love-cycle-subhead">心情星期分布</div>
-          <MoodTrendLineRows rows={weekRows} showTime={false} ariaLabel="心情星期分布"/>
+          <MoodWeekBarChart rows={weekRows} ariaLabel="心情星期分布"/>
         </div>
         <div className="review-love-insight review-love-habit-insight">
           {dist.weekInsight}
@@ -4377,29 +4666,29 @@ const MOOD_SHARE_INSIGHT_BY_RANGE = {
 const MOOD_DIST_BY_RANGE = {
   d30: {
     timeRows: [
-      {name:'深夜', icon:'moon', count:3, start:'00:00', end:'05:00', mood:'neg', pos:37},
-      {name:'早晨', icon:'sunrise', count:5, start:'06:00', end:'11:00', mood:'pos', pos:66},
-      {name:'下午', icon:'sun', count:4, start:'12:00', end:'17:00', mood:'mid', pos:53},
-      {name:'夜晚', icon:'night', count:14, start:'18:00', end:'23:00', mood:'mid', pos:48},
+      {name:'早晨', icon:'sunrise', count:5, start:'06:00', end:'11:00', moodLabel:'平静', moodColor:'#2E6FD0', bg:'#EAF4FC'},
+      {name:'下午', icon:'sun', count:4, start:'12:00', end:'17:00', moodLabel:'专注', moodColor:'#C9953A', bg:'#FBF3E4'},
+      {name:'夜晚', icon:'night', count:14, start:'18:00', end:'23:00', moodLabel:'放松', moodColor:'#2E6FD0', bg:'#EEF0FA'},
+      {name:'深夜', icon:'moon', count:3, start:'00:00', end:'05:00', moodLabel:'焦虑', moodColor:'#C93B44', bg:'#FCEEF2'},
     ],
     weekRows: [
-      {name:'周一', count:5, mood:'neg', pos:40},
-      {name:'周二', count:4, mood:'mid', pos:52},
-      {name:'周三', count:3, mood:'pos', pos:60},
-      {name:'周四', count:4, mood:'mid', pos:54},
-      {name:'周五', count:5, mood:'pos', pos:67},
-      {name:'周六', count:6, mood:'pos', pos:72},
-      {name:'周日', count:4, mood:'pos', pos:63},
+      {name:'周一', count:5, mood:'neg', pos:36},
+      {name:'周二', count:4, mood:'mid', pos:48},
+      {name:'周三', count:3, mood:'mid', pos:56},
+      {name:'周四', count:4, mood:'neg', pos:40},
+      {name:'周五', count:5, mood:'pos', pos:72},
+      {name:'周六', count:6, mood:'pos', pos:92},
+      {name:'周日', count:4, mood:'pos', pos:84},
     ],
-    timeInsight: <>你的心情在一天中呈现明显变化：<span className="review-key-emphasis">早晨</span>整体更积极，<span className="review-key-emphasis">深夜</span>相对偏低落，<span className="review-key-emphasis">夜晚</span>则是你<span className="review-key-emphasis">最常记录</span>心情的时段。</>,
-    weekInsight: <>你的心情在一周中整体逐渐趋于<span className="review-key-emphasis">积极</span>，周三至周日状态较好，<span className="review-key-emphasis">周一</span>相对偏低落，周二和周四则更加平稳。</>,
+    timeInsight: <>你似乎更习惯在一天结束后，留一点时间与自己的情绪相处。<span className="review-key-emphasis">夜晚</span>不仅是你记录最多的时刻，也是更容易<span className="review-key-emphasis">放松</span>的时间。白天的<span className="review-key-emphasis">专注</span>与清晨的<span className="review-key-emphasis">平静</span>，组成了稳定的一天；偶尔出现的<span className="review-key-emphasis">深夜</span>情绪，也提醒你多照顾自己。</>,
+    weekInsight: <>你在<span className="review-key-emphasis">周初</span>偶尔需要一点适应时间，周三后状态逐渐<span className="review-key-emphasis">回升</span>，<span className="review-key-emphasis">周五和周末</span>更容易保持<span className="review-key-emphasis">积极</span>。忙碌了一周后，属于你的<span className="review-key-emphasis">放松和恢复</span>时间似乎正在到来。</>,
   },
   half: {
     timeRows: [
-      {name:'深夜', icon:'moon', count:18, start:'00:00', end:'05:00', mood:'neg', pos:34},
-      {name:'早晨', icon:'sunrise', count:31, start:'06:00', end:'11:00', mood:'pos', pos:68},
-      {name:'下午', icon:'sun', count:36, start:'12:00', end:'17:00', mood:'mid', pos:56},
-      {name:'夜晚', icon:'night', count:57, start:'18:00', end:'23:00', mood:'pos', pos:61},
+      {name:'早晨', icon:'sunrise', count:31, start:'06:00', end:'11:00', moodLabel:'平静', moodColor:'#2E6FD0', bg:'#EAF4FC'},
+      {name:'下午', icon:'sun', count:36, start:'12:00', end:'17:00', moodLabel:'专注', moodColor:'#C9953A', bg:'#FBF3E4'},
+      {name:'夜晚', icon:'night', count:57, start:'18:00', end:'23:00', moodLabel:'放松', moodColor:'#2E6FD0', bg:'#EEF0FA'},
+      {name:'深夜', icon:'moon', count:18, start:'00:00', end:'05:00', moodLabel:'焦虑', moodColor:'#C93B44', bg:'#FCEEF2'},
     ],
     weekRows: [
       {name:'周一', count:19, mood:'mid', pos:47},
@@ -4410,15 +4699,15 @@ const MOOD_DIST_BY_RANGE = {
       {name:'周六', count:24, mood:'pos', pos:71},
       {name:'周日', count:18, mood:'pos', pos:64},
     ],
-    timeInsight: <>近半年里，你的心情在一天中依然保持<span className="review-key-emphasis">早晨更积极、深夜偏低</span>的规律；<span className="review-key-emphasis">夜晚是最常记录心情的时段</span>，说明晚间更容易觉察并表达感受。</>,
+    timeInsight: <>近半年里，夜深时你仍常写下<span className="review-key-emphasis">焦虑</span>；而<span className="review-key-emphasis">夜晚</span>是最常记录、也最<span className="review-key-emphasis">放松</span>的时段。</>,
     weekInsight: <>近半年的周内分布显示，你的状态从工作周前半段到周末<span className="review-key-emphasis">逐步转向更积极</span>；<span className="review-key-emphasis">周五到周日表现最好</span>，周一相对更需要缓冲。</>,
   },
   year: {
     timeRows: [
-      {name:'深夜', icon:'moon', count:34, start:'00:00', end:'05:00', mood:'neg', pos:36},
-      {name:'早晨', icon:'sunrise', count:69, start:'06:00', end:'11:00', mood:'pos', pos:67},
-      {name:'下午', icon:'sun', count:74, start:'12:00', end:'17:00', mood:'mid', pos:55},
-      {name:'夜晚', icon:'night', count:109, start:'18:00', end:'23:00', mood:'pos', pos:60},
+      {name:'早晨', icon:'sunrise', count:69, start:'06:00', end:'11:00', moodLabel:'平静', moodColor:'#2E6FD0', bg:'#EAF4FC'},
+      {name:'下午', icon:'sun', count:74, start:'12:00', end:'17:00', moodLabel:'专注', moodColor:'#C9953A', bg:'#FBF3E4'},
+      {name:'夜晚', icon:'night', count:109, start:'18:00', end:'23:00', moodLabel:'放松', moodColor:'#2E6FD0', bg:'#EEF0FA'},
+      {name:'深夜', icon:'moon', count:34, start:'00:00', end:'05:00', moodLabel:'焦虑', moodColor:'#C93B44', bg:'#FCEEF2'},
     ],
     weekRows: [
       {name:'周一', count:37, mood:'mid', pos:45},
@@ -4429,15 +4718,15 @@ const MOOD_DIST_BY_RANGE = {
       {name:'周六', count:46, mood:'pos', pos:70},
       {name:'周日', count:38, mood:'pos', pos:62},
     ],
-    timeInsight: <>近1年里，你在一天中的心情节律比较稳定：<span className="review-key-emphasis">早晨更明亮，深夜更容易低落</span>；而<span className="review-key-emphasis">夜晚长期是记录最集中的时段</span>。</>,
+    timeInsight: <>近1年里，你在一天中的心情节律比较稳定：<span className="review-key-emphasis">早晨更平静</span>，<span className="review-key-emphasis">深夜更容易焦虑</span>；而<span className="review-key-emphasis">夜晚长期是记录最集中的时段</span>。</>,
     weekInsight: <>从近1年的每周分布看，你的状态在一周中段后<span className="review-key-emphasis">逐步向积极移动</span>；<span className="review-key-emphasis">周末两天表现最好</span>，周一仍是相对需要照顾情绪的一天。</>,
   },
   all: {
     timeRows: [
-      {name:'深夜', icon:'moon', count:63, start:'00:00', end:'05:00', mood:'neg', pos:35},
-      {name:'早晨', icon:'sunrise', count:128, start:'06:00', end:'11:00', mood:'pos', pos:66},
-      {name:'下午', icon:'sun', count:136, start:'12:00', end:'17:00', mood:'mid', pos:55},
-      {name:'夜晚', icon:'night', count:193, start:'18:00', end:'23:00', mood:'pos', pos:62},
+      {name:'早晨', icon:'sunrise', count:128, start:'06:00', end:'11:00', moodLabel:'平静', moodColor:'#2E6FD0', bg:'#EAF4FC'},
+      {name:'下午', icon:'sun', count:136, start:'12:00', end:'17:00', moodLabel:'专注', moodColor:'#C9953A', bg:'#FBF3E4'},
+      {name:'夜晚', icon:'night', count:193, start:'18:00', end:'23:00', moodLabel:'放松', moodColor:'#2E6FD0', bg:'#EEF0FA'},
+      {name:'深夜', icon:'moon', count:63, start:'00:00', end:'05:00', moodLabel:'焦虑', moodColor:'#C93B44', bg:'#FCEEF2'},
     ],
     weekRows: [
       {name:'周一', count:69, mood:'mid', pos:46},
@@ -4448,7 +4737,7 @@ const MOOD_DIST_BY_RANGE = {
       {name:'周六', count:81, mood:'pos', pos:71},
       {name:'周日', count:72, mood:'pos', pos:63},
     ],
-    timeInsight: <>从全部记录来看，你在一天中的情绪节律非常清晰：<span className="review-key-emphasis">早晨偏积极，深夜偏低落</span>；而<span className="review-key-emphasis">夜晚一直是最愿意记录心情的时段</span>。</>,
+    timeInsight: <>从全部记录来看，你在一天中的情绪节律非常清晰：<span className="review-key-emphasis">早晨偏平静</span>，<span className="review-key-emphasis">深夜偏焦虑</span>；而<span className="review-key-emphasis">夜晚一直是最愿意记录心情的时段</span>。</>,
     weekInsight: <>长期观察下，你在一周中的心情变化呈现出<span className="review-key-emphasis">前低后高</span>的趋势；<span className="review-key-emphasis">周三到周日通常状态更好</span>，周一最需要一点过渡和放松。</>,
   },
 };
@@ -4515,76 +4804,169 @@ function MoodPhaseHormoneBlock(){
 }
 
 const MOOD_JAR_ENTRIES = [
-  {id:'e1', face:'😄', label:'开心', dates:[{date:'2026.07.12', times:['08:36', '21:18']}, {date:'2026.07.08', times:['13:05']}], left:'30%', top:'24%'},
-  {id:'e2', face:'🙂', label:'平静', dates:[{date:'2026.07.09', times:['08:42', '20:17']}, {date:'2026.07.02', times:['18:26']}], left:'58%', top:'29%'},
-  {id:'e3', face:'😴', label:'疲惫', dates:[{date:'2026.07.05', times:['23:06']}, {date:'2026.06.30', times:['22:14']}], left:'44%', top:'48%'},
-  {id:'e4', face:'🥰', label:'甜甜', dates:[{date:'2026.07.03', times:['11:20', '19:52']}, {date:'2026.06.27', times:['20:06']}], left:'64%', top:'56%'},
-  {id:'e5', face:'😞', label:'低落', dates:[{date:'2026.06.28', times:['00:34', '22:41']}, {date:'2026.06.21', times:['23:08']}], left:'26%', top:'66%'},
+  {
+    id:'e1',
+    face:'💪',
+    label:'自信',
+    datetime:'07.03 · 09:15',
+    note:'今天状态爆棚，感觉什么都能搞定，把拖了两周的事情一口气全清了，痛快！',
+    voiceSec:12,
+  },
+  {
+    id:'e2',
+    face:'😍',
+    label:'心动',
+    datetime:'07.09 · 20:17',
+    note:'傍晚散步遇到晚霞，突然觉得被温柔包围，想把这份好心情收进罐子里。',
+    voiceSec:8,
+  },
+  {
+    id:'e3',
+    face:'😄',
+    label:'超开心',
+    datetime:'07.12 · 08:36',
+    note:'周末早起喝了杯热咖啡，阳光正好，整个人都轻飘飘的。',
+    voiceSec:10,
+  },
+  {
+    id:'e4',
+    face:'😊',
+    label:'满足',
+    datetime:'07.05 · 11:20',
+    note:'没有特别的大事，但小事都顺顺当当，这种平静也很好。',
+    voiceSec:6,
+  },
+  {
+    id:'e5',
+    face:'😌',
+    label:'平静',
+    datetime:'06.28 · 22:41',
+    note:'泡了个澡，听完歌，把白天的小情绪都放下了。',
+    voiceSec:9,
+  },
+  {
+    id:'e6',
+    face:'😣',
+    label:'压力',
+    datetime:'07.01 · 21:08',
+    note:'事情堆在一起有点喘不过气，先记一笔，明天再一点点拆。',
+    voiceSec:11,
+  },
+  {
+    id:'e7',
+    face:'😨',
+    label:'害怕',
+    datetime:'06.25 · 23:40',
+    note:'夜里突然有点慌，写下来会好一些，至少不是一个人扛着。',
+    voiceSec:7,
+  },
+  {
+    id:'e8',
+    face:'😐',
+    label:'冷漠',
+    datetime:'06.22 · 18:26',
+    note:'今天什么都不太想说，就这样静静待一会儿也好。',
+    voiceSec:5,
+  },
 ];
 
-function moodJarFlattenRecords(entry){
-  const rows = [];
-  (entry.dates || []).forEach(group=>{
-    (group.times || []).forEach(time=>{
-      rows.push({date:group.date, time});
-    });
-  });
-  return rows;
+function moodJarPickNext(excludeId){
+  const pool = MOOD_JAR_ENTRIES.filter(item=>item.id !== excludeId);
+  const list = pool.length ? pool : MOOD_JAR_ENTRIES;
+  return list[Math.floor(Math.random() * list.length)].id;
 }
 
 function MoodRecordCard(){
   const [activeId, setActiveId] = React.useState(null);
+  const [shaking, setShaking] = React.useState(false);
+  const shakeLockRef = React.useRef(false);
+  const lastShakeRef = React.useRef(0);
+  const activeIdRef = React.useRef(activeId);
+  activeIdRef.current = activeId;
   const activeEntry = MOOD_JAR_ENTRIES.find(item=>item.id === activeId) || null;
-  const records = activeEntry ? moodJarFlattenRecords(activeEntry) : [];
+  const revealed = !!activeEntry;
+
+  const revealMood = React.useCallback((nextId)=>{
+    if(shakeLockRef.current) return;
+    shakeLockRef.current = true;
+    setShaking(true);
+    window.setTimeout(()=>{
+      setActiveId(nextId);
+      setShaking(false);
+      shakeLockRef.current = false;
+    }, 700);
+  }, []);
+
+  const onShakeOrTap = React.useCallback(()=>{
+    revealMood(moodJarPickNext(activeIdRef.current));
+  }, [revealMood]);
+
+  React.useEffect(()=>{
+    const onMotion = (event)=>{
+      const acc = event.accelerationIncludingGravity || event.acceleration;
+      if(!acc) return;
+      const force = Math.abs(acc.x || 0) + Math.abs(acc.y || 0) + Math.abs(acc.z || 0);
+      const now = Date.now();
+      if(force > 28 && now - lastShakeRef.current > 1200){
+        lastShakeRef.current = now;
+        revealMood(moodJarPickNext(activeIdRef.current));
+      }
+    };
+    window.addEventListener('devicemotion', onMotion);
+    return ()=> window.removeEventListener('devicemotion', onMotion);
+  }, [revealMood]);
+
   return (
     <div className="review-love-cycle-combined-wrap">
       <div className="review-love-trend-title">心情罐罐</div>
       <div className="review-detail-card review-mood-record-card review-love-mini-card">
-        <div className={'review-mood-jar-main' + (activeEntry ? '' : ' is-idle')}>
-          <div className="review-mood-record-bubbles">
-            <div className="review-mood-record-bubbles-stage">
-              <img
-                className="review-mood-record-bubbles-img"
-                src="assets/mood-jar-custom.png"
-                alt="心情罐罐：最近30天心情收藏"
-              />
-              {MOOD_JAR_ENTRIES.map(item=>(
-                <button
-                  type="button"
-                  key={item.id}
-                  className={'review-mood-jar-hotspot' + (item.id === activeId ? ' is-active' : '')}
-                  style={{left:item.left, top:item.top}}
-                  aria-label={item.label}
-                  onClick={()=>setActiveId(item.id)}
-                >
-                  <span>{item.face}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-          {activeEntry ? (
-            <div className="review-mood-jar-detail" aria-live="polite">
-              <div className="review-mood-jar-detail-head">
-                <em aria-hidden="true">{activeEntry.face}</em>
-                <b>{activeEntry.label}</b>
-                <i>{records.length}</i>
+        <div className={'review-mood-jar-stage' + (revealed ? ' is-revealed' : ' is-idle') + (shaking ? ' is-shaking' : '')}>
+          <div className="review-mood-jar-stage-inner">
+            <button
+              type="button"
+              className="review-mood-jar-hit"
+              aria-label={revealed ? '再次摇一摇心情罐罐' : '摇一摇心情罐罐'}
+              onClick={onShakeOrTap}
+            >
+              <div className="review-mood-record-bubbles">
+                <div className="review-mood-record-bubbles-stage">
+                  <img
+                    className="review-mood-record-bubbles-img"
+                    src="assets/mood-jar-custom.png"
+                    alt="心情罐罐：最近30天心情收藏"
+                  />
+                </div>
               </div>
-              <div className="review-mood-jar-detail-list" aria-label="记录日期和时间列表">
-                {records.map((row, idx)=>(
-                  <div className="review-mood-jar-detail-row" key={activeEntry.id + '-row-' + idx}>
-                    <span className="review-mood-jar-detail-dot" aria-hidden="true"/>
-                    <strong>{row.date}</strong>
-                    <em>{row.time}</em>
-                  </div>
-                ))}
+            </button>
+          </div>
+          {revealed && activeEntry ? (
+            <div className="review-mood-jar-note" aria-live="polite">
+              <div className="review-mood-jar-note-head">
+                <em aria-hidden="true">{activeEntry.face}</em>
+                <div className="review-mood-jar-note-meta">
+                  <b>{activeEntry.label}</b>
+                  <span>{activeEntry.datetime}</span>
+                </div>
+              </div>
+              <div className="review-mood-jar-note-body">
+                <p className="review-mood-jar-note-quote">“{activeEntry.note}”</p>
+                {activeEntry.voiceSec ? (
+                  <button type="button" className="review-mood-jar-voice" aria-label={'播放语音 ' + activeEntry.voiceSec + ' 秒'}>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6.5v11l9-5.5z"/></svg>
+                    <i aria-hidden="true"/>
+                    <span>语音 {activeEntry.voiceSec}&quot;</span>
+                  </button>
+                ) : null}
               </div>
             </div>
           ) : null}
         </div>
-        <div className="review-mood-jar-tip">
-          <i aria-hidden="true">☝︎</i>
-          <span>轻轻摇一摇，看看它们在瓶中相遇吧～</span>
-        </div>
+        {!revealed ? (
+          <button type="button" className="review-mood-jar-tip" onClick={onShakeOrTap}>
+            <i aria-hidden="true">☝︎</i>
+            <span>轻轻摇一摇，看看它们在瓶中相遇吧～</span>
+          </button>
+        ) : null}
       </div>
     </div>
   );
@@ -4696,25 +5078,16 @@ function MoodTodayEmotionCard({playKey}){
 function MoodTrendSummary({range = 'd30'}){
   const meta = MOOD_RANGE_META[range] || MOOD_RANGE_META.d30;
   const chartProps = moodTrendChartProps(range);
-  const periodMoodVals = chartProps.vals;
   const isCompact = !!chartProps.compact;
   const hourly = MOOD_HOURLY_BY_RANGE[range] || MOOD_HOURLY_BY_RANGE.d30;
   const recordCount = hourly.reduce((s, n)=>s + n, 0);
-  // 记录最多：取该范围心情档位众数
-  const levelCount = [0, 0, 0, 0, 0, 0];
-  periodMoodVals.forEach(v=>{
-    const lv = Math.max(1, Math.min(5, Math.round(v)));
-    levelCount[lv] += 1;
-  });
-  let topLevel = 4;
-  let topN = -1;
-  for(let lv = 1; lv <= 5; lv++){
-    if(levelCount[lv] >= topN){
-      topN = levelCount[lv];
-      topLevel = lv;
-    }
-  }
-  const topMoodWord = MOOD_WORD_BY_LEVEL[topLevel - 1];
+  const triShare = meta.triShare || MOOD_RANGE_META.d30.triShare;
+  const totalDays = Number(meta.recordDaysTotal) || 1;
+  const intervalDays = Math.max(1, Math.round(totalDays / Math.max(recordCount, 1)));
+  const cnNum = n => (['零','一','两','三','四','五','六','七','八','九','十'][n] || String(n));
+  const cadenceText = intervalDays <= 1
+    ? '大约每天记录一次'
+    : ('大约每' + cnNum(intervalDays) + '天记录一次');
   return (
     <div className="review-mood-trend-block">
       <div className="review-mood-trend-head-main">
@@ -4725,30 +5098,110 @@ function MoodTrendSummary({range = 'd30'}){
         <MoodLineChart {...chartProps}/>
       </div>
       <MoodChartLegend/>
-      <div className="review-mood-trend-metrics" aria-label="心情趋势概览">
-        <div className="review-mood-trend-metric">
-          <div className="review-mood-trend-metric-value">{recordCount}<small>次</small></div>
-          <div className="review-mood-trend-metric-label">记录心情次数</div>
+      <div className="review-mood-trend-foot">
+        <div className="review-mood-trend-tri">
+          <div className="review-mood-trend-tri-head">
+            <span>心情构成</span>
+          </div>
+          <div className="review-mood-trend-tri-track" aria-hidden="true">
+            {triShare.map(item=>(
+              <i key={item.key} style={{width:item.pct + '%', background:item.color}}/>
+            ))}
+          </div>
+          <div className="review-mood-trend-tri-legend">
+            {triShare.map(item=>(
+              <span key={item.key}>
+                <i style={{background:item.color}}/>
+                <em>{item.label}</em>
+                <b>{item.pct}%</b>
+              </span>
+            ))}
+          </div>
         </div>
-        <div className="review-mood-trend-metric">
-          <ReviewMoodValue word={topMoodWord}/>
-          <div className="review-mood-trend-metric-label">{meta.label}记录最多</div>
-        </div>
-        <div className="review-mood-trend-metric">
-          <ReviewMoodValue word={meta.trend} trend/>
-          <div className="review-mood-trend-metric-label">整体趋势</div>
+        <div className="review-mood-trend-insight-row">
+          <div className="review-mood-trend-record-card">
+            <span className="review-mood-trend-record-card-title">心情记录</span>
+            <p><b>{recordCount}</b><em>次</em></p>
+            <small>{cadenceText}</small>
+          </div>
+          <div className="review-mood-trend-recover">
+            <div className="review-mood-trend-recover-copy">
+              <strong>情绪恢复力</strong>
+              <p><b>{meta.recoverHighlight}</b><em>天</em></p>
+              <span>每次状态都能稳稳回升</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-const MOOD_CYCLE_INDEX_PHASES = [
-  {name:'月经期', cur:3.6, prev:3.2, prev2:3.4},
-  {name:'卵泡期', cur:4.5, prev:4.2, prev2:4.1},
-  {name:'排卵期', cur:3.1, prev:2.7, prev2:3.0},
-  {name:'黄体期', cur:2.3, prev:2.1, prev2:2.4},
+const MOOD_CYCLE_PHASE_LABELS = ['月经期', '卵泡期', '排卵期', '黄体期'];
+const MOOD_X_POS = '#6BA8F5';
+const MOOD_X_NEU = '#F2C94C';
+const MOOD_X_NEG = '#F0808F';
+const MOOD_X_W = 270;
+const MOOD_X_H = 72;
+const MOOD_X_BASE_Y = 65;
+const MOOD_X_ANCHOR_XS = [33.75, 101.25, 168.75, 236.25];
+const MOOD_X_DIVIDER_XS = [67.5, 135, 202.5];
+// 锚点绝对坐标；level: neu|pos|neg。完整周期行曲线 x=0→270，进行中行止于末锚点
+const MOOD_CYCLE_SPARK_ROWS = [
+  {
+    key:'c1',
+    cycleLabel:'上上周期',
+    range:'5/4~6/1',
+    anchors:[
+      {level:'neu', y:44},
+      {level:'pos', y:25},
+      {level:'pos', y:13},
+      {level:'neg', y:49},
+    ],
+    ongoing:false,
+  },
+  {
+    key:'c2',
+    cycleLabel:'上周期',
+    range:'6/2~6/29',
+    anchors:[
+      {level:'neu', y:40},
+      {level:'pos', y:15},
+      {level:'pos', y:17},
+      {level:'neg', y:57},
+    ],
+    ongoing:false,
+  },
+  {
+    key:'c3',
+    cycleLabel:'本周期',
+    range:'6/30 起',
+    anchors:[
+      {level:'neu', y:42},
+      {level:'pos', y:17},
+    ],
+    ongoing:true,
+  },
 ];
+function moodXLevelColor(level){
+  if(level === 'pos') return MOOD_X_POS;
+  if(level === 'neg') return MOOD_X_NEG;
+  return MOOD_X_NEU;
+}
+// 相邻点：C mx py, mx cy, cx cy（mx 为两点 x 中点），避免过冲
+function moodXCycleCurve(points){
+  if(!points.length) return '';
+  let d = 'M' + points[0].x.toFixed(2) + ' ' + points[0].y.toFixed(2);
+  for(let i = 0; i < points.length - 1; i++){
+    const p = points[i];
+    const c = points[i + 1];
+    const mx = (p.x + c.x) / 2;
+    d += ' C' + mx.toFixed(2) + ' ' + p.y.toFixed(2)
+      + ',' + mx.toFixed(2) + ' ' + c.y.toFixed(2)
+      + ',' + c.x.toFixed(2) + ' ' + c.y.toFixed(2);
+  }
+  return d;
+}
 const MOOD_TRAJ_DAYS = 28;
 const MOOD_TRAJ_PHASES = [
   {key:'menstrual', label:'月经期', start:1, end:5, bg:'rgba(255,77,136,0.05)', color:'#FF4D88'},
@@ -4791,89 +5244,131 @@ function moodTrajProgesterone(day){
   return 0.04 + 0.92 * rise * fall;
 }
 
-function MoodCycleCompareChart({phases = MOOD_CYCLE_INDEX_PHASES}){
-  const yMin = 1;
-  const yMax = 5;
-  const plotH = 128;
-  // 背景铺满整图：下 20% 消极 / 中 60% 中性 / 上 20% 积极（低存在感）
-  const bands = [
-    {key:'neg', label:'消极', bottomPct:0, heightPct:20, bg:'rgba(255,77,77,0.10)', color:'#E06B6B'},
-    {key:'neu', label:'中性', bottomPct:20, heightPct:60, bg:'rgba(255,185,71,0.06)', color:'#D4B06A'},
-    {key:'pos', label:'积极', bottomPct:80, heightPct:20, bg:'rgba(142,196,248,0.07)', color:'#8EB4D8'},
-  ];
-  const yPos = v => ((v - yMin) / (yMax - yMin)) * plotH;
-  const series = [
-    {key:'prev2', cls:'prev2'},
-    {key:'prev', cls:'prev'},
-    {key:'cur', cls:'cur'},
-  ];
+function MoodCycleSparkLine({row}){
+  const anchors = row.anchors || [];
+  const n = anchors.length;
+  const pts = anchors.map((a, i)=>({
+    x:MOOD_X_ANCHOR_XS[i],
+    y:a.y,
+    color:moodXLevelColor(a.level),
+  }));
+  const first = pts[0];
+  const last = pts[n - 1];
+  const pathPts = [];
+  if(first){
+    pathPts.push({x:0, y:first.y + 8});
+    pathPts.push(...pts);
+    if(!row.ongoing && last){
+      pathPts.push({x:MOOD_X_W, y:last.y + 5});
+    }
+  }
+  const path = moodXCycleCurve(pathPts);
+  const strokeGradId = 'moodXStroke-' + row.key;
+  const fillGradId = 'moodXFill-' + row.key;
+  const endPt = pathPts[pathPts.length - 1];
+  const startPt = pathPts[0];
+  const area = path && startPt && endPt
+    ? path
+      + ' L' + endPt.x.toFixed(2) + ' ' + MOOD_X_BASE_Y
+      + ' L' + startPt.x.toFixed(2) + ' ' + MOOD_X_BASE_Y
+      + ' Z'
+    : '';
+  const gradX1 = first ? first.x : 0;
+  const gradX2 = last ? last.x : MOOD_X_W;
   return (
-    <div className="review-love-cycle-compare review-mood-cycle-compare">
-      <div className="review-mood-cycle-index-plot" aria-label="近三个周期心情指数">
-        <div className="review-mood-cycle-index-axis" aria-hidden="true" style={{height:plotH + 'px'}}>
-          {bands.map(band=>(
-            <span
-              key={band.key}
-              className={'review-mood-cycle-index-axis-label is-' + band.key}
-              style={{
-                bottom:band.bottomPct + '%',
-                height:band.heightPct + '%',
-                color:band.color,
-              }}
-            >
-              {band.label}
-            </span>
+    <svg
+      className="review-mood-x-cycle-svg"
+      viewBox={'0 0 ' + MOOD_X_W + ' ' + MOOD_X_H}
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
+      <defs>
+        <linearGradient id={strokeGradId} x1={gradX1} y1="0" x2={gradX2} y2="0" gradientUnits="userSpaceOnUse">
+          {pts.map((p, i)=>(
+            <stop key={i} offset={n <= 1 ? 0 : (i / (n - 1))} stopColor={p.color}/>
           ))}
-        </div>
-        <div className="review-mood-cycle-index-main">
-          <div className="review-mood-cycle-index-bars" style={{height:plotH + 'px'}}>
-            <div className="review-mood-cycle-index-bands" aria-hidden="true">
-              {bands.map(band=>(
-                <i
-                  key={band.key}
-                  className={'review-mood-cycle-index-band is-' + band.key}
-                  style={{
-                    bottom:band.bottomPct + '%',
-                    height:band.heightPct + '%',
-                    background:band.bg,
-                  }}
-                />
-              ))}
-              {[20, 80].map(pct=>(
-                <em
-                  key={pct}
-                  className="review-mood-cycle-index-grid"
-                  style={{bottom:pct + '%'}}
-                />
-              ))}
+        </linearGradient>
+        <linearGradient id={fillGradId} x1={gradX1} y1="0" x2={gradX2} y2="0" gradientUnits="userSpaceOnUse">
+          {pts.map((p, i)=>(
+            <stop key={i} offset={n <= 1 ? 0 : (i / (n - 1))} stopColor={p.color}/>
+          ))}
+        </linearGradient>
+      </defs>
+      {MOOD_X_DIVIDER_XS.map((x, i)=>(
+        <line
+          key={row.key + '-div' + i}
+          x1={x}
+          y1="7"
+          x2={x}
+          y2={MOOD_X_BASE_Y}
+          stroke="rgba(0,0,0,0.14)"
+          strokeWidth="1"
+          strokeDasharray="3 4"
+        />
+      ))}
+      {area ? <path d={area} fill={'url(#' + fillGradId + ')'} fillOpacity="0.16"/> : null}
+      {path ? (
+        <path
+          d={path}
+          fill="none"
+          stroke={'url(#' + strokeGradId + ')'}
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      ) : null}
+      {pts.map((p, i)=>{
+        const isBreath = row.ongoing && i === n - 1;
+        if(isBreath){
+          return (
+            <g key={row.key + '-b' + i} className="review-mood-x-breath" transform={'translate(' + p.x + ' ' + p.y + ')'}>
+              <g className="review-mood-x-breath-pulse">
+                <circle cx="0" cy="0" r="6" fill={p.color}/>
+              </g>
+              <circle cx="0" cy="0" r="5" fill={p.color} stroke="#fff" strokeWidth="2"/>
+            </g>
+          );
+        }
+        return (
+          <circle
+            key={row.key + '-d' + i}
+            cx={p.x}
+            cy={p.y}
+            r="4"
+            fill={p.color}
+          />
+        );
+      })}
+    </svg>
+  );
+}
+
+function MoodCycleCompareChart(){
+  return (
+    <div className="review-mood-x-cycle" aria-label="近三个周期心情曲线">
+      <div className="review-mood-x-cycle-title">最近3次月经周期心情规律</div>
+      <div className="review-mood-x-cycle-rows">
+        {MOOD_CYCLE_SPARK_ROWS.map(row=>(
+          <div className={'review-mood-x-cycle-row' + (row.ongoing ? ' is-ongoing' : '')} key={row.key}>
+            <div className="review-mood-x-cycle-meta">
+              <strong>{row.cycleLabel}</strong>
+              <span>{row.range}</span>
             </div>
-            {phases.map(phase=>(
-              <div className="review-mood-cycle-index-group" key={phase.name}>
-                {series.map(bar=>{
-                  const v = phase[bar.key];
-                  return (
-                    <span className={'review-love-cycle-bar-wrap is-' + bar.cls} key={bar.key}>
-                      <i
-                        className={'review-love-cycle-bar is-' + bar.cls}
-                        style={{height:Math.max(6, yPos(v)) + 'px'}}
-                      />
-                    </span>
-                  );
-                })}
-              </div>
-            ))}
+            <div className="review-mood-x-cycle-plot">
+              <MoodCycleSparkLine row={row}/>
+            </div>
           </div>
-          <div className="review-mood-cycle-index-x">
-            {phases.map(phase=>(
-              <span key={phase.name}>{phase.name}</span>
-            ))}
-          </div>
-        </div>
+        ))}
       </div>
-      <div className="review-love-cycle-legend">
-        <span><i className="is-cur"/>本次</span>
-        <span><i className="is-prev"/>上次</span>
-        <span><i className="is-prev2"/>上上次</span>
+      <div className="review-mood-x-cycle-phases" aria-hidden="true">
+        {MOOD_CYCLE_PHASE_LABELS.map(label=>(
+          <span key={label}>{label}</span>
+        ))}
+      </div>
+      <div className="review-legend review-mood-x-cycle-legend" aria-hidden="true">
+        <span className="review-legend-item is-mood-pos"><i></i>积极</span>
+        <span className="review-legend-item is-mood-neu"><i></i>中性</span>
+        <span className="review-legend-item is-mood-neg"><i></i>消极</span>
       </div>
     </div>
   );
@@ -4897,8 +5392,9 @@ function moodTrajSmoothLine(pts){
   return d;
 }
 
-function MoodPhaseDistChart(){
-  const W = 520, H = 300;
+function MoodPhaseDistChart({expanded = false} = {}){
+  const uid = expanded ? 'Exp' : '';
+  const W = expanded ? 760 : 520, H = 300;
   const padL = 2, padR = 12, padT = 36, padB = 26;
   const x0 = padL, x1 = W - padR;
   const plotW = x1 - x0;
@@ -4945,7 +5441,7 @@ function MoodPhaseDistChart(){
   const tagH = 30;
   const midY = (moodBot + hormTop) / 2;
   return (
-    <div className="review-mood-traj">
+    <div className={'review-mood-traj' + (expanded ? ' is-expanded' : '')}>
       <div className="review-mood-traj-plot">
         <div className="review-mood-traj-yaxis" aria-hidden="true">
           {yAxisTicks.map(item=>(
@@ -4959,18 +5455,18 @@ function MoodPhaseDistChart(){
           <div className="review-mood-traj-canvas">
       <svg viewBox={'0 0 ' + W + ' ' + H} preserveAspectRatio="xMidYMid meet" role="img" aria-label="本周期心情变化与激素轨迹">
         <defs>
-          <linearGradient id="moodTrajE2Fill" x1="0" y1="0" x2="0" y2="1">
+          <linearGradient id={'moodTrajE2Fill' + uid} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0" stopColor={MOOD_TRAJ_E2} stopOpacity="0.35"/>
             <stop offset="1" stopColor={MOOD_TRAJ_E2} stopOpacity="0.02"/>
           </linearGradient>
-          <linearGradient id="moodTrajP4Fill" x1="0" y1="0" x2="0" y2="1">
+          <linearGradient id={'moodTrajP4Fill' + uid} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0" stopColor={MOOD_TRAJ_P4} stopOpacity="0.32"/>
             <stop offset="1" stopColor={MOOD_TRAJ_P4} stopOpacity="0.02"/>
           </linearGradient>
-          <clipPath id="moodTrajMoodClip">
+          <clipPath id={'moodTrajMoodClip' + uid}>
             <rect x={x0} y={moodTop} width={plotW} height={moodBot - moodTop}/>
           </clipPath>
-          <clipPath id="moodTrajHormClip">
+          <clipPath id={'moodTrajHormClip' + uid}>
             <rect x={x0} y={hormTop} width={plotW} height={hormBot - hormTop}/>
           </clipPath>
         </defs>
@@ -4990,7 +5486,7 @@ function MoodPhaseDistChart(){
           );
         })}
 
-        <g clipPath="url(#moodTrajMoodClip)">
+        <g clipPath={'url(#moodTrajMoodClip' + uid + ')'}>
           <path d={moodLine} fill="none" stroke={MOOD_TRAJ_MOOD} strokeWidth="2.4" strokeLinejoin="round" strokeLinecap="round"/>
         </g>
         {moodPts.map((p, i)=>(
@@ -5005,9 +5501,9 @@ function MoodPhaseDistChart(){
           >{p.face}</text>
         ))}
 
-        <g clipPath="url(#moodTrajHormClip)">
-          <path d={toArea(e2Line, e2Pts, hormBot)} fill="url(#moodTrajE2Fill)"/>
-          <path d={toArea(p4Line, p4Pts, hormBot)} fill="url(#moodTrajP4Fill)"/>
+        <g clipPath={'url(#moodTrajHormClip' + uid + ')'}>
+          <path d={toArea(e2Line, e2Pts, hormBot)} fill={'url(#moodTrajE2Fill' + uid + ')'}/>
+          <path d={toArea(p4Line, p4Pts, hormBot)} fill={'url(#moodTrajP4Fill' + uid + ')'}/>
           <path d={e2Line} fill="none" stroke={MOOD_TRAJ_E2} strokeWidth="1.6" strokeLinejoin="round" strokeLinecap="round"/>
           <path d={p4Line} fill="none" stroke={MOOD_TRAJ_P4} strokeWidth="1.6" strokeLinejoin="round" strokeLinecap="round"/>
         </g>
@@ -5083,33 +5579,41 @@ function MoodPhaseDistChart(){
           </div>
         </div>
       </div>
-      <div className="review-mood-traj-legend" aria-hidden="true">
-        <span><i className="is-mood"/>心情</span>
-        <span><i className="is-e2"/>雌激素 E2</span>
-        <span><i className="is-p4"/>孕激素 P4</span>
-      </div>
+      {expanded ? null : (
+        <div className="review-mood-traj-legend" aria-hidden="true">
+          <span><i className="is-mood"/>心情</span>
+          <span><i className="is-e2"/>雌激素 E2</span>
+          <span><i className="is-p4"/>孕激素 P4</span>
+        </div>
+      )}
     </div>
   );
 }
 
-function MoodCycleCombinedCard(){
+function MoodCycleCombinedCard({onExpand}){
   return (
     <div className="review-love-cycle-combined-wrap">
       <div className="review-love-trend-title">月经周期与心情</div>
       <div className="review-detail-card review-love-mini-card review-love-cycle-combined">
         <div className="review-love-cycle-block">
-          <div className="review-love-cycle-subhead">最近3个周期心情指数</div>
           <MoodCycleCompareChart/>
           <div className="review-love-insight">
-            你的心情在 <b>卵泡期</b> 始终最积极，<b>黄体期</b> 相对偏低，近 <b>3</b> 个周期都保持着相似的变化规律。<b>黄体期</b> 可以多留一些放松和休息的时间。
+            最近2个完整周期里，你的心情呈现出相似轨迹：<b>排卵前后</b>状态较好，进入<b>黄体期</b>后逐渐回落。当前周期也延续这一趋势，你似乎形成了自己的“<b>周期节拍</b>”。情绪变化时，可以多一点理解和接纳自己。
           </div>
         </div>
         <div className="review-love-cycle-divider" aria-hidden="true"/>
         <div className="review-love-cycle-block review-mood-traj-block">
-          <div className="review-love-cycle-subhead">本周期心情变化</div>
+          <div className="review-love-cycle-subhead review-cycle-subhead-expand-row">
+            <span>本周期心情变化</span>
+            {typeof onExpand === 'function' && (
+              <button type="button" className="review-cycle-card-expand-btn" aria-label="全屏查看本周期心情变化" onClick={onExpand}>
+                <ReviewExpandIcon/>
+              </button>
+            )}
+          </div>
           <MoodPhaseDistChart/>
           <div className="review-love-insight">
-            你的心情在<b>排卵前后</b>达到本周期最佳状态，进入<b>黄体后期</b>后逐渐出现更多波动。这是雌孕激素回落阶段较常见的变化，不必过于担心，可以适当放慢节奏，多关注休息和睡眠。
+            本周期的心情变化，可能与体内激素节奏有关。随着<b>雌激素</b>升高，状态通常更容易保持积极；进入<b>黄体期</b>后，<b>孕激素</b>变化和激素波动，可能让人更容易疲惫或敏感。提前了解这些阶段，可以更好安排休息调节。
           </div>
         </div>
       </div>
@@ -5206,14 +5710,13 @@ function MoodShareCombinedCard({range = 'd30'}){
   );
 }
 
-function MoodDetailBody({range}){
+function MoodDetailBody({range, onExpandPhase}){
   const showCycle = range === 'd30';
   return (
     <>
       <MoodTrendSummary range={range}/>
       <div className="review-mood-detail-lower">
-        {showCycle ? <MoodCycleCombinedCard/> : null}
-        <MoodShareCombinedCard range={range}/>
+        {showCycle ? <MoodCycleCombinedCard onExpand={onExpandPhase}/> : null}
         <MoodTimeDistributionCard range={range}/>
         {showCycle ? <MoodRecordCard/> : null}
       </div>
@@ -5270,6 +5773,7 @@ function MoodPeriodNav({range, offset, onChange}){
 
 function MoodDetailPage({open, onClose}){
   const [range, setRange] = React.useState('d30');
+  const [phaseLandscapeOpen, setPhaseLandscapeOpen] = React.useState(false);
   const ranges = [
     {key:'d30', label:'近30天'},
     {key:'half', label:'近半年'},
@@ -5277,16 +5781,21 @@ function MoodDetailPage({open, onClose}){
     {key:'all', label:'全部'},
   ];
   React.useEffect(()=>{
-    if(!open) return;
+    if(!open){
+      setPhaseLandscapeOpen(false);
+      return;
+    }
     setRange('d30');
   }, [open]);
   return (
+    <>
     <section className={'review-cycle-detail is-fullscreen-detail' + (open ? ' is-open' : '')} aria-hidden={!open} aria-label="心情详情">
       <div className="review-detail-nav">
         <button type="button" className="review-detail-back" aria-label="返回" onClick={onClose}>
           <ReviewBackIcon/>
         </button>
         <span className="review-detail-title">心情</span>
+        <button type="button" className="review-detail-all-records">所有记录</button>
       </div>
       <div className="review-detail-content review-mood-detail-content">
         <div className="review-mood-detail-top">
@@ -5304,15 +5813,31 @@ function MoodDetailPage({open, onClose}){
             ))}
           </div>
         </div>
-        <MoodDetailBody range={range}/>
+        <MoodDetailBody range={range} onExpandPhase={()=>setPhaseLandscapeOpen(true)}/>
       </div>
     </section>
+    <PhaseChartLandscapePage
+      open={open && phaseLandscapeOpen}
+      onClose={()=>setPhaseLandscapeOpen(false)}
+      title="本周期心情变化"
+      subtitle="心情与激素走势 · 左右滑动查看"
+      legend={(
+        <>
+          <span className="review-mood-traj-legend-item"><i className="is-mood"/>心情</span>
+          <span className="review-mood-traj-legend-item"><i className="is-e2"/>雌激素 E2</span>
+          <span className="review-mood-traj-legend-item"><i className="is-p4"/>孕激素 P4</span>
+          <span className="review-cycle-landscape-tip">← 滑动查看更多 →</span>
+        </>
+      )}
+    >
+      <MoodPhaseDistChart expanded/>
+    </PhaseChartLandscapePage>
+    </>
   );
 }
 
 function MoodReviewCard({onOpen, onLandscapeOpen}){
   const monthAvg = MOOD_MONTH_VALS.reduce((s, v)=>s + v, 0) / MOOD_MONTH_VALS.length;
-  const lastLevel = MOOD_MONTH_VALS[MOOD_MONTH_VALS.length - 1];
 
   return (
     <ReviewCard
@@ -5338,8 +5863,8 @@ function MoodReviewCard({onOpen, onLandscapeOpen}){
       metrics={(
         <>
           <div className="review-metric">
-            <ReviewMoodValue word={MOOD_WORD_BY_LEVEL[lastLevel - 1]}/>
-            <div className="review-metric-label">最近一次心情</div>
+            <ReviewMoodValue word="7月8日"/>
+            <div className="review-metric-label">心情最佳</div>
           </div>
           <div className="review-metric">
             <ReviewMoodValue word={moodWordFromAvg(monthAvg)}/>
@@ -7124,8 +7649,9 @@ function StoolTrajFeelingMarker({x, y, feeling}){
   );
 }
 
-function StoolPhaseDistChart(){
-  const W = 520, H = 300;
+function StoolPhaseDistChart({expanded = false} = {}){
+  const uid = expanded ? 'Exp' : '';
+  const W = expanded ? 760 : 520, H = 300;
   const padL = 2, padR = 12, padT = 36, padB = 26;
   const x0 = padL, x1 = W - padR;
   const plotW = x1 - x0;
@@ -7159,7 +7685,7 @@ function StoolPhaseDistChart(){
   }));
   const midY = (topAreaBottom + hormoneTop) / 2;
   return (
-    <div className="review-stool-traj">
+    <div className={'review-stool-traj' + (expanded ? ' is-expanded' : '')}>
       <div className="review-stool-traj-plot">
         <div className="review-stool-traj-yaxis" aria-hidden="true">
           {yAxisTicks.map(item=>(
@@ -7173,18 +7699,18 @@ function StoolPhaseDistChart(){
           <div className="review-stool-traj-canvas">
             <svg viewBox={'0 0 ' + W + ' ' + H} preserveAspectRatio="xMidYMid meet" role="img" aria-label="本周期排便感受趋势">
               <defs>
-                <linearGradient id="stoolTrajE2Fill" x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id={'stoolTrajE2Fill' + uid} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0" stopColor="#FF7AA8" stopOpacity="0.35"/>
                   <stop offset="1" stopColor="#FF7AA8" stopOpacity="0.02"/>
                 </linearGradient>
-                <linearGradient id="stoolTrajP4Fill" x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id={'stoolTrajP4Fill' + uid} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0" stopColor="#E8A040" stopOpacity="0.32"/>
                   <stop offset="1" stopColor="#E8A040" stopOpacity="0.02"/>
                 </linearGradient>
-                <clipPath id="stoolTrajTopClip">
+                <clipPath id={'stoolTrajTopClip' + uid}>
                   <rect x={x0} y={topAreaTop} width={plotW} height={topAreaBottom - topAreaTop}/>
                 </clipPath>
-                <clipPath id="stoolTrajBottomClip">
+                <clipPath id={'stoolTrajBottomClip' + uid}>
                   <rect x={x0} y={hormoneTop} width={plotW} height={hormoneBottom - hormoneTop}/>
                 </clipPath>
               </defs>
@@ -7202,7 +7728,7 @@ function StoolPhaseDistChart(){
                   />
                 );
               })}
-              <g clipPath="url(#stoolTrajTopClip)">
+              <g clipPath={'url(#stoolTrajTopClip' + uid + ')'}>
                 <path
                   d={linePath}
                   fill="none"
@@ -7215,9 +7741,9 @@ function StoolPhaseDistChart(){
               {pts.map((p, i)=>(
                 <StoolTrajFeelingMarker key={'p' + i} x={p.x} y={p.y} feeling={p.feeling}/>
               ))}
-              <g clipPath="url(#stoolTrajBottomClip)">
-                <path d={toArea(e2Line, e2Pts, hormoneBottom)} fill="url(#stoolTrajE2Fill)"/>
-                <path d={toArea(p4Line, p4Pts, hormoneBottom)} fill="url(#stoolTrajP4Fill)"/>
+              <g clipPath={'url(#stoolTrajBottomClip' + uid + ')'}>
+                <path d={toArea(e2Line, e2Pts, hormoneBottom)} fill={'url(#stoolTrajE2Fill' + uid + ')'}/>
+                <path d={toArea(p4Line, p4Pts, hormoneBottom)} fill={'url(#stoolTrajP4Fill' + uid + ')'}/>
                 <path d={e2Line} fill="none" stroke="#FF7AA8" strokeWidth="1.6" strokeLinejoin="round" strokeLinecap="round"/>
                 <path d={p4Line} fill="none" stroke="#E8A040" strokeWidth="1.6" strokeLinejoin="round" strokeLinecap="round"/>
               </g>
@@ -7249,16 +7775,18 @@ function StoolPhaseDistChart(){
           </div>
         </div>
       </div>
-      <div className="review-stool-traj-legend">
-        <span><i className="is-stool"/>排便感受</span>
-        <span><i className="is-e2"/>雌激素 E2</span>
-        <span><i className="is-p4"/>孕激素 P4</span>
-      </div>
+      {expanded ? null : (
+        <div className="review-stool-traj-legend">
+          <span><i className="is-stool"/>排便感受</span>
+          <span><i className="is-e2"/>雌激素 E2</span>
+          <span><i className="is-p4"/>孕激素 P4</span>
+        </div>
+      )}
     </div>
   );
 }
 
-function StoolCycleCombinedCard(){
+function StoolCycleCombinedCard({onExpand}){
   return (
     <div className="review-love-cycle-combined-wrap">
       <div className="review-love-trend-title">月经周期与便便</div>
@@ -7279,7 +7807,14 @@ function StoolCycleCombinedCard(){
         </div>
         <div className="review-love-cycle-divider" aria-hidden="true"/>
         <div className="review-love-cycle-block review-stool-traj-block">
-          <div className="review-love-cycle-subhead">本周期排便感受</div>
+          <div className="review-love-cycle-subhead review-cycle-subhead-expand-row">
+            <span>本周期排便感受</span>
+            {typeof onExpand === 'function' && (
+              <button type="button" className="review-cycle-card-expand-btn" aria-label="全屏查看本周期排便感受" onClick={onExpand}>
+                <ReviewExpandIcon/>
+              </button>
+            )}
+          </div>
           <StoolPhaseDistChart/>
           <div className="review-love-insight">
             你的排便感受在<span className="review-key-emphasis">排卵前后</span>相对舒畅，进入<span className="review-key-emphasis">黄体期</span>后逐渐出现残便感与排便困难，可能与周期变化带来的<span className="review-key-emphasis">肠道蠕动变化</span>有关。
@@ -7594,13 +8129,13 @@ function StoolHabitCombinedCard({range = 'd30'}){
   );
 }
 
-function StoolDetailBody({range}){
+function StoolDetailBody({range, onExpandPhase}){
   const showCycle = range === 'd30';
   return (
     <>
       <StoolTrendSummary range={range}/>
       <div className="review-love-detail-lower">
-        {showCycle ? <StoolCycleCombinedCard/> : null}
+        {showCycle ? <StoolCycleCombinedCard onExpand={onExpandPhase}/> : null}
         {showCycle ? <StoolShapeShareCombinedCard/> : null}
         <StoolHabitCombinedCard range={range}/>
       </div>
@@ -7610,6 +8145,7 @@ function StoolDetailBody({range}){
 
 function StoolDetailPage({open, onClose}){
   const [range, setRange] = React.useState('d30');
+  const [phaseLandscapeOpen, setPhaseLandscapeOpen] = React.useState(false);
   const ranges = [
     {key:'d30', label:'近30天'},
     {key:'half', label:'近半年'},
@@ -7617,16 +8153,21 @@ function StoolDetailPage({open, onClose}){
     {key:'all', label:'全部'},
   ];
   React.useEffect(()=>{
-    if(!open) return;
+    if(!open){
+      setPhaseLandscapeOpen(false);
+      return;
+    }
     setRange('d30');
   }, [open]);
   return (
+    <>
     <section className={'review-cycle-detail is-fullscreen-detail' + (open ? ' is-open' : '')} aria-hidden={!open} aria-label="便便详情">
       <div className="review-detail-nav">
         <button type="button" className="review-detail-back" aria-label="返回" onClick={onClose}>
           <ReviewBackIcon/>
         </button>
         <span className="review-detail-title">便便</span>
+        <button type="button" className="review-detail-all-records">所有记录</button>
       </div>
       <div className="review-detail-content review-love-detail-content">
         <div className="review-love-detail-top">
@@ -7644,9 +8185,26 @@ function StoolDetailPage({open, onClose}){
             ))}
           </div>
         </div>
-        <StoolDetailBody range={range}/>
+        <StoolDetailBody range={range} onExpandPhase={()=>setPhaseLandscapeOpen(true)}/>
       </div>
     </section>
+    <PhaseChartLandscapePage
+      open={open && phaseLandscapeOpen}
+      onClose={()=>setPhaseLandscapeOpen(false)}
+      title="本周期排便感受"
+      subtitle="排便感受与激素走势 · 左右滑动查看"
+      legend={(
+        <>
+          <span className="review-stool-traj-legend-item"><i className="is-stool"/>排便感受</span>
+          <span className="review-stool-traj-legend-item"><i className="is-e2"/>雌激素 E2</span>
+          <span className="review-stool-traj-legend-item"><i className="is-p4"/>孕激素 P4</span>
+          <span className="review-cycle-landscape-tip">← 滑动查看更多 →</span>
+        </>
+      )}
+    >
+      <StoolPhaseDistChart expanded/>
+    </PhaseChartLandscapePage>
+    </>
   );
 }
 
@@ -8054,8 +8612,9 @@ function LoveDistLegendHeart({risk}){
   );
 }
 
-function LovePhaseDistChart(){
-  const W = 520, H = 300;
+function LovePhaseDistChart({expanded = false} = {}){
+  const uid = expanded ? 'Exp' : '';
+  const W = expanded ? 760 : 520, H = 300;
   const padL = 2, padR = 12, padT = 36, padB = 26;
   const x0 = padL, x1 = W - padR;
   const plotW = x1 - x0;
@@ -8089,7 +8648,7 @@ function LovePhaseDistChart(){
   const peakX = X(13);
   const yAxisTicks = yTicks.map(tick=>({tick, top:Y(tick)}));
   return (
-    <div className="review-love-traj">
+    <div className={'review-love-traj' + (expanded ? ' is-expanded' : '')}>
       <div className="review-love-traj-plot">
         <div className="review-love-traj-yaxis" aria-hidden="true">
           {yAxisTicks.map(item=>(
@@ -8100,18 +8659,18 @@ function LovePhaseDistChart(){
           <div className="review-love-traj-canvas">
             <svg viewBox={'0 0 ' + W + ' ' + H} preserveAspectRatio="xMidYMid meet" role="img" aria-label="本周期爱爱变化趋势">
             <defs>
-              <linearGradient id="loveTrajE2Fill" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id={'loveTrajE2Fill' + uid} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0" stopColor="#FF7AA8" stopOpacity="0.35"/>
                 <stop offset="1" stopColor="#FF7AA8" stopOpacity="0.02"/>
               </linearGradient>
-              <linearGradient id="loveTrajP4Fill" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id={'loveTrajP4Fill' + uid} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0" stopColor="#E8A040" stopOpacity="0.32"/>
                 <stop offset="1" stopColor="#E8A040" stopOpacity="0.02"/>
               </linearGradient>
-              <clipPath id="loveTrajTopClip">
+              <clipPath id={'loveTrajTopClip' + uid}>
                 <rect x={x0} y={topAreaTop} width={plotW} height={topAreaBottom - topAreaTop}/>
               </clipPath>
-              <clipPath id="loveTrajBottomClip">
+              <clipPath id={'loveTrajBottomClip' + uid}>
                 <rect x={x0} y={hormoneTop} width={plotW} height={hormoneBottom - hormoneTop}/>
               </clipPath>
             </defs>
@@ -8129,7 +8688,7 @@ function LovePhaseDistChart(){
                 />
               );
             })}
-            <g clipPath="url(#loveTrajTopClip)">
+            <g clipPath={'url(#loveTrajTopClip' + uid + ')'}>
               <path
                 d={linePath}
                 fill="none"
@@ -8142,9 +8701,9 @@ function LovePhaseDistChart(){
             {pts.map((p, i)=>(
               <LoveDistHeart key={'p' + i} x={p.x} y={p.y} risk={p.risk} scale={1.1}/>
             ))}
-            <g clipPath="url(#loveTrajBottomClip)">
-              <path d={toArea(e2Line, e2Pts, hormoneBottom)} fill="url(#loveTrajE2Fill)"/>
-              <path d={toArea(p4Line, p4Pts, hormoneBottom)} fill="url(#loveTrajP4Fill)"/>
+            <g clipPath={'url(#loveTrajBottomClip' + uid + ')'}>
+              <path d={toArea(e2Line, e2Pts, hormoneBottom)} fill={'url(#loveTrajE2Fill' + uid + ')'}/>
+              <path d={toArea(p4Line, p4Pts, hormoneBottom)} fill={'url(#loveTrajP4Fill' + uid + ')'}/>
               <path d={e2Line} fill="none" stroke="#FF7AA8" strokeWidth="1.6" strokeLinejoin="round" strokeLinecap="round"/>
               <path d={p4Line} fill="none" stroke="#E8A040" strokeWidth="1.6" strokeLinejoin="round" strokeLinecap="round"/>
             </g>
@@ -8216,12 +8775,14 @@ function LovePhaseDistChart(){
           </div>
         </div>
       </div>
-      <div className="review-love-traj-legend">
-        <span><LoveDistLegendHeart risk={false}/>有措施</span>
-        <span><LoveDistLegendHeart risk={true}/>无措施</span>
-        <span><i className="is-e2"/>雌激素 E2</span>
-        <span><i className="is-p4"/>孕激素 P4</span>
-      </div>
+      {expanded ? null : (
+        <div className="review-love-traj-legend">
+          <span><LoveDistLegendHeart risk={false}/>有措施</span>
+          <span><LoveDistLegendHeart risk={true}/>无措施</span>
+          <span><i className="is-e2"/>雌激素 E2</span>
+          <span><i className="is-p4"/>孕激素 P4</span>
+        </div>
+      )}
     </div>
   );
 }
@@ -8515,7 +9076,7 @@ function LoveTrendSummary({range = 'half'}){
   );
 }
 
-function LoveCycleCombinedCard(){
+function LoveCycleCombinedCard({onExpand}){
   return (
     <div className="review-love-cycle-combined-wrap">
       <div className="review-love-trend-title">月经周期与爱爱</div>
@@ -8529,7 +9090,14 @@ function LoveCycleCombinedCard(){
         </div>
         <div className="review-love-cycle-divider" aria-hidden="true"/>
         <div className="review-love-cycle-block">
-          <div className="review-love-cycle-subhead">本周期爱爱变化</div>
+          <div className="review-love-cycle-subhead review-cycle-subhead-expand-row">
+            <span>本周期爱爱变化</span>
+            {typeof onExpand === 'function' && (
+              <button type="button" className="review-cycle-card-expand-btn" aria-label="全屏查看本周期爱爱变化" onClick={onExpand}>
+                <ReviewExpandIcon/>
+              </button>
+            )}
+          </div>
           <LovePhaseDistChart/>
           <div className="review-love-insight">
             你的爱爱记录主要集中在 <span className="review-key-emphasis">排卵前后</span>，与本周期激素变化规律基本一致。排卵期雌激素达到高水平时，<span className="review-key-emphasis">亲密意愿通常更强</span>；进入黄体期后，随着雌孕激素水平变化，<span className="review-key-emphasis">亲密需求可能逐渐回归平稳</span>。
@@ -8873,13 +9441,13 @@ function LoveHabitCombinedCard({range = 'half'}){
   );
 }
 
-function LoveDetailBody({range}){
+function LoveDetailBody({range, onExpandPhase}){
   const showCycle = range === 'half';
   return (
     <>
       <LoveTrendSummary range={range}/>
       <div className="review-love-detail-lower">
-        {showCycle ? <LoveCycleCombinedCard/> : null}
+        {showCycle ? <LoveCycleCombinedCard onExpand={onExpandPhase}/> : null}
         <LoveMeasureCombinedCard range={range}/>
         <LoveHabitCombinedCard range={range}/>
       </div>
@@ -8889,22 +9457,28 @@ function LoveDetailBody({range}){
 
 function LoveDetailPage({open, onClose}){
   const [range, setRange] = React.useState('half');
+  const [phaseLandscapeOpen, setPhaseLandscapeOpen] = React.useState(false);
   const ranges = [
     {key:'half', label:'近半年'},
     {key:'year', label:'近1年'},
     {key:'all', label:'全部'},
   ];
   React.useEffect(()=>{
-    if(!open) return;
+    if(!open){
+      setPhaseLandscapeOpen(false);
+      return;
+    }
     setRange('half');
   }, [open]);
   return (
+    <>
     <section className={'review-cycle-detail is-fullscreen-detail' + (open ? ' is-open' : '')} aria-hidden={!open} aria-label="爱爱详情">
       <div className="review-detail-nav">
         <button type="button" className="review-detail-back" aria-label="返回" onClick={onClose}>
           <ReviewBackIcon/>
         </button>
         <span className="review-detail-title">爱爱</span>
+        <button type="button" className="review-detail-all-records">所有记录</button>
       </div>
       <div className="review-detail-content review-love-detail-content">
         <div className="review-love-detail-top">
@@ -8922,9 +9496,27 @@ function LoveDetailPage({open, onClose}){
             ))}
           </div>
         </div>
-        <LoveDetailBody range={range}/>
+        <LoveDetailBody range={range} onExpandPhase={()=>setPhaseLandscapeOpen(true)}/>
       </div>
     </section>
+    <PhaseChartLandscapePage
+      open={open && phaseLandscapeOpen}
+      onClose={()=>setPhaseLandscapeOpen(false)}
+      title="本周期爱爱变化"
+      subtitle="爱爱与激素走势 · 左右滑动查看"
+      legend={(
+        <>
+          <span className="review-love-traj-legend-item"><LoveDistLegendHeart risk={false}/>有措施</span>
+          <span className="review-love-traj-legend-item"><LoveDistLegendHeart risk={true}/>无措施</span>
+          <span className="review-love-traj-legend-item"><i className="is-e2"/>雌激素 E2</span>
+          <span className="review-love-traj-legend-item"><i className="is-p4"/>孕激素 P4</span>
+          <span className="review-cycle-landscape-tip">← 滑动查看更多 →</span>
+        </>
+      )}
+    >
+      <LovePhaseDistChart expanded/>
+    </PhaseChartLandscapePage>
+    </>
   );
 }
 

@@ -1205,6 +1205,21 @@
   font-weight:500;
   color:var(--my-text-primary);
 }
+.review-detail-all-records{
+  position:absolute;
+  right:12px;
+  top:50%;
+  transform:translateY(-50%);
+  border:0;
+  background:none;
+  font-size:13px;
+  font-weight:400;
+  color:rgba(0,0,0,0.45);
+  cursor:pointer;
+  padding:0;
+  line-height:1;
+  font-family:inherit;
+}
 .review-detail-back{
   position:absolute;
   left:4px;
@@ -2109,6 +2124,9 @@
 .review-cycle-landscape.is-open{
   display:flex;
 }
+.review-cycle-landscape.is-over-detail{
+  z-index:220;
+}
 .review-cycle-landscape-surface{
   width:min(calc(100vw - 32px), 844px);
   height:min(calc(100vh - 32px), 390px);
@@ -2198,6 +2216,67 @@
   height:100%;
   min-height:230px;
 }
+.review-cycle-landscape-scroll.is-phase-traj{
+  display:flex;
+  align-items:stretch;
+}
+.review-cycle-landscape-scroll.is-phase-traj .review-mood-traj,
+.review-cycle-landscape-scroll.is-phase-traj .review-stool-traj,
+.review-cycle-landscape-scroll.is-phase-traj .review-love-traj{
+  width:100%;
+  height:100%;
+  margin:0;
+  display:flex;
+  flex-direction:column;
+}
+.review-cycle-landscape-scroll.is-phase-traj .review-mood-traj-plot,
+.review-cycle-landscape-scroll.is-phase-traj .review-stool-traj-plot,
+.review-cycle-landscape-scroll.is-phase-traj .review-love-traj-plot{
+  flex:1 1 auto;
+  min-height:0;
+}
+.review-cycle-landscape-scroll.is-phase-traj .review-mood-traj-scroll,
+.review-cycle-landscape-scroll.is-phase-traj .review-stool-traj-scroll,
+.review-cycle-landscape-scroll.is-phase-traj .review-love-traj-scroll{
+  overflow:visible;
+}
+.review-cycle-landscape-scroll.is-phase-traj svg{
+  height:auto;
+  min-height:0;
+  width:100%;
+}
+.review-mood-traj.is-expanded .review-mood-traj-canvas,
+.review-stool-traj.is-expanded .review-stool-traj-canvas,
+.review-love-traj.is-expanded .review-love-traj-canvas{
+  min-width:760px;
+  width:760px;
+}
+.review-cycle-landscape-legend .review-mood-traj-legend-item,
+.review-cycle-landscape-legend .review-stool-traj-legend-item,
+.review-cycle-landscape-legend .review-love-traj-legend-item{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  font-size:11px;
+  color:rgba(0,0,0,0.55);
+}
+.review-cycle-landscape-legend .review-mood-traj-legend-item i,
+.review-cycle-landscape-legend .review-stool-traj-legend-item i,
+.review-cycle-landscape-legend .review-love-traj-legend-item i{
+  display:inline-block;
+  width:14px;
+  height:2px;
+  border-radius:2px;
+  flex:0 0 auto;
+}
+.review-cycle-landscape-legend .review-mood-traj-legend-item i.is-mood{background:#F2B8C4}
+.review-cycle-landscape-legend .review-mood-traj-legend-item i.is-e2,
+.review-cycle-landscape-legend .review-stool-traj-legend-item i.is-e2,
+.review-cycle-landscape-legend .review-love-traj-legend-item i.is-e2{background:#FF7AA8}
+.review-cycle-landscape-legend .review-mood-traj-legend-item i.is-p4,
+.review-cycle-landscape-legend .review-stool-traj-legend-item i.is-p4,
+.review-cycle-landscape-legend .review-love-traj-legend-item i.is-p4{background:#E8A040}
+.review-cycle-landscape-legend .review-stool-traj-legend-item i.is-stool{background:#B89AD4}
 
 @media (orientation:portrait) and (max-width:600px){
   .review-cycle-landscape-surface{
@@ -3172,6 +3251,87 @@
   color:rgba(0,0,0,0.55);
 }
 
+.review-mood-slot-sub{
+  margin:-4px 0 12px;
+  font-size:12px;
+  font-weight:400;
+  color:rgba(0,0,0,0.4);
+  line-height:1.29;
+}
+.review-mood-slot-cards{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.review-mood-slot-card{
+  padding:15px 14px;
+  border-radius:14px;
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+}
+.review-mood-slot-card-head{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  min-width:0;
+}
+.review-mood-slot-card-period{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  min-width:0;
+  line-height:1;
+}
+.review-mood-slot-card-period svg{
+  width:16px;
+  height:16px;
+  flex:0 0 16px;
+  display:block;
+}
+.review-mood-slot-card-period strong{
+  font-size:14px;
+  font-weight:500;
+  color:rgba(0,0,0,0.8);
+  line-height:1;
+  white-space:nowrap;
+}
+.review-mood-slot-card-range{
+  margin-top:2px;
+  font-size:10.5px;
+  font-weight:400;
+  color:rgba(0,0,0,0.38);
+  line-height:1;
+  white-space:nowrap;
+}
+.review-mood-slot-card-foot{
+  margin-top:14px;
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:8px;
+}
+.review-mood-slot-card-foot > b{
+  font-size:22px;
+  font-weight:500;
+  line-height:1;
+}
+.review-mood-slot-card-foot > em{
+  font-style:normal;
+  font-size:11px;
+  font-weight:400;
+  color:rgba(0,0,0,0.38);
+  line-height:1;
+  white-space:nowrap;
+  flex:0 0 auto;
+}
+.review-mood-week-bars{
+  display:block;
+  width:100%;
+  height:auto;
+  margin-top:4px;
+}
+
 /* 营养摄入：心情时段分布外壳 + 营养素达标区间条 */
 .review-diet-nutrient-range-chart{
   gap:0;
@@ -3531,6 +3691,102 @@
   display:flex;
   align-items:flex-end;
   gap:4px;
+}
+.review-mood-x-cycle{
+  font-family:"PingFang SC",-apple-system,sans-serif;
+}
+.review-mood-x-cycle-head{
+  margin-bottom:12px;
+}
+.review-mood-x-cycle-title{
+  margin-bottom:12px;
+  font-size:13px;
+  font-weight:500;
+  color:rgba(0,0,0,0.8);
+  line-height:1.29;
+}
+.review-mood-x-cycle-sub{
+  margin-top:4px;
+  font-size:12px;
+  color:rgba(0,0,0,0.4);
+  line-height:1.29;
+}
+.review-mood-x-cycle-rows{
+  display:flex;
+  flex-direction:column;
+  gap:0;
+}
+.review-mood-x-cycle-row{
+  display:flex;
+  align-items:center;
+  gap:0;
+  height:72px;
+}
+.review-mood-x-cycle-meta{
+  flex:0 0 72px;
+  width:72px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:0;
+}
+.review-mood-x-cycle-meta strong{
+  font-size:12px;
+  font-weight:500;
+  color:rgba(0,0,0,0.8);
+  line-height:1.45;
+  white-space:nowrap;
+}
+.review-mood-x-cycle-meta span{
+  font-size:12px;
+  font-weight:400;
+  color:rgba(0,0,0,0.45);
+  line-height:1.45;
+  white-space:nowrap;
+}
+.review-mood-x-cycle-plot{
+  flex:0 1 228px;
+  width:228px;
+  max-width:calc(100% - 72px);
+  height:72px;
+}
+.review-mood-x-cycle-svg{
+  display:block;
+  width:100%;
+  height:72px;
+  overflow:visible;
+}
+.review-mood-x-breath-pulse{
+  transform-origin:0 0;
+  animation:mood-x-breath 1.8s ease-out infinite;
+}
+@keyframes mood-x-breath{
+  0%{
+    transform:scale(1);
+    opacity:0.45;
+  }
+  100%{
+    transform:scale(2);
+    opacity:0;
+  }
+}
+.review-mood-x-cycle-phases{
+  display:flex;
+  margin:2px 0 0 72px;
+  width:228px;
+  max-width:calc(100% - 72px);
+}
+.review-mood-x-cycle-phases span{
+  flex:1 1 0;
+  text-align:center;
+  font-size:12px;
+  color:rgba(0,0,0,0.6);
+  line-height:1.29;
+}
+.review-mood-x-cycle-legend{
+  margin-top:10px;
+  margin-bottom:0;
+  padding-left:2px;
 }
 .review-mood-cycle-index-axis{
   position:relative;
@@ -5463,143 +5719,179 @@
   color:rgba(0,0,0,0.68);
   line-height:1.47;
 }
-.review-mood-jar-main{
+.review-mood-jar-stage{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.review-mood-jar-stage-inner{
+  position:relative;
   display:flex;
   align-items:center;
-  justify-content:flex-start;
-  gap:12px;
+  justify-content:center;
+  width:100%;
+  min-height:168px;
 }
-.review-mood-jar-main.is-idle{
+.review-mood-jar-stage.is-idle .review-mood-jar-stage-inner{
   justify-content:center;
 }
-.review-mood-jar-main .review-mood-record-bubbles{
-  flex:0 0 min(100%, 168px);
-  min-width:0;
+.review-mood-jar-stage.is-revealed .review-mood-jar-stage-inner{
+  justify-content:center;
 }
-.review-mood-jar-detail{
-  position:relative;
-  flex:1 1 auto;
-  min-width:0;
-  max-width:180px;
-  padding:12px 12px 10px;
+.review-mood-jar-hit{
+  margin:0;
+  padding:0;
+  border:0;
+  background:transparent;
+  cursor:pointer;
+  display:block;
+  width:min(100%, 168px);
+  flex:0 0 auto;
+}
+.review-mood-jar-hit:focus-visible{
+  outline:2px solid rgba(255,77,136,0.45);
+  outline-offset:4px;
+  border-radius:12px;
+}
+.review-mood-jar-stage.is-shaking .review-mood-jar-hit{
+  animation:mood-jar-shake 0.7s ease-in-out;
+}
+@keyframes mood-jar-shake{
+  0%,100%{transform:translateX(0) rotate(0deg)}
+  15%{transform:translateX(-6px) rotate(-4deg)}
+  30%{transform:translateX(6px) rotate(4deg)}
+  45%{transform:translateX(-5px) rotate(-3deg)}
+  60%{transform:translateX(5px) rotate(3deg)}
+  75%{transform:translateX(-3px) rotate(-2deg)}
+  90%{transform:translateX(3px) rotate(1deg)}
+}
+.review-mood-jar-change{
+  position:absolute;
+  right:0;
+  top:50%;
+  transform:translateY(-50%);
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  height:32px;
+  padding:0 12px;
+  margin:0;
+  border:1px solid rgba(255,77,136,0.55);
+  border-radius:80px;
+  background:#fff;
+  color:#ff4d88;
+  font-family:"PingFang SC",-apple-system,sans-serif;
+  font-size:13px;
+  font-weight:400;
+  line-height:1;
+  cursor:pointer;
+}
+.review-mood-jar-change svg{
+  width:14px;
+  height:14px;
+  display:block;
+  color:#6BA8F5;
+}
+.review-mood-jar-change:active{
+  transform:translateY(-50%) scale(0.96);
+  background:rgba(255,77,136,0.06);
+}
+.review-mood-jar-note{
+  width:100%;
+  margin-top:12px;
+  padding:14px 14px 12px;
   border-radius:12px;
   background:#fff7fa;
   box-sizing:border-box;
+  animation:mood-jar-note-in 0.35s ease-out;
 }
-.review-mood-jar-detail::before{
-  content:"";
-  position:absolute;
-  left:-6px;
-  top:28px;
-  width:12px;
-  height:12px;
-  background:#fff7fa;
-  transform:rotate(45deg);
-  border-radius:2px;
+@keyframes mood-jar-note-in{
+  from{opacity:0; transform:translateY(8px)}
+  to{opacity:1; transform:translateY(0)}
 }
-.review-mood-jar-detail-head{
+.review-mood-jar-note-head{
   display:flex;
   align-items:center;
-  gap:6px;
-  margin-bottom:8px;
+  gap:10px;
+  margin-bottom:10px;
 }
-.review-mood-jar-detail-head > em{
+.review-mood-jar-note-head > em{
   font-style:normal;
-  font-size:16px;
+  font-size:36px;
   line-height:1;
+  flex:0 0 auto;
 }
-.review-mood-jar-detail-head > b{
-  font-size:14px;
-  font-weight:500;
-  color:rgba(0,0,0,0.8);
-  line-height:1.29;
-}
-.review-mood-jar-detail-head > i{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  min-width:18px;
-  height:18px;
-  padding:0 5px;
-  border-radius:80px;
-  background:#ff4d88;
-  color:#fff;
-  font-style:normal;
-  font-size:11px;
-  font-weight:500;
-  line-height:1;
-}
-.review-mood-jar-detail-list{
+.review-mood-jar-note-meta{
+  min-width:0;
   display:flex;
   flex-direction:column;
+  gap:4px;
 }
-.review-mood-jar-detail-row{
-  display:grid;
-  grid-template-columns:8px auto auto;
-  align-items:center;
-  column-gap:6px;
-  min-height:32px;
-  padding:6px 0;
-  border-top:0.5px solid rgba(255,77,136,0.12);
-}
-.review-mood-jar-detail-row:first-child{
-  border-top:0;
-  padding-top:2px;
-}
-.review-mood-jar-detail-dot{
-  width:5px;
-  height:5px;
-  border-radius:50%;
-  background:#ff4d88;
-}
-.review-mood-jar-detail-row > strong{
-  font-size:12px;
+.review-mood-jar-note-meta > b{
+  font-size:17px;
   font-weight:500;
   color:rgba(0,0,0,0.8);
-  line-height:1.29;
-  white-space:nowrap;
+  line-height:1.19;
 }
-.review-mood-jar-detail-row > em{
-  font-style:normal;
+.review-mood-jar-note-meta > span{
   font-size:12px;
-  color:rgba(0,0,0,0.55);
+  color:rgba(0,0,0,0.45);
   line-height:1.29;
+}
+.review-mood-jar-note-body{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:12px;
+}
+.review-mood-jar-note-quote{
+  margin:0;
+  width:100%;
+  font-size:14px;
+  font-weight:400;
+  color:rgba(0,0,0,0.75);
+  line-height:1.47;
+}
+.review-mood-jar-voice{
+  margin:0;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  height:28px;
+  padding:0 10px 0 8px;
+  border:0;
+  border-radius:80px;
+  background:#EAF3FC;
+  color:#4f7cae;
+  font-family:"PingFang SC",-apple-system,sans-serif;
+  font-size:12px;
+  font-weight:400;
+  line-height:1;
+  cursor:pointer;
+  flex:0 0 auto;
   white-space:nowrap;
 }
-.review-mood-jar-hotspot{
-  position:absolute;
-  width:24px;
-  height:24px;
-  margin:0;
-  padding:0;
-  transform:translate(-50%, -50%);
-  border:0;
-  border-radius:50%;
-  background:transparent;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
+.review-mood-jar-voice svg{
+  width:12px;
+  height:12px;
+  display:block;
+  fill:#4f7cae;
 }
-.review-mood-jar-hotspot span{
-  width:20px;
-  height:20px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:14px;
-  line-height:1;
-  background:rgba(255,255,255,0.72);
-  box-shadow:0 1px 3px rgba(0,0,0,0.12);
+.review-mood-jar-voice > i{
+  display:block;
+  width:14px;
+  height:12px;
+  border-radius:2px;
+  background:
+    linear-gradient(#6BA8F5,#6BA8F5) 0 50%/2px 5px no-repeat,
+    linear-gradient(#6BA8F5,#6BA8F5) 3px 50%/2px 8px no-repeat,
+    linear-gradient(#6BA8F5,#6BA8F5) 6px 50%/2px 12px no-repeat,
+    linear-gradient(#6BA8F5,#6BA8F5) 9px 50%/2px 7px no-repeat,
+    linear-gradient(#6BA8F5,#6BA8F5) 12px 50%/2px 4px no-repeat;
 }
-.review-mood-jar-hotspot.is-active span{
-  background:#fff;
-  box-shadow:0 2px 8px rgba(255,77,136,0.22);
-}
-.review-mood-jar-hotspot:focus-visible{
-  outline:2px solid rgba(255,77,136,0.45);
-  outline-offset:2px;
+.review-mood-jar-voice:active{
+  opacity:0.85;
+  transform:scale(0.98);
 }
 .review-mood-jar-tip{
   margin-top:12px;
@@ -5608,6 +5900,11 @@
   gap:8px;
   padding:0;
   justify-content:center;
+  width:100%;
+  border:0;
+  background:transparent;
+  cursor:pointer;
+  font-family:"PingFang SC",-apple-system,sans-serif;
 }
 .review-mood-jar-tip i{
   font-style:normal;
@@ -5619,6 +5916,11 @@
   font-size:11px;
   color:rgba(0,0,0,0.45);
   line-height:1.29;
+}
+.review-mood-jar-tip:focus-visible{
+  outline:2px solid rgba(255,77,136,0.45);
+  outline-offset:4px;
+  border-radius:8px;
 }
 .review-mood-record-divider{
   height:0.5px;
@@ -5836,6 +6138,188 @@
   margin-top:8px;
   margin-bottom:0;
 }
+.review-mood-trend-foot{
+  margin-top:16px;
+  padding:0 0 12px;
+  border-top:0;
+}
+.review-mood-trend-tri{
+  margin-top:0;
+  padding:13px 14px;
+  border-radius:14px;
+  background:#FAFAFB;
+  font-family:"PingFang SC",-apple-system,sans-serif;
+}
+.review-mood-trend-tri-head{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  margin-bottom:10px;
+}
+.review-mood-trend-tri-head span{
+  font-size:13px;
+  color:rgba(0,0,0,0.6);
+  line-height:1.29;
+}
+.review-mood-trend-tri-head b{
+  font-size:15px;
+  font-weight:600;
+  color:rgba(0,0,0,0.8);
+  line-height:1.29;
+}
+.review-mood-trend-tri-track{
+  display:flex;
+  height:14px;
+  border-radius:7px;
+  overflow:hidden;
+  background:#EEF1F6;
+}
+.review-mood-trend-tri-track i{
+  display:block;
+  height:100%;
+}
+.review-mood-trend-tri-legend{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  margin-top:10px;
+}
+.review-mood-trend-tri-legend span{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  font-size:12px;
+  color:rgba(0,0,0,0.6);
+  line-height:1.29;
+  white-space:nowrap;
+}
+.review-mood-trend-tri-legend i{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  flex:0 0 auto;
+}
+.review-mood-trend-tri-legend span em{
+  font-style:normal;
+  font-size:12px;
+  font-weight:400;
+  color:rgba(0,0,0,0.6);
+}
+.review-mood-trend-tri-legend span b{
+  font-size:12px;
+  font-weight:600;
+  color:rgba(0,0,0,0.8);
+}
+.review-mood-trend-recover{
+  position:relative;
+  display:flex;
+  align-items:flex-start;
+  justify-content:flex-start;
+  gap:0;
+  margin-top:0;
+  padding:13px 14px;
+  border-radius:14px;
+  background:#FAFAFB;
+  font-family:"PingFang SC",-apple-system,sans-serif;
+}
+.review-mood-trend-insight-row{
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) minmax(0, 1fr);
+  gap:10px;
+  margin-top:10px;
+}
+.review-mood-trend-insight-row > *{
+  min-width:0;
+  width:100%;
+}
+.review-mood-trend-record-card{
+  padding:13px 14px;
+  border-radius:14px;
+  background:#FAFAFB;
+  font-family:"PingFang SC",-apple-system,sans-serif;
+}
+.review-mood-trend-record-card-title{
+  display:block;
+  font-size:13px;
+  color:rgba(0,0,0,0.6);
+  line-height:1.29;
+}
+.review-mood-trend-record-card p{
+  margin:7px 0 0;
+  display:flex;
+  align-items:baseline;
+  gap:3px;
+}
+.review-mood-trend-record-card p b{
+  font-size:26px;
+  font-weight:600;
+  line-height:1;
+  color:#FF4D88;
+}
+.review-mood-trend-record-card p em{
+  font-style:normal;
+  font-size:13px;
+  font-weight:400;
+  color:rgba(0,0,0,0.6);
+}
+.review-mood-trend-record-card small{
+  display:block;
+  margin-top:7px;
+  font-size:12px;
+  color:rgba(0,0,0,0.38);
+  line-height:1.29;
+  white-space:nowrap;
+}
+.review-mood-trend-recover-icon{
+  position:absolute;
+  right:12px;
+  top:34px;
+  width:58px;
+  height:22px;
+  pointer-events:none;
+}
+.review-mood-trend-recover-copy{
+  min-width:0;
+  flex:1 1 auto;
+}
+.review-mood-trend-recover-copy strong{
+  display:block;
+  font-size:13px;
+  font-weight:400;
+  color:rgba(0,0,0,0.6);
+  line-height:1.29;
+}
+.review-mood-trend-recover-copy p{
+  margin:7px 0 0;
+  font-size:13px;
+  font-weight:400;
+  color:rgba(0,0,0,0.8);
+  line-height:1;
+  display:flex;
+  align-items:baseline;
+  gap:3px;
+}
+.review-mood-trend-recover-copy b{
+  font-weight:600;
+  font-size:26px;
+  line-height:1;
+  color:#3B82E8;
+}
+.review-mood-trend-recover-copy p em{
+  font-style:normal;
+  font-size:13px;
+  font-weight:400;
+  color:rgba(0,0,0,0.6);
+}
+.review-mood-trend-recover-copy span{
+  display:block;
+  margin-top:7px;
+  font-size:12px;
+  color:rgba(0,0,0,0.38);
+  line-height:1.29;
+  white-space:nowrap;
+}
 .review-mood-trend-metrics{
   margin-top:12px;
   padding:14px 0 16px;
@@ -5919,6 +6403,34 @@
   font-weight:500;
   color:var(--my-text-primary);
   line-height:1.19;
+}
+.review-cycle-subhead-expand-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+}
+.review-cycle-card-expand-btn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:28px;
+  height:28px;
+  border:0;
+  background:none;
+  cursor:pointer;
+  padding:0;
+  color:rgba(0,0,0,0.35);
+  flex-shrink:0;
+}
+.review-cycle-card-expand-btn svg{
+  width:16px;
+  height:16px;
+  stroke:currentColor;
+  stroke-width:2;
+  fill:none;
+  stroke-linecap:round;
+  stroke-linejoin:round;
 }
 .review-love-trend-range{
   margin-top:4px;
