@@ -14,6 +14,7 @@ function StatusBar({isMember=false, onMemberChange, showMemberSwitch=false, plan
           <button type="button" className={plan === 'plan1' ? 'is-active' : ''} onClick={()=>onPlanChange?.('plan1')}>方案1</button>
           <button type="button" className={plan === 'plan2' ? 'is-active' : ''} onClick={()=>onPlanChange?.('plan2')}>方案2</button>
           <button type="button" className={plan === 'plan3' ? 'is-active' : ''} onClick={()=>onPlanChange?.('plan3')}>方案3</button>
+          <button type="button" className={plan === 'plan4' ? 'is-active' : ''} onClick={()=>onPlanChange?.('plan4')}>方案4</button>
         </div>
       ) : null}
       <span className="sb-right">

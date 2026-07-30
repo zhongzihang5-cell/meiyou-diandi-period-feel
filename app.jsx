@@ -54,7 +54,7 @@ function Scheme2QuestionModule(){
   );
 }
 
-function PeriodFeelOverlay({open, onClose, onComplete, label='经期感受', plan='plan1', scheme1VoiceMotion=false, scheme1Content=false, scheme2Content=false, scheme3Content=false}){
+function PeriodFeelOverlay({open, onClose, onComplete, label='经期感受', plan='plan1', scheme1VoiceMotion=false, scheme1Content=false, scheme2Content=false, scheme3Content=false, scheme4Style=false, scheme4Content=false}){
   const [state, setState] = React.useState('ready');
   const [text, setText] = React.useState('');
   const [scheme1ExampleIndex, setScheme1ExampleIndex] = React.useState(0);
@@ -62,7 +62,13 @@ function PeriodFeelOverlay({open, onClose, onComplete, label='经期感受', pla
   const isPlan2 = plan === 'plan2';
   const isScheme1 = scheme1Content;
   const isScheme2 = scheme2Content;
-  const scheme1Examples = scheme3Content
+  const scheme1Examples = scheme4Content
+    ? [
+        <>一天之中，<strong>经血量</strong>有变化么</>,
+        <>出现了哪些<strong>经期症状</strong></>,
+        <>今天的<strong>心情</strong>怎样</>,
+      ]
+    : scheme3Content
     ? [
         <>今天<strong>流量</strong>____</>,
         <>这次<strong>痛经</strong>比上次____</>,
@@ -103,7 +109,7 @@ function PeriodFeelOverlay({open, onClose, onComplete, label='经期感受', pla
   };
   const DockPublisher = window.DockPublisher;
   return ReactDOM.createPortal(
-    <div className={'period-feel-overlay'+(scheme1Content ? ' is-scheme1' : '')+(scheme1VoiceMotion ? ' is-compact' : '')} role="dialog" aria-modal="true" aria-label="经期感受">
+    <div className={'period-feel-overlay'+(scheme1Content ? ' is-scheme1' : '')+(scheme1VoiceMotion ? ' is-compact' : '')+(scheme4Style ? ' is-scheme4' : '')} role="dialog" aria-modal="true" aria-label="经期感受">
       <div className="period-feel-sheet">
         <div className="period-feel-nav"><button type="button" onClick={onClose} aria-label="关闭">×</button><span>{label}</span></div>
         {state === 'result' ? (
@@ -113,7 +119,7 @@ function PeriodFeelOverlay({open, onClose, onComplete, label='经期感受', pla
             <div className="period-feel-result-actions"><button type="button" onClick={()=>onComplete?.(demoText)}>保存</button></div>
           </div>
         ) : (
-          <><div className={'period-feel-top'+(isScheme1 ? ' is-scheme1-content' : '')+(isScheme2 ? ' is-scheme2-content' : '')}>{state === 'recording' ? <p className="period-feel-live-text">{text}<span className="period-feel-caret"/></p> : <><div className="period-feel-intro"><span className="period-feel-demo-mic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="8" y="3" width="8" height="12" rx="4"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8.5 21h7"/></svg></span><div><b>{isScheme1 ? '试着说：' : (isPlan2 ? '用语音，记录经期身体的感受' : (plan === 'plan4' ? '用语音，记录经期的流量痛经变化' : (plan === 'plan3' ? '用语音，记录更详细的经期身体感受' : '用语音，记录流量变化')))}</b></div></div>{isScheme1 ? <div className="period-feel-example-carousel" aria-live="polite"><p key={scheme1ExampleIndex}>{scheme1Examples[scheme1ExampleIndex]}</p></div> : <div className="period-feel-demo"><b className="period-feel-demo-title">你可以这样说：</b><p className="period-feel-demo-quote">{isPlan2 ? <>“来月经的前一天特别<strong>烦躁</strong>，特别想<strong>发脾气</strong>，感觉胸部一直<strong>胀胀的</strong>，还有<strong>褐色分泌物</strong>”</> : <>“今天早上<strong>量不多</strong>，下午<strong>量变大</strong>了，晚上<strong>血量特别大</strong>，月经开始的前一天特别<strong>烦躁</strong>，感觉胸部一直<strong>胀胀的</strong>”</>}</p></div>}</>}</div>{isScheme2 ? <Scheme2QuestionModule /> : null}<div className={'period-feel-real-dock'+(scheme1VoiceMotion ? ' is-scheme1-motion' : '')+(isScheme2 ? ' is-scheme2' : '')}>{isScheme2 ? <div className="period-feel-speak-guide">说一句话，全都帮你记录下来</div> : null}{DockPublisher ? <DockPublisher draft="" onDraft={()=>{}} onSend={()=>{}} onQuickMark={()=>{}} onMoodConfirm={()=>{}} onSymptomConfirm={()=>{}} onWeightConfirm={()=>{}} onFoodConfirm={()=>{}} onDietCapture={()=>{}} onCameraRecord={()=>{}} onVoiceDone={()=>{clearTimers(); onComplete?.(demoText);}} onVoiceStart={()=>{clearTimers(); setState('recording'); let i=0; const timer=setInterval(()=>{i+=1; setText(demoText.slice(0,i)); if(i>=demoText.length) clearInterval(timer);},65); timers.current.push(timer);}} onPhoto={()=>{}} onDockExpandedChange={()=>{}} activeTab="note" defaultInputMode="voice" hideQuickFan hideQuickFab/> : null}</div></>
+          <><div className={'period-feel-top'+(isScheme1 ? ' is-scheme1-content' : '')+(isScheme2 ? ' is-scheme2-content' : '')}>{state === 'recording' ? <p className="period-feel-live-text">{text}<span className="period-feel-caret"/></p> : <>{!scheme4Content && <div className="period-feel-intro"><span className="period-feel-demo-mic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="8" y="3" width="8" height="12" rx="4"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8.5 21h7"/></svg></span><div><b>{isScheme1 ? '试着说：' : (isPlan2 ? '用语音，记录经期身体的感受' : (plan === 'plan4' ? '用语音，记录经期的流量痛经变化' : (plan === 'plan3' ? '用语音，记录更详细的经期身体感受' : '用语音，记录流量变化')))}</b></div></div>}{isScheme1 ? <div className="period-feel-example-carousel" aria-live="polite"><p key={scheme1ExampleIndex}>{scheme1Examples[scheme1ExampleIndex]}</p></div> : <div className="period-feel-demo"><b className="period-feel-demo-title">你可以这样说：</b><p className="period-feel-demo-quote">{isPlan2 ? <>“来月经的前一天特别<strong>烦躁</strong>，特别想<strong>发脾气</strong>，感觉胸部一直<strong>胀胀的</strong>，还有<strong>褐色分泌物</strong>”</> : <>“今天早上<strong>量不多</strong>，下午<strong>量变大</strong>了，晚上<strong>血量特别大</strong>，月经开始的前一天特别<strong>烦躁</strong>，感觉胸部一直<strong>胀胀的</strong>”</>}</p></div>}</>}</div>{isScheme2 ? <Scheme2QuestionModule /> : null}<div className={'period-feel-real-dock'+(scheme1VoiceMotion ? ' is-scheme1-motion' : '')+(isScheme2 ? ' is-scheme2' : '')+(scheme4Content ? ' is-scheme4-dock' : '')}>{(isScheme2 || scheme4Content) ? <div className="period-feel-speak-guide">说一句话，全都帮你记录下来</div> : null}{DockPublisher ? <DockPublisher draft="" onDraft={()=>{}} onSend={()=>{}} onQuickMark={()=>{}} onMoodConfirm={()=>{}} onSymptomConfirm={()=>{}} onWeightConfirm={()=>{}} onFoodConfirm={()=>{}} onDietCapture={()=>{}} onCameraRecord={()=>{}} onVoiceDone={()=>{clearTimers(); onComplete?.(demoText);}} onVoiceStart={()=>{clearTimers(); setState('recording'); let i=0; const timer=setInterval(()=>{i+=1; setText(demoText.slice(0,i)); if(i>=demoText.length) clearInterval(timer);},65); timers.current.push(timer);}} onPhoto={()=>{}} onDockExpandedChange={()=>{}} activeTab="note" defaultInputMode="voice" hideQuickFan hideQuickFab/> : null}</div></>
         )}
       </div>
     </div>, document.body
@@ -450,22 +456,22 @@ function App(){
   const [periodFeelRecorded, setPeriodFeelRecorded] = useState(false);
   const [periodFeelModalOpen, setPeriodFeelModalOpen] = useState(false);
   const [periodPlan, setPeriodPlan] = useState('plan4');
+  const [periodPlanUi, setPeriodPlanUi] = useState('plan1');
   const [dockExpanded, setDockExpanded] = useState(false);
   const [showSearchPage, setShowSearchPage] = useState(false);
   const [babyFeedingPanelMode, setBabyFeedingPanelMode] = useState(null);
   const [searchCriteria, setSearchCriteria] = useState(null);
 
-  const displayPeriodPlan = periodPlan === 'plan1'
-    ? 'plan2'
-    : (periodPlan === 'plan3' ? 'plan3' : (periodPlan === 'plan2' ? 'plan4' : 'plan1'));
   const behaviorPlan = periodPlan === 'plan4' || periodPlan === 'plan1' ? 'plan3' : periodPlan;
 
   const handlePeriodPlanChange = (nextPlan)=>{
-    const implementationPlan = nextPlan === 'plan1'
+    // 方案4 与 方案1 共用同一套实现（plan4），仅样式不同
+    const implementationPlan = nextPlan === 'plan1' || nextPlan === 'plan4'
       ? 'plan4'
-      : (nextPlan === 'plan3' ? 'plan3' : (nextPlan === 'plan2' ? 'plan1' : 'plan2'));
-    if(implementationPlan === periodPlan) return;
+      : (nextPlan === 'plan3' ? 'plan3' : 'plan1');
+    if(nextPlan === periodPlanUi) return;
     const reset = window.getSceneInitialState(t.demoScene);
+    setPeriodPlanUi(nextPlan);
     setPeriodPlan(implementationPlan);
     setTimeline(reset.timeline);
     setDraft(reset.draft);
@@ -2422,7 +2428,7 @@ function App(){
   return (
     <>
       <div className={'phone' + (homeDetailOpen ? ' is-home-detail-open' : '') + (showDockQuickStrip ? ' is-dock-quick-entry' : '')}>
-        <StatusBar isMember={isMember} onMemberChange={setIsMember} showMemberSwitch={showReview} plan={displayPeriodPlan} onPlanChange={handlePeriodPlanChange} showPlanSwitch={showRecordShell && recordLifeMode === '经期'}/>
+        <StatusBar isMember={isMember} onMemberChange={setIsMember} showMemberSwitch={showReview} plan={periodPlanUi} onPlanChange={handlePeriodPlanChange} showPlanSwitch={showRecordShell && recordLifeMode === '经期'}/>
 
       {showHome && HomePage && (
         <HomePage
@@ -2748,6 +2754,7 @@ function App(){
         scheme1Content={periodPlan === 'plan4' || periodPlan === 'plan1'}
         scheme2Content={periodPlan === 'plan3'}
         scheme3Content={periodPlan === 'plan1'}
+        scheme4Content={periodPlanUi === 'plan4'}
         onClose={()=>setPeriodFeelModalOpen(false)}
           onComplete={(text)=>{
           setPeriodFeelRecorded(true);
