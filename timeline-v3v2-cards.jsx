@@ -508,43 +508,156 @@ function ChartBeverageWeek({data}){
   );
 }
 
+function readSavedDailyGoal(kind, fallback){
+  try {
+    const value = Number(window.localStorage?.getItem(`meiyou-daily-goal-${kind}`));
+    return value > 0 ? value : fallback;
+  } catch (error) {
+    return fallback;
+  }
+}
+
+function DailyGoalSettingPage({kind, value, onCancel, onSave}){
+  const isWater = kind === 'water';
+  const I = window.Icon;
+  const unit = isWater ? 'ml' : 'mg';
+  const min = isWater ? 500 : 50;
+  const max = isWater ? 3500 : 600;
+  const step = isWater ? 100 : 50;
+  const presets = isWater ? [1200, 1500, 2000, 2500] : [100, 200, 300, 400];
+  const [draft, setDraft] = React.useState(value);
+  return (
+    <div className="daily-goal-setting-page" role="dialog" aria-modal="true" aria-label={isWater ? '设置每日饮水目标' : '设置每日咖啡因目标'}>
+      <div className="daily-goal-setting-nav">
+        <button type="button" onClick={onCancel} aria-label="取消">
+          <I name="x" size={23} stroke={2}/>
+        </button>
+        <h2>{isWater ? '每日饮水目标' : '每日咖啡因目标'}</h2>
+        <button type="button" className="is-save" onClick={()=>onSave(draft)}>保存</button>
+      </div>
+      <div className="daily-goal-setting-content">
+        <div className={'daily-goal-setting-icon is-' + kind} aria-hidden="true">
+          {isWater
+            ? <img src="assets/baby-feeding-icons/water.png" alt=""/>
+            : <I name="coffee" size={30} stroke={1.8}/>}
+        </div>
+        <p>设置后将用于计算每天的摄入进度</p>
+        <div className="daily-goal-setting-value">
+          <button type="button" onClick={()=>setDraft(current=>Math.max(min, current - step))} aria-label={`减少${step}${unit}`}>
+            <I name="minus" size={21} stroke={2}/>
+          </button>
+          <div><strong>{draft}</strong><span>{unit}</span></div>
+          <button type="button" onClick={()=>setDraft(current=>Math.min(max, current + step))} aria-label={`增加${step}${unit}`}>
+            <I name="plus" size={21} stroke={2}/>
+          </button>
+        </div>
+        <input
+          className="daily-goal-setting-range"
+          type="range"
+          min={min}
+          max={max}
+          step={step}
+          value={draft}
+          onChange={(event)=>setDraft(Number(event.target.value))}
+          aria-label={isWater ? '每日饮水目标值' : '每日咖啡因目标值'}
+        />
+        <div className="daily-goal-setting-presets">
+          {presets.map(preset=>(
+            <button
+              type="button"
+              key={preset}
+              className={draft === preset ? 'is-active' : ''}
+              onClick={()=>setDraft(preset)}
+            >
+              {preset}{unit}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ChartDailyGoal({data}){
   const consumed = Math.max(0, Number(data?.consumed) || 0);
-  const goal = Math.max(1, Number(data?.goal) || 1);
+  const isWater = data?.kind === 'water';
+  const kind = isWater ? 'water' : 'caffeine';
+  const defaultGoal = Math.max(1, Number(data?.goal) || (isWater ? 1500 : 300));
+  const [goal, setGoal] = React.useState(()=>readSavedDailyGoal(kind, defaultGoal));
+  const [settingOpen, setSettingOpen] = React.useState(false);
   const remaining = Math.max(0, goal - consumed);
   const ratio = Math.min(1, consumed / goal);
   const radius = 43;
   const circumference = 2 * Math.PI * radius;
-  const isWater = data?.kind === 'water';
   const unit = data?.unit || (isWater ? 'ml' : 'mg');
   const color = isWater ? '#4aa9e9' : '#2db7aa';
+  React.useEffect(()=>{
+    const handleGoalChange = (event)=>{
+      if(event?.detail?.kind !== kind) return;
+      setGoal(event.detail.value);
+    };
+    window.addEventListener('dailyGoalChange', handleGoalChange);
+    return ()=>window.removeEventListener('dailyGoalChange', handleGoalChange);
+  }, [kind]);
+  const saveGoal = (nextGoal)=>{
+    try {
+      window.localStorage?.setItem(`meiyou-daily-goal-${kind}`, String(nextGoal));
+    } catch (error) {}
+    setGoal(nextGoal);
+    window.dispatchEvent(new CustomEvent('dailyGoalChange', {
+      detail:{ kind, value:nextGoal },
+    }));
+    setSettingOpen(false);
+  };
+  const settingPage = settingOpen && window.ReactDOM?.createPortal
+    ? window.ReactDOM.createPortal(
+        <DailyGoalSettingPage
+          kind={kind}
+          value={goal}
+          onCancel={()=>setSettingOpen(false)}
+          onSave={saveGoal}
+        />,
+        document.querySelector('.phone') || document.body
+      )
+    : null;
   return (
-    <div className={'v3-daily-goal is-' + (isWater ? 'water' : 'caffeine')}>
-      <div className="v3-daily-goal-ring" role="img" aria-label={`已完成今日目标的${Math.round(ratio * 100)}%`}>
-        <svg viewBox="0 0 104 104" aria-hidden="true">
-          <circle cx="52" cy="52" r={radius} className="v3-daily-goal-track"/>
-          <circle
-            cx="52"
-            cy="52"
-            r={radius}
-            className="v3-daily-goal-progress"
-            stroke={color}
-            strokeDasharray={`${circumference * ratio} ${circumference}`}
-          />
-        </svg>
-        <div className="v3-daily-goal-value">
-          <strong>{consumed}</strong>
-          <span>{unit}</span>
+    <div className="v3-daily-goal-card">
+      <div className={'v3-daily-goal is-' + kind}>
+        <div className="v3-daily-goal-ring" role="img" aria-label={`已完成今日目标的${Math.round(ratio * 100)}%`}>
+          <svg viewBox="0 0 104 104" aria-hidden="true">
+            <circle cx="52" cy="52" r={radius} className="v3-daily-goal-track"/>
+            <circle
+              cx="52"
+              cy="52"
+              r={radius}
+              className="v3-daily-goal-progress"
+              stroke={color}
+              strokeDasharray={`${circumference * ratio} ${circumference}`}
+            />
+          </svg>
+          <div className="v3-daily-goal-value">
+            <strong>{consumed}</strong>
+            <span>{unit}</span>
+          </div>
+        </div>
+        <div className="v3-daily-goal-summary">
+          <span>今日目标</span>
+          <strong>{goal}{unit}</strong>
+          <div className="v3-daily-goal-remaining">
+            <i style={{backgroundColor:color}} aria-hidden="true"/>
+            {isWater ? '还需饮水' : '还可摄入'} {remaining}{unit}
+          </div>
         </div>
       </div>
-      <div className="v3-daily-goal-summary">
-        <span>今日目标</span>
-        <strong>{goal}{unit}</strong>
-        <div className="v3-daily-goal-remaining">
-          <i style={{backgroundColor:color}} aria-hidden="true"/>
-          {isWater ? '还需饮水' : '还可摄入'} {remaining}{unit}
-        </div>
-      </div>
+      <p className="v3-daily-goal-copy">
+        {isWater
+          ? `今天已饮水${consumed}ml，距离${goal}ml目标还差${remaining}ml。`
+          : `今天摄入${consumed}mg，还可以摄入${remaining}mg。`}
+      </p>
+      <button type="button" className="v3-daily-goal-setting-link" onClick={()=>setSettingOpen(true)}>
+        {isWater ? '设置饮水目标' : '设置咖啡因目标'}
+      </button>
+      {settingPage}
     </div>
   );
 }
@@ -1015,7 +1128,9 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
     if(isCameraInsight){
       const detailRows = entry.recordType === 'beverage'
         ? [
-            { label:'规格', value:entry.spec },
+            { label:'容量', value:entry.capacityMl ? `${entry.capacityMl}ml` : '' },
+            { label:'冰度', value:entry.iceLevel || '' },
+            { label:'糖度', value:entry.sugarLevel || '' },
             { label:'总热量', value:`${entry.calories || 0} 千卡`, accent:true },
             { label:'咖啡因', value:`${entry.caffeineMg || 0} 毫克` },
           ]
@@ -1048,10 +1163,10 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
           ) : null}
           <p className="v3-camera-insight-title">{headline}</p>
           <div className="v3-camera-insight-details">
-            {detailRows.filter(row => row.value).map((row) => (
+            {(entry.recordType === 'beverage' ? detailRows : detailRows.filter(row => row.value)).map((row) => (
               <div className="v3-camera-insight-detail" key={row.label}>
                 <span>{row.label}</span>
-                <strong className={row.accent ? 'is-accent' : ''}>{row.value}</strong>
+                <strong className={row.accent ? 'is-accent' : ''}>{row.value || '\u00a0'}</strong>
               </div>
             ))}
           </div>
@@ -1232,6 +1347,7 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
 }
 
 function PhotoMemoryRecord({entry}){
+  const I = window.Icon;
   const [note, setNote] = React.useState(entry.note || '');
   React.useEffect(()=>setNote(entry.note || ''), [entry.note]);
   const saveNote = ()=>{
@@ -1242,8 +1358,7 @@ function PhotoMemoryRecord({entry}){
   return (
     <section className="v3-photo-memory">
       <div className="v3-photo-memory-heading">
-        <img src={recordIconSrc('photo')} alt="" aria-hidden="true"/>
-        <span>照片记录</span>
+        <I name="camera" size={22} stroke={1.8}/>
       </div>
       <div className="v3-photo-memory-image">
         <img src={entry.photoUrl} alt="生活照片"/>
@@ -1348,6 +1463,9 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
           iconText: p.iconText || '',
           brand: p.brand,
           beverageName: p.beverageName,
+          capacityMl: p.capacityMl,
+          iceLevel: p.iceLevel,
+          sugarLevel: p.sugarLevel,
           spec: p.spec,
           calories: p.calories,
           caffeineMg: p.caffeineMg,

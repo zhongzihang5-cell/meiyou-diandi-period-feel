@@ -146,13 +146,18 @@ function buildCameraRecognitionResult(payload) {
       ...base,
       brand: '星巴克',
       beverageName: '红茶咖啡拿铁鸳鸯',
-      spec: '大杯 / 冰',
+      capacityMl: 500,
+      iceLevel: '正常冰',
+      sugarLevel: '',
+      spec: '500ml / 正常冰',
       calories: 286,
       caffeineMg: 95,
-      summary: '星巴克红茶咖啡拿铁鸳鸯 · 大杯/冰',
+      summary: '星巴克红茶咖啡拿铁鸳鸯 · 500ml/正常冰',
       summaryItems: [
         { label: '饮品', value: '星巴克 · 红茶咖啡拿铁鸳鸯' },
-        { label: '规格', value: '大杯 / 冰' },
+        { label: '容量', value: '500ml' },
+        { label: '冰度', value: '正常冰' },
+        { label: '糖度', value: '' },
         { label: '热量', value: '286 千卡' },
         { label: '咖啡因', value: '95 毫克' },
       ],
@@ -1174,10 +1179,25 @@ function CameraTransition({
   };
 
   const handleAnalyzeSuccess = React.useCallback((payload) => {
-    setRecognitionResult(buildCameraRecognitionResult(payload));
-  }, []);
+    const result = buildCameraRecognitionResult(payload);
+    if (['photo', 'beverage'].includes(result.mode)) {
+      onCaptureSuccess?.({
+        ...result,
+        recognitionState: 'ready',
+      });
+      onClose?.();
+      return;
+    }
+    setRecognitionResult(result);
+  }, [onCaptureSuccess, onClose]);
 
   const analyze = useCameraPhotoAnalyze({ onSuccess: handleAnalyzeSuccess });
+
+  React.useEffect(() => {
+    if (active) return;
+    setRecognitionResult(null);
+    analyze.reset();
+  }, [active, analyze.reset]);
 
   const handleCameraClose = () => {
     if (showGallery) {

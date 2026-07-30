@@ -785,6 +785,9 @@ function App(){
               iconText: payload.iconText || item.primary?.iconText || '',
               brand:payload.brand ?? item.primary?.brand,
               beverageName:payload.beverageName ?? item.primary?.beverageName,
+              capacityMl:payload.capacityMl ?? item.primary?.capacityMl,
+              iceLevel:payload.iceLevel ?? item.primary?.iceLevel,
+              sugarLevel:payload.sugarLevel ?? item.primary?.sugarLevel,
               spec:payload.spec ?? item.primary?.spec,
               calories:payload.calories ?? item.primary?.calories,
               caffeineMg:payload.caffeineMg ?? item.primary?.caffeineMg,
@@ -807,7 +810,7 @@ function App(){
                 goal:300,
                 unit:'mg',
               },
-              note:'今天摄入195mg，还可以摄入105mg。',
+              note:'',
             } : item.ai;
             return {
               ...item,
@@ -1880,7 +1883,14 @@ function App(){
       beverage:{
         label:'饮品',
         icon:'beverage',
-        buildDetail:(data)=>`${data.brand || ''}${data.beverageName || ''} · ${(data.spec || '').replace(/\s*\/\s*/g, '/')}`,
+        buildDetail:(data)=>{
+          const specParts = [
+            data.capacityMl ? `${data.capacityMl}ml` : '',
+            data.iceLevel || '',
+            data.sugarLevel || '',
+          ].filter(Boolean);
+          return `${data.brand || ''}${data.beverageName || ''}${specParts.length ? ` · ${specParts.join('/')}` : ''}`;
+        },
         buildAi:()=>({
           title:'今日咖啡因摄入',
           chartType:'dailyGoal',
@@ -1890,7 +1900,7 @@ function App(){
             goal:300,
             unit:'mg',
           },
-          note:'今天摄入195mg，还可以摄入105mg。',
+          note:'',
         }),
       },
       skin:{
@@ -1940,6 +1950,9 @@ function App(){
           photoUrl:payload.photoUrl || null,
           brand:payload.brand,
           beverageName:payload.beverageName,
+          capacityMl:payload.capacityMl,
+          iceLevel:payload.iceLevel,
+          sugarLevel:payload.sugarLevel,
           spec:payload.spec,
           calories:payload.calories,
           caffeineMg:payload.caffeineMg,
@@ -2015,7 +2028,7 @@ function App(){
           goal:1500,
           unit:'ml',
         },
-        note:`今天已饮水${todayTotal}ml，距离1500ml目标还差${1500 - todayTotal}ml。`,
+        note:'',
       },
     };
     const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
