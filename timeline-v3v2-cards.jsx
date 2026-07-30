@@ -30,6 +30,7 @@ const RECORD_ICON_SRC = {
   beverage: 'assets/record-beverage.svg',
   skin: 'assets/record-symptom.png',
   cosmetic: 'assets/record-cosmetic.svg',
+  photo: 'assets/record-diary.png',
 };
 function recordIconSrc(key, fallback){
   return RECORD_ICON_SRC[key] || fallback || RECORD_ICON_SRC.symptom;
@@ -507,6 +508,47 @@ function ChartBeverageWeek({data}){
   );
 }
 
+function ChartDailyGoal({data}){
+  const consumed = Math.max(0, Number(data?.consumed) || 0);
+  const goal = Math.max(1, Number(data?.goal) || 1);
+  const remaining = Math.max(0, goal - consumed);
+  const ratio = Math.min(1, consumed / goal);
+  const radius = 43;
+  const circumference = 2 * Math.PI * radius;
+  const isWater = data?.kind === 'water';
+  const unit = data?.unit || (isWater ? 'ml' : 'mg');
+  const color = isWater ? '#4aa9e9' : '#2db7aa';
+  return (
+    <div className={'v3-daily-goal is-' + (isWater ? 'water' : 'caffeine')}>
+      <div className="v3-daily-goal-ring" role="img" aria-label={`已完成今日目标的${Math.round(ratio * 100)}%`}>
+        <svg viewBox="0 0 104 104" aria-hidden="true">
+          <circle cx="52" cy="52" r={radius} className="v3-daily-goal-track"/>
+          <circle
+            cx="52"
+            cy="52"
+            r={radius}
+            className="v3-daily-goal-progress"
+            stroke={color}
+            strokeDasharray={`${circumference * ratio} ${circumference}`}
+          />
+        </svg>
+        <div className="v3-daily-goal-value">
+          <strong>{consumed}</strong>
+          <span>{unit}</span>
+        </div>
+      </div>
+      <div className="v3-daily-goal-summary">
+        <span>今日目标</span>
+        <strong>{goal}{unit}</strong>
+        <div className="v3-daily-goal-remaining">
+          <i style={{backgroundColor:color}} aria-hidden="true"/>
+          {isWater ? '还需饮水' : '还可摄入'} {remaining}{unit}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function WeightAnalysisNote({ noteParts, note }){
   if(noteParts){
     return (
@@ -680,6 +722,7 @@ function TLChart({type, compact = false, data, weightUnit}){
   if(type === 'symptomDots') return <ChartSymptomDots data={data}/>;
   if(type === 'todayMoodWave') return <ChartTodayMoodWave data={data} compact={compact}/>;
   if(type === 'beverageWeek') return <ChartBeverageWeek data={data}/>;
+  if(type === 'dailyGoal') return <ChartDailyGoal data={data}/>;
   return null;
 }
 
@@ -716,7 +759,7 @@ function V3v2Header({time, title, isNew, entryId, entryKind, editPayload}){
 }
 
 function V3EditableRecordArea({entryId, entryKind, editPayload, children}){
-  const canEdit = !!(entryId && window.openEditModal);
+  const canEdit = !!(entryId && editPayload && window.openEditModal);
   const handleClick = React.useCallback((event)=>{
     event.stopPropagation();
     if(canEdit) window.openEditModal(entryId, entryKind, editPayload);
@@ -965,6 +1008,9 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
   }
   if(entry.kind === 'daily-record'){
     const iconKey = entry.icon || entry.recordType;
+    if(entry.recordType === 'photo'){
+      return <PhotoMemoryRecord entry={entry}/>;
+    }
     const isCameraInsight = ['beverage', 'skin', 'cosmetic'].includes(entry.recordType);
     if(isCameraInsight){
       const detailRows = entry.recordType === 'beverage'
@@ -1185,6 +1231,41 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
   );
 }
 
+function PhotoMemoryRecord({entry}){
+  const [note, setNote] = React.useState(entry.note || '');
+  React.useEffect(()=>setNote(entry.note || ''), [entry.note]);
+  const saveNote = ()=>{
+    window.dispatchEvent(new CustomEvent('timelinePhotoNoteSave', {
+      detail:{ entryId:entry.id, note },
+    }));
+  };
+  return (
+    <section className="v3-photo-memory">
+      <div className="v3-photo-memory-heading">
+        <img src={recordIconSrc('photo')} alt="" aria-hidden="true"/>
+        <span>照片记录</span>
+      </div>
+      <div className="v3-photo-memory-image">
+        <img src={entry.photoUrl} alt="生活照片"/>
+      </div>
+      <label className="v3-photo-memory-note">
+        <span>这一刻想记下...</span>
+        <textarea
+          value={note}
+          maxLength={160}
+          rows={3}
+          placeholder="写下拍照时发生的事情或此刻的想法"
+          onChange={(event)=>setNote(event.target.value)}
+          onBlur={saveNote}
+          onClick={(event)=>event.stopPropagation()}
+          onKeyDown={(event)=>event.stopPropagation()}
+        />
+        <small>{note ? '已自动保存' : '最多160字'}</small>
+      </label>
+    </section>
+  );
+}
+
 
 function normalizeV3Entry(raw){
   if(!raw) return null;
@@ -1256,7 +1337,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
           photoUrl:p.photo?.src || p.photoUrl || null,
         }
     : p?.kind === 'daily-record'
-      ? {
+      ? (p.recordType === 'photo' ? null : {
           kind: 'daily-record',
           time: p.time,
           recordType: p.recordType,
@@ -1280,7 +1361,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
           totalKcal: p.totalKcal,
           mealType: p.mealType,
           photoUrl: p.photoUrl,
-        }
+        })
     : (p?.kind === 'weight' || p?.kind === 'weight-text')
         ? {
             kind: 'daily-record',

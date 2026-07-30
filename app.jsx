@@ -120,7 +120,7 @@ const PERIOD_DOCK_QUICK_ITEMS = [
   { id:'symptom', label:'症状', action:'symptom', iconSrc:'assets/record-symptom.png' },
   { id:'mood', label:'心情', action:'mood', iconSrc:'assets/record-mood.png' },
   { id:'diet', label:'饮食', action:'diet', iconSrc:'assets/record-diet.png' },
-  { id:'water', label:'喝水', icon:'🥤', text:'喝水' },
+  { id:'beverage', label:'饮品', action:'beverage', iconSrc:'assets/record-beverage.svg', text:'饮品' },
   { id:'stool', label:'便便', icon:'💩', text:'便便' },
   { id:'exercise', label:'运动', icon:'🏃', text:'运动' },
   { id:'sleep', label:'睡眠', icon:'🌙', text:'睡眠' },
@@ -799,12 +799,15 @@ function App(){
             };
             const nextAi = type === 'beverage' ? {
               ...item.ai,
+              title:'今日咖啡因摄入',
+              chartType:'dailyGoal',
               chartData:{
-                ...(item.ai?.chartData || {}),
-                totalCalories:(Number(nextPrimary.calories) || 286) + 300,
-                totalCaffeineMg:(Number(nextPrimary.caffeineMg) || 95) + 100,
+                kind:'caffeine',
+                consumed:195,
+                goal:300,
+                unit:'mg',
               },
-              note:`近7天记录饮品3天；饮品摄入总热量${(Number(nextPrimary.calories) || 286) + 300}千卡，咖啡因${(Number(nextPrimary.caffeineMg) || 95) + 100}毫克。`,
+              note:'今天摄入195mg，还可以摄入105mg。',
             } : item.ai;
             return {
               ...item,
@@ -1809,7 +1812,57 @@ function App(){
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
   };
 
+  React.useEffect(()=>{
+    const handlePhotoNoteSave = (event)=>{
+      const entryId = event?.detail?.entryId;
+      const note = String(event?.detail?.note || '').trim();
+      if(!entryId) return;
+      setTimeline(blocks=>blocks.map(block=>{
+        if(block.type !== 'day') return block;
+        const items = (block.items || block.entries || []).map(item=>{
+          if(item?.id !== entryId && item?.primary?.id !== entryId) return item;
+          return item.primary
+            ? { ...item, primary:{ ...item.primary, note } }
+            : { ...item, note };
+        });
+        return { ...block, items, entries:undefined };
+      }));
+    };
+    window.addEventListener('timelinePhotoNoteSave', handlePhotoNoteSave);
+    return ()=>window.removeEventListener('timelinePhotoNoteSave', handlePhotoNoteSave);
+  }, []);
+
   const submitCameraRecord = (payload)=>{
+    if(payload?.mode === 'photo'){
+      markUserRecorded();
+      const stamp = Date.now();
+      const entry = {
+        kind:'record-group',
+        id:`e-photo-camera-${stamp}-g`,
+        isNew:true,
+        cameraSource:'photo',
+        photoUrl:payload.photoUrl || null,
+        primary:{
+          id:`e-photo-camera-${stamp}`,
+          time:window.formatNowTime(),
+          kind:'daily-record',
+          recordType:'photo',
+          icon:'photo',
+          recordLabel:'照片',
+          recordDetail:'',
+          text:'',
+          photoUrl:payload.photoUrl || null,
+          note:'',
+          tags:[],
+        },
+      };
+      const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id
+        || window.resolveEntryDayId('', timeline);
+      setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
+      setTimeout(()=>scrollTimelineToBottom('smooth'), 80);
+      return;
+    }
+
     if(payload?.mode === 'weight'){
       submitWeightRecord({
         value:Number(payload.value) || 108.4,
@@ -1828,28 +1881,17 @@ function App(){
         label:'饮品',
         icon:'beverage',
         buildDetail:(data)=>`${data.brand || ''}${data.beverageName || ''} · ${(data.spec || '').replace(/\s*\/\s*/g, '/')}`,
-        buildAi:(data)=>{
-          const totalCalories = (Number(data.calories) || 286) + 300;
-          const totalCaffeineMg = (Number(data.caffeineMg) || 95) + 100;
-          return {
-            title:'近7天饮品摄入',
-            chartType:'beverageWeek',
-            chartData:{
-              days:[
-                { label:'周二', consumed:false },
-                { label:'周三', consumed:true },
-                { label:'周四', consumed:false },
-                { label:'周五', consumed:false },
-                { label:'周六', consumed:true },
-                { label:'周日', consumed:false },
-                { label:'今天', consumed:true, isToday:true },
-              ],
-              totalCalories,
-              totalCaffeineMg,
-            },
-            note:`近7天记录饮品3天；饮品摄入总热量${totalCalories}千卡，咖啡因${totalCaffeineMg}毫克。`,
-          };
-        },
+        buildAi:()=>({
+          title:'今日咖啡因摄入',
+          chartType:'dailyGoal',
+          chartData:{
+            kind:'caffeine',
+            consumed:195,
+            goal:300,
+            unit:'mg',
+          },
+          note:'今天摄入195mg，还可以摄入105mg。',
+        }),
       },
       skin:{
         label:'皮肤状态',
@@ -1941,10 +1983,13 @@ function App(){
 
     markUserRecorded();
     const stamp = Date.now();
+    const todayTotal = Math.min(1500, 550 + amount);
     const entry = {
       kind:'record-group',
       id:'e-water-camera-'+stamp+'-g',
       isNew:true,
+      staggerReveal:true,
+      aiDefaultOpen:true,
       cameraSource:'water',
       photoUrl:payload.photoUrl || null,
       primary:{
@@ -1957,6 +2002,20 @@ function App(){
         recordDetail:`${amount}ml`,
         text:`喝水：${amount}ml`,
         tags:[],
+      },
+      ai:{
+        id:'e-water-camera-'+stamp+'-ai',
+        time:window.formatNowTime(),
+        kind:'camera-ai-feedback',
+        title:'今日饮水进度',
+        chartType:'dailyGoal',
+        chartData:{
+          kind:'water',
+          consumed:todayTotal,
+          goal:1500,
+          unit:'ml',
+        },
+        note:`今天已饮水${todayTotal}ml，距离1500ml目标还差${1500 - todayTotal}ml。`,
       },
     };
     const dayId = timeline.find(b=>b.type==='day' && b.isToday)?.id

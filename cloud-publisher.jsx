@@ -216,6 +216,81 @@ function QuickCardFan({
   );
 }
 
+function BeverageQuickSheet({onClose, onPhoto, onWater}){
+  const I = window.Icon;
+  return (
+    <div className="dock-sheet dock-beverage-sheet">
+      <div className="dock-sheet-hd">
+        <h3 className="dock-sheet-title">记录饮品</h3>
+        <button type="button" className="dock-sheet-close" onClick={onClose} aria-label="关闭">
+          <I name="x" size={20} stroke={1.8}/>
+        </button>
+      </div>
+      <div className="dock-beverage-actions">
+        <button type="button" className="dock-beverage-action" onClick={(event)=>onPhoto?.(event.currentTarget)}>
+          <span className="dock-beverage-action-icon is-photo" aria-hidden="true">
+            <I name="camera" size={25} stroke={1.8}/>
+          </span>
+          <span>
+            <strong>拍照记录饮品</strong>
+            <small>识别名称、热量和咖啡因</small>
+          </span>
+          <I name="chevron-right" size={18} stroke={1.8}/>
+        </button>
+        <button type="button" className="dock-beverage-action" onClick={onWater}>
+          <span className="dock-beverage-action-icon is-water" aria-hidden="true">
+            <img src="assets/baby-feeding-icons/water.png" alt=""/>
+          </span>
+          <span>
+            <strong>记录喝水</strong>
+            <small>快速记录本次饮水量</small>
+          </span>
+          <I name="chevron-right" size={18} stroke={1.8}/>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function WaterQuickSheet({value, onChange, onClose, onSave}){
+  const I = window.Icon;
+  const presets = [200, 300, 500, 750];
+  return (
+    <div className="dock-sheet dock-water-sheet">
+      <div className="dock-sheet-hd">
+        <h3 className="dock-sheet-title">记录喝水</h3>
+        <button type="button" className="dock-sheet-close" onClick={onClose} aria-label="关闭">
+          <I name="x" size={20} stroke={1.8}/>
+        </button>
+      </div>
+      <div className="dock-water-amount">
+        <button type="button" onClick={()=>onChange(Math.max(50, value - 50))} aria-label="减少50毫升">
+          <I name="minus" size={20} stroke={2}/>
+        </button>
+        <div><strong>{value}</strong><span>ml</span></div>
+        <button type="button" onClick={()=>onChange(value + 50)} aria-label="增加50毫升">
+          <I name="plus" size={20} stroke={2}/>
+        </button>
+      </div>
+      <div className="dock-water-presets" role="group" aria-label="常用饮水量">
+        {presets.map(amount=>(
+          <button
+            type="button"
+            className={value === amount ? 'is-active' : ''}
+            key={amount}
+            onClick={()=>onChange(amount)}
+          >
+            {amount}ml
+          </button>
+        ))}
+      </div>
+      <div className="dock-sheet-foot">
+        <button type="button" className="dock-sheet-submit" onClick={()=>onSave(value)}>保存记录</button>
+      </div>
+    </div>
+  );
+}
+
 function DockPublisher({
   draft, onDraft, onSend, onQuickMark, onMoodConfirm, onSymptomConfirm, onWeightConfirm,
   onFoodConfirm, onDietCapture, onCameraRecord,
@@ -243,6 +318,8 @@ function DockPublisher({
   const [inputFocused, setInputFocused] = React.useState(false);
   const [cameraOpen, setCameraOpen] = React.useState(false);
   const [cameraSourceRect, setCameraSourceRect] = React.useState(null);
+  const [cameraPreferredMode, setCameraPreferredMode] = React.useState(null);
+  const [waterAmount, setWaterAmount] = React.useState(300);
   const [feedingExpanded, setFeedingExpanded] = React.useState(false);
   const recTimer = React.useRef(null);
   const prevTabRef = React.useRef(activeTab);
@@ -395,13 +472,15 @@ function DockPublisher({
     onSymptomConfirm?.(symptoms);
   };
 
-  const openRecognitionCamera = (buttonEl)=>{
+  const openRecognitionCamera = (buttonEl, preferredMode = null)=>{
     if(!buttonEl) return;
     const phone = buttonEl.closest('.phone');
     if(!phone) return;
     containerRef.current = phone;
     const rect = measureElementRect?.(buttonEl, phone);
     setCameraSourceRect(rect);
+    setCameraPreferredMode(preferredMode);
+    setDockSheet(null);
     setQuickOpen(false);
     setQuickSelected(null);
     setCameraOpen(true);
@@ -425,6 +504,7 @@ function DockPublisher({
 
   const handleCameraClose = ()=>{
     setCameraOpen(false);
+    setCameraPreferredMode(null);
   };
 
   React.useEffect(()=>{
@@ -474,6 +554,10 @@ function DockPublisher({
       setQuickSelected('diet');
       return;
     }
+    if(item?.action === 'beverage'){
+      setDockSheet('beverage');
+      return;
+    }
     onFeedingQuickSelect?.(item);
   };
 
@@ -517,6 +601,7 @@ function DockPublisher({
           onCaptureSuccess={handleCameraCaptureSuccess}
           onClose={handleCameraClose}
           onActiveChange={onCameraActiveChange}
+          preferredRecognitionMode={cameraPreferredMode}
         />
       )}
 
@@ -558,6 +643,22 @@ function DockPublisher({
             <DockSymptomPicker
               onConfirm={handleSymptomConfirm}
               onCancel={closeDockSheet}
+            />
+          ) : dockSheet === 'beverage' ? (
+            <BeverageQuickSheet
+              onClose={closeDockSheet}
+              onPhoto={(buttonEl)=>openRecognitionCamera(buttonEl, 'beverage')}
+              onWater={()=>setDockSheet('water')}
+            />
+          ) : dockSheet === 'water' ? (
+            <WaterQuickSheet
+              value={waterAmount}
+              onChange={setWaterAmount}
+              onClose={closeDockSheet}
+              onSave={(amount)=>{
+                closeDockSheet();
+                onCameraRecord?.({mode:'water', value:amount, source:'quick'});
+              }}
             />
           ) : (
           <div className={'dock-bar is-path-dock'+(showFeedingQuick ? ' has-feeding-quick' : '')}>
@@ -687,7 +788,7 @@ function DockPublisher({
                 type="button"
                 className="dock-camera-btn"
                 aria-label="智能拍照记录"
-                onClick={(event)=>openRecognitionCamera(event.currentTarget, 'weight')}
+                onClick={(event)=>openRecognitionCamera(event.currentTarget)}
               >
                 <I name="camera" size={22} stroke={1.7}/>
               </button>

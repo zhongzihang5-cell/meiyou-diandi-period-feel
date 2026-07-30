@@ -353,6 +353,114 @@
 .dock-sheet-submit:disabled{opacity:0.35;cursor:default}
 .dock-sheet-submit:not(:disabled):active{transform:scale(0.98);opacity:0.92}
 
+.dock-beverage-sheet,
+.dock-water-sheet{
+  min-height:238px;
+  max-height:340px;
+}
+.dock-beverage-actions{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  padding:4px 14px 16px;
+}
+.dock-beverage-action{
+  min-height:72px;
+  display:grid;
+  grid-template-columns:46px minmax(0, 1fr) 20px;
+  align-items:center;
+  gap:11px;
+  padding:10px 12px;
+  border:0;
+  border-radius:8px;
+  background:#f7f7f9;
+  color:#2c2c2e;
+  text-align:left;
+  font:inherit;
+  cursor:pointer;
+}
+.dock-beverage-action:active{transform:scale(.99);background:#f1f1f4}
+.dock-beverage-action-icon{
+  width:42px;
+  height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:8px;
+}
+.dock-beverage-action-icon.is-photo{background:#e7f6f3;color:#24a89d}
+.dock-beverage-action-icon.is-water{background:#eaf4ff;color:#4a9ce0}
+.dock-beverage-action-icon img{
+  width:29px;
+  height:29px;
+  display:block;
+  object-fit:contain;
+}
+.dock-beverage-action > span:nth-child(2){
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+.dock-beverage-action strong{font-size:15px;line-height:21px;font-weight:600}
+.dock-beverage-action small{font-size:11px;line-height:17px;color:rgba(0,0,0,.45)}
+.dock-beverage-action > svg{color:rgba(0,0,0,.28)}
+.dock-water-amount{
+  display:grid;
+  grid-template-columns:42px minmax(0, 1fr) 42px;
+  align-items:center;
+  gap:16px;
+  padding:4px 38px 12px;
+}
+.dock-water-amount > button{
+  width:42px;
+  height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:0;
+  border-radius:50%;
+  background:#eef6ff;
+  color:#4a9ce0;
+  cursor:pointer;
+}
+.dock-water-amount > div{
+  display:flex;
+  align-items:baseline;
+  justify-content:center;
+  gap:4px;
+  white-space:nowrap;
+}
+.dock-water-amount strong{
+  font-size:34px;
+  line-height:42px;
+  font-weight:650;
+  font-variant-numeric:tabular-nums;
+}
+.dock-water-amount span{font-size:14px;color:rgba(0,0,0,.45)}
+.dock-water-presets{
+  display:grid;
+  grid-template-columns:repeat(4, minmax(0, 1fr));
+  gap:7px;
+  padding:0 14px 10px;
+}
+.dock-water-presets button{
+  height:34px;
+  border:1px solid #e3e6ea;
+  border-radius:7px;
+  background:#fff;
+  color:#666;
+  font:inherit;
+  font-size:12px;
+  cursor:pointer;
+}
+.dock-water-presets button.is-active{
+  border-color:#4a9ce0;
+  background:#eef7ff;
+  color:#287fc7;
+  font-weight:600;
+}
+
 /* ============ 症状选择 ============ */
 .dock-symptom-sheet{
   max-height:min(62vh, 440px);

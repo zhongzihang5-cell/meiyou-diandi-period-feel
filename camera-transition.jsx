@@ -6,6 +6,16 @@ const OVERLAY_FADE_DURATION = Math.round(TRANSITION_DURATION * 0.55);
 
 const CAMERA_RECOGNITION_MODES = [
   {
+    id: 'photo',
+    label: '照片',
+    capturePhoto: '公园照片.jpg',
+    iconSrc: 'assets/record-diary.png',
+    resultTitle: '保存为照片记录',
+    resultDescription: '未提取到记录项，将只保留这张照片',
+    resultNote: '保存后可以在照片下方补充当时的事情和想法',
+    saveLabel: '保存照片',
+  },
+  {
     id: 'period',
     label: '月经',
     capturePhoto: '使用过的量大卫生巾.jpg',
@@ -98,12 +108,19 @@ function getNextAutoDetectDemoPhoto() {
 function inferCameraRecognitionMode(photo) {
   const candidate = photo?.mode || photo?.type;
   if (candidate === 'food') return 'diet';
-  return CAMERA_RECOGNITION_MODE_MAP[candidate] ? candidate : 'diet';
+  return CAMERA_RECOGNITION_MODE_MAP[candidate] ? candidate : 'photo';
 }
 
 function buildCameraRecognitionResult(payload) {
   const mode = inferCameraRecognitionMode(payload?.photo || payload);
   const base = { ...payload, mode };
+  if (mode === 'photo') {
+    return {
+      ...base,
+      summary: '',
+      summaryItems: [],
+    };
+  }
   if (mode === 'period') {
     return {
       ...base,
@@ -207,6 +224,7 @@ function measureElementRect(el, container) {
 
 // 模拟相册照片数据（真实用户图片）
 const MOCK_PHOTOS = [
+  { id: 'p0', date: '2026-07-30', time: '18:20', thumb: '公园照片.jpg', type: 'photo', mode: 'photo' },
   { id: 'p1', date: '2026-06-03', time: '12:35', thumb: 'assets/gallery/IMG_9140-a0794273-c982-414f-8516-52af2c4456e1.png', type: 'food' },
   { id: 'p2', date: '2026-06-03', time: '11:20', thumb: 'assets/gallery/IMG_9145_2-72cf62bb-2ea4-45fa-977a-78f80ac3da58.png', type: 'food' },
   { id: 'p3', date: '2026-06-03', time: '10:15', thumb: 'assets/gallery/IMG_9139-a36f2639-6b62-453c-bdc1-2d7cd67b4d28.png', type: 'food' },
@@ -455,7 +473,7 @@ function CameraPermissionDialog({ onAllow, onDeny }) {
       <div className="camera-perm-dialog">
         <CameraPermissionIcon/>
         <h2 id="camera-perm-title" className="camera-perm-title">美柚想访问相机</h2>
-        <p className="camera-perm-subtitle">用于智能识别饮食、饮品、皮肤、化妆品等记录，请允许美柚访问相机</p>
+        <p className="camera-perm-subtitle">用于记录生活照片并智能识别饮食、饮品等内容，请允许美柚访问相机</p>
         <div className="camera-perm-actions">
           <button type="button" className="camera-perm-btn" onClick={onDeny}>不允许</button>
           <button type="button" className="camera-perm-btn" onClick={onAllow}>允许</button>
@@ -570,6 +588,7 @@ function CameraPermissionBlocked({ onEnable }) {
 
 function CameraRecognitionResult({ result, onChange, onRetake, onSave }) {
   const modeConfig = getCameraRecognitionMode(result?.mode);
+  const isPhoto = result?.mode === 'photo';
   const isWeight = result?.mode === 'weight';
   const isNumeric = isWeight;
   const numericValue = result?.value ?? '';
@@ -584,8 +603,8 @@ function CameraRecognitionResult({ result, onChange, onRetake, onSave }) {
     <div className={'camera-recognition-result is-' + result.mode}>
       <span className="camera-result-handle" aria-hidden="true"/>
       <div className="camera-result-status">
-        <span className="camera-result-check" aria-hidden="true">✓</span>
-        <span>AI 自动分类完成</span>
+        <span className="camera-result-check" aria-hidden="true">{isPhoto ? '●' : '✓'}</span>
+        <span>{isPhoto ? '普通照片' : 'AI 自动分类完成'}</span>
       </div>
       <div className="camera-result-heading">
         <div>
@@ -596,7 +615,12 @@ function CameraRecognitionResult({ result, onChange, onRetake, onSave }) {
           <img src={modeConfig.iconSrc} alt="" />
         </span>
       </div>
-      {isNumeric ? (
+      {isPhoto ? (
+        <div className="camera-result-photo-message">
+          <span aria-hidden="true">照片</span>
+          <p>没有识别到饮食或饮品信息，本次不会生成健康记录项。</p>
+        </div>
+      ) : isNumeric ? (
         <div className="camera-result-value-row">
           <input
             className="camera-result-value-input"
@@ -925,7 +949,14 @@ function CameraView({
               <span className="camera-frame-corner br"/>
             </div>
             <div className="camera-hint camera-auto-detect-hint">
-              快速拍照记录饮食、饮品、皮肤、化妆品等情况
+              <div className="camera-hint-roller" aria-label="随手一拍，记录生活；拍照餐食记录热量；识别奶茶、咖啡标签记录饮品">
+                <div className="camera-hint-track">
+                  <span>随手一拍，记录生活</span>
+                  <span>拍照餐食记录热量</span>
+                  <span>识别奶茶、咖啡标签记录饮品</span>
+                  <span aria-hidden="true">随手一拍，记录生活</span>
+                </div>
+              </div>
             </div>
           </>
         )}
@@ -1012,6 +1043,7 @@ function CameraTransition({
   onClose,
   onSelectPhoto,
   onActiveChange,
+  preferredRecognitionMode = null,
 }) {
   const [phase, setPhase] = React.useState('idle');
   const [showGallery, setShowGallery] = React.useState(false);
@@ -1158,7 +1190,17 @@ function CameraTransition({
   };
 
   const handleCapturePhoto = () => {
-    const photo = getNextAutoDetectDemoPhoto();
+    const preferredConfig = preferredRecognitionMode
+      ? CAMERA_RECOGNITION_MODE_MAP[preferredRecognitionMode]
+      : null;
+    const photo = preferredConfig
+      ? {
+          id: `preferred-${preferredConfig.id}`,
+          thumb: preferredConfig.capturePhoto,
+          type: preferredConfig.id,
+          mode: preferredConfig.id,
+        }
+      : getNextAutoDetectDemoPhoto();
     analyze.runAnalyze({
       url: photo.thumb,
       meta: { type: 'capture', photo, mode: inferCameraRecognitionMode(photo) },
