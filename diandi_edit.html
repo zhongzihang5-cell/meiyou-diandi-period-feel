@@ -1043,13 +1043,29 @@
   .option-sheet.is-health-picker.is-beverage-picker,
   .option-sheet.is-health-picker.is-skin-picker,
   .option-sheet.is-health-picker.is-cosmetic-picker {
+    height: 86%;
     max-height: 86%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .option-sheet.is-health-picker.is-diet-picker .sheet-header,
+  .option-sheet.is-health-picker.is-beverage-picker .sheet-header,
+  .option-sheet.is-health-picker.is-skin-picker .sheet-header,
+  .option-sheet.is-health-picker.is-cosmetic-picker .sheet-header {
+    flex: 0 0 auto;
   }
   .option-sheet.is-health-picker.is-diet-picker .sheet-body,
   .option-sheet.is-health-picker.is-beverage-picker .sheet-body,
   .option-sheet.is-health-picker.is-skin-picker .sheet-body,
   .option-sheet.is-health-picker.is-cosmetic-picker .sheet-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
     padding-top: 12px;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
   }
   .edit-diet-card {
     margin-bottom: 12px;
