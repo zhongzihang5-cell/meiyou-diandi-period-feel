@@ -254,7 +254,8 @@ function BeverageQuickSheet({onClose, onPhoto, onWater}){
 
 function WaterQuickSheet({onClose, onSave}){
   const I = window.Icon;
-  const categories = ['水', '奶茶', '咖啡', '果茶', '纯茶', '果汁', '果蔬汁', '纯奶饮品'];
+  const categories = ['水', '奶茶', '咖啡', '果茶', '纯茶', '果汁', '果蔬汁', '纯奶饮品', '饮料', '其他'];
+  const simpleCategories = ['水', '饮料', '其他'];
   const iceOptions = ['热', '常温', '去冰', '少冰', '正常冰'];
   const sugarOptions = ['0%', '30%', '50%', '70%', '100%'];
   const [category, setCategory] = React.useState('水');
@@ -265,16 +266,16 @@ function WaterQuickSheet({onClose, onSave}){
   const [sugarLevel, setSugarLevel] = React.useState('100%');
   const [calories, setCalories] = React.useState('');
   const [caffeineMg, setCaffeineMg] = React.useState('');
-  const isWater = category === '水';
+  const isSimpleCategory = simpleCategories.includes(category);
   const submit = ()=>onSave({
     beverageCategory:category,
     capacityMl,
-    brand:isWater ? '' : brand.trim(),
-    beverageName:isWater ? '白水' : (beverageName.trim() || category),
-    iceLevel:isWater ? '' : iceLevel,
-    sugarLevel:isWater ? '' : sugarLevel,
-    calories:isWater ? 0 : (Number(calories) || 0),
-    caffeineMg:isWater ? 0 : (Number(caffeineMg) || 0),
+    brand:isSimpleCategory ? '' : brand.trim(),
+    beverageName:isSimpleCategory ? (category === '水' ? '白水' : category) : (beverageName.trim() || category),
+    iceLevel:isSimpleCategory ? '' : iceLevel,
+    sugarLevel:isSimpleCategory ? '' : sugarLevel,
+    calories:isSimpleCategory ? 0 : (Number(calories) || 0),
+    caffeineMg:isSimpleCategory ? 0 : (Number(caffeineMg) || 0),
   });
   return (
     <div className="dock-sheet dock-water-sheet dock-water-entry-sheet">
@@ -301,7 +302,7 @@ function WaterQuickSheet({onClose, onSave}){
             ))}
           </div>
 
-          {!isWater ? (
+          {!isSimpleCategory ? (
             <div className="dock-water-entry-fields">
               <label>
                 <span>品牌</span>
@@ -333,7 +334,7 @@ function WaterQuickSheet({onClose, onSave}){
             </div>
           </div>
 
-          {!isWater ? (
+          {!isSimpleCategory ? (
             <>
               <div className="dock-water-option-group">
                 <span className="dock-water-entry-label">冰度</span>

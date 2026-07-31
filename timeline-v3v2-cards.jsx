@@ -1127,7 +1127,7 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
     const isCameraInsight = ['beverage', 'skin', 'cosmetic'].includes(entry.recordType);
     if(isCameraInsight){
       const detailRows = entry.recordType === 'beverage'
-        ? entry.beverageCategory === '水'
+        ? ['水', '饮料', '其他'].includes(entry.beverageCategory)
           ? [
               { label:'容量', value:entry.capacityMl ? `${entry.capacityMl}ml` : '' },
             ]
