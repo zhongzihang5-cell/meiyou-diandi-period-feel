@@ -88,14 +88,28 @@ function getCameraRecognitionMode(modeId) {
   return CAMERA_RECOGNITION_MODE_MAP[modeId] || CAMERA_RECOGNITION_MODE_MAP.period;
 }
 
-const AUTO_DETECT_DEMO_PHOTOS = CAMERA_RECOGNITION_MODES.map((mode, index) => ({
-  id: `auto-detect-${mode.id}`,
-  date: '2026-07-27',
-  time: `09:${String(41 + index).padStart(2, '0')}`,
-  thumb: mode.capturePhoto,
-  type: mode.id,
-  mode: mode.id,
-}));
+const AUTO_DETECT_DEMO_PHOTOS = CAMERA_RECOGNITION_MODES.flatMap((mode, index) => {
+  const photos = [{
+    id: `auto-detect-${mode.id}`,
+    date: '2026-07-27',
+    time: `09:${String(41 + index).padStart(2, '0')}`,
+    thumb: mode.capturePhoto,
+    type: mode.id,
+    mode: mode.id,
+  }];
+  if (mode.id === 'beverage') {
+    photos.push({
+      id: 'auto-detect-beverage-starbucks',
+      date: '2026-07-27',
+      time: '09:46',
+      thumb: '星巴克红茶拿铁.webp',
+      type: 'beverage',
+      mode: 'beverage',
+      recognitionVariant: 'starbucks',
+    });
+  }
+  return photos;
+});
 
 let autoDetectCaptureIndex = 0;
 
@@ -142,6 +156,33 @@ function buildCameraRecognitionResult(payload) {
     };
   }
   if (mode === 'beverage') {
+    const sourcePhoto = payload?.photo || payload;
+    const isStarbucks = sourcePhoto?.recognitionVariant === 'starbucks'
+      || sourcePhoto?.thumb === '星巴克红茶拿铁.webp';
+    if (isStarbucks) {
+      return {
+        ...base,
+        brand: '星巴克',
+        beverageName: '红茶咖啡拿铁鸳鸯',
+        beverageCategory: '咖啡',
+        capacityMl: 500,
+        iceLevel: '正常冰',
+        sugarLevel: '100%',
+        spec: '500ml / 正常冰 / 100%',
+        calories: 286,
+        caffeineMg: 95,
+        summary: '星巴克红茶咖啡拿铁鸳鸯 · 500ml/正常冰/100%',
+        summaryItems: [
+          { label: '饮品', value: '星巴克 · 红茶咖啡拿铁鸳鸯' },
+          { label: '品类', value: '咖啡' },
+          { label: '容量', value: '500ml' },
+          { label: '冰度', value: '正常冰' },
+          { label: '糖度', value: '100%' },
+          { label: '热量', value: '286 千卡' },
+          { label: '咖啡因', value: '95 毫克' },
+        ],
+      };
+    }
     return {
       ...base,
       brand: '鸳鸯',
