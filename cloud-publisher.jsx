@@ -233,7 +233,7 @@ function BeverageQuickSheet({onClose, onPhoto, onWater}){
           </span>
           <span>
             <strong>拍照记录</strong>
-            <small>识别饮品信息并记录饮水量</small>
+            <small>识别奶茶、咖啡标签分析热量、咖啡因</small>
           </span>
           <I name="chevron-right" size={18} stroke={1.8}/>
         </button>
@@ -243,7 +243,7 @@ function BeverageQuickSheet({onClose, onPhoto, onWater}){
           </span>
           <span>
             <strong>输入记录</strong>
-            <small>输入本次饮水量</small>
+            <small>记录饮水、饮品信息统计每日饮水量</small>
           </span>
           <I name="chevron-right" size={18} stroke={1.8}/>
         </button>
@@ -252,40 +252,137 @@ function BeverageQuickSheet({onClose, onPhoto, onWater}){
   );
 }
 
-function WaterQuickSheet({value, onChange, onClose, onSave}){
+function WaterQuickSheet({onClose, onSave}){
   const I = window.Icon;
-  const presets = [200, 300, 500, 750];
+  const categories = ['水', '奶茶', '咖啡', '果茶', '纯茶', '果汁', '果蔬汁', '纯奶饮品'];
+  const iceOptions = ['热', '常温', '去冰', '少冰', '正常冰'];
+  const sugarOptions = ['0%', '30%', '50%', '70%', '100%'];
+  const [category, setCategory] = React.useState('水');
+  const [capacityMl, setCapacityMl] = React.useState(300);
+  const [brand, setBrand] = React.useState('');
+  const [beverageName, setBeverageName] = React.useState('');
+  const [iceLevel, setIceLevel] = React.useState('正常冰');
+  const [sugarLevel, setSugarLevel] = React.useState('100%');
+  const [calories, setCalories] = React.useState('');
+  const [caffeineMg, setCaffeineMg] = React.useState('');
+  const isWater = category === '水';
+  const submit = ()=>onSave({
+    beverageCategory:category,
+    capacityMl,
+    brand:isWater ? '' : brand.trim(),
+    beverageName:isWater ? '白水' : (beverageName.trim() || category),
+    iceLevel:isWater ? '' : iceLevel,
+    sugarLevel:isWater ? '' : sugarLevel,
+    calories:isWater ? 0 : (Number(calories) || 0),
+    caffeineMg:isWater ? 0 : (Number(caffeineMg) || 0),
+  });
   return (
-    <div className="dock-sheet dock-water-sheet">
+    <div className="dock-sheet dock-water-sheet dock-water-entry-sheet">
       <div className="dock-sheet-hd">
-        <h3 className="dock-sheet-title">输入喝水量</h3>
+        <h3 className="dock-sheet-title">记录喝水</h3>
         <button type="button" className="dock-sheet-close" onClick={onClose} aria-label="关闭">
           <I name="x" size={20} stroke={1.8}/>
         </button>
       </div>
-      <div className="dock-water-amount">
-        <button type="button" onClick={()=>onChange(Math.max(50, value - 50))} aria-label="减少50毫升">
-          <I name="minus" size={20} stroke={2}/>
-        </button>
-        <div><strong>{value}</strong><span>ml</span></div>
-        <button type="button" onClick={()=>onChange(value + 50)} aria-label="增加50毫升">
-          <I name="plus" size={20} stroke={2}/>
-        </button>
-      </div>
-      <div className="dock-water-presets" role="group" aria-label="常用饮水量">
-        {presets.map(amount=>(
-          <button
-            type="button"
-            className={value === amount ? 'is-active' : ''}
-            key={amount}
-            onClick={()=>onChange(amount)}
-          >
-            {amount}ml
-          </button>
-        ))}
+      <div className="dock-water-entry-scroll">
+        <section className="dock-water-entry-card">
+          <label className="dock-water-entry-label">品类</label>
+          <div className="dock-water-category-scroll" role="group" aria-label="喝水品类">
+            {categories.map(option=>(
+              <button
+                type="button"
+                className={category === option ? 'is-active' : ''}
+                key={option}
+                onClick={()=>setCategory(option)}
+                aria-pressed={category === option}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+
+          {!isWater ? (
+            <div className="dock-water-entry-fields">
+              <label>
+                <span>品牌</span>
+                <input value={brand} onChange={(event)=>setBrand(event.target.value)} placeholder="例如：星巴克"/>
+              </label>
+              <label>
+                <span>饮品名称</span>
+                <input value={beverageName} onChange={(event)=>setBeverageName(event.target.value)} placeholder="例如：红茶咖啡拿铁鸳鸯"/>
+              </label>
+            </div>
+          ) : null}
+
+          <div className="dock-water-capacity">
+            <div>
+              <span>容量</span>
+              <strong>{capacityMl} ml</strong>
+            </div>
+            <input
+              type="range"
+              min="100"
+              max="1000"
+              step="50"
+              value={capacityMl}
+              onChange={(event)=>setCapacityMl(Number(event.target.value))}
+              aria-label="饮品容量"
+            />
+            <div className="dock-water-capacity-labels">
+              <span>100</span><span>300</span><span>500</span><span>750</span><span>1000ml</span>
+            </div>
+          </div>
+
+          {!isWater ? (
+            <>
+              <div className="dock-water-option-group">
+                <span className="dock-water-entry-label">冰度</span>
+                <div className="dock-water-option-row" role="group" aria-label="冰度">
+                  {iceOptions.map(option=>(
+                    <button
+                      type="button"
+                      className={iceLevel === option ? 'is-active' : ''}
+                      key={option}
+                      onClick={()=>setIceLevel(option)}
+                      aria-pressed={iceLevel === option}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="dock-water-option-group">
+                <span className="dock-water-entry-label">糖度</span>
+                <div className="dock-water-option-row" role="group" aria-label="糖度">
+                  {sugarOptions.map(option=>(
+                    <button
+                      type="button"
+                      className={sugarLevel === option ? 'is-active' : ''}
+                      key={option}
+                      onClick={()=>setSugarLevel(option)}
+                      aria-pressed={sugarLevel === option}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="dock-water-entry-fields is-nutrition">
+                <label>
+                  <span>热量</span>
+                  <div><input value={calories} onChange={(event)=>setCalories(event.target.value)} inputMode="decimal"/><i>千卡</i></div>
+                </label>
+                <label>
+                  <span>咖啡因</span>
+                  <div><input value={caffeineMg} onChange={(event)=>setCaffeineMg(event.target.value)} inputMode="decimal"/><i>毫克</i></div>
+                </label>
+              </div>
+            </>
+          ) : null}
+        </section>
       </div>
       <div className="dock-sheet-foot">
-        <button type="button" className="dock-sheet-submit" onClick={()=>onSave(value)}>保存记录</button>
+        <button type="button" className="dock-sheet-submit" onClick={submit}>保存记录</button>
       </div>
     </div>
   );
@@ -319,7 +416,6 @@ function DockPublisher({
   const [cameraOpen, setCameraOpen] = React.useState(false);
   const [cameraSourceRect, setCameraSourceRect] = React.useState(null);
   const [cameraPreferredMode, setCameraPreferredMode] = React.useState(null);
-  const [waterAmount, setWaterAmount] = React.useState(300);
   const [feedingExpanded, setFeedingExpanded] = React.useState(false);
   const recTimer = React.useRef(null);
   const prevTabRef = React.useRef(activeTab);
@@ -652,12 +748,10 @@ function DockPublisher({
             />
           ) : dockSheet === 'water' ? (
             <WaterQuickSheet
-              value={waterAmount}
-              onChange={setWaterAmount}
               onClose={closeDockSheet}
-              onSave={(amount)=>{
+              onSave={(record)=>{
                 closeDockSheet();
-                onCameraRecord?.({mode:'water', value:amount, source:'quick'});
+                onCameraRecord?.({mode:'water', ...record, source:'quick'});
               }}
             />
           ) : (

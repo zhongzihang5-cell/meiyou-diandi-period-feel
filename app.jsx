@@ -1981,6 +1981,7 @@ function App(){
           spec:payload.spec,
           calories:payload.calories,
           caffeineMg:payload.caffeineMg,
+          inputSource:'camera-beverage',
           area:payload.area,
           acne:payload.acne,
           redness:payload.redness,
@@ -2004,7 +2005,22 @@ function App(){
     }
 
     if(payload?.mode !== 'water') return;
-    const amount = Math.max(1, Math.round(Number(payload.value) || 350));
+    const amount = Math.max(1, Math.round(Number(payload.capacityMl ?? payload.value) || 300));
+    const category = payload.beverageCategory || '水';
+    const isWater = category === '水';
+    const brand = isWater ? '' : (payload.brand || '');
+    const beverageName = isWater ? '白水' : (payload.beverageName || category);
+    const iceLevel = isWater ? '' : (payload.iceLevel || '');
+    const sugarLevel = isWater ? '' : (payload.sugarLevel || '');
+    const calories = isWater ? 0 : (Number(payload.calories) || 0);
+    const caffeineMg = isWater ? 0 : (Number(payload.caffeineMg) || 0);
+    const specParts = [
+      `${amount}ml`,
+      iceLevel,
+      sugarLevel,
+    ].filter(Boolean);
+    const recordName = `${brand}${beverageName}`.trim();
+    const recordDetail = `${recordName} · ${specParts.join('/')}`;
     if(recordLifeMode === '育儿'){
       handleBabyFeedingQuickSelect({
         id:'water-camera',
@@ -2037,17 +2053,18 @@ function App(){
         recordType:'beverage',
         icon:'beverage',
         recordLabel:'喝水',
-        recordDetail:`白水 · ${amount}ml`,
-        text:`喝水：白水 · ${amount}ml`,
-        beverageName:'白水',
-        beverageCategory:'',
+        recordDetail,
+        text:`喝水：${recordDetail}`,
+        brand,
+        beverageName,
+        beverageCategory:category,
         capacityMl:amount,
-        iceLevel:'',
-        sugarLevel:'',
-        spec:`${amount}ml`,
-        calories:0,
-        caffeineMg:0,
-        inputSource:'manual-water',
+        iceLevel,
+        sugarLevel,
+        spec:specParts.join(' / '),
+        calories,
+        caffeineMg,
+        inputSource:isWater ? 'manual-water' : 'manual-beverage',
         tags:[],
       },
       ai:{
