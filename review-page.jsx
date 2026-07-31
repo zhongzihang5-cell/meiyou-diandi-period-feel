@@ -2673,7 +2673,7 @@ function dietWeekCalorieZoneColor(zone){
 
 function DietCalorieWeekBarChart({rows = DIET_WEEK_CALORIE_ROWS, goal = DIET_TARGET_GOAL, ariaLabel = '热量星期分布'}){
   const W = 340, H = 220;
-  const padL = 40, padR = 10, padT = 40, padB = 30;
+  const padL = 44, padR = 10, padT = 40, padB = 30;
   const x0 = padL, x1 = W - padR;
   const yTop = padT, yBot = H - padB;
   const plotH = yBot - yTop;
@@ -2681,10 +2681,7 @@ function DietCalorieWeekBarChart({rows = DIET_WEEK_CALORIE_ROWS, goal = DIET_TAR
   const maxKcal = Math.max(band.max * 1.15, ...rows.map(r=>r.kcal || 0), band.goal, 1);
   const yMax = Math.ceil(maxKcal / 100) * 100;
   // 只保留合适区间上下限两条线（目标 ±10%）
-  const yTicks = [
-    {value:band.min, color:'#E06B6B'},
-    {value:band.max, color:'#8EB4D8'},
-  ];
+  const yTicks = [band.min, band.max];
   const Y = (kcal)=> yBot - Math.max(0, Math.min(1, kcal / yMax)) * plotH;
   const n = rows.length || 7;
   const colW = (x1 - x0) / n;
@@ -2723,25 +2720,25 @@ function DietCalorieWeekBarChart({rows = DIET_WEEK_CALORIE_ROWS, goal = DIET_TAR
         fontFamily="PingFang SC"
         fontWeight={500}
       >周末</text>
-      {yTicks.map(tick=>(
-        <g key={tick.value}>
+      {yTicks.map(value=>(
+        <g key={value}>
           <line
             x1={x0}
-            y1={Y(tick.value)}
+            y1={Y(value)}
             x2={x1}
-            y2={Y(tick.value)}
+            y2={Y(value)}
             stroke="rgba(0,0,0,0.08)"
             strokeWidth="1"
             strokeDasharray="3 4"
           />
           <text
-            x={x0 - 6}
-            y={Y(tick.value) + 4}
+            x={x0 - 4}
+            y={Y(value) + 3}
             textAnchor="end"
-            fontSize="11"
-            fill={tick.color}
+            fontSize="10"
+            fill="rgba(0,0,0,0.4)"
             fontFamily="PingFang SC"
-          >{tick.value}</text>
+          >{value}kcal</text>
         </g>
       ))}
       <line x1={x0} y1={yBot} x2={x1} y2={yBot} stroke="rgba(0,0,0,0.1)" strokeWidth="1"/>
@@ -2807,7 +2804,7 @@ const DIET_SPECIAL_MOMENT_ROWS = [
     name:'最晚一餐',
     icon:'moon',
     value:'23:48',
-    sub:'7月11日 · 夜宵',
+    sub:'7月11日 · 晚加餐',
     color:'#7B6BB0',
     bg:'#EEF0FA',
   },
@@ -2908,7 +2905,7 @@ function DietHabitDistributionCard({goal = DIET_TARGET_GOAL}){
           </div>
         </div>
         <div className="review-love-insight review-love-habit-insight">
-          近一周热量波动主要集中在<b>周末</b>，<b>周五至周日</b>摄入较高，工作日相对偏低。适当减少日间差异，让每天获得更<b>稳定的能量补充</b>，会更有利于保持状态。
+          你的热量波动主要集中在<b>周末</b>，<b>周五至周日</b>摄入较高，工作日相对偏低。适当减少日间差异，让每天获得更<b>稳定的能量补充</b>，会更有利于保持状态。
         </div>
       </div>
     </div>
@@ -3537,7 +3534,7 @@ const DIET_ALL_RECORDS = [
       {id:'d10-1', time:'07:10', meal:'早餐', food:'鸡蛋三明治', kcal:342, photo:DIET_REVIEW_PHOTOS[7]},
       {id:'d10-2', time:'12:05', meal:'午餐', food:'虾仁炒饭', kcal:580, photo:DIET_REVIEW_PHOTOS[3]},
       {id:'d10-3', time:'15:22', meal:'加餐', food:'酸奶坚果杯', kcal:186, photo:DIET_REVIEW_PHOTOS[5]},
-      {id:'d10-4', time:'22:15', meal:'夜宵', food:'草莓优格', kcal:164, photo:DIET_REVIEW_PHOTOS[7]},
+      {id:'d10-4', time:'22:15', meal:'晚加餐', food:'草莓优格', kcal:164, photo:DIET_REVIEW_PHOTOS[7]},
     ],
   },
   {
@@ -7132,6 +7129,17 @@ const STOOL_CARD_RECORDS = STOOL_CARD_VALUES.map((count, i)=>{
   };
 });
 
+/** 一级卡：近 7 天柱状图（对齐饮食一级卡） */
+const STOOL_L1_VALUES = STOOL_CARD_VALUES.slice(-7);
+const STOOL_L1_RECORDS = STOOL_CARD_RECORDS.slice(-7);
+const STOOL_L1_LABEL_INDEXES = STOOL_L1_VALUES.map((_, i)=>i);
+const STOOL_L1_AVG = (STOOL_L1_VALUES.reduce((s, v)=>s + v, 0) / Math.max(STOOL_L1_VALUES.length, 1));
+const STOOL_L1_PREV = STOOL_CARD_VALUES.slice(-14, -7);
+const STOOL_L1_PREV_AVG = STOOL_L1_PREV.length
+  ? STOOL_L1_PREV.reduce((s, v)=>s + v, 0) / STOOL_L1_PREV.length
+  : STOOL_L1_AVG;
+const STOOL_L1_DELTA = STOOL_L1_AVG - STOOL_L1_PREV_AVG;
+
 /** 横屏滑动：近 2 个月每日次数（末 30 天与列表卡对齐） */
 const STOOL_ALL_RECORDS = (()=>{
   const seed = [
@@ -7175,11 +7183,12 @@ function StoolReviewChart({
   const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
   const plotH = y1 - y0;
   const yMax = Math.max(2, ...values);
-  const gap = 1.6;
-  const barW = Math.max(4, (x1 - x0 - gap * (n - 1)) / n);
-  const X = i => x0 + i * (barW + gap) + barW / 2;
+  // 柱宽对齐饮食一级卡：按列带宽占比，上限约 18
+  const band = (x1 - x0) / Math.max(n, 1);
+  const barW = Math.min(18, Math.max(8, band * 0.62));
+  const X = i => x0 + band * i + band / 2;
   const Y = v => y1 - (v / yMax) * plotH;
-  const barRx = Math.min(3, barW / 2);
+  const barRx = Math.min(7, barW / 2);
   const softTop = STOOL_CHART.softTop;
   const softBottom = STOOL_CHART.softBottom;
   const mainTop = STOOL_CHART.mainTop;
@@ -9187,6 +9196,12 @@ function StoolDetailPage({open, onClose}){
 }
 
 function StoolReviewCard({onOpen, onLandscapeOpen}){
+  const avgText = (Math.round(STOOL_L1_AVG * 10) / 10).toFixed(1).replace(/\.0$/, '');
+  const deltaAbs = Math.abs(Math.round(STOOL_L1_DELTA * 10) / 10);
+  const deltaText = (STOOL_L1_DELTA > 0.05 ? '↗ ' : STOOL_L1_DELTA < -0.05 ? '↘ ' : '→ ')
+    + (deltaAbs % 1 === 0 ? String(deltaAbs) : deltaAbs.toFixed(1));
+  const trendTone = STOOL_L1_DELTA > 0.05 ? 'up' : (STOOL_L1_DELTA < -0.05 ? 'down' : undefined);
+  const trendText = STOOL_L1_DELTA > 0.05 ? '↗ 上升' : (STOOL_L1_DELTA < -0.05 ? '↘ 下降' : '→ 平稳');
   return (
     <ReviewCard
       title="便便"
@@ -9206,23 +9221,21 @@ function StoolReviewCard({onOpen, onLandscapeOpen}){
           <ReviewExpandIcon/>
         </button>
       ) : null}
-      chart={<StoolReviewChart/>}
-      legend={<span className="review-legend-item is-stool"><i></i>便便次数</span>}
+      chart={(
+        <StoolReviewChart
+          values={STOOL_L1_VALUES}
+          records={STOOL_L1_RECORDS}
+          labelIndexes={STOOL_L1_LABEL_INDEXES}
+          gradientId="stoolCardL1Fill"
+          ariaLabel="近7天便便次数柱状图"
+        />
+      )}
+      legend={<span className="review-legend-item is-stool"><i></i>每日次数</span>}
       metrics={(
         <>
-          <StoolReviewMetric
-            label="最近一次便便"
-            segments={[
-              {value:'8', unit:'小时'},
-              {value:'2', unit:'分'},
-              {unit:'前'},
-            ]}
-          />
-          <StoolReviewMetric
-            label="平均每日便便"
-            segments={[{value:'0.6', unit:'次'}]}
-          />
-          <ReviewMetric value="→ 平稳" label="整体趋势" trend/>
+          <ReviewMetric value={avgText} unit="次" label="近7天日均"/>
+          <ReviewMetric value={deltaText} unit="次" label="较上周" trend tone={trendTone}/>
+          <ReviewMetric value={trendText} label="整体趋势" trend tone={trendTone}/>
         </>
       )}
       more="查看完整便便变化"
