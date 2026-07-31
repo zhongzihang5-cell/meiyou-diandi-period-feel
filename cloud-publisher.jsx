@@ -266,12 +266,13 @@ function WaterQuickSheet({onClose, onSave}){
   const [sugarLevel, setSugarLevel] = React.useState('100%');
   const [calories, setCalories] = React.useState('');
   const [caffeineMg, setCaffeineMg] = React.useState('');
+  const isWater = category === '水';
   const isSimpleCategory = simpleCategories.includes(category);
   const submit = ()=>onSave({
     beverageCategory:category,
     capacityMl,
-    brand:isSimpleCategory ? '' : brand.trim(),
-    beverageName:isSimpleCategory ? (category === '水' ? '白水' : category) : (beverageName.trim() || category),
+    brand:isWater ? '' : brand.trim(),
+    beverageName:isWater ? '白水' : (beverageName.trim() || category),
     iceLevel:isSimpleCategory ? '' : iceLevel,
     sugarLevel:isSimpleCategory ? '' : sugarLevel,
     calories:isSimpleCategory ? 0 : (Number(calories) || 0),
@@ -302,7 +303,7 @@ function WaterQuickSheet({onClose, onSave}){
             ))}
           </div>
 
-          {!isSimpleCategory ? (
+          {!isWater ? (
             <div className="dock-water-entry-fields">
               <label>
                 <span>品牌</span>

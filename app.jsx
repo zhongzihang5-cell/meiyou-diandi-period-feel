@@ -2007,11 +2007,10 @@ function App(){
     if(payload?.mode !== 'water') return;
     const amount = Math.max(1, Math.round(Number(payload.capacityMl ?? payload.value) || 300));
     const category = payload.beverageCategory || '水';
+    const isWater = category === '水';
     const isSimpleCategory = ['水', '饮料', '其他'].includes(category);
-    const brand = isSimpleCategory ? '' : (payload.brand || '');
-    const beverageName = isSimpleCategory
-      ? (category === '水' ? '白水' : category)
-      : (payload.beverageName || category);
+    const brand = isWater ? '' : (payload.brand || '');
+    const beverageName = isWater ? '白水' : (payload.beverageName || category);
     const iceLevel = isSimpleCategory ? '' : (payload.iceLevel || '');
     const sugarLevel = isSimpleCategory ? '' : (payload.sugarLevel || '');
     const calories = isSimpleCategory ? 0 : (Number(payload.calories) || 0);
