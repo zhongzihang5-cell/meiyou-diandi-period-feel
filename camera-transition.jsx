@@ -998,7 +998,7 @@ function CameraView({
                 <div className="camera-hint-track">
                   <span>随手一拍，记录生活</span>
                   <span>拍照餐食记录热量</span>
-                  <span>识别奶茶咖啡标签、饮料配料成分表记录饮品</span>
+                  <span>识别奶茶咖啡标签、<br/>饮料配料成分表记录饮品</span>
                   <span aria-hidden="true">随手一拍，记录生活</span>
                 </div>
               </div>
