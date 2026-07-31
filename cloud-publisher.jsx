@@ -255,7 +255,6 @@ function BeverageQuickSheet({onClose, onPhoto, onWater}){
 function WaterQuickSheet({onClose, onSave}){
   const I = window.Icon;
   const categories = ['水', '奶茶', '咖啡', '果茶', '纯茶', '果汁', '果蔬汁', '纯奶饮品', '饮料', '其他'];
-  const simpleCategories = ['水', '饮料', '其他'];
   const iceOptions = ['热', '常温', '去冰', '少冰', '正常冰'];
   const sugarOptions = ['0%', '30%', '50%', '70%', '100%'];
   const [category, setCategory] = React.useState('水');
@@ -267,7 +266,7 @@ function WaterQuickSheet({onClose, onSave}){
   const [calories, setCalories] = React.useState('');
   const [caffeineMg, setCaffeineMg] = React.useState('');
   const isWater = category === '水';
-  const isSimpleCategory = simpleCategories.includes(category);
+  const isSimpleCategory = isWater;
   const submit = ()=>onSave({
     beverageCategory:category,
     capacityMl,

@@ -1127,7 +1127,7 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
     const isCameraInsight = ['beverage', 'skin', 'cosmetic'].includes(entry.recordType);
     if(isCameraInsight){
       const detailRows = entry.recordType === 'beverage'
-        ? ['水', '饮料', '其他'].includes(entry.beverageCategory)
+        ? entry.beverageCategory === '水'
           ? [
               { label:'容量', value:entry.capacityMl ? `${entry.capacityMl}ml` : '' },
             ]
@@ -1171,7 +1171,7 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
           ) : null}
           <p className="v3-camera-insight-title">{headline}</p>
           <div className="v3-camera-insight-details">
-            {(entry.recordType === 'beverage' ? detailRows : detailRows.filter(row => row.value)).map((row) => (
+            {detailRows.filter(row => row.value !== '' && row.value != null).map((row) => (
               <div className="v3-camera-insight-detail" key={row.label}>
                 <span>{row.label}</span>
                 <strong className={row.accent ? 'is-accent' : ''}>{row.value || '\u00a0'}</strong>

@@ -45,7 +45,7 @@ const CAMERA_RECOGNITION_MODES = [
     capturePhoto: '菊花茶饮料.jpg',
     iconSrc: 'assets/record-beverage.svg',
     resultTitle: '识别为饮品记录',
-    resultDescription: '已通过包装标签识别饮品名称、品类和容量',
+    resultDescription: '已通过包装标签识别饮品名称、品类、容量和热量',
     resultNote: '包装标签信息仅供记录，请以实物标注为准',
     saveLabel: '保存记录',
   },
@@ -151,13 +151,14 @@ function buildCameraRecognitionResult(payload) {
       iceLevel: '',
       sugarLevel: '',
       spec: '248ml',
-      calories: 0,
+      calories: 17,
       caffeineMg: 0,
       summary: '鸳鸯小菊菊花植物饮料 · 248ml',
       summaryItems: [
         { label: '饮品', value: '鸳鸯 · 小菊菊花植物饮料' },
         { label: '品类', value: '饮料' },
         { label: '容量', value: '248ml' },
+        { label: '热量', value: '17 千卡' },
       ],
     };
   }

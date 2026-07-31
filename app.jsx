@@ -2008,7 +2008,7 @@ function App(){
     const amount = Math.max(1, Math.round(Number(payload.capacityMl ?? payload.value) || 300));
     const category = payload.beverageCategory || '水';
     const isWater = category === '水';
-    const isSimpleCategory = ['水', '饮料', '其他'].includes(category);
+    const isSimpleCategory = isWater;
     const brand = isWater ? '' : (payload.brand || '');
     const beverageName = isWater ? '白水' : (payload.beverageName || category);
     const iceLevel = isSimpleCategory ? '' : (payload.iceLevel || '');

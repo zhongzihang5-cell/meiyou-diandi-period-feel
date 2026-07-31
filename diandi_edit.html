@@ -2430,7 +2430,7 @@
   }
 
   function escapeHtml(value){
-    return String(value || '').replace(/[&<>"']/g, (char) => ({
+    return String(value ?? '').replace(/[&<>"']/g, (char) => ({
       '&': '&amp;',
       '<': '&lt;',
       '>': '&gt;',
@@ -3367,11 +3367,10 @@
     if(type === 'beverage'){
       const capacity = Math.max(100, Math.min(1000, Number(dailyRecordState.capacityMl) || 500));
       const categoryOptions = ['水', '奶茶', '咖啡', '果茶', '纯茶', '果汁', '果蔬汁', '纯奶饮品', '饮料', '其他'];
-      const simpleCategories = ['水', '饮料', '其他'];
       const selectedCategory = dailyRecordState.beverageCategory
         || (dailyRecordState.beverageName === '白水' ? '水' : '奶茶');
       const waterSelected = selectedCategory === '水';
-      const simpleSelected = simpleCategories.includes(selectedCategory);
+      const simpleSelected = waterSelected;
       const iceOptions = ['热', '常温', '去冰', '少冰', '正常冰'];
       const sugarOptions = ['0%', '30%', '50%', '70%', '100%'];
       return `
@@ -3421,14 +3420,14 @@
             <div class="edit-camera-field">
               <label for="edit-camera-calories">热量</label>
               <div class="edit-camera-input-wrap">
-                <input id="edit-camera-calories" class="edit-camera-input" data-field="calories" value="${escapeHtml(dailyRecordState.calories || '')}" inputmode="decimal">
+                <input id="edit-camera-calories" class="edit-camera-input" data-field="calories" value="${escapeHtml(dailyRecordState.calories ?? '')}" inputmode="decimal">
                 <span class="edit-camera-unit">千卡</span>
               </div>
             </div>
             <div class="edit-camera-field">
               <label for="edit-camera-caffeineMg">咖啡因</label>
               <div class="edit-camera-input-wrap">
-                <input id="edit-camera-caffeineMg" class="edit-camera-input" data-field="caffeineMg" value="${escapeHtml(dailyRecordState.caffeineMg || '')}" inputmode="decimal">
+                <input id="edit-camera-caffeineMg" class="edit-camera-input" data-field="caffeineMg" value="${escapeHtml(dailyRecordState.caffeineMg ?? '')}" inputmode="decimal">
                 <span class="edit-camera-unit">毫克</span>
               </div>
             </div>
@@ -3482,7 +3481,7 @@
       const activeValue = (key)=>document.querySelector(`#optionList [data-beverage-group="${key}"] .edit-beverage-segment.active`)?.dataset.value || '';
       const beverageCategory = activeValue('beverageCategory') || '水';
       const waterSelected = beverageCategory === '水';
-      const simpleSelected = ['水', '饮料', '其他'].includes(beverageCategory);
+      const simpleSelected = waterSelected;
       return {
         brand:waterSelected ? '' : valueOf('brand'),
         beverageName:waterSelected ? '白水' : (valueOf('beverageName') || beverageCategory),
@@ -3507,7 +3506,7 @@
   function syncBeverageCategoryFields() {
     const category = document.querySelector('#optionList [data-beverage-group="beverageCategory"] .edit-beverage-segment.active')?.dataset.value || '水';
     const waterSelected = category === '水';
-    const simpleSelected = ['水', '饮料', '其他'].includes(category);
+    const simpleSelected = waterSelected;
     document.querySelectorAll('#optionList [data-beverage-identity]').forEach(element => {
       element.hidden = waterSelected;
     });
@@ -3778,7 +3777,7 @@
         const fields = collectDailyCameraFields();
         Object.assign(dailyRecordState, fields);
         if(dailyRecordState.recordType === 'beverage'){
-          const simpleSelected = ['水', '饮料', '其他'].includes(fields.beverageCategory);
+          const simpleSelected = fields.beverageCategory === '水';
           if(fields.beverageCategory !== '水' && !fields.beverageName) return;
           nextValue = `${fields.brand || ''}${fields.beverageName}`.trim();
           const specParts = [
