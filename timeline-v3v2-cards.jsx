@@ -1127,7 +1127,11 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
     const isCameraInsight = ['beverage', 'skin', 'cosmetic'].includes(entry.recordType);
     if(isCameraInsight){
       const detailRows = entry.recordType === 'beverage'
-        ? [
+        ? entry.inputSource === 'manual-water'
+          ? [
+              { label:'容量', value:entry.capacityMl ? `${entry.capacityMl}ml` : '' },
+            ]
+          : [
             { label:'容量', value:entry.capacityMl ? `${entry.capacityMl}ml` : '' },
             { label:'冰度', value:entry.iceLevel || '' },
             { label:'糖度', value:entry.sugarLevel || '' },
@@ -1156,7 +1160,7 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
             <img src={recordIconSrc(iconKey)} alt="" aria-hidden="true"/>
             <span>
               {entry.recordType === 'beverage' && entry.beverageCategory
-                ? `${entry.recordLabel || '饮品'}（${entry.beverageCategory}）：`
+                ? `${entry.recordLabel || '喝水'}（${entry.beverageCategory}）：`
                 : `${entry.recordLabel || '记录'}：`}
             </span>
           </div>

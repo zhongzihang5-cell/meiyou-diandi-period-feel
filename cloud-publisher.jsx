@@ -221,7 +221,7 @@ function BeverageQuickSheet({onClose, onPhoto, onWater}){
   return (
     <div className="dock-sheet dock-beverage-sheet">
       <div className="dock-sheet-hd">
-        <h3 className="dock-sheet-title">记录饮品</h3>
+        <h3 className="dock-sheet-title">记录喝水</h3>
         <button type="button" className="dock-sheet-close" onClick={onClose} aria-label="关闭">
           <I name="x" size={20} stroke={1.8}/>
         </button>
@@ -232,8 +232,8 @@ function BeverageQuickSheet({onClose, onPhoto, onWater}){
             <I name="camera" size={25} stroke={1.8}/>
           </span>
           <span>
-            <strong>拍照记录饮品</strong>
-            <small>识别名称、热量和咖啡因</small>
+            <strong>拍照记录</strong>
+            <small>识别饮品信息并记录饮水量</small>
           </span>
           <I name="chevron-right" size={18} stroke={1.8}/>
         </button>
@@ -242,8 +242,8 @@ function BeverageQuickSheet({onClose, onPhoto, onWater}){
             <img src="assets/baby-feeding-icons/water.png" alt=""/>
           </span>
           <span>
-            <strong>记录喝水</strong>
-            <small>快速记录本次饮水量</small>
+            <strong>输入记录</strong>
+            <small>输入本次饮水量</small>
           </span>
           <I name="chevron-right" size={18} stroke={1.8}/>
         </button>
@@ -258,7 +258,7 @@ function WaterQuickSheet({value, onChange, onClose, onSave}){
   return (
     <div className="dock-sheet dock-water-sheet">
       <div className="dock-sheet-hd">
-        <h3 className="dock-sheet-title">记录喝水</h3>
+        <h3 className="dock-sheet-title">输入喝水量</h3>
         <button type="button" className="dock-sheet-close" onClick={onClose} aria-label="关闭">
           <I name="x" size={20} stroke={1.8}/>
         </button>

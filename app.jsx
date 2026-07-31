@@ -120,7 +120,7 @@ const PERIOD_DOCK_QUICK_ITEMS = [
   { id:'symptom', label:'症状', action:'symptom', iconSrc:'assets/record-symptom.png' },
   { id:'mood', label:'心情', action:'mood', iconSrc:'assets/record-mood.png' },
   { id:'diet', label:'饮食', action:'diet', iconSrc:'assets/record-diet.png' },
-  { id:'beverage', label:'饮品', action:'beverage', iconSrc:'assets/record-beverage.svg', text:'饮品' },
+  { id:'beverage', label:'喝水', action:'beverage', iconSrc:'assets/record-beverage.svg', text:'喝水' },
   { id:'stool', label:'便便', icon:'💩', text:'便便' },
   { id:'exercise', label:'运动', icon:'🏃', text:'运动' },
   { id:'sleep', label:'睡眠', icon:'🌙', text:'睡眠' },
@@ -808,15 +808,16 @@ function App(){
               text:`${label}：${detail}`,
               tags:[{ label, cat:label, val:value, icon }],
             };
+            const nextCapacity = Number(payload.capacityMl ?? item.primary?.capacityMl) || 0;
             const nextAi = type === 'beverage' ? {
               ...item.ai,
-              title:'今日咖啡因摄入',
+              title:'今日饮水进度',
               chartType:'dailyGoal',
               chartData:{
-                kind:'caffeine',
-                consumed:195,
-                goal:300,
-                unit:'mg',
+                kind:'water',
+                consumed:Math.min(1500, 550 + nextCapacity),
+                goal:1500,
+                unit:'ml',
               },
               note:'',
             } : item.ai;
@@ -1904,7 +1905,7 @@ function App(){
       period:{ label:'月经', icon:'flow', detail:'经量多，颜色鲜红色' },
       discharge:{ label:'白带', icon:'discharge', detail:'淡黄色，黏稠' },
       beverage:{
-        label:'饮品',
+        label:'喝水',
         icon:'beverage',
         buildDetail:(data)=>{
           const specParts = [
@@ -1914,14 +1915,14 @@ function App(){
           ].filter(Boolean);
           return `${data.brand || ''}${data.beverageName || ''}${specParts.length ? ` · ${specParts.join('/')}` : ''}`;
         },
-        buildAi:()=>({
-          title:'今日咖啡因摄入',
+        buildAi:(data)=>({
+          title:'今日饮水进度',
           chartType:'dailyGoal',
           chartData:{
-            kind:'caffeine',
-            consumed:195,
-            goal:300,
-            unit:'mg',
+            kind:'water',
+            consumed:Math.min(1500, 550 + (Number(data.capacityMl) || 0)),
+            goal:1500,
+            unit:'ml',
           },
           note:'',
         }),
@@ -2033,11 +2034,20 @@ function App(){
         id:'e-water-camera-'+stamp,
         time:window.formatNowTime(),
         kind:'daily-record',
-        recordType:'water',
-        icon:'water',
+        recordType:'beverage',
+        icon:'beverage',
         recordLabel:'喝水',
-        recordDetail:`${amount}ml`,
-        text:`喝水：${amount}ml`,
+        recordDetail:`白水 · ${amount}ml`,
+        text:`喝水：白水 · ${amount}ml`,
+        beverageName:'白水',
+        beverageCategory:'',
+        capacityMl:amount,
+        iceLevel:'',
+        sugarLevel:'',
+        spec:`${amount}ml`,
+        calories:0,
+        caffeineMg:0,
+        inputSource:'manual-water',
         tags:[],
       },
       ai:{
