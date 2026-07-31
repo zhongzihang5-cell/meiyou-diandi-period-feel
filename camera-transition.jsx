@@ -952,11 +952,11 @@ function CameraView({
               <span className="camera-frame-corner br"/>
             </div>
             <div className="camera-hint camera-auto-detect-hint">
-              <div className="camera-hint-roller" aria-label="随手一拍，记录生活；拍照餐食记录热量；识别奶茶、咖啡标签记录饮品">
+              <div className="camera-hint-roller" aria-label="随手一拍，记录生活；拍照餐食记录热量；识别奶茶咖啡标签、饮料配料成分表记录饮品">
                 <div className="camera-hint-track">
                   <span>随手一拍，记录生活</span>
                   <span>拍照餐食记录热量</span>
-                  <span>识别奶茶、咖啡标签记录饮品</span>
+                  <span>识别奶茶咖啡标签、饮料配料成分表记录饮品</span>
                   <span aria-hidden="true">随手一拍，记录生活</span>
                 </div>
               </div>
