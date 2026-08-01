@@ -2689,6 +2689,189 @@
   font-size:16px;
   line-height:1;
 }
+.review-mood-all-records-page{
+  z-index:160;
+  top:0 !important;
+  bottom:0;
+  background:var(--my-bg);
+}
+.review-mood-all-records-page .review-detail-nav{
+  background:var(--my-bg);
+}
+.review-mood-all-records-content{
+  padding-top:4px;
+}
+.review-mood-all-records-cols{
+  display:grid;
+  grid-template-columns:104px minmax(0, 1fr);
+  gap:8px;
+  padding:4px 28px 10px;
+  font-size:12px;
+  font-weight:400;
+  color:rgba(0,0,0,0.38);
+  line-height:1.29;
+}
+.review-mood-all-records-cols > span:last-child{
+  text-align:center;
+}
+.review-mood-all-records-card{
+  margin:0 12px 20px;
+  padding:0 16px;
+  border-radius:12px;
+  background:#fff;
+  overflow:hidden;
+}
+.review-mood-all-records-list{
+  list-style:none;
+  margin:0;
+  padding:0;
+}
+.review-mood-all-records-row{
+  display:grid;
+  grid-template-columns:104px minmax(0, 1fr);
+  gap:8px;
+  align-items:center;
+  min-height:61px;
+  padding:14px 0;
+  border-top:0.5px solid rgba(0,0,0,0.06);
+  box-sizing:border-box;
+}
+.review-mood-all-records-row:first-child{
+  border-top:0;
+}
+.review-mood-all-records-date{
+  font-size:14px;
+  font-weight:400;
+  color:rgba(0,0,0,0.38);
+  line-height:1.29;
+  font-variant-numeric:tabular-nums;
+}
+.review-mood-all-records-moods{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  min-width:0;
+}
+.review-mood-all-records-text{
+  font-size:14px;
+  font-weight:400;
+  color:rgba(0,0,0,0.8);
+  line-height:1.47;
+  text-align:center;
+  min-width:0;
+}
+.review-mood-all-records-text.is-clamp{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.review-mood-all-records-row.is-expanded .review-mood-all-records-text{
+  white-space:normal;
+}
+.review-mood-all-records-toggle{
+  flex:0 0 auto;
+  width:20px;
+  height:20px;
+  margin:0;
+  padding:0;
+  border:0;
+  background:transparent;
+  color:rgba(0,0,0,0.28);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+.review-mood-all-records-toggle svg{
+  width:12px;
+  height:12px;
+  display:block;
+}
+.review-diet-all-records-card{
+  padding:0 12px 0 16px;
+}
+.review-diet-all-records-list{
+  list-style:none;
+  margin:0;
+  padding:0;
+}
+.review-diet-all-records-meal{
+  display:grid;
+  grid-template-columns:64px minmax(0, 1fr) 56px;
+  gap:10px;
+  align-items:center;
+  min-height:72px;
+  padding:12px 4px 12px 0;
+  border-top:0.5px solid rgba(0,0,0,0.06);
+  box-sizing:border-box;
+}
+.review-diet-all-records-meal:first-child{
+  border-top:0;
+}
+.review-diet-all-records-meta{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  min-width:0;
+}
+.review-diet-all-records-when{
+  font-size:12px;
+  font-weight:400;
+  color:rgba(0,0,0,0.38);
+  line-height:1.29;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+}
+.review-diet-all-records-meal-type{
+  font-size:12px;
+  font-weight:400;
+  color:rgba(0,0,0,0.38);
+  line-height:1.29;
+}
+.review-diet-all-records-main{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  min-width:0;
+}
+.review-diet-all-records-main > b{
+  font-size:15px;
+  font-weight:500;
+  color:rgba(0,0,0,0.8);
+  line-height:1.19;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.review-diet-all-records-main > em{
+  font-style:normal;
+  font-size:12px;
+  font-weight:400;
+  color:rgba(0,0,0,0.38);
+  line-height:1.29;
+  font-variant-numeric:tabular-nums;
+}
+.review-diet-all-records-thumb{
+  width:56px;
+  height:56px;
+  border-radius:8px;
+  overflow:hidden;
+  background:#F2F2F5;
+  flex:0 0 56px;
+}
+.review-diet-all-records-thumb img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.review-diet-all-records-thumb > i{
+  display:block;
+  width:100%;
+  height:100%;
+  background:#EBEBEF;
+}
 .review-diet-timeline,
 .review-diet-budget-page{
   z-index:160;
@@ -2760,7 +2943,7 @@
   font-variant-numeric:tabular-nums;
 }
 .review-diet-budget-value.is-editable{
-  color:var(--my-brand-red);
+  color:var(--my-text-primary);
 }
 .review-diet-budget-chevron{
   flex:0 0 auto;
@@ -2781,10 +2964,11 @@
 }
 .review-diet-budget-activity{
   display:flex;
+  flex-wrap:wrap;
   gap:8px;
 }
 .review-diet-budget-activity-card{
-  flex:1 1 0;
+  flex:1 1 calc(50% - 4px);
   min-width:0;
   min-height:64px;
   padding:12px 8px;
@@ -3080,6 +3264,562 @@
 .review-diet-daily-intake.is-over .review-diet-daily-intake-remain{
   color:#ff9500;
 }
+.review-diet-daily-card{
+  padding-bottom:12px;
+}
+.review-diet-balance-title-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+}
+.review-diet-balance-title-row > span{
+  min-width:0;
+}
+.review-diet-balance-capsule{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  height:24px;
+  padding:0 4px 0 10px;
+  border-radius:12px;
+  background:rgba(0,0,0,0.04);
+  flex:0 0 auto;
+}
+.review-diet-balance-capsule > span{
+  font-size:12px;
+  font-weight:400;
+  color:rgba(0,0,0,0.6);
+  line-height:1;
+  white-space:nowrap;
+}
+.review-diet-balance-capsule > button{
+  height:20px;
+  padding:0 8px;
+  border:0;
+  border-radius:10px;
+  background:#fff;
+  color:var(--my-brand-red);
+  font-size:12px;
+  font-weight:500;
+  font-family:inherit;
+  line-height:1;
+  cursor:pointer;
+}
+.review-diet-balance-capsule > button:active{opacity:0.72}
+.review-diet-balance-week{
+  display:flex;
+  align-items:stretch;
+  justify-content:space-between;
+  gap:4px;
+  margin:0 0 14px;
+}
+.review-diet-balance-day{
+  flex:1 1 0;
+  min-width:0;
+  max-width:48px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  padding:8px 0 6px;
+  border:0;
+  border-radius:12px;
+  background:transparent;
+  cursor:pointer;
+  font-family:inherit;
+}
+.review-diet-balance-day.is-selected{
+  background:rgba(0,0,0,0.06);
+}
+.review-diet-balance-day-num{
+  font-size:13px;
+  font-weight:500;
+  color:rgba(0,0,0,0.55);
+  line-height:1;
+  font-variant-numeric:tabular-nums;
+}
+.review-diet-balance-day.is-selected .review-diet-balance-day-num,
+.review-diet-balance-day.is-today .review-diet-balance-day-num{
+  color:rgba(0,0,0,0.8);
+}
+.review-diet-balance-day-ring{
+  width:28px;
+  height:28px;
+  display:block;
+}
+.review-diet-balance-day-ring svg{
+  display:block;
+  width:28px;
+  height:28px;
+}
+.review-diet-balance-intake{
+  margin:0;
+}
+.review-diet-balance-intake-lbl{
+  font-size:12px;
+  font-weight:400;
+  color:rgba(0,0,0,0.45);
+  line-height:1.29;
+}
+.review-diet-balance-intake-val{
+  margin-top:4px;
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:6px;
+  line-height:1.19;
+}
+.review-diet-balance-intake-val b{
+  font-size:28px;
+  font-weight:500;
+  color:rgba(0,0,0,0.8);
+  font-variant-numeric:tabular-nums;
+}
+.review-diet-balance-intake-val > span{
+  font-size:14px;
+  font-weight:400;
+  color:rgba(0,0,0,0.45);
+}
+.review-diet-balance-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height:20px;
+  padding:0 6px;
+  border-radius:4px;
+  font-size:11px;
+  font-weight:500;
+  font-style:normal;
+  line-height:1;
+}
+.review-diet-balance-badge.is-low{
+  background:rgba(255,158,176,0.18);
+  color:#FF9EB0;
+}
+.review-diet-balance-badge.is-ok{
+  background:rgba(255,217,102,0.22);
+  color:#FFD966;
+}
+.review-diet-balance-badge.is-over{
+  background:rgba(142,196,248,0.20);
+  color:#8EC4F8;
+}
+.review-diet-balance-intake-delta{
+  margin-top:4px;
+  font-size:12px;
+  color:rgba(0,0,0,0.45);
+  line-height:1.29;
+}
+.review-diet-calorie-zone{
+  margin-top:14px;
+}
+.review-diet-calorie-zone-scale{
+  position:relative;
+  height:16px;
+  margin-bottom:6px;
+}
+.review-diet-calorie-zone-scale > span{
+  position:absolute;
+  top:0;
+  transform:translateX(-50%);
+  font-size:11px;
+  color:rgba(0,0,0,0.38);
+  line-height:1.29;
+  white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+}
+.review-diet-calorie-zone-track{
+  position:relative;
+  display:flex;
+  height:8px;
+  border-radius:80px;
+  overflow:visible;
+}
+.review-diet-calorie-zone-track > i{
+  display:block;
+  height:100%;
+}
+.review-diet-calorie-zone-track > i.is-low{
+  flex:22 1 0;
+  border-radius:80px 0 0 80px;
+  background:#FF9EB0;
+}
+.review-diet-calorie-zone-track > i.is-ok{
+  flex:56 1 0;
+  background:#FFD966;
+}
+.review-diet-calorie-zone-track > i.is-over{
+  flex:22 1 0;
+  border-radius:0 80px 80px 0;
+  background:#8EC4F8;
+}
+.review-diet-calorie-zone-thumb{
+  position:absolute;
+  top:50%;
+  width:14px;
+  height:14px;
+  margin-left:-7px;
+  margin-top:-7px;
+  border-radius:50%;
+  box-sizing:border-box;
+  background:#fff;
+  border:2px solid rgba(0,0,0,0.55);
+  pointer-events:none;
+  z-index:1;
+}
+.review-diet-calorie-zone-thumb.is-low{border-color:#FF9EB0}
+.review-diet-calorie-zone-thumb.is-ok{border-color:#FFD966}
+.review-diet-calorie-zone-thumb.is-over{border-color:#8EC4F8}
+.review-diet-calorie-zone-labels{
+  display:flex;
+  margin-top:6px;
+}
+.review-diet-calorie-zone-labels > span{
+  text-align:center;
+  font-size:12px;
+  line-height:1.29;
+  font-weight:400;
+  color:rgba(0,0,0,0.38);
+}
+.review-diet-calorie-zone-labels > span.is-low{
+  flex:22 1 0;
+}
+.review-diet-calorie-zone-labels > span.is-ok{
+  flex:56 1 0;
+}
+.review-diet-calorie-zone-labels > span.is-over{
+  flex:22 1 0;
+}
+.review-diet-ratio-card{
+  margin-top:16px;
+  padding:12px 12px 4px;
+  border-radius:12px;
+  background:#FAFAFB;
+}
+.review-diet-ratio-cols{
+  display:grid;
+  grid-template-columns:minmax(0, 1.35fr) minmax(0, 0.85fr) minmax(0, 0.85fr);
+  gap:8px;
+  margin-bottom:2px;
+  font-size:12px;
+  color:rgba(0,0,0,0.38);
+  line-height:1.29;
+}
+.review-diet-ratio-cols > span:nth-child(2),
+.review-diet-ratio-cols > span:nth-child(3){
+  text-align:right;
+}
+.review-diet-ratio-list{
+  display:flex;
+  flex-direction:column;
+}
+.review-diet-ratio-row{
+  display:grid;
+  grid-template-columns:minmax(0, 1.35fr) minmax(0, 0.85fr) minmax(0, 0.85fr);
+  gap:8px;
+  align-items:center;
+  min-height:44px;
+  border-top:0.5px solid rgba(0,0,0,0.06);
+}
+.review-diet-ratio-name{
+  font-size:14px;
+  font-weight:400;
+  color:rgba(0,0,0,0.8);
+  line-height:1.29;
+}
+.review-diet-ratio-name em{
+  font-style:normal;
+  font-weight:400;
+}
+.review-diet-ratio-name em.is-low{color:#FF9EB0}
+.review-diet-ratio-name em.is-ok{color:#FFD966}
+.review-diet-ratio-name em.is-over{color:#8EC4F8}
+.review-diet-ratio-intake{
+  display:inline-flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:4px;
+  font-variant-numeric:tabular-nums;
+}
+.review-diet-ratio-intake b{
+  font-size:14px;
+  font-weight:500;
+  color:rgba(0,0,0,0.8);
+}
+.review-diet-ratio-intake i{
+  width:16px;
+  height:16px;
+  border-radius:50%;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-style:normal;
+  font-size:10px;
+  line-height:1;
+  font-weight:500;
+  color:#fff;
+}
+.review-diet-ratio-intake.is-low i{background:#FF9EB0}
+.review-diet-ratio-intake.is-ok i{background:#FFD966}
+.review-diet-ratio-intake.is-over i{background:#8EC4F8}
+.review-diet-ratio-rec{
+  text-align:right;
+  font-size:14px;
+  color:rgba(0,0,0,0.45);
+  font-variant-numeric:tabular-nums;
+  line-height:1.29;
+}
+.review-diet-balance-incomplete{
+  margin:12px 0 0;
+  font-size:12px;
+  color:rgba(0,0,0,0.45);
+  line-height:1.29;
+}
+.review-diet-balance-insight{
+  margin-top:12px;
+}
+.review-diet-calorie-week-legend{
+  margin-top:8px;
+  justify-content:flex-start;
+  gap:12px;
+}
+.review-diet-calorie-week-legend .review-legend-item.is-diet-week i{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  border:0;
+  background-clip:padding-box;
+}
+.review-diet-calorie-week-card .review-love-insight{
+  margin-top:12px;
+}
+.review-diet-moment-card .review-mood-slot-card-foot{
+  flex-direction:column;
+  align-items:flex-start;
+  gap:6px;
+}
+.review-diet-moment-card .review-mood-slot-card-foot > em{
+  white-space:normal;
+  line-height:1.29;
+  max-width:100%;
+}
+.review-diet-dist-card .review-love-insight{
+  margin-top:12px;
+}
+.review-diet-balance-footnote{
+  margin:8px 0 0;
+  font-size:11px;
+  color:rgba(0,0,0,0.28);
+  line-height:1.29;
+}
+
+.review-diet-card-foot{
+  width:100%;
+  margin-top:12px;
+}
+.review-diet-insight-cell{
+  display:grid;
+  grid-template-rows:17px 26px 16px;
+  row-gap:8px;
+  align-content:start;
+  box-sizing:border-box;
+  padding:13px 14px;
+  border-radius:14px;
+  background:#FAFAFB;
+  font-family:"PingFang SC",-apple-system,sans-serif;
+}
+.review-diet-insight-grid{
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) minmax(0, 1fr);
+  gap:10px;
+  margin-top:10px;
+}
+.review-diet-insight-sub{
+  display:block;
+  margin:0;
+  font-size:12px;
+  font-weight:400;
+  color:rgba(0,0,0,0.38);
+  line-height:16px;
+  height:16px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.review-diet-insight-title{
+  display:block;
+  font-size:13px;
+  font-weight:400;
+  color:rgba(0,0,0,0.6);
+  line-height:17px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.review-diet-insight-value{
+  margin:0;
+  display:flex;
+  align-items:flex-end;
+  gap:3px;
+  height:26px;
+  line-height:26px;
+  overflow:hidden;
+}
+.review-diet-insight-value b{
+  font-size:26px;
+  font-weight:500;
+  line-height:26px;
+  color:#FF8A3D;
+}
+.review-diet-insight-value em{
+  font-style:normal;
+  font-size:13px;
+  font-weight:400;
+  line-height:26px;
+  color:rgba(0,0,0,0.6);
+}
+.review-diet-insight-value.is-meal b{
+  font-size:22px;
+  line-height:26px;
+}
+.review-love-trend-block.is-diet-main .review-diet-card-foot{
+  margin-top:12px;
+}
+.review-diet-meal-stack-card .review-chart{
+  margin:0;
+}
+.review-diet-meal-stack-legend{
+  margin:8px 0 0;
+  flex-wrap:wrap;
+  gap:8px 12px;
+}
+.review-diet-fridge-stage .review-mood-jar-stage-inner{
+  min-height:168px;
+}
+.review-diet-fridge-hit{
+  width:min(100%, 168px);
+}
+.review-mood-jar-stage.is-shaking .review-diet-fridge-hit{
+  animation:diet-fridge-shake 0.7s ease-in-out;
+}
+.review-diet-fridge-img{
+  display:block;
+  width:100%;
+  height:auto;
+  border:0;
+  outline:0;
+  background:transparent;
+  pointer-events:none;
+}
+.review-diet-jar-note-meta{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  min-width:0;
+}
+.review-diet-jar-note-meta > b{
+  font-size:15px;
+  font-weight:500;
+  color:rgba(0,0,0,0.8);
+  line-height:1.19;
+}
+.review-diet-jar-note-meta > span{
+  font-size:12px;
+  font-weight:400;
+  color:rgba(0,0,0,0.45);
+  line-height:1.29;
+}
+.review-diet-jar-note-tip{
+  margin:0;
+  font-size:14px;
+  font-weight:400;
+  color:rgba(0,0,0,0.68);
+  line-height:1.47;
+}
+.review-diet-jar-note{
+  background:#FFF8F1;
+}
+.review-diet-jar-note-head{
+  margin-bottom:12px;
+}
+.review-diet-jar-note-kcal{
+  display:flex;
+  align-items:baseline;
+  gap:4px;
+}
+.review-diet-jar-note-kcal > em{
+  font-style:normal;
+  font-size:14px;
+  font-weight:400;
+  color:rgba(0,0,0,0.38);
+}
+.review-diet-jar-note-kcal > strong{
+  font-size:21px;
+  font-weight:500;
+  color:#FF8A3D;
+  line-height:1.19;
+}
+.review-diet-jar-thumb{
+  width:43px;
+  height:43px;
+  border-radius:8px;
+  overflow:hidden;
+  flex:0 0 43px;
+  background:#F3E9DC;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.review-diet-jar-thumb img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.review-diet-jar-thumb-placeholder{
+  display:block;
+  width:22px;
+  height:16px;
+  border-radius:2px;
+  background:
+    radial-gradient(circle at 70% 35%, #E8D5BE 0 3px, transparent 3.5px),
+    linear-gradient(135deg, transparent 42%, #D9C4A8 42% 58%, transparent 58%),
+    linear-gradient(#E8D5BE, #E8D5BE);
+  background-repeat:no-repeat;
+  background-size:100% 100%, 100% 100%, 100% 55%;
+  background-position:center, center, bottom;
+  opacity:0.9;
+}
+.review-diet-jar-meal{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-size:17px;
+  font-weight:500;
+  color:rgba(0,0,0,0.8);
+  line-height:1.19;
+}
+.review-diet-jar-meal svg{
+  width:16px;
+  height:16px;
+  color:#8B6914;
+  flex:0 0 16px;
+}
+.review-diet-jar-tip span{
+  color:rgba(0,0,0,0.45);
+}
+
+@keyframes diet-fridge-shake{
+  0%,100%{transform:translateX(0) rotate(0deg)}
+  15%{transform:translateX(-5px) rotate(-2.5deg)}
+  30%{transform:translateX(5px) rotate(2.5deg)}
+  45%{transform:translateX(-4px) rotate(-2deg)}
+  60%{transform:translateX(4px) rotate(2deg)}
+  75%{transform:translateX(-2px) rotate(-1deg)}
+  90%{transform:translateX(2px) rotate(1deg)}
+}
+
 .review-diet-weekly-head{
   margin-bottom:8px;
 }
@@ -6180,10 +6920,14 @@
 }
 .review-mood-trend-tri-legend{
   display:flex;
-  justify-content:space-between;
+  justify-content:flex-start;
   align-items:center;
-  gap:8px;
+  flex-wrap:wrap;
+  gap:8px 12px;
   margin-top:10px;
+}
+.review-diet-card-foot .review-mood-trend-tri-legend{
+  justify-content:flex-start;
 }
 .review-mood-trend-tri-legend span{
   display:inline-flex;
