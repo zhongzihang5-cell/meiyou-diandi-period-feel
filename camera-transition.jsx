@@ -173,6 +173,7 @@ function buildCameraRecognitionResult(payload) {
     return {
       ...base,
       mode: 'photo',
+      fallbackFromBeverage: true,
       summary: '',
       summaryItems: [],
     };
@@ -1205,6 +1206,7 @@ function CameraTransition({
   const [showPhotoPermDialog, setShowPhotoPermDialog] = React.useState(false);
   const [recognitionResult, setRecognitionResult] = React.useState(null);
   const wrapperRef = React.useRef(null);
+  const beverageLabelRetakeRef = React.useRef(false);
 
   const containerSize = React.useMemo(() => {
     const el = containerRef?.current;
@@ -1226,6 +1228,7 @@ function CameraTransition({
       setPhotoPermGranted(false);
       setShowPhotoPermDialog(false);
       setRecognitionResult(null);
+      beverageLabelRetakeRef.current = false;
     }
   }, [active, sourceRect, phase]);
 
@@ -1237,6 +1240,7 @@ function CameraTransition({
       setPhotoPermGranted(false);
       setShowPhotoPermDialog(false);
       setRecognitionResult(null);
+      beverageLabelRetakeRef.current = false;
     };
     window.addEventListener('cameraPermissionScenarioChange', onScenarioChange);
     return () => window.removeEventListener('cameraPermissionScenarioChange', onScenarioChange);
@@ -1342,6 +1346,7 @@ function CameraTransition({
   React.useEffect(() => {
     if (active) return;
     setRecognitionResult(null);
+    beverageLabelRetakeRef.current = false;
     analyze.reset();
   }, [active, analyze.reset]);
 
@@ -1351,15 +1356,32 @@ function CameraTransition({
       return;
     }
     setRecognitionResult(null);
+    beverageLabelRetakeRef.current = false;
     analyze.reset();
     onClose?.();
+  };
+
+  const resolveBeverageRetakePhoto = (photo) => {
+    if (!beverageLabelRetakeRef.current) return photo;
+    beverageLabelRetakeRef.current = false;
+    const isNoLabelPhoto = photo?.recognitionVariant === 'coffee-no-label'
+      || photo?.thumb === 'image/咖啡无标签图.jpg'
+      || photo?.url === 'image/咖啡无标签图.jpg';
+    if (!isNoLabelPhoto) return photo;
+    return {
+      ...photo,
+      id: `${photo?.id || 'beverage-coffee-no-label'}-fallback`,
+      mode: 'beverage',
+      type: 'beverage',
+      recognitionVariant: 'coffee-no-label-fallback',
+    };
   };
 
   const handleCapturePhoto = () => {
     const preferredConfig = preferredRecognitionMode
       ? CAMERA_RECOGNITION_MODE_MAP[preferredRecognitionMode]
       : null;
-    const photo = preferredRecognitionMode === 'beverage'
+    const selectedPhoto = preferredRecognitionMode === 'beverage'
       ? getNextBeverageOcrDemoPhoto()
       : preferredConfig
       ? {
@@ -1369,6 +1391,7 @@ function CameraTransition({
           mode: preferredConfig.id,
         }
       : getNextAutoDetectDemoPhoto();
+    const photo = resolveBeverageRetakePhoto(selectedPhoto);
     analyze.runAnalyze({
       url: photo.thumb,
       meta: { type: 'capture', photo, mode: inferCameraRecognitionMode(photo) },
@@ -1377,14 +1400,22 @@ function CameraTransition({
   
   const handleSelectPhoto = (photo) => {
     setShowGallery(false);
-    const photoUrl = photo?.thumb || photo?.url || window.pickFallbackPhoto?.() || null;
+    const selectedPhoto = resolveBeverageRetakePhoto(photo);
+    const photoUrl = selectedPhoto?.thumb || selectedPhoto?.url || window.pickFallbackPhoto?.() || null;
     analyze.runAnalyze({
       url: photoUrl,
-      meta: { type: 'select', photo, mode: inferCameraRecognitionMode(photo) },
+      meta: {
+        type: 'select',
+        photo: selectedPhoto,
+        mode: inferCameraRecognitionMode(selectedPhoto),
+      },
     });
   };
 
   const handleAnalyzeRetake = () => {
+    if (analyze.errorKind === 'beverage-no-label') {
+      beverageLabelRetakeRef.current = true;
+    }
     setRecognitionResult(null);
     analyze.handleRetake();
   };

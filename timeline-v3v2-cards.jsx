@@ -1359,36 +1359,13 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
 }
 
 function PhotoMemoryRecord({entry}){
-  const I = window.Icon;
-  const [note, setNote] = React.useState(entry.note || '');
-  React.useEffect(()=>setNote(entry.note || ''), [entry.note]);
-  const saveNote = ()=>{
-    window.dispatchEvent(new CustomEvent('timelinePhotoNoteSave', {
-      detail:{ entryId:entry.id, note },
-    }));
-  };
+  const note = String(entry.note || '').trim();
   return (
     <section className="v3-photo-memory">
-      <div className="v3-photo-memory-heading">
-        <I name="camera" size={22} stroke={1.8}/>
-      </div>
       <div className="v3-photo-memory-image">
         <img src={entry.photoUrl} alt="生活照片"/>
       </div>
-      <label className="v3-photo-memory-note">
-        <span>这一刻想记下...</span>
-        <textarea
-          value={note}
-          maxLength={160}
-          rows={3}
-          placeholder="写下拍照时发生的事情或此刻的想法"
-          onChange={(event)=>setNote(event.target.value)}
-          onBlur={saveNote}
-          onClick={(event)=>event.stopPropagation()}
-          onKeyDown={(event)=>event.stopPropagation()}
-        />
-        <small>{note ? '已自动保存' : '最多160字'}</small>
-      </label>
+      {note ? <p className="v3-photo-memory-saved-note">{note}</p> : null}
     </section>
   );
 }
