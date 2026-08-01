@@ -417,6 +417,13 @@ if (fs.existsSync(assetsSrc)) {
   console.log(`Copied assets → ${assetsDest}`);
 }
 
+const imageSrc = path.join(ROOT, 'image');
+const imageDest = path.join(DOCS, 'image');
+if (fs.existsSync(imageSrc)) {
+  copyDirSync(imageSrc, imageDest);
+  console.log(`Copied image → ${imageDest}`);
+}
+
 fs.writeFileSync(
   path.join(DOCS, 'scene3.html'),
   buildRedirectPage('./scene3-1.html', '场景三 · 方案一'),
