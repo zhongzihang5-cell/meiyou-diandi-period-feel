@@ -558,6 +558,10 @@ function ReviewCard({title, iconClass='', icon, chart, legend, metrics, more, mo
   );
 }
 
+function ReviewUpdateTag(){
+  return <span className="review-update-tag">已更新</span>;
+}
+
 function PeriodHealthImageCard(){
   return (
     <div className="review-card review-health-image-card">
@@ -573,19 +577,26 @@ const REVIEW_CYCLE_ALL_DATA = [
   ['23.8',33],['23.9',30],['23.10',32],['23.11',31],['23.12',33],
   ['24.1',31],['24.3',30],['24.4',29],['24.5',28],['24.6',29],['24.7',34],
   ['24.8',31],['24.9',30],['24.10',33],['24.11',31],['24.12',32],['25.1',36],
-  ['25.2',31],['25.3',30],['25.4',32],['25.5',30],['25.6',31],['25.7',29],
-  ['25.8',30],['25.9',31],['25.10',29],['25.11',30],['25.12',29],['26.1',31],
-  ['26.2',30],['26.3',30],['26.4',28],['26.5',28],
+  ['25.2',31],['25.3',30],['25.4',32],['25.5',30],['25.8',29],['25.9',34],
+  ['25.10',27],['25.11',33],['25.12',28],['26.1',32],['26.2',30],['26.3',31],
+  ['26.4',29],['26.5',30],['26.6',29],['26.7',28],
 ];
 
 function CycleDetailChart({range}){
-  const slice = range === '1y' ? REVIEW_CYCLE_ALL_DATA.slice(-12) : (range === '3y' ? REVIEW_CYCLE_ALL_DATA.slice(-36) : REVIEW_CYCLE_ALL_DATA);
+  const slice = range === '6c' ? REVIEW_CYCLE_ALL_DATA.slice(-6) : range === '1y' ? REVIEW_CYCLE_ALL_DATA.slice(-12) : (range === '3y' ? REVIEW_CYCLE_ALL_DATA.slice(-36) : REVIEW_CYCLE_ALL_DATA);
+  const cycleAxisLabels = ['2/8','3/10','4/10','5/9','6/8','7/7'];
+  const yearAxisLabels = ['8/9','9/7','10/11','11/7','12/10','1/7','2/8','3/10','4/10','5/9','6/8','7/7'];
+  const displaySlice = range === '6c'
+    ? slice.map((item, index)=>[cycleAxisLabels[index], item[1]])
+    : range === '1y'
+      ? slice.map((item, index)=>[yearAxisLabels[index], item[1]])
+      : slice;
   const vals = slice.map(d=>d[1]);
   const n = vals.length;
-  const normalMax = 35;
+  const normalMin = 21, normalMax = 35;
   const W = 340, H = 180, padL = 26, padR = 14, padT = 16, padB = 28;
   const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
-  const yMin = 26, yMax = 37;
+  const yMin = 20, yMax = 37;
   const X = i => x0 + (x1 - x0) * (i / (n - 1));
   const Y = v => y1 - (v - yMin) / (yMax - yMin) * (y1 - y0);
   const sx = vals.reduce((s, _v, i)=>s + i, 0);
@@ -596,59 +607,111 @@ function CycleDetailChart({range}){
   const a = (sy - b * sx) / n;
   let anomalyIdx = -1, anomalyVal = 0;
   vals.forEach((v, i)=>{ if(v > normalMax && v > anomalyVal){ anomalyVal = v; anomalyIdx = i; } });
-  const marks = [0, Math.round((n - 1) * 0.25), Math.round((n - 1) * 0.5), Math.round((n - 1) * 0.75), n - 1]
-    .filter((v, i, arr)=>arr.indexOf(v) === i);
+  const maxVal = Math.max(...vals), minVal = Math.min(...vals);
+  const maxIdx = vals.indexOf(maxVal), minIdx = vals.indexOf(minVal);
+  const hasAboveNormal = maxVal > normalMax;
+  const hasBelowNormal = minVal < normalMin;
+  const marks = range === '6c'
+    ? vals.map((_value, index)=>index)
+    : [0, Math.round((n - 1) * 0.25), Math.round((n - 1) * 0.5), Math.round((n - 1) * 0.75), n - 1]
+      .filter((v, i, arr)=>arr.indexOf(v) === i);
   const pts = vals.map((v, i)=>[X(i), Y(v)]);
 
   return (
     <svg viewBox="0 0 340 180" preserveAspectRatio="xMidYMid meet" role="img" aria-label="月经周期长度趋势曲线">
-      <rect x={x0} y={y0} width={x1 - x0} height={Y(normalMax) - y0} fill="rgba(255,149,0,0.06)"/>
-      {[28,32,36].map(g=>(
+      {[20,24,28,32,36].map(g=>(
         <React.Fragment key={g}>
           <line x1={x0} y1={Y(g)} x2={x1} y2={Y(g)} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/>
           <text x={x0 - 5} y={Y(g) + 3} textAnchor="end" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{g}</text>
         </React.Fragment>
       ))}
-      <line x1={x0} y1={Y(normalMax)} x2={x1} y2={Y(normalMax)} stroke="#ffb15a" strokeWidth="1" strokeDasharray="3 3"/>
-      <text x={x1} y={Y(normalMax) - 4} textAnchor="end" fontSize="9" fill="#e8930f" fontFamily="PingFang SC">正常上限 35天</text>
+      {hasBelowNormal ? <line x1={x0} y1={Y(normalMin)} x2={x1} y2={Y(normalMin)} stroke="#e6a2b8" strokeWidth="1" strokeDasharray="3 3"/> : null}
+      {hasAboveNormal ? <line x1={x0} y1={Y(normalMax)} x2={x1} y2={Y(normalMax)} stroke="#e6a2b8" strokeWidth="1" strokeDasharray="3 3"/> : null}
+      {hasAboveNormal ? <text x={x1} y={Y(normalMax) - 4} textAnchor="end" fontSize="9" fill="#bd7891" fontFamily="PingFang SC">上限 35天</text> : null}
+      {hasBelowNormal ? <text x={x1} y={Y(normalMin) + 12} textAnchor="end" fontSize="9" fill="#bd7891" fontFamily="PingFang SC">下限 21天</text> : null}
       <line x1={X(0)} y1={Y(a)} x2={X(n - 1)} y2={Y(a + b * (n - 1))} stroke="#c2c2c8" strokeWidth="1.5" strokeDasharray="4 3" strokeLinecap="round"/>
       <path d={reviewSmoothPath(pts)} fill="none" stroke="#ff4d88" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round"/>
       {vals.map((v, i)=>{
         const isAnomaly = i === anomalyIdx;
+        const isRangeMax = i === maxIdx;
+        const isRangeMin = i === minIdx;
         const isLast = i === n - 1;
         return (
           <React.Fragment key={i}>
-            <circle cx={X(i)} cy={Y(v)} r={isLast ? 4.5 : (isAnomaly ? 4 : 2.4)} fill={isAnomaly ? '#ff9500' : '#ff4d88'} stroke={isLast || isAnomaly ? '#fff' : 'none'} strokeWidth={isLast ? 2 : 1.5}/>
-            {isAnomaly ? <text x={X(i)} y={Y(v) - 8} textAnchor="middle" fontSize="9.5" fontWeight="600" fill="#e8930f" fontFamily="PingFang SC">{anomalyVal}天</text> : null}
-            {isLast ? <text x={X(i)} y={Y(v) + 15} textAnchor="end" fontSize="9.5" fontWeight="600" fill="#ff4d88" fontFamily="PingFang SC">{v}天</text> : null}
+            <circle cx={X(i)} cy={Y(v)} r={isLast || isRangeMax || isRangeMin ? 4.5 : (isAnomaly ? 4 : 2.4)} fill={isAnomaly ? '#ff9500' : '#ff4d88'} stroke={isLast || isAnomaly || isRangeMax || isRangeMin ? '#fff' : 'none'} strokeWidth={isLast || isRangeMax || isRangeMin ? 2 : 1.5}/>
+            {isRangeMax ? <text x={X(i)} y={Y(v) - 9} textAnchor="middle" fontSize="9.5" fontWeight="600" fill={isAnomaly ? '#e8930f' : '#ff4d88'} fontFamily="PingFang SC">最长 {v}天</text> : null}
+            {isRangeMin ? <text x={X(i)} y={Y(v) + 16} textAnchor="middle" fontSize="9.5" fontWeight="600" fill="#ff4d88" fontFamily="PingFang SC">最短 {v}天</text> : null}
           </React.Fragment>
         );
       })}
       {marks.map(idx=>(
-        <text key={idx} x={X(idx)} y={H - 9} textAnchor="middle" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{slice[idx][0]}</text>
+        <text key={idx} x={X(idx)} y={H - 9} textAnchor="middle" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{displaySlice[idx][0]}</text>
       ))}
     </svg>
   );
 }
 
 function CycleDetailBarChart({range}){
-  const source = range === '6m' ? REVIEW_CYCLE_ALL_DATA.slice(-6) : range === '1y' ? REVIEW_CYCLE_ALL_DATA.slice(-12) : range === '3y' ? REVIEW_CYCLE_ALL_DATA.slice(-36) : REVIEW_CYCLE_ALL_DATA;
-  const data = source.slice(-12).map((item, index)=>({label:item[0], cycle:item[1], period:[5,6,5,7,5,4][index % 6]}));
-  const W = 340, H = 190, padL = 30, padR = 12, padT = 20, padB = 28, maxDays = 36;
-  const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB, band = (x1 - x0) / data.length, bw = Math.min(22, band - 5);
-  const X = i => x0 + band * i + band / 2;
-  const Y = days => y1 - days / maxDays * (y1 - y0);
-  return <svg viewBox="0 0 340 190" preserveAspectRatio="xMidYMid meet" role="img" aria-label="月经周期经期与非经期天数柱状图">
-    {[0,10,20,30].map(v=><React.Fragment key={v}><line x1={x0} y1={Y(v)} x2={x1} y2={Y(v)} stroke="rgba(0,0,0,.05)"/><text x={x0-5} y={Y(v)+3} textAnchor="end" fontSize="9" fill="#aaa">{v}</text></React.Fragment>)}
-    {data.map((item,i)=>{ const x=X(i)-bw/2, darkY=Y(item.period), topY=Y(item.cycle); return <g key={item.label}>
-      <rect x={x} y={topY} width={bw} height={Y(0)-topY} rx="4" fill="#ffd6e5"/>
-      <rect x={x} y={darkY} width={bw} height={Y(0)-darkY} rx="4" fill="#ff4d88"/>
-      <text x={X(i)} y={topY-6} textAnchor="middle" fontSize="8.5" fontWeight="600" fill="#b85f83">{item.cycle}天</text>
-      <text x={X(i)} y={(darkY+y1)/2+3} textAnchor="middle" fontSize="8.5" fill="#fff">{item.period}天</text>
-      {i===data.length-1 ? <text x={X(i)} y={topY-18} textAnchor="middle" fontSize="9" fontWeight="600" fill="#ff4d88">进行中</text> : null}
-      <text x={X(i)} y={H-9} textAnchor="middle" fontSize="8.5" fill="#aaa">{item.label}</text>
-    </g>;})}
-  </svg>;
+  const source = range === '6c'
+    ? REVIEW_CYCLE_ALL_DATA.slice(-6)
+    : range === '1y'
+      ? REVIEW_CYCLE_ALL_DATA.slice(-12)
+      : range === '3y'
+        ? REVIEW_CYCLE_ALL_DATA.slice(-36)
+        : REVIEW_CYCLE_ALL_DATA;
+  const sixCycleDates = ['2/8','3/10','4/10','5/9','6/8','7/7'];
+  const oneYearDates = ['8/9','9/7','10/11','11/7','12/10','1/7','2/8','3/10','4/10','5/9','6/8','7/7'];
+  const data = source.map((item, index)=>{
+    const rawDate = range === '6c' ? sixCycleDates[index] : range === '1y' ? oneYearDates[index] : item[0];
+    const dateParts = rawDate.split(/[./]/);
+    const isPreciseDate = rawDate.includes('/');
+    const year = isPreciseDate
+      ? (range === '1y' && index < 5 ? '2025年' : '2026年')
+      : ('20' + dateParts[0] + '年');
+    const date = isPreciseDate ? (dateParts[0] + '月' + dateParts[1] + '日') : (dateParts[1] + '月');
+    const delta = item[1] - 29;
+    return {
+      date,
+      year,
+      cycle:item[1],
+      status:delta === 0 ? '准时' : (delta < 0 ? `提前${Math.abs(delta)}天` : `推迟${delta}天`),
+      normal:item[1] >= 21 && item[1] <= 35,
+      current:index === source.length - 1,
+    };
+  }).reverse();
+
+  return (
+    <div className="review-cycle-bar-module" role="img" aria-label={`${data.length}次月经周期天数柱状图`}>
+      <div className="review-cycle-bar-header">
+        <span>月经开始</span>
+        <span>是否准时</span>
+        <span>周期天数</span>
+        <b>正常范围21-35天</b>
+      </div>
+      <div className="review-cycle-bar-rows">
+        {data.map((item, index)=>{
+          const barPercent = Math.min(item.cycle / 35 * 100, 100);
+          return (
+            <div className="review-cycle-bar-row" key={item.year + item.date + index}>
+              <div className="review-cycle-bar-date">
+                {item.date}
+                <small>{item.year}</small>
+              </div>
+              <div className="review-cycle-bar-status">{item.status}</div>
+              <div className="review-cycle-bar-wrap">
+                <span
+                  className={'review-cycle-bar-value' + (item.normal ? ' is-normal' : ' is-abnormal')}
+                  style={{width:barPercent + '%'}}
+                >
+                  {item.current ? `当前周期${item.cycle}天` : `${item.cycle}天`}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 function ReviewShareQr(){
@@ -1010,40 +1073,175 @@ function ReviewShareHubPage({open, onClose, cycleShared, onCycleManage, sharedCa
   );
 }
 
-function CycleDetailPage({open, onClose}){
-  const [range, setRange] = useState('6m');
+function CycleHealthScoreCard(){
+  return (
+    <section className="review-detail-card review-health-score-card" aria-label="经期健康度">
+      <div className="review-health-score-body">
+        <div className="review-health-score-gauge-section">
+          <div className="review-health-score-gauge">
+            <svg viewBox="0 0 150 95" aria-hidden="true">
+              <defs>
+                <linearGradient id="reviewCycleHealthArc" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#ffb6d3"/>
+                  <stop offset="100%" stopColor="#ff6ba6"/>
+                </linearGradient>
+              </defs>
+              <path className="review-health-score-track" d="M 15 88 A 60 60 0 0 1 135 88"/>
+              <path className="review-health-score-arc" d="M 15 88 A 60 60 0 0 1 135 88"/>
+            </svg>
+            <div className="review-health-score-gauge-label">
+              <span>预测得分</span>
+              <strong>88</strong>
+            </div>
+          </div>
+          <div className="review-health-score-change">
+            <span>比上次</span>
+            <svg viewBox="0 0 10 10" aria-hidden="true"><path d="M5 2v6M3 6l2 2 2-2"/></svg>
+            <b>1分</b>
+          </div>
+        </div>
+
+        <div className="review-health-score-summary">
+          <h4>基本健康</h4>
+          <div className="review-health-score-metric">
+            <span><b>2</b> 项指标</span>
+            <em className="is-warning">轻度偏离</em>
+          </div>
+          <div className="review-health-score-metric">
+            <span><b>3</b> 项指标</span>
+            <em className="is-normal">正常</em>
+          </div>
+          <button type="button" className="review-health-score-cta">立即查看</button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+const REVIEW_CYCLE_ALL_RECORDS = [
+  {date:'当前周期：7月5日-今天', period:5, cycle:28},
+  {date:'6月16日-7月4日', period:5, cycle:19},
+  {date:'6月1日-6月15日', period:5, cycle:15},
+  {date:'5月8日-5月31日', period:5, cycle:24},
+  {date:'4月10日-5月7日', period:5, cycle:28},
+  {date:'3月10日-4月9日', period:5, cycle:31},
+  {date:'2月7日-3月9日', period:5, cycle:31},
+  {date:'1月9日-2月6日', period:5, cycle:29},
+  {date:'2025年12月11日-2026年1月8日', period:5, cycle:29},
+  {date:'2025年11月11日-2025年12月10日', period:5, cycle:30},
+  {date:'2025年10月11日-2025年11月10日', period:5, cycle:31},
+];
+
+function CycleAllRecordsPage({open, onClose}){
+  React.useEffect(()=>{
+    if(!open) return undefined;
+    const handleKeyDown = event=>{ if(event.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handleKeyDown);
+    return ()=>document.removeEventListener('keydown', handleKeyDown);
+  }, [open, onClose]);
+
+  return (
+    <section
+      className={'review-cycle-detail is-fullscreen-detail review-mood-all-records-page review-cycle-all-records-page' + (open ? ' is-open' : '')}
+      aria-hidden={!open}
+      aria-label="月经周期所有记录"
+    >
+      <div className="review-detail-nav">
+        <button type="button" className="review-detail-back" aria-label="返回" onClick={onClose}>
+          <ReviewBackIcon/>
+        </button>
+        <span className="review-detail-title">所有记录</span>
+      </div>
+      <div className="review-detail-content review-cycle-all-records-content">
+        <div className="review-cycle-all-records-list">
+          {REVIEW_CYCLE_ALL_RECORDS.map((record, index)=>{
+            const barPercent = Math.min(record.cycle / 35 * 100, 100);
+            return (
+              <div className="review-cycle-all-record" key={record.date + index}>
+                <div className="review-cycle-all-record-date">{record.date}</div>
+                <div className="review-cycle-all-record-bar-row">
+                  <span className="review-cycle-all-record-period">{record.period}</span>
+                  <div className="review-cycle-all-record-cycle">
+                    <span className="review-cycle-all-record-track" aria-hidden="true">
+                      <i style={{width:barPercent + '%'}}></i>
+                    </span>
+                    <span className="review-cycle-all-record-length">{record.cycle}</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function CycleDetailPage({open, onClose, isMember=false}){
+  const [range, setRange] = useState('6c');
   const [chartMode, setChartMode] = useState('line');
+  const [allRecordsOpen, setAllRecordsOpen] = useState(false);
   const ranges = [
-    {key:'6m', label:'近半年'},
+    {key:'6c', label:'近6个周期'},
     {key:'1y', label:'近1年'},
     {key:'3y', label:'近3年'},
     {key:'all', label:'全部'},
   ];
   const analysisCopy = {
+    '6c': {
+      items: [
+        {
+          tone:'is-good',
+          title:'周期规律',
+          text:<>近 6 次周期在 <b>28~31 天</b>之间，波动仅 <b>3 天</b>，属于非常规律。正常月经周期为 <b>24~38 天</b>，你的每一次都在正常范围内。</>,
+        },
+        {
+          tone:'is-good',
+          title:'稳定性',
+          text:<>前 3 次波动 <b>2 天（29~31）</b>，后 3 次波动 <b>2 天（28~30）</b>，稳定性保持一致。</>,
+        },
+        {
+          tone:'is-good',
+          title:'平均周期',
+          text:<><b>29.5 天</b>，与同龄女性平均水平（约 29 天）非常接近。</>,
+        },
+        {
+          tone:'is-good',
+          title:'近期变化',
+          text:<>最近 3 次平均 <b>29.0 天</b>，较之前 3 次（30.0 天）缩短约 <b>1 天</b>。变化幅度很小，无需担心。</>,
+        },
+      ],
+      summary:null,
+    },
     '1y': {
       items: [
         {
           tone:'is-good',
-          title:'最近一年规律性：很好',
-          text:<>最近 12 次周期都在 <b>28-31 天</b>之间，平均约 <b>29.7 天</b>，波动标准差约 <b>1.0 天</b>。每次都处于常见周期范围内，整体节奏稳定。</>,
-        },
-        {
-          tone:'is-note',
-          title:'近期有轻微缩短',
-          text:<>前 6 次平均约 <b>30.0 天</b>，后 6 次平均约 <b>29.3 天</b>。变化幅度不到 1 天，属于轻微趋势，暂时不代表异常。</>,
+          title:'周期规律',
+          text:<>近 12 次周期在 <b>27~34 天</b>之间，波动 <b>7 天</b>。按照临床标准（同年波动 ≤ 7~9 天为规则月经），整体属于比较规律。12 次周期全部落在正常范围（21~35 天）内，没有任何一次偏离。</>,
         },
         {
           tone:'is-good',
-          title:'波动范围正在收窄',
-          text:<>这一年最长周期是 <b>31 天</b>，最短是 <b>28 天</b>，最大相差只有 3 天。最近几次大多集中在 28-30 天，周期表现比过去更集中。</>,
+          title:'稳定性',
+          text:<>前 6 次波动 <b>7 天（27~34 天）</b>，后 6 次波动仅 <b>3 天（28~31 天）</b>，波动收窄了一半以上。你的周期正在变得越来越规律，这是一个积极的信号。</>,
+        },
+        {
+          tone:'is-good',
+          title:'平均周期',
+          text:<><b>30.0 天</b>，与同龄女性平均水平（约 29 天）非常接近，属于典型的正常周期长度。</>,
+        },
+        {
+          tone:'is-good',
+          title:'近期变化',
+          text:<>最近 6 次平均 <b>29.5 天</b>，较之前 6 次（30.5 天）缩短约 <b>1 天</b>。变化幅度很小，无需担心。整体来看周期从略长逐步向 29 天附近收敛。</>,
         },
         {
           tone:'is-note',
-          title:'连续两次 28 天，建议继续观察',
-          text:<>最近两个周期都是 <b>28 天</b>，是近一年里的低位，但仍在正常范围内。可以继续记录未来 2-3 次，看看是否稳定在新的节奏。</>,
+          title:'值得留意',
+          text:<>10/11 开始的周期为 <b>27 天</b>，是 12 次中最短的一次；9/7 开始的周期为 <b>34 天</b>，是最长的一次。两次差值达到 <b>7 天</b>，如果周期天数差值大于7天，则为不规律。近 6 次未再出现类似波动。如果未来出现这种情况，则需要密切留意。</>,
         },
       ],
-      summary:'近一年周期规律、波动小，近期有轻微缩短，但仍处于健康区间。继续保持记录即可；如果之后连续出现明显提前、推迟或伴随不适，再结合身体状态进一步关注。',
+      summary:null,
     },
     '3y': {
       items: [
@@ -1097,16 +1295,35 @@ function CycleDetailPage({open, onClose}){
     },
   };
   const currentAnalysis = analysisCopy[range] || analysisCopy['1y'];
+  const rangeData = range === '6c'
+    ? REVIEW_CYCLE_ALL_DATA.slice(-6)
+    : range === '1y'
+      ? REVIEW_CYCLE_ALL_DATA.slice(-12)
+      : range === '3y'
+        ? REVIEW_CYCLE_ALL_DATA.slice(-36)
+        : REVIEW_CYCLE_ALL_DATA;
+  const hasRangeUpper = rangeData.some(item=>item[1] > 35);
+  const hasRangeLower = rangeData.some(item=>item[1] < 21);
+
+  React.useEffect(()=>{
+    if(!open){
+      setAllRecordsOpen(false);
+      setChartMode('line');
+    }
+  }, [open]);
 
   return (
+    <>
     <section className={'review-cycle-detail is-cycle-ai-detail' + (open ? ' is-open' : '')} aria-hidden={!open} aria-label="月经周期详情">
       <div className="review-detail-nav">
         <button type="button" className="review-detail-back" aria-label="返回" onClick={onClose}>
           <ReviewBackIcon/>
         </button>
         <span className="review-detail-title">月经周期</span>
+        <button type="button" className="review-detail-all-records" onClick={()=>setAllRecordsOpen(true)}>所有记录</button>
       </div>
-      <div className="review-detail-content">
+      <div className="review-detail-content review-cycle-detail-content">
+        <div className="review-cycle-detail-top">
         <div className="review-segment" role="tablist" aria-label="时间范围">
           {ranges.map(item=>(
             <button
@@ -1120,28 +1337,39 @@ function CycleDetailPage({open, onClose}){
             </button>
           ))}
         </div>
+        </div>
 
         <div className="review-cycle-sample-area">
-        <div className="review-detail-card">
-          <div className="review-cycle-chart-toolbar">
-            <span>周期变化</span>
-            <div className="review-segment review-chart-mode" role="tablist" aria-label="图表视图">
-              <button type="button" className={chartMode === 'line' ? 'is-active' : ''} onClick={()=>setChartMode('line')}>曲线</button>
-              <button type="button" className={chartMode === 'bar' ? 'is-active' : ''} onClick={()=>setChartMode('bar')}>柱状图</button>
-            </div>
+        <div className="review-detail-card review-cycle-overview-card">
+          <div className={'review-chart review-detail-chart' + (chartMode === 'bar' ? ' is-cycle-bar-mode' : '')}>
+            {chartMode === 'bar' ? <CycleDetailBarChart range={range}/> : <CycleDetailChart range={range}/>}
           </div>
-          <div className="review-chart review-detail-chart">{chartMode === 'line' ? <CycleDetailChart range={range}/> : <CycleDetailBarChart range={range}/>}</div>
-          <div className="review-legend">
-            {chartMode === 'bar' ? <><span className="review-legend-item is-period"><i></i>经期天数</span><span className="review-legend-item is-cycle"><i></i>非经期天数</span></> : <><span className="review-legend-item is-cycle"><i></i>周期天数</span><span className="review-legend-item is-trend"><i></i>趋势</span></>}
+          <div className="review-legend review-cycle-chart-legend">
+            <div className="review-cycle-chart-legend-items">
+            {chartMode === 'bar' ? <>
+              <span className="review-legend-item is-cycle-bar-normal"><i></i>正常周期</span>
+              <span className="review-legend-item is-cycle-bar-abnormal"><i></i>超出正常范围</span>
+            </> : <>
+              <span className="review-legend-item is-cycle"><i></i>周期天数</span>
+              <span className="review-legend-item is-trend"><i></i>趋势</span>
+              {hasRangeUpper ? <span className="review-legend-item is-cycle-upper"><i></i>正常范围上限35天</span> : null}
+              {hasRangeLower ? <span className="review-legend-item is-cycle-lower"><i></i>正常范围下限21天</span> : null}
+            </>}
+            </div>
+            <button
+              type="button"
+              className="review-cycle-chart-toggle"
+              onClick={()=>setChartMode(mode=>mode === 'line' ? 'bar' : 'line')}
+            >
+              {chartMode === 'line' ? '切换柱状图' : '切换折线图'}
+            </button>
           </div>
         </div>
 
-        <div className={'review-detail-card review-ai-insight-card' + (range !== '6m' ? ' is-vip-locked' : '')}>
-          <div className="review-insight-head">
-            <span className="review-ai-badge" aria-hidden="true">AI</span>
-            <span>趋势分析</span>
-          </div>
-          {range !== '6m' ? <div className="review-vip-lock-content"><span className="review-ai-unlock-vip">VIP</span><b>解锁长期趋势洞察</b><p>近1年、近3年及全部数据的规律性与稳定性对比</p><button type="button">立即查看</button></div> : <div className="review-insight-body">
+        <div className="review-cycle-detail-lower">
+        <div className="review-love-trend-title review-cycle-discovery-title">趋势发现</div>
+        <div className={'review-detail-card review-ai-insight-card review-cycle-discovery-card' + (range === '6c' ? ' is-six-cycle' : '')}>
+          <div className="review-insight-body">
             {currentAnalysis.items.map((item, index)=>(
               <div className={'review-insight-item ' + item.tone} key={index}>
                 <span className="review-insight-dot"></span>
@@ -1151,17 +1379,25 @@ function CycleDetailPage({open, onClose}){
                 </div>
               </div>
             ))}
-            <div className="review-insight-summary">
+            {currentAnalysis.summary ? <div className="review-insight-summary">
               <div className="review-summary-head">总结</div>
               <p className="review-summary-text">{currentAnalysis.summary}</p>
-            </div>
-          </div>}
+            </div> : null}
+          </div>
         </div>
-        <div className="review-detail-card review-membership-entry"><img src="assets/period-health-detail.png" alt="经期健康度详情" /></div>
-        <div className="review-detail-card review-next-period-card"><img src="assets/period-prediction-detail.jpg" alt="经期预测" /></div>
+        {range === '6c' && !isMember ? <>
+          <div className="review-cycle-health-heading">
+            <div className="review-love-trend-title">经期健康度</div>
+            <span className="review-health-score-vip">VIP</span>
+          </div>
+          <CycleHealthScoreCard/>
+        </> : null}
+        </div>
         </div>
       </div>
     </section>
+    <CycleAllRecordsPage open={open && allRecordsOpen} onClose={()=>setAllRecordsOpen(false)}/>
+    </>
   );
 }
 
@@ -1192,40 +1428,36 @@ function ReviewMoodValue({kind, word, trend}){
 
 function CycleChart(){
   const data = [
-    {label:'1月', cycle:31, period:5},
-    {label:'2月', cycle:29, period:6},
-    {label:'3月', cycle:30, period:5},
-    {label:'4月', cycle:30, period:7},
-    {label:'5月', cycle:30, period:5},
-    {label:'6月', cycle:28, period:4},
+    {label:'2/8', days:30},
+    {label:'3/10', days:31},
+    {label:'4/10', days:29},
+    {label:'5/9', days:30},
+    {label:'6/8', days:29},
+    {label:'7/7', days:28},
   ];
-  const W = 340, H = 168, padL = 28, padR = 12, padT = 12, padB = 26;
+  const W = 340, H = 164, padL = 30, padR = 12, padT = 18, padB = 28;
   const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
-  const maxDays = 35;
   const band = (x1 - x0) / data.length;
-  const barWidth = 24;
+  const barWidth = 25;
   const X = i => x0 + band * i + band / 2;
-  const Y = v => y1 - v / maxDays * (y1 - y0);
+  const Y = v => y1 - (v - 20) / 15 * (y1 - y0);
   return (
-    <svg viewBox="0 0 340 168" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近6次月经周期构成图">
-      {[0,10,20,30].map(g=>(
+    <svg viewBox="0 0 340 164" preserveAspectRatio="xMidYMid meet" role="img" aria-label="最近6个周期长度对比柱状图">
+      {[21,28,35].map(g=>(
         <React.Fragment key={g}>
           <line x1={x0} y1={Y(g)} x2={x1} y2={Y(g)} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/>
-          <text x={x0 - 5} y={Y(g) + 3} textAnchor="end" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{g}</text>
+          <text x={x0 - 6} y={Y(g) + 3} textAnchor="end" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{g}</text>
         </React.Fragment>
       ))}
       {data.map((item, i)=>{
         const x = X(i) - barWidth / 2;
-        const periodY = Y(item.period);
-        const cycleY = Y(item.cycle);
+        const barY = Y(item.days);
+        const isCurrent = i === data.length - 1;
         return (
           <g key={item.label}>
-            <rect x={x} y={cycleY} width={barWidth} height={Y(0) - cycleY} rx="5" fill="#ffd6e5"/>
-            <rect x={x} y={periodY} width={barWidth} height={Y(0) - periodY} rx="5" fill="#ff4d88"/>
-            <text x={X(i)} y={cycleY - 6} textAnchor="middle" fontSize="9" fontWeight="600" fill="#c66b8b" fontFamily="PingFang SC">{item.cycle}天</text>
-            <text x={X(i)} y={(periodY + y1) / 2 + 3} textAnchor="middle" fontSize="9" fontWeight="600" fill="#fff" fontFamily="PingFang SC">{item.period}天</text>
-            {i === data.length - 1 ? <text x={X(i)} y={cycleY - 18} textAnchor="middle" fontSize="9" fontWeight="600" fill="#ff4d88" fontFamily="PingFang SC">进行中</text> : null}
-            <text x={X(i)} y={H - 8} textAnchor="middle" fontSize="9" fill={i === data.length - 1 ? '#ff4d88' : '#bbbbbf'} fontFamily="PingFang SC">{item.label}</text>
+            <rect x={x} y={barY} width={barWidth} height={y1 - barY} rx="7" fill={isCurrent ? '#ff4d88' : '#f3adc4'}/>
+            <text x={X(i)} y={barY - 7} textAnchor="middle" fontSize="10" fontWeight="600" fill={isCurrent ? '#e7447c' : '#a8687e'} fontFamily="PingFang SC">{item.days}</text>
+            <text x={X(i)} y={H - 8} textAnchor="middle" fontSize="9" fontWeight={isCurrent ? '600' : '400'} fill={isCurrent ? '#e7447c' : '#bbbbbf'} fontFamily="PingFang SC">{item.label}</text>
           </g>
         );
       })}
@@ -7005,26 +7237,32 @@ function MoodLandscapePage({open, onClose}){
   );
 }
 
-function PeriodLengthChart(){
-  const values = [6,7,6,7,8,7,6,7];
-  const labels = ['11月','12月','1月','2月','3月','4月','5月','本次'];
-  const W = 340, H = 156, padL = 28, padR = 14, padT = 18, padB = 26;
-  const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
-  const X = i => x0 + (x1 - x0) * (i / (values.length - 1));
-  const Y = v => y1 - (v - 4) / 6 * (y1 - y0);
-  const points = values.map((value, i)=>[X(i), Y(value)]);
+function PeriodDurationChart(){
+  const data = [
+    {label:'2/8', days:7},
+    {label:'3/10', days:6},
+    {label:'4/10', days:7},
+    {label:'5/9', days:8},
+    {label:'6/8', days:6},
+    {label:'7/7', days:7},
+  ];
+  const W = 340, H = 156, padL = 30, padR = 12, padT = 18, padB = 28;
+  const x0 = padL, x1 = W - padR, y1 = H - padB;
+  const band = (x1 - x0) / data.length;
+  const X = i => x0 + band * i + band / 2;
+  const Y = value => y1 - value / 9 * 104;
   return (
-    <svg viewBox="0 0 340 156" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近8次经期长度趋势">
-      <rect x={x0} y={Y(8)} width={x1 - x0} height={Y(5) - Y(8)} rx="8" fill="rgba(255,77,136,0.06)"/>
-      {[5,7,9].map(value=><line key={value} x1={x0} y1={Y(value)} x2={x1} y2={Y(value)} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/>)}
-      <path d={reviewSmoothPath(points)} fill="none" stroke="#ff6f9f" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-      {values.map((value, i)=>(
-        <React.Fragment key={labels[i]}>
-          <circle cx={X(i)} cy={Y(value)} r={i === values.length - 1 ? 4.5 : 3} fill="#ff6f9f" stroke="#fff" strokeWidth="1.5"/>
-          {i === values.length - 1 ? <text x={X(i) - 2} y={Y(value) - 10} textAnchor="end" fontSize="10" fontWeight="600" fill="#e7447c" fontFamily="PingFang SC">7天</text> : null}
-          <text x={X(i)} y={H - 7} textAnchor="middle" fontSize="9" fill={i === values.length - 1 ? '#e7447c' : '#bbbbbf'} fontFamily="PingFang SC">{labels[i]}</text>
-        </React.Fragment>
-      ))}
+    <svg viewBox="0 0 340 156" preserveAspectRatio="xMidYMid meet" role="img" aria-label="最近6次经期持续天数对比柱状图">
+      {[3,6,9].map(value=><React.Fragment key={value}><line x1={x0} y1={Y(value)} x2={x1} y2={Y(value)} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/><text x={x0 - 6} y={Y(value) + 3} textAnchor="end" fontSize="9" fill="#bbbbbf">{value}</text></React.Fragment>)}
+      {data.map((item, i)=>{
+        const barY = Y(item.days);
+        const isCurrent = i === data.length - 1;
+        return <React.Fragment key={item.label}>
+          <rect x={X(i) - 12.5} y={barY} width="25" height={y1 - barY} rx="7" fill={isCurrent ? '#d94b75' : '#ee9db5'}/>
+          <text x={X(i)} y={barY - 7} textAnchor="middle" fontSize="10" fontWeight="600" fill={isCurrent ? '#d94b75' : '#a8687e'} fontFamily="PingFang SC">{item.days}</text>
+          <text x={X(i)} y={H - 8} textAnchor="middle" fontSize="9" fontWeight={isCurrent ? '600' : '400'} fill={isCurrent ? '#d94b75' : '#bbbbbf'} fontFamily="PingFang SC">{item.label}</text>
+        </React.Fragment>;
+      })}
     </svg>
   );
 }
@@ -7035,49 +7273,42 @@ function PeriodReviewCard(){
       title="经期"
       iconClass="is-period"
       icon={<ReviewPeriodIcon/>}
-      chart={<PeriodLengthChart/>}
-      legend={<span className="review-legend-item is-period"><i></i>经期天数</span>}
+      chart={<PeriodDurationChart/>}
+      legend={<span className="review-legend-item is-period-flow"><i></i>经期天数</span>}
       metrics={(
         <>
           <ReviewMetric value="7" unit="天" label="最近经期"/>
-          <ReviewMetric value="6.8" unit="天" label="近半年平均"/>
+          <ReviewMetric value="6.8" unit="天" label="近6次平均"/>
           <ReviewMetric value="→ 稳定" label="整体趋势" trend/>
         </>
       )}
-      more="查看完整经期变化"
+      more="查看流量、颜色与痛经分析"
     />
   );
 }
 
 function SymptomReviewChart(){
-  const days = [
-    {label:'周一', values:[1,0,0]}, {label:'周二', values:[1,1,0]}, {label:'周三', values:[0,1,1]},
-    {label:'周四', values:[2,1,0]}, {label:'周五', values:[1,0,1]}, {label:'周六', values:[0,1,0]},
-    {label:'今天', values:[1,1,1]},
+  const symptoms = [
+    {label:'乳房胀痛', days:9, color:'#ff7da6'},
+    {label:'疲惫', days:7, color:'#f0ad4e'},
+    {label:'腰酸', days:5, color:'#78a6e4'},
+    {label:'腹痛', days:4, color:'#9b84d7'},
+    {label:'头痛', days:3, color:'#72b7ae'},
   ];
-  const colors = ['#ff729f','#7aa8e8','#f6b24d'];
-  const W = 340, H = 156, padL = 28, padR = 12, padT = 14, padB = 26;
-  const x0 = padL, x1 = W - padR, y1 = H - padB;
-  const band = (x1 - x0) / days.length;
-  const X = i => x0 + band * i + band / 2;
-  const unit = 25;
+  const W = 340, H = 164, labelW = 62, right = 32, top = 8, rowH = 30;
+  const chartW = W - labelW - right;
+  const maxDays = 10;
   return (
-    <svg viewBox="0 0 340 156" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近7天症状记录构成">
-      {[1,2,3].map(v=><line key={v} x1={x0} y1={y1 - v * unit} x2={x1} y2={y1 - v * unit} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/>)}
-      {days.map((day, i)=>{
-        let offset = 0;
-        return (
-          <React.Fragment key={day.label}>
-            {day.values.map((value, idx)=>{
-              if(!value) return null;
-              const height = value * unit - 3;
-              const y = y1 - offset - value * unit + 1.5;
-              offset += value * unit;
-              return <rect key={idx} x={X(i) - 10} y={y} width="20" height={height} rx="7" fill={colors[idx]}/>;
-            })}
-            <text x={X(i)} y={H - 7} textAnchor="middle" fontSize="9" fontWeight={i === days.length - 1 ? '600' : '400'} fill={i === days.length - 1 ? '#e7447c' : '#bbbbbf'} fontFamily="PingFang SC">{day.label}</text>
-          </React.Fragment>
-        );
+    <svg viewBox="0 0 340 164" preserveAspectRatio="xMidYMid meet" role="img" aria-label="近30天症状出现天数排行">
+      {symptoms.map((item, i)=>{
+        const y = top + i * rowH;
+        const width = chartW * item.days / maxDays;
+        return <g key={item.label}>
+          <text x={labelW - 8} y={y + 16} textAnchor="end" fontSize="11" fill="#66666c" fontFamily="PingFang SC">{item.label}</text>
+          <rect x={labelW} y={y + 5} width={chartW} height="14" rx="7" fill="#f4f4f6"/>
+          <rect x={labelW} y={y + 5} width={width} height="14" rx="7" fill={item.color}/>
+          <text x={labelW + width + 7} y={y + 16} fontSize="10" fontWeight="600" fill={item.color} fontFamily="PingFang SC">{item.days}天</text>
+        </g>;
       })}
     </svg>
   );
@@ -7090,21 +7321,15 @@ function SymptomReviewCard(){
       iconClass="is-symptom"
       icon={<ReviewSymptomIcon/>}
       chart={<SymptomReviewChart/>}
-      legend={(
-        <>
-          <span className="review-legend-item is-symptom-pain"><i></i>腹痛</span>
-          <span className="review-legend-item is-symptom-back"><i></i>腰酸</span>
-          <span className="review-legend-item is-symptom-tired"><i></i>疲惫</span>
-        </>
-      )}
+      legend={<span className="review-legend-note">按出现天数排序，同一天重复记录只计1天</span>}
       metrics={(
         <>
-          <ReviewMetric value="腹痛" label="最近症状"/>
-          <ReviewMetric value="9" unit="次" label="近7天记录"/>
-          <ReviewMetric value="↘ 减少" label="较上周" trend/>
+          <ReviewMetric value="5" unit="种" label="记录症状"/>
+          <ReviewMetric value="18" unit="天" label="有症状"/>
+          <ReviewMetric value="乳房胀痛" label="最常出现"/>
         </>
       )}
-      more="查看完整症状变化"
+      more="查看症状与周期的关系"
     />
   );
 }
@@ -10513,6 +10738,7 @@ function LoveDetailPage({open, onClose}){
 
 function ReviewPage({mode='经期', isMember=false, shareState, onShareStateChange, onOpenPartnerPreview}){
   const [reviewSearchOpen, setReviewSearchOpen] = useState(false);
+  const [cycleUpdated, setCycleUpdated] = useState(true);
   const [cycleDetailOpen, setCycleDetailOpen] = useState(false);
   const [cycleLandscapeOpen, setCycleLandscapeOpen] = useState(false);
   const [dietDistDetailOpen, setDietDistDetailOpen] = useState(false);
@@ -10524,9 +10750,6 @@ function ReviewPage({mode='经期', isMember=false, shareState, onShareStateChan
   const [loveLandscapeOpen, setLoveLandscapeOpen] = useState(false);
   const [loveDetailOpen, setLoveDetailOpen] = useState(false);
   const isPeriodMode = mode === '经期';
-  const cycleData = [29,34,31,30,33,31,32,36,31,30,32,30,31,29,30,31,29,30,29,31,30,30,28,28];
-  const cycleLast12 = cycleData.slice(-12);
-  const cycleAvg = cycleLast12.reduce((s, x)=>s + x, 0) / cycleLast12.length;
   const weightData = [103.3,98.2,101.4,97.6,98.6,97.5,97.9,97.3,96.5,99.4,102.0,100.6,101.6,99.9,101.0,102.1,100.7,101.3,101.9,100.6,101.5,102.0,101.4,101.1];
   const weightAvg = weightData.reduce((s, x)=>s + x, 0) / weightData.length;
   const weightDelta = weightData[weightData.length - 1] - weightData[0];
@@ -10555,13 +10778,9 @@ function ReviewPage({mode='经期', isMember=false, shareState, onShareStateChan
       <ReviewCard
         title="月经周期"
         icon={<ReviewDropletIcon/>}
+        headAction={cycleUpdated ? <ReviewUpdateTag/> : null}
         chart={<CycleChart/>}
-        legend={(
-          <>
-            <span className="review-legend-item is-period"><i></i>经期天数</span>
-            <span className="review-legend-item is-cycle"><i></i>非经期天数</span>
-          </>
-        )}
+        legend={<span className="review-legend-item is-cycle-bar"><i></i>周期长度（天）</span>}
         metrics={(
           <>
             <ReviewMetric value="28" unit="天" label="最近周期"/>
@@ -10571,6 +10790,7 @@ function ReviewPage({mode='经期', isMember=false, shareState, onShareStateChan
         )}
         more="查看趋势分析"
         onOpen={()=>{
+          setCycleUpdated(false);
           setCycleDetailOpen(true);
         }}
       />
@@ -10599,6 +10819,13 @@ function ReviewPage({mode='经期', isMember=false, shareState, onShareStateChan
       />
       {!isPeriodMode ? <DietPhotoWallCard/> : null}
 
+      {isPeriodMode ? (
+        <LoveReviewCard
+          onOpen={()=>setLoveDetailOpen(true)}
+          onLandscapeOpen={()=>setLoveLandscapeOpen(true)}
+        />
+      ) : null}
+
       {isPeriodMode ? <SymptomReviewCard/> : null}
 
       <MoodReviewCard
@@ -10612,16 +10839,11 @@ function ReviewPage({mode='经期', isMember=false, shareState, onShareStateChan
           onLandscapeOpen={()=>setStoolLandscapeOpen(true)}
         />
       ) : null}
-      {isPeriodMode ? (
-        <LoveReviewCard
-          onOpen={()=>setLoveDetailOpen(true)}
-          onLandscapeOpen={()=>setLoveLandscapeOpen(true)}
-        />
-      ) : null}
 
       </div>
       <CycleDetailPage
         open={cycleDetailOpen}
+        isMember={isMember}
         onClose={()=>setCycleDetailOpen(false)}
       />
       {reviewSearchOpen && ReviewSearchOverlay ? (
