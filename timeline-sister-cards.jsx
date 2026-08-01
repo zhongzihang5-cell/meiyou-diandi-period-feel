@@ -642,8 +642,6 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, t
   const hasTags = tags.some(t => resolveTag(t).cat !== 'care');
   const hasAiNote = !!entry.aiNote;
   const hasAnalysis = !!analysisProps;
-  const guideOutside = !!analysisProps?.periodFeelGuideOutside;
-  const [analysisDone, setAnalysisDone] = React.useState(!hasAnalysis);
   const hasVoice = !!entry.voice;
   const isVtLive = !!entry.vtLive;
   const isPeriodSync = entry.kind === 'sync-card' && (entry.tags || []).some((tag) => (
@@ -655,9 +653,6 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, t
   const analysisAnimateText = hasAnalysis && !entry.instantAnalysis && (
     !!animateAnalysis || (analysisProps.playAnimation > 0)
   );
-  React.useEffect(()=>{
-    setAnalysisDone(!analysisAnimateText);
-  }, [analysisAnimateText, analysisProps?.playAnimation]);
   const entryKind = (isPeriodSync || entry.kind === 'symptom') ? 'quick' : (entry.voice ? 'mixed' : entry.photo ? 'image' : entry.body ? 'text' : 'quick');
   const editPayload = isPeriodSync ? {
     kind: 'quick',
@@ -731,17 +726,7 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, t
           {...analysisProps}
           periodStyle={isPeriodSync}
           animateText={analysisAnimateText}
-          onCycleComplete={()=>{
-            if(guideOutside) setAnalysisDone(true);
-            else analysisProps.onCycleComplete?.();
-          }}
-        />
-      )}
-      {hasAnalysis && guideOutside && analysisDone && (
-        <PeriodFeelGuideOutside
-          playAnimation={analysisProps.playAnimation}
-          animateText={analysisAnimateText}
-          onComplete={analysisProps.onCycleComplete}
+          onCycleComplete={analysisProps.onCycleComplete}
         />
       )}
     </div>
@@ -1047,18 +1032,6 @@ const PERIOD_FEEL_GUIDE_COPY = [
   { text:'记录一下吧。' },
 ];
 
-const PERIOD_FEEL_GUIDE_COPY_PLAN3 = [
-  { text:'经期时身体的感受很多变，一天内的流量变化和多天的身体感受，点滴都能帮你记下来。现在就用「' },
-  { text:'经期感受', bold:true },
-  { text:'」记录一下吧。' },
-];
-
-function getPeriodFeelGuideCopy(label = '经期感受'){
-  return PERIOD_FEEL_GUIDE_COPY.map(segment => (
-    segment.bold ? {...segment, text:`「${label}」`} : segment
-  ));
-}
-
 const PERIOD_END_PARA = [
   { text:'最近3次经期天数呈逐渐变长的趋势。本次 ' },
   { text:'8 天', bold:true },
@@ -1083,10 +1056,7 @@ function TlAiChartIcon({size = 10, color = '#FF4D88'}){
   );
 }
 
-function SisterAnalysisCollapsible({playAnimation, onCycleComplete, animateText, periodStyle = false, analysisKind = 'period-start', showPeriodFeelPrompt = true, periodFeelGuideCopy, periodFeelGuideVariant}){
-  const resolvedPeriodFeelGuideCopy = periodFeelGuideCopy || (periodFeelGuideVariant === 'plan3'
-    ? PERIOD_FEEL_GUIDE_COPY_PLAN3
-    : PERIOD_FEEL_GUIDE_COPY);
+function SisterAnalysisCollapsible({playAnimation, onCycleComplete, animateText, periodStyle = false, analysisKind = 'period-start', showPeriodFeelPrompt = true, periodFeelGuideCopy = PERIOD_FEEL_GUIDE_COPY}){
   const [open, setOpen] = React.useState(true);
   const [canCollapse, setCanCollapse] = React.useState(!animateText);
   const [hasSeenAnimation, setHasSeenAnimation] = React.useState(!animateText);
@@ -1151,7 +1121,7 @@ function SisterAnalysisCollapsible({playAnimation, onCycleComplete, animateText,
               animateText={contentAnimateText}
               analysisKind={analysisKind}
               showPeriodFeelPrompt={showPeriodFeelPrompt}
-              periodFeelGuideCopy={resolvedPeriodFeelGuideCopy}
+              periodFeelGuideCopy={periodFeelGuideCopy}
             />
           </div>
         )}
@@ -1363,117 +1333,21 @@ function SisterAnalysisContent({playAnimation, onCycleComplete, animateText, ana
   );
 }
 
-function PeriodFeelGuideOutside({playAnimation, animateText, onComplete, guideLabel = '经期感受'}){
-  const [done, setDone] = React.useState(!animateText);
-  const [arrow, setArrow] = React.useState(null);
-  const [dismissed, setDismissed] = React.useState(false);
-  const rootRef = React.useRef(null);
-  React.useEffect(()=>{
-    setDone(!animateText);
-    setDismissed(false);
-  }, [animateText, playAnimation]);
-  React.useLayoutEffect(()=>{
-    if(!done) {
-      setArrow(null);
-      return;
-    }
-    const measure = ()=>{
-      const word = rootRef.current?.querySelector('b, strong');
-      const button = Array.from(document.querySelectorAll('.dock-feeding-quick-item'))
-        .find(el=>el.textContent?.includes(guideLabel));
-      if(!word || !button) return;
-      const wordRect = word.getBoundingClientRect();
-      const buttonRect = button.getBoundingClientRect();
-      setArrow({
-        x1:wordRect.left + wordRect.width * .5,
-        y1:wordRect.bottom + 4,
-        x2:buttonRect.right - 7,
-        y2:buttonRect.top + 7,
-      });
-    };
-    const frame = requestAnimationFrame(measure);
-    const poller = setInterval(measure, 100);
-    const stopPoller = setTimeout(()=>clearInterval(poller), 3000);
-    const stream = document.querySelector('.suiji-stream');
-    const dismiss = (event)=>{
-      const item = event.target?.closest?.('.dock-feeding-quick-item');
-      if(item?.textContent?.includes(guideLabel)) setDismissed(true);
-    };
-    document.addEventListener('click', dismiss);
-    stream?.addEventListener('scroll', measure, {passive:true});
-    window.addEventListener('resize', measure);
-    return ()=>{
-      cancelAnimationFrame(frame);
-      clearInterval(poller);
-      clearTimeout(stopPoller);
-      stream?.removeEventListener('scroll', measure);
-      document.removeEventListener('click', dismiss);
-      window.removeEventListener('resize', measure);
-    };
-  }, [done, guideLabel]);
-  const guideCopy = getPeriodFeelGuideCopy(guideLabel);
-  const arrowPath = arrow
-    ? `M ${arrow.x1} ${arrow.y1} C ${arrow.x1} ${arrow.y1 + 28}, ${arrow.x2 + 34} ${arrow.y2 - 24}, ${arrow.x2} ${arrow.y2}`
-    : '';
-  return (
-    <div className="tl-period-feel-guide-outside" ref={rootRef}>
-      <p>
-        {animateText && !done ? (
-          <TypewriterText
-            segments={guideCopy}
-            active
-            followScroll
-            onComplete={()=>{setDone(true); onComplete?.();}}
-          />
-        ) : renderTypedSegments(guideCopy, segmentsFullText(guideCopy).length)}
-      </p>
-      {done && arrow && !dismissed && ReactDOM.createPortal(
-        <svg className="tl-period-feel-guide-arrow" aria-label="指向经期感受">
-          <defs>
-            <marker id="period-feel-arrow-head" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-              <path d="M0 0L8 4L0 8" className="tl-period-feel-guide-arrow-head"/>
-            </marker>
-          </defs>
-          <path d={arrowPath} markerEnd="url(#period-feel-arrow-head)"/>
-        </svg>,
-        document.body
-      )}
-    </div>
-  );
-}
-
 function SisterAnalysisCard({item, playAnimation, onCycleComplete, animateText}){
-  const guideOutside = item?.periodFeelGuideOutside === true;
-  const periodFeelGuideCopy = item?.periodFeelGuideVariant === 'plan3'
-    ? PERIOD_FEEL_GUIDE_COPY_PLAN3
-    : PERIOD_FEEL_GUIDE_COPY;
-  const [analysisDone, setAnalysisDone] = React.useState(!animateText);
-  React.useEffect(()=>setAnalysisDone(!animateText), [animateText, playAnimation]);
   return (
     <div className="sister-bubble">
       <SisterAnalysisCollapsible
         playAnimation={playAnimation}
-        onCycleComplete={()=>{
-          if(guideOutside) setAnalysisDone(true);
-          else onCycleComplete?.();
-        }}
+        onCycleComplete={onCycleComplete}
         animateText={!!animateText}
         showPeriodFeelPrompt={item?.periodFeelPrompt !== false}
-        periodFeelGuideCopy={periodFeelGuideCopy}
       />
-      {guideOutside && analysisDone && (
-        <PeriodFeelGuideOutside
-          playAnimation={playAnimation}
-          animateText={!!animateText}
-          onComplete={onCycleComplete}
-        />
-      )}
     </div>
   );
 }
 
 Object.assign(window, {
   TlRecCardHead, TlRecKindIcon, inferRecordKind, TypewriterText, TypewriterBody, TlVoiceBar, TlVoicePlayBtn, TlVoiceInline, RecordedTags, AiNoteSection, RecordPhoto, resolveTag, CardMoreMenu,
-  SegmentedRecordCard, VoiceRecordCard, DemoVoiceCard, SisterAnalysisCard, SisterAnalysisCollapsible, SisterAnalysisContent, PeriodFeelGuideOutside,
+  SegmentedRecordCard, VoiceRecordCard, DemoVoiceCard, SisterAnalysisCard, SisterAnalysisCollapsible, SisterAnalysisContent,
   scrollFeedContentIntoView,
 });

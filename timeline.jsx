@@ -85,7 +85,7 @@ function resolveTimelineLastItemId(blocks, sisterCycleDone, hideTodayGuide){
   return ids[ids.length - 1];
 }
 
-function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, onPeriodFeelGuideComplete, lastItemId, hideDayHeader, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
+function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, lastItemId, hideDayHeader, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
   const items = sortDayItemsByTime(filterDayItems(day.items || day.entries, sisterCycleDone, hideTodayGuide));
   const phaseCls = day.phaseKind || '';
   return (
@@ -113,7 +113,6 @@ function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDo
           isFeedLast={it.id === lastItemId || sisterItem?.id === lastItemId}
           sisterPlayAnimation={sisterPlayAnimation}
           onSisterCycleComplete={onSisterCycleComplete}
-          onPeriodFeelGuideComplete={onPeriodFeelGuideComplete}
           firstDropAnim={firstDropAnim}
           onFirstDropLand={onFirstDropLand}
           onFirstDropComplete={onFirstDropComplete}
@@ -139,7 +138,7 @@ function CycleStartMarker({block}){
   );
 }
 
-function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, onPeriodFeelGuideComplete, hideGapDivider, hideDayHeader, hideBabyFeeding, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
+function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, hideGapDivider, hideDayHeader, hideBabyFeeding, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
   const visibleBlocks = hideBabyFeeding
     ? (blocks || []).map(block=>{
         if(block.type !== 'day') return block;
@@ -167,7 +166,6 @@ function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, h
                 sisterCycleDone={sisterCycleDone}
                 hideTodayGuide={hideTodayGuide}
                 onSisterCycleComplete={onSisterCycleComplete}
-                onPeriodFeelGuideComplete={onPeriodFeelGuideComplete}
                 lastItemId={lastItemId}
                 hideDayHeader={hideDayHeader}
                 firstDropAnim={firstDropAnim}

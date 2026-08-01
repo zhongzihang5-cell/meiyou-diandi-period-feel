@@ -9,77 +9,17 @@ const DEFAULT_REVIEW_SHARE_STATE = {
   modules:{cycle:true, period:true, care:true, mood:false, symptom:false, weight:false, intimate:false},
 };
 
-function FlowQuestionIcon(){
-  return (
-    <svg viewBox="0 0 64 64" role="img" aria-label="经血量">
-      <defs>
-        <radialGradient id="bggFlow" cx="50%" cy="34%" r="72%"><stop offset="0" stopColor="#fff"/><stop offset="1" stopColor="#fff0f5"/></radialGradient>
-        <linearGradient id="shellFlow" gradientUnits="userSpaceOnUse" x1="19" y1="12" x2="46" y2="50"><stop offset="0" stopColor="#ff8fb4" stopOpacity=".52"/><stop offset="1" stopColor="#ff5f8f" stopOpacity=".34"/></linearGradient>
-        <linearGradient id="liqFlow" gradientUnits="userSpaceOnUse" x1="20" y1="36" x2="45" y2="52"><stop offset="0" stopColor="#ff5f8f"/><stop offset="1" stopColor="#ff3d7a"/></linearGradient>
-        <radialGradient id="hFlow" cx="50%" cy="50%" r="50%"><stop offset="0" stopColor="#fff" stopOpacity=".95"/><stop offset="1" stopColor="#fff" stopOpacity="0"/></radialGradient>
-        <filter id="sFlow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3.2"/></filter>
-        <clipPath id="clipFlow"><path d="M32 11.5c8.8 9.9 15 17.6 15 24.8A15 15 0 0 1 17 36.3c0-7.2 6.2-14.9 15-24.8z"/></clipPath>
-      </defs>
-      <circle cx="32" cy="32" r="32" fill="url(#bggFlow)"/>
-      <ellipse cx="32" cy="51" rx="15" ry="4.6" fill="#ff3d7a" opacity=".22" filter="url(#sFlow)"/>
-      <path d="M32 11.5c8.8 9.9 15 17.6 15 24.8A15 15 0 0 1 17 36.3c0-7.2 6.2-14.9 15-24.8z" fill="url(#shellFlow)"/>
-      <g clipPath="url(#clipFlow)"><path d="M14 38.6C18 35.4 20.2 35.6 23.6 37.2s5.2 2.2 8.4 1.1 5.4-2.4 8.8-1.4 5.6 2.4 9.2 1.3V56H14z" fill="url(#liqFlow)"/><path d="M14 38.6C18 35.4 20.2 35.6 23.6 37.2s5.2 2.2 8.4 1.1 5.4-2.4 8.8-1.4 5.6 2.4 9.2 1.3v2.6c-3.6 1.1-5.8-.3-9.2-1.3s-5.6.3-8.8 1.4-5 .5-8.4-1.1S18 38 14 41.2z" fill="#fff" opacity=".4"/></g>
-      <path d="M32 11.5c8.8 9.9 15 17.6 15 24.8a15 15 0 0 1-3.4 9.5c1.3-2.4 2-5 2-7.8 0-7-5.9-14.5-14.4-24.2z" fill="#fff" opacity=".2"/>
-      <ellipse cx="25.4" cy="25.2" rx="3.4" ry="5.2" fill="url(#hFlow)" transform="rotate(-28 25.4 25.2)"/>
-    </svg>
-  );
-}
-
-function Scheme2QuestionModule(){
-  const UnifiedQuickIcon = window.UnifiedQuickIcon;
-  return (
-    <div className="period-feel-question-module" aria-label="经期记录问题">
-      <div className="period-feel-question-row">
-        <FlowQuestionIcon/>
-        <p>本次<em>经血量</em>有没有变化</p>
-      </div>
-      <div className="period-feel-question-row">
-        <span className="period-feel-question-icon is-symptom" aria-hidden="true">
-          {UnifiedQuickIcon ? <UnifiedQuickIcon type="symptom"/> : null}
-        </span>
-        <p>是否有出现<em>经前症状</em></p>
-      </div>
-      <div className="period-feel-question-row">
-        <span className="period-feel-question-icon is-mood" aria-hidden="true">
-          {UnifiedQuickIcon ? <UnifiedQuickIcon type="mood"/> : null}
-        </span>
-        <p>经期时<em>心情</em>怎样</p>
-      </div>
-    </div>
-  );
-}
-
-function PeriodFeelOverlay({open, onClose, onComplete, label='经期感受', plan='plan1', scheme1VoiceMotion=false, scheme1Content=false, scheme2Content=false, scheme3Content=false, scheme4Style=false, scheme4Content=false}){
+function PeriodFeelOverlay({open, onClose, onComplete, label='经期感受'}){
   const [state, setState] = React.useState('ready');
   const [text, setText] = React.useState('');
   const [scheme1ExampleIndex, setScheme1ExampleIndex] = React.useState(0);
   const timers = React.useRef([]);
-  const isPlan2 = plan === 'plan2';
-  const isScheme1 = scheme1Content;
-  const isScheme2 = scheme2Content;
-  const scheme1Examples = scheme4Content
-    ? [
-        <>一天之中，<strong>经血量</strong>有变化么</>,
-        <>出现了哪些<strong>经期症状</strong></>,
-        <>今天的<strong>心情</strong>怎样</>,
-      ]
-    : scheme3Content
-    ? [
-        <>今天<strong>流量</strong>____</>,
-        <>这次<strong>痛经</strong>比上次____</>,
-        <>经前1天出现<strong>症状</strong>____</>,
-      ]
-    : [
+  const examples = [
         <><span>“今天</span><strong>流量</strong><span>特别大”</span></>,
         <><span>“这次</span><strong>痛经</strong><span>比上次严重”</span></>,
         <><span>“经前1天</span><strong>胸部胀痛</strong><span>”</span></>,
       ];
-  const demoText = isPlan2 ? '来月经的前一天特别烦躁，特别想发脾气，感觉胸部一直胀胀的，还有褐色分泌物' : '今天早上量不多，下午量变大了，晚上血量特别大，月经开始的前一天特别烦躁，感觉胸部一直胀胀的';
+  const demoText = '今天早上量不多，下午量变大了，晚上血量特别大，月经开始的前一天特别烦躁，感觉胸部一直胀胀的';
   const clearTimers = ()=>{ timers.current.forEach(clearTimeout); timers.current=[]; };
   React.useEffect(()=>{
     if(!open){ clearTimers(); setState('ready'); setText(''); return; }
@@ -87,39 +27,25 @@ function PeriodFeelOverlay({open, onClose, onComplete, label='经期感受', pla
     return clearTimers;
   }, [open]);
   React.useEffect(()=>{
-    if(!open || !isScheme1) return;
+    if(!open) return;
     setScheme1ExampleIndex(0);
     const timer = setInterval(()=>setScheme1ExampleIndex(index=>(index + 1) % 3), 1800);
     return ()=>clearInterval(timer);
-  }, [open, isScheme1]);
+  }, [open]);
   if(!open) return null;
-  const startRecording = ()=>{
-    if(state !== 'ready') return;
-    setState('recording');
-    let i=0;
-    const timer=setInterval(()=>{
-      i += 1; setText(demoText.slice(0,i));
-      if(i >= demoText.length) clearInterval(timer);
-    }, 65);
-    timers.current.push(timer);
-  };
-  const finishRecording = ()=>{
-    if(state !== 'recording') return;
-    clearTimers(); setState('result'); setText(demoText);
-  };
   const DockPublisher = window.DockPublisher;
   return ReactDOM.createPortal(
-    <div className={'period-feel-overlay'+(scheme1Content ? ' is-scheme1' : '')+(scheme1VoiceMotion ? ' is-compact' : '')+(scheme4Style ? ' is-scheme4' : '')} role="dialog" aria-modal="true" aria-label="经期感受">
+    <div className="period-feel-overlay is-scheme1 is-compact" role="dialog" aria-modal="true" aria-label="经期感受">
       <div className="period-feel-sheet">
         <div className="period-feel-nav"><button type="button" onClick={onClose} aria-label="关闭">×</button><span>{label}</span></div>
         {state === 'result' ? (
           <div className="period-feel-result">
-            <h2>{isPlan2 ? '共识别4条记录' : '共识别5条记录'}</h2>
-            <div className="period-feel-result-card"><p>“{demoText}”</p><b>月经前1天</b><div className="period-result-pre-tags">{isPlan2 ? <><span className="period-result-pre-item"><span className="v3-tag" data-cat="心情">心情</span><span className="period-result-value">烦躁、易怒</span></span><span className="period-result-pre-item"><span className="v3-tag" data-cat="症状">症状</span><span className="period-result-value">乳房胀痛、褐色分泌物</span></span></> : <><span className="period-result-pre-item"><span className="v3-tag" data-cat="心情">心情</span><span className="period-result-value">烦躁</span></span><span className="period-result-pre-item"><span className="v3-tag" data-cat="症状">症状</span><span className="period-result-value">乳房胀痛</span></span></>}</div>{!isPlan2 && <><b>月经第1天</b><div><span className="period-result-pre-item"><span className="v3-tag" data-cat="经期">流量</span><span className="period-result-value">早上少量、下午中量、晚上特别大量</span></span></div></>}</div>
+            <h2>共识别5条记录</h2>
+            <div className="period-feel-result-card"><p>“{demoText}”</p><b>月经前1天</b><div className="period-result-pre-tags"><span className="period-result-pre-item"><span className="v3-tag" data-cat="心情">心情</span><span className="period-result-value">烦躁</span></span><span className="period-result-pre-item"><span className="v3-tag" data-cat="症状">症状</span><span className="period-result-value">乳房胀痛</span></span></div><b>月经第1天</b><div><span className="period-result-pre-item"><span className="v3-tag" data-cat="经期">流量</span><span className="period-result-value">早上少量、下午中量、晚上特别大量</span></span></div></div>
             <div className="period-feel-result-actions"><button type="button" onClick={()=>onComplete?.(demoText)}>保存</button></div>
           </div>
         ) : (
-          <><div className={'period-feel-top'+(isScheme1 ? ' is-scheme1-content' : '')+(isScheme2 ? ' is-scheme2-content' : '')}>{state === 'recording' ? <p className="period-feel-live-text">{text}<span className="period-feel-caret"/></p> : <>{!scheme4Content && <div className="period-feel-intro"><span className="period-feel-demo-mic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="8" y="3" width="8" height="12" rx="4"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8.5 21h7"/></svg></span><div><b>{isScheme1 ? '试着说：' : (isPlan2 ? '用语音，记录经期身体的感受' : (plan === 'plan4' ? '用语音，记录经期的流量痛经变化' : (plan === 'plan3' ? '用语音，记录更详细的经期身体感受' : '用语音，记录流量变化')))}</b></div></div>}{isScheme1 ? <div className="period-feel-example-carousel" aria-live="polite"><p key={scheme1ExampleIndex}>{scheme1Examples[scheme1ExampleIndex]}</p></div> : <div className="period-feel-demo"><b className="period-feel-demo-title">你可以这样说：</b><p className="period-feel-demo-quote">{isPlan2 ? <>“来月经的前一天特别<strong>烦躁</strong>，特别想<strong>发脾气</strong>，感觉胸部一直<strong>胀胀的</strong>，还有<strong>褐色分泌物</strong>”</> : <>“今天早上<strong>量不多</strong>，下午<strong>量变大</strong>了，晚上<strong>血量特别大</strong>，月经开始的前一天特别<strong>烦躁</strong>，感觉胸部一直<strong>胀胀的</strong>”</>}</p></div>}</>}</div>{isScheme2 ? <Scheme2QuestionModule /> : null}<div className={'period-feel-real-dock'+(scheme1VoiceMotion ? ' is-scheme1-motion' : '')+(isScheme2 ? ' is-scheme2' : '')+(scheme4Content ? ' is-scheme4-dock' : '')}>{(isScheme2 || scheme4Content) ? <div className="period-feel-speak-guide">说一句话，全都帮你记录下来</div> : null}{DockPublisher ? <DockPublisher draft="" onDraft={()=>{}} onSend={()=>{}} onQuickMark={()=>{}} onMoodConfirm={()=>{}} onSymptomConfirm={()=>{}} onWeightConfirm={()=>{}} onFoodConfirm={()=>{}} onDietCapture={()=>{}} onCameraRecord={()=>{}} onVoiceDone={()=>{clearTimers(); onComplete?.(demoText);}} onVoiceStart={()=>{clearTimers(); setState('recording'); let i=0; const timer=setInterval(()=>{i+=1; setText(demoText.slice(0,i)); if(i>=demoText.length) clearInterval(timer);},65); timers.current.push(timer);}} onPhoto={()=>{}} onDockExpandedChange={()=>{}} activeTab="note" defaultInputMode="voice" hideQuickFan hideQuickFab/> : null}</div></>
+          <><div className="period-feel-top is-scheme1-content">{state === 'recording' ? <p className="period-feel-live-text">{text}<span className="period-feel-caret"/></p> : <><div className="period-feel-intro"><span className="period-feel-demo-mic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="8" y="3" width="8" height="12" rx="4"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8.5 21h7"/></svg></span><div><b>试着说：</b></div></div><div className="period-feel-example-carousel" aria-live="polite"><p key={scheme1ExampleIndex}>{examples[scheme1ExampleIndex]}</p></div></>}</div><div className="period-feel-real-dock is-scheme1-motion">{DockPublisher ? <DockPublisher draft="" onDraft={()=>{}} onSend={()=>{}} onQuickMark={()=>{}} onMoodConfirm={()=>{}} onSymptomConfirm={()=>{}} onWeightConfirm={()=>{}} onFoodConfirm={()=>{}} onDietCapture={()=>{}} onCameraRecord={()=>{}} onVoiceDone={()=>{clearTimers(); onComplete?.(demoText);}} onVoiceStart={()=>{clearTimers(); setState('recording'); let i=0; const timer=setInterval(()=>{i+=1; setText(demoText.slice(0,i)); if(i>=demoText.length) clearInterval(timer);},65); timers.current.push(timer);}} onPhoto={()=>{}} onDockExpandedChange={()=>{}} activeTab="note" defaultInputMode="voice" hideQuickFan hideQuickFab/> : null}</div></>
         )}
       </div>
     </div>, document.body
@@ -455,39 +381,11 @@ function App(){
   const [periodFeelGuideVisible, setPeriodFeelGuideVisible] = useState(false);
   const [periodFeelRecorded, setPeriodFeelRecorded] = useState(false);
   const [periodFeelModalOpen, setPeriodFeelModalOpen] = useState(false);
-  const [periodPlan, setPeriodPlan] = useState('plan4');
-  const [periodPlanUi, setPeriodPlanUi] = useState('plan1');
   const [dockExpanded, setDockExpanded] = useState(false);
   const [showSearchPage, setShowSearchPage] = useState(false);
   const [babyFeedingPanelMode, setBabyFeedingPanelMode] = useState(null);
   const [searchCriteria, setSearchCriteria] = useState(null);
 
-  const behaviorPlan = periodPlan === 'plan4' || periodPlan === 'plan1' ? 'plan3' : periodPlan;
-
-  const handlePeriodPlanChange = (nextPlan)=>{
-    // 方案4 与 方案1 共用同一套实现（plan4），仅样式不同
-    const implementationPlan = nextPlan === 'plan1' || nextPlan === 'plan4'
-      ? 'plan4'
-      : (nextPlan === 'plan3' ? 'plan3' : 'plan1');
-    if(nextPlan === periodPlanUi) return;
-    const reset = window.getSceneInitialState(t.demoScene);
-    setPeriodPlanUi(nextPlan);
-    setPeriodPlan(implementationPlan);
-    setTimeline(reset.timeline);
-    setDraft(reset.draft);
-    setShowAnalysisNotice(false);
-    setSisterPlayAnimation(0);
-    setSisterCycleDone(reset.sisterCycleDone);
-    setHideTodayGuide(reset.hideTodayGuide);
-    setPeriodFeelVisible(false);
-    setPeriodFeelReady(false);
-    setPeriodFeelGuideVisible(false);
-    setPeriodFeelRecorded(false);
-    setPeriodFeelModalOpen(false);
-    setPeriodEndRecordReady(false);
-    setPeriodEndRecordCompleted(false);
-    setActiveTab('note');
-  };
   const scheme3FirstVisitRef = useRef(null);
   const searchCloseScrollRef = useRef(null);
   const streamRef = useRef(null);
@@ -678,8 +576,7 @@ function App(){
     const sisterEntry = {
       kind:'sister-card', id:'e-sister-'+Date.now(), time: window.formatNowTime(), railDot:'ai',
       analysisKind: isPeriodEndAnalysis ? 'period-end' : 'period-start',
-      periodFeelPrompt: behaviorPlan !== 'plan2' && behaviorPlan !== 'plan3' && behaviorPlan !== 'plan4',
-      periodFeelGuideVariant: behaviorPlan === 'plan1' ? 'plan3' : undefined,
+      periodFeelPrompt: false,
       periodFeelGuideLabel: '经期感受',
     };
     const todayId = timeline.find(b=>b.type==='day' && b.isToday)?.id;
@@ -691,53 +588,30 @@ function App(){
 
     setSisterCycleDone(false);
     setSisterPlayAnimation(n=>n + 1);
-    setPeriodFeelVisible(behaviorPlan === 'plan3');
+    setPeriodFeelVisible(true);
     setPeriodFeelReady(false);
     setActiveTab('note');
     scrollToSisterAnalysis();
   };
 
   const handleSisterCycleComplete = React.useCallback(()=>{
-    if(behaviorPlan === 'plan4'){
-      setTimeline(blocks=>{
-        const exists = blocks.some(block=>(block.items || block.entries || []).some(item=>item.kind === 'period-feel-guide'));
-        if(exists) return blocks;
-        const dayId = blocks.find(block=>block.type === 'day' && (block.items || block.entries || []).some(item=>item.analysisKind === 'period-start'))?.id
-          || blocks.find(block=>block.type === 'day' && block.isToday)?.id;
-        return window.appendTimelineEntry(blocks, {
-          id:'e-period-feel-guide-'+Date.now(),
-          kind:'period-feel-guide',
-          isNew:true,
-          railDot:'ai',
-          periodFeelGuideLabel: '经期感受',
-        }, {dayId});
-      });
-    }
     setSisterCycleDone(true);
     setPeriodFeelReady(true);
     requestAnimationFrame(()=>{
       setTimeout(()=>scrollTimelineToLastItem('smooth'), 120);
     });
-  }, [behaviorPlan]);
-
-  const handlePeriodFeelGuideComplete = React.useCallback(()=>{
-    if(behaviorPlan !== 'plan4') return;
-    setPeriodFeelVisible(true);
-    setPeriodFeelReady(true);
-    requestAnimationFrame(()=>setTimeout(()=>scrollTimelineToLastItem('auto'), 100));
-  }, [behaviorPlan]);
+  }, []);
 
   React.useEffect(()=>{
     if(activeTab !== 'note' || recordLifeMode !== '经期') return;
     const hasPeriodFeedback = timeline.some(block=>(block.items || block.entries || []).some(item=>item.analysisKind === 'period-start' || item.kind === 'sync-card' && item.periodSummaryLabel === '月经来了'));
-    if(!hasPeriodFeedback || !sisterCycleDone || periodFeelRecorded || behaviorPlan === 'plan4') return;
-    const revealDelay = behaviorPlan === 'plan3' ? 500 : 1000;
+    if(!hasPeriodFeedback || !sisterCycleDone || periodFeelRecorded) return;
     const timer = setTimeout(()=>{
       setPeriodFeelVisible(true);
       setPeriodFeelReady(true);
-      if(behaviorPlan === 'plan2' || behaviorPlan === 'plan3') setPeriodFeelGuideVisible(true);
+      setPeriodFeelGuideVisible(true);
       requestAnimationFrame(()=>setTimeout(()=>scrollTimelineToLastItem('auto'), 100));
-    }, revealDelay);
+    }, 500);
     return ()=>clearTimeout(timer);
   }, [activeTab, recordLifeMode, timeline, sisterCycleDone, periodFeelRecorded]);
 
@@ -2410,10 +2284,7 @@ function App(){
   const periodDockQuickItems = showPeriodQuickStrip
     ? [
         ...(periodFeelVisible ? [{id:'period-feel', label:'经期感受', action:'period-feel', icon:'💧', pulse:periodFeelReady, drop:false}] : []),
-        ...PERIOD_DOCK_QUICK_ITEMS.map(item=>({
-          ...item,
-          plan3Shift: false,
-        })),
+        ...PERIOD_DOCK_QUICK_ITEMS,
       ].map(item=>({
         ...item,
         iconNode:item.id === 'stool' && item.iconSrc
@@ -2428,7 +2299,7 @@ function App(){
   return (
     <>
       <div className={'phone' + (homeDetailOpen ? ' is-home-detail-open' : '') + (showDockQuickStrip ? ' is-dock-quick-entry' : '')}>
-        <StatusBar isMember={isMember} onMemberChange={setIsMember} showMemberSwitch={showReview} plan={periodPlanUi} onPlanChange={handlePeriodPlanChange} showPlanSwitch={showRecordShell && recordLifeMode === '经期'}/>
+        <StatusBar isMember={isMember} onMemberChange={setIsMember} showMemberSwitch={showReview}/>
 
       {showHome && HomePage && (
         <HomePage
@@ -2657,7 +2528,6 @@ function App(){
             hideTodayGuide={!showTodayGuide}
             hideBabyFeeding={recordLifeMode === '经期'}
             onSisterCycleComplete={handleSisterCycleComplete}
-            onPeriodFeelGuideComplete={handlePeriodFeelGuideComplete}
             firstDropAnim={recordFeedback ? firstDropAnim : null}
             onFirstDropLand={recordFeedback ? handleFirstDropLand : undefined}
             onFirstDropComplete={recordFeedback ? handleFirstDropComplete : undefined}
@@ -2690,18 +2560,11 @@ function App(){
           onPeriodFeelSelect={()=>{
             setPeriodFeelGuideVisible(false);
             setPeriodFeelReady(false);
-            if(behaviorPlan === 'plan4'){
-              setTimeline(blocks=>blocks.map(block=>({
-                ...block,
-                items:block.items ? block.items.filter(item=>item.kind !== 'period-feel-guide') : block.items,
-                entries:block.entries ? block.entries.filter(item=>item.kind !== 'period-feel-guide') : block.entries,
-              })));
-            }
             setPeriodFeelModalOpen(true);
           }}
           periodFeelLabel="经期感受"
-          periodFeelGuide={(behaviorPlan === 'plan2' || behaviorPlan === 'plan3') && periodFeelGuideVisible}
-          periodFeelGuideText={behaviorPlan === 'plan3' ? '血量变化、经期症状，都能帮你快速记下来，立刻试试吧' : undefined}
+          periodFeelGuide={periodFeelGuideVisible}
+          periodFeelGuideText="血量变化、经期症状，都能帮你快速记下来，立刻试试吧"
           demoPhase={demoPhase}
           isDemoRunning={isDemoRunning}
         />
@@ -2749,12 +2612,6 @@ function App(){
       <PeriodFeelOverlay
         open={periodFeelModalOpen && showRecordShell}
         label="记录经期感受"
-        plan={behaviorPlan}
-        scheme1VoiceMotion={periodPlan === 'plan4' || periodPlan === 'plan3' || periodPlan === 'plan1'}
-        scheme1Content={periodPlan === 'plan4' || periodPlan === 'plan1'}
-        scheme2Content={periodPlan === 'plan3'}
-        scheme3Content={periodPlan === 'plan1'}
-        scheme4Content={periodPlanUi === 'plan4'}
         onClose={()=>setPeriodFeelModalOpen(false)}
           onComplete={(text)=>{
           setPeriodFeelRecorded(true);
@@ -2763,7 +2620,7 @@ function App(){
           const entry = buildTimelineEntry(text, [], {
             voice:{duration:'10″'},
             tagLayout:'v3',
-            tags:behaviorPlan === 'plan2' ? [{cat:'心情'},{cat:'症状'}] : [{cat:'流量'},{cat:'心情'},{cat:'症状'}],
+            tags:[{cat:'流量'},{cat:'心情'},{cat:'症状'}],
           });
           setTimeline(blocks=>{
             const dayId = blocks.find(b=>b.type==='day' && b.isToday)?.id;
