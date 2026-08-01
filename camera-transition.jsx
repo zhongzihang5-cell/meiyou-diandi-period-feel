@@ -100,10 +100,20 @@ const BEVERAGE_OCR_DEMO_PHOTOS = [
   },
 ];
 
+const BEVERAGE_OCR_CAPTURE_SEQUENCE = [
+  BEVERAGE_OCR_DEMO_PHOTOS[0],
+  {
+    ...BEVERAGE_OCR_DEMO_PHOTOS[0],
+    id: 'beverage-coffee-no-label-fallback',
+    recognitionVariant: 'coffee-no-label-fallback',
+  },
+  BEVERAGE_OCR_DEMO_PHOTOS[1],
+];
+
 let beverageOcrCaptureIndex = 0;
 
 function getNextBeverageOcrDemoPhoto() {
-  const photo = BEVERAGE_OCR_DEMO_PHOTOS[beverageOcrCaptureIndex % BEVERAGE_OCR_DEMO_PHOTOS.length];
+  const photo = BEVERAGE_OCR_CAPTURE_SEQUENCE[beverageOcrCaptureIndex % BEVERAGE_OCR_CAPTURE_SEQUENCE.length];
   beverageOcrCaptureIndex += 1;
   return photo;
 }
@@ -158,6 +168,15 @@ function inferCameraRecognitionMode(photo) {
 function buildCameraRecognitionResult(payload) {
   const mode = inferCameraRecognitionMode(payload?.photo || payload);
   const base = { ...payload, mode };
+  const sourcePhoto = payload?.photo || payload;
+  if (sourcePhoto?.recognitionVariant === 'coffee-no-label-fallback') {
+    return {
+      ...base,
+      mode: 'photo',
+      summary: '',
+      summaryItems: [],
+    };
+  }
   if (mode === 'photo') {
     return {
       ...base,
@@ -186,7 +205,6 @@ function buildCameraRecognitionResult(payload) {
     };
   }
   if (mode === 'beverage') {
-    const sourcePhoto = payload?.photo || payload;
     const isStarbucks = sourcePhoto?.recognitionVariant === 'starbucks'
       || sourcePhoto?.thumb === 'image/星巴克红茶拿铁.webp';
     if (isStarbucks) {
@@ -924,7 +942,7 @@ function useCameraPhotoAnalyze({ onSuccess, onAnalyzeStart }) {
     const analyzeMs = recognitionMode === 'diet'
       ? resolveAnalyzeMs(activeScenario, loadingMs)
       : recognitionMode === 'beverage'
-        ? 10000
+        ? 6000
         : 2600;
     const isBeverageNoLabel = recognitionMode === 'beverage'
       && meta?.photo?.recognitionVariant === 'coffee-no-label';
@@ -1080,11 +1098,11 @@ function CameraView({
               <span className="camera-frame-corner br"/>
             </div>
             <div className="camera-hint camera-auto-detect-hint">
-              <div className="camera-hint-roller" aria-label="随手一拍，记录生活；拍饮食记热量；拍咖啡机记咖啡因；拍奶茶、饮料识别热量">
+              <div className="camera-hint-roller" aria-label="随手一拍，记录生活；拍饮食记热量；拍咖啡记咖啡因；拍奶茶、饮料识别热量">
                 <div className="camera-hint-track">
                   <span>随手一拍，记录生活</span>
                   <span>拍饮食记热量</span>
-                  <span>拍咖啡机记咖啡因</span>
+                  <span>拍咖啡记咖啡因</span>
                   <span>拍奶茶、饮料识别热量</span>
                   <span aria-hidden="true">随手一拍，记录生活</span>
                 </div>

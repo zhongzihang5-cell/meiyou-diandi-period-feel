@@ -580,7 +580,6 @@ function DailyGoalSettingPage({kind, value, onCancel, onSave}){
 }
 
 function ChartDailyGoal({data}){
-  const I = window.Icon;
   const consumed = Math.max(0, Number(data?.consumed) || 0);
   const isWater = data?.kind === 'water';
   const kind = isWater ? 'water' : 'caffeine';
@@ -647,9 +646,7 @@ function ChartDailyGoal({data}){
           <div className="v3-daily-goal-target-label">
             <span>今日目标</span>
             {isWater ? (
-              <button type="button" onClick={()=>setSettingOpen(true)} aria-label="编辑饮水目标">
-                <I name="pencil" size={14} stroke={1.9}/>
-              </button>
+              <button type="button" onClick={()=>setSettingOpen(true)} aria-label="编辑饮水目标">编辑</button>
             ) : null}
           </div>
           <strong>{goal}{unit}</strong>
@@ -1154,11 +1151,9 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
               { label:'产品', value:entry.product },
               { label:'管理状态', value:entry.managementStatus },
             ];
-      const beverageContent = `${entry.brand || ''}${entry.beverageName || ''}`.trim()
-        || entry.beverageCategory
-        || '饮品';
+      const beverageName = `${entry.brand || ''}${entry.beverageName || ''}`.trim();
       const headline = entry.recordType === 'beverage'
-        ? beverageContent
+        ? beverageName
         : entry.recordType === 'skin'
           ? '本次皮肤状态'
           : `${entry.brand || ''} ${entry.product || ''}`;
@@ -1167,9 +1162,12 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
           <div className="v3-camera-insight-heading">
             <img src={recordIconSrc(iconKey)} alt="" aria-hidden="true"/>
             <span>{entry.recordType === 'beverage'
-              ? `${entry.recordLabel || '喝水'}：${beverageContent}`
+              ? `${entry.recordLabel || '喝水'}：${entry.beverageCategory || '饮品'}`
               : `${entry.recordLabel || '记录'}：`}</span>
           </div>
+          {entry.recordType === 'beverage' && headline ? (
+            <p className="v3-camera-insight-title is-beverage-name">{headline}</p>
+          ) : null}
           {entry.photoUrl ? (
             <div className="v3-camera-insight-photo">
               <img src={entry.photoUrl} alt={entry.recordLabel || '拍照记录'}/>
