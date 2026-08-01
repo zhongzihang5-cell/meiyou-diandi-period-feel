@@ -726,6 +726,7 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, t
           {...analysisProps}
           periodStyle={isPeriodSync}
           animateText={analysisAnimateText}
+          onCycleComplete={analysisProps.onCycleComplete}
         />
       )}
     </div>
@@ -1022,6 +1023,15 @@ const SISTER_CLOSING = [
   { text:'内。很棒哦，继续保持现在的健康生活节奏就可以。' },
 ];
 
+// 经期感受引导文案
+const PERIOD_FEEL_GUIDE_COPY = [
+  { text:'这次经期开始前，身体有没有不适？\n' },
+  { text:'一天内的流量、痛经，有变化吗？\n' },
+  { text:'现在就点击' },
+  { text:'「经期感受」', bold:true },
+  { text:'记录一下吧。' },
+];
+
 const PERIOD_END_PARA = [
   { text:'最近3次经期天数呈逐渐变长的趋势。本次 ' },
   { text:'8 天', bold:true },
@@ -1046,7 +1056,7 @@ function TlAiChartIcon({size = 10, color = '#FF4D88'}){
   );
 }
 
-function SisterAnalysisCollapsible({playAnimation, onCycleComplete, animateText, periodStyle = false, analysisKind = 'period-start'}){
+function SisterAnalysisCollapsible({playAnimation, onCycleComplete, animateText, periodStyle = false, analysisKind = 'period-start', showPeriodFeelPrompt = true, periodFeelGuideCopy = PERIOD_FEEL_GUIDE_COPY}){
   const [open, setOpen] = React.useState(true);
   const [canCollapse, setCanCollapse] = React.useState(!animateText);
   const [hasSeenAnimation, setHasSeenAnimation] = React.useState(!animateText);
@@ -1110,6 +1120,8 @@ function SisterAnalysisCollapsible({playAnimation, onCycleComplete, animateText,
               onCycleComplete={handleComplete}
               animateText={contentAnimateText}
               analysisKind={analysisKind}
+              showPeriodFeelPrompt={showPeriodFeelPrompt}
+              periodFeelGuideCopy={periodFeelGuideCopy}
             />
           </div>
         )}
@@ -1118,7 +1130,7 @@ function SisterAnalysisCollapsible({playAnimation, onCycleComplete, animateText,
   );
 }
 
-function SisterAnalysisContent({playAnimation, onCycleComplete, animateText, analysisKind = 'period-start'}){
+function SisterAnalysisContent({playAnimation, onCycleComplete, animateText, analysisKind = 'period-start', showPeriodFeelPrompt = true, periodFeelGuideCopy = PERIOD_FEEL_GUIDE_COPY}){
   const [animated, setAnimated] = React.useState(false);
   const [leadDone, setLeadDone] = React.useState(!animateText);
   const [chartDone, setChartDone] = React.useState(!animateText);
@@ -1128,6 +1140,7 @@ function SisterAnalysisContent({playAnimation, onCycleComplete, animateText, ana
   const [showSignal, setShowSignal] = React.useState(!animateText);
   const [showClosing, setShowClosing] = React.useState(!animateText);
   const [closingDone, setClosingDone] = React.useState(!animateText);
+  const [promptDone, setPromptDone] = React.useState(!animateText || !showPeriodFeelPrompt);
   const prevPlayRef = React.useRef(playAnimation);
   const onCycleCompleteRef = React.useRef(onCycleComplete);
   const bodyRef = React.useRef(null);
@@ -1152,6 +1165,7 @@ function SisterAnalysisContent({playAnimation, onCycleComplete, animateText, ana
       setClosingDone(true);
       setShowSignal(true);
       setShowClosing(true);
+      setPromptDone(true);
       return;
     }
     if(playAnimation > prevPlayRef.current){
@@ -1163,6 +1177,7 @@ function SisterAnalysisContent({playAnimation, onCycleComplete, animateText, ana
       setClosingDone(false);
       setShowSignal(false);
       setShowClosing(false);
+      setPromptDone(false);
       setAnimated(false);
     }
     prevPlayRef.current = playAnimation;
@@ -1213,9 +1228,9 @@ function SisterAnalysisContent({playAnimation, onCycleComplete, animateText, ana
       onCycleCompleteRef.current?.();
       return;
     }
-    if(!animateText || !showClosing || !closingDone) return;
+    if(!animateText || !showClosing || !closingDone || (showPeriodFeelPrompt && !promptDone)) return;
     onCycleCompleteRef.current?.();
-  }, [animateText, isPeriodEnd, para1Done, showClosing, closingDone]);
+  }, [animateText, isPeriodEnd, para1Done, showClosing, closingDone, promptDone, showPeriodFeelPrompt]);
 
   const showChart = !animateText || (leadDone && animated);
   const showPara1 = !animateText || (leadDone && chartDone);
@@ -1283,6 +1298,23 @@ function SisterAnalysisContent({playAnimation, onCycleComplete, animateText, ana
           )}
         </p>
       )}
+      {!isPeriodEnd && showPeriodFeelPrompt && showClosing && closingDone && (
+        <>
+        <div className="tl-t5-chart-divider" role="separator"/>
+        <p className="tl-t5-analysis-prompt">
+          {animateText && !promptDone ? (
+            <TypewriterText
+              segments={periodFeelGuideCopy}
+              active
+              followScroll
+              onComplete={()=>setPromptDone(true)}
+            />
+          ) : (
+            renderTypedSegments(periodFeelGuideCopy, segmentsFullText(periodFeelGuideCopy).length)
+          )}
+        </p>
+        </>
+      )}
       {isPeriodEnd && showClosing && (!animateText || forecastDone) && (
         <p className="tl-t5-analysis-text">
           {animateText && !closingDone ? (
@@ -1301,13 +1333,14 @@ function SisterAnalysisContent({playAnimation, onCycleComplete, animateText, ana
   );
 }
 
-function SisterAnalysisCard({playAnimation, onCycleComplete, animateText}){
+function SisterAnalysisCard({item, playAnimation, onCycleComplete, animateText}){
   return (
     <div className="sister-bubble">
       <SisterAnalysisCollapsible
         playAnimation={playAnimation}
         onCycleComplete={onCycleComplete}
         animateText={!!animateText}
+        showPeriodFeelPrompt={item?.periodFeelPrompt !== false}
       />
     </div>
   );

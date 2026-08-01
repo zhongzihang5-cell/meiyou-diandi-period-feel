@@ -1025,11 +1025,12 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
       <VoiceRecordCard
         entry={item}
         isNew={isNew}
-        animateAnalysis={isFeedLast}
+        animateAnalysis={isFeedLast && isNew}
         analysisProps={sisterItem ? {
           playAnimation: sisterPlayAnimation,
           onCycleComplete: onSisterCycleComplete,
           analysisKind: sisterItem.analysisKind || item.analysisKind,
+          showPeriodFeelPrompt: sisterItem.periodFeelPrompt !== false,
         } : null}
       />
     );
@@ -1039,6 +1040,7 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
         item={item}
         playAnimation={sisterPlayAnimation}
         onCycleComplete={onSisterCycleComplete}
+        animateText={!!isNew}
       />
     );
   } else if(item.module) {

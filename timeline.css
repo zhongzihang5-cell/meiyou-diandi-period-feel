@@ -2014,11 +2014,21 @@
   letter-spacing:0.01em;
 }
 .tl-t5-insight .tl-t5-analysis-lead,
-.tl-t5-insight .tl-t5-analysis-text{
+.tl-t5-insight .tl-t5-analysis-text,
+.tl-t5-insight .tl-t5-analysis-prompt{
   margin:0 0 10px;
   font-size:13px;
   line-height:1.55;
   color:rgba(0,0,0,0.55);
+}
+.tl-t5-insight .tl-t5-analysis-prompt{
+  margin-top:2px;
+  color:rgba(0,0,0,0.62);
+  white-space:pre-line;
+}
+.tl-t5-insight .period-feel-highlight{
+  color:var(--my-brand-red, #ff4d88);
+  font-weight:600;
 }
 .tl-t5-insight .tl-t5-analysis-body b,
 .tl-t5-insight .tl-t5-analysis-body strong{
@@ -2043,7 +2053,8 @@
 }
 .tl-t5-card.has-period-summary .tl-t5-analysis-body,
 .tl-t5-card.has-period-summary .tl-t5-analysis-lead,
-.tl-t5-card.has-period-summary .tl-t5-analysis-text{
+.tl-t5-card.has-period-summary .tl-t5-analysis-text,
+.tl-t5-card.has-period-summary .tl-t5-analysis-prompt{
   font-size:16px;
   line-height:1.6;
   color:#323232;

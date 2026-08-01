@@ -1,5 +1,5 @@
 const { useState, useEffect, useRef } = React;
-const PERIOD_START_NOTICE_TITLE = '本次周期29天，最近3次周期稳定，点击查看';
+const PERIOD_START_NOTICE_TITLE = '本次周期29天，结合近期记录为你生成周期分析';
 const BABY_VOICE_DEMO_TEXT = '今天早上喂奶喂了60ml';
 const DEFAULT_REVIEW_SHARE_STATE = {
   status:'idle',
@@ -8,6 +8,49 @@ const DEFAULT_REVIEW_SHARE_STATE = {
   acceptedAt:'',
   modules:{cycle:true, period:true, care:true, mood:false, symptom:false, weight:false, intimate:false},
 };
+
+function PeriodFeelOverlay({open, onClose, onComplete, label='经期感受'}){
+  const [state, setState] = React.useState('ready');
+  const [text, setText] = React.useState('');
+  const [scheme1ExampleIndex, setScheme1ExampleIndex] = React.useState(0);
+  const timers = React.useRef([]);
+  const examples = [
+        <><span>“今天</span><strong>流量</strong><span>特别大”</span></>,
+        <><span>“这次</span><strong>痛经</strong><span>比上次严重”</span></>,
+        <><span>“经前1天</span><strong>胸部胀痛</strong><span>”</span></>,
+      ];
+  const demoText = '今天早上量不多，下午量变大了，晚上血量特别大，月经开始的前一天特别烦躁，感觉胸部一直胀胀的';
+  const clearTimers = ()=>{ timers.current.forEach(clearTimeout); timers.current=[]; };
+  React.useEffect(()=>{
+    if(!open){ clearTimers(); setState('ready'); setText(''); return; }
+    clearTimers(); setState('ready'); setText('');
+    return clearTimers;
+  }, [open]);
+  React.useEffect(()=>{
+    if(!open) return;
+    setScheme1ExampleIndex(0);
+    const timer = setInterval(()=>setScheme1ExampleIndex(index=>(index + 1) % 3), 1800);
+    return ()=>clearInterval(timer);
+  }, [open]);
+  if(!open) return null;
+  const DockPublisher = window.DockPublisher;
+  return ReactDOM.createPortal(
+    <div className="period-feel-overlay is-scheme1 is-compact" role="dialog" aria-modal="true" aria-label="经期感受">
+      <div className="period-feel-sheet">
+        <div className="period-feel-nav"><button type="button" onClick={onClose} aria-label="关闭">×</button><span>{label}</span></div>
+        {state === 'result' ? (
+          <div className="period-feel-result">
+            <h2>共识别5条记录</h2>
+            <div className="period-feel-result-card"><p>“{demoText}”</p><b>月经前1天</b><div className="period-result-pre-tags"><span className="period-result-pre-item"><span className="v3-tag" data-cat="心情">心情</span><span className="period-result-value">烦躁</span></span><span className="period-result-pre-item"><span className="v3-tag" data-cat="症状">症状</span><span className="period-result-value">乳房胀痛</span></span></div><b>月经第1天</b><div><span className="period-result-pre-item"><span className="v3-tag" data-cat="经期">流量</span><span className="period-result-value">早上少量、下午中量、晚上特别大量</span></span></div></div>
+            <div className="period-feel-result-actions"><button type="button" onClick={()=>onComplete?.(demoText)}>保存</button></div>
+          </div>
+        ) : (
+          <><div className="period-feel-top is-scheme1-content">{state === 'recording' ? <p className="period-feel-live-text">{text}<span className="period-feel-caret"/></p> : <><div className="period-feel-intro"><span className="period-feel-demo-mic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="8" y="3" width="8" height="12" rx="4"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8.5 21h7"/></svg></span><div><b>试着说：</b></div></div><div className="period-feel-example-carousel" aria-live="polite"><p key={scheme1ExampleIndex}>{examples[scheme1ExampleIndex]}</p></div></>}</div><div className="period-feel-real-dock is-scheme1-motion">{DockPublisher ? <DockPublisher draft="" onDraft={()=>{}} onSend={()=>{}} onQuickMark={()=>{}} onMoodConfirm={()=>{}} onSymptomConfirm={()=>{}} onWeightConfirm={()=>{}} onFoodConfirm={()=>{}} onDietCapture={()=>{}} onCameraRecord={()=>{}} onVoiceDone={()=>{clearTimers(); onComplete?.(demoText);}} onVoiceStart={()=>{clearTimers(); setState('recording'); let i=0; const timer=setInterval(()=>{i+=1; setText(demoText.slice(0,i)); if(i>=demoText.length) clearInterval(timer);},65); timers.current.push(timer);}} onPhoto={()=>{}} onDockExpandedChange={()=>{}} activeTab="note" defaultInputMode="voice" hideQuickFan hideQuickFab/> : null}</div></>
+        )}
+      </div>
+    </div>, document.body
+  );
+}
 
 function shouldShowAnalysis(hits, analysis){
   if(!analysis || !hits.length) return false;
@@ -19,14 +62,14 @@ function shouldShowAnalysis(hits, analysis){
 function buildTimelineEntry(text, hits, opts={}){
   const analysis = hits.length ? window.chooseAnalysis(hits) : null;
   const toneMap = { warn:'yellow', brand:'brand', good:'green' };
-  const tags = window.buildT5TagsFromText(text, hits);
+  const tags = opts.tags || window.buildT5TagsFromText(text, hits);
   const entry = {
     id:'e-'+Date.now(),
     kind: opts.voice ? 'voice-card' : 'rec',
     time: window.formatNowTime(),
     isNew: true,
     tags,
-    tagLayout: 't5',
+    tagLayout: opts.tagLayout || 't5',
   };
   if(opts.voice){
     entry.voice = opts.voice;
@@ -121,7 +164,7 @@ const PERIOD_DOCK_QUICK_ITEMS = [
   { id:'mood', label:'心情', action:'mood', iconSrc:'assets/record-mood.png' },
   { id:'diet', label:'饮食', action:'diet', iconSrc:'assets/record-diet.png' },
   { id:'beverage', label:'喝水', action:'beverage', iconSrc:'assets/record-beverage.svg', text:'喝水' },
-  { id:'stool', label:'便便', icon:'💩', text:'便便' },
+  { id:'stool', label:'便便', iconSrc:'assets/record-stool.svg', text:'便便' },
   { id:'exercise', label:'运动', icon:'🏃', text:'运动' },
   { id:'sleep', label:'睡眠', icon:'🌙', text:'睡眠' },
   { id:'medicine', label:'吃药', icon:'💊', text:'吃药' },
@@ -333,10 +376,16 @@ function App(){
   const [periodDetailDraft, setPeriodDetailDraft] = useState({});
   const [healthRecordDrafts, setHealthRecordDrafts] = useState([]);
   const [noteTabUnread, setNoteTabUnread] = useState(false);
+  const [periodFeelVisible, setPeriodFeelVisible] = useState(false);
+  const [periodFeelReady, setPeriodFeelReady] = useState(false);
+  const [periodFeelGuideVisible, setPeriodFeelGuideVisible] = useState(false);
+  const [periodFeelRecorded, setPeriodFeelRecorded] = useState(false);
+  const [periodFeelModalOpen, setPeriodFeelModalOpen] = useState(false);
   const [dockExpanded, setDockExpanded] = useState(false);
   const [showSearchPage, setShowSearchPage] = useState(false);
   const [babyFeedingPanelMode, setBabyFeedingPanelMode] = useState(null);
   const [searchCriteria, setSearchCriteria] = useState(null);
+
   const scheme3FirstVisitRef = useRef(null);
   const searchCloseScrollRef = useRef(null);
   const streamRef = useRef(null);
@@ -456,6 +505,10 @@ function App(){
     setSisterCycleDone(next.sisterCycleDone);
     setHideTodayGuide(next.hideTodayGuide);
     setPeriodEndRecordReady(false);
+    setPeriodFeelVisible(false);
+    setPeriodFeelReady(false);
+    setPeriodFeelRecorded(false);
+    setPeriodFeelModalOpen(false);
     setPeriodEndRecordCompleted(false);
     setHealthRecordDrafts([]);
     setActiveTab(next.activeTab);
@@ -523,6 +576,8 @@ function App(){
     const sisterEntry = {
       kind:'sister-card', id:'e-sister-'+Date.now(), time: window.formatNowTime(), railDot:'ai',
       analysisKind: isPeriodEndAnalysis ? 'period-end' : 'period-start',
+      periodFeelPrompt: false,
+      periodFeelGuideLabel: '经期感受',
     };
     const todayId = timeline.find(b=>b.type==='day' && b.isToday)?.id;
     setTimeline(blocks => {
@@ -533,16 +588,32 @@ function App(){
 
     setSisterCycleDone(false);
     setSisterPlayAnimation(n=>n + 1);
+    setPeriodFeelVisible(true);
+    setPeriodFeelReady(false);
     setActiveTab('note');
     scrollToSisterAnalysis();
   };
 
   const handleSisterCycleComplete = React.useCallback(()=>{
     setSisterCycleDone(true);
+    setPeriodFeelReady(true);
     requestAnimationFrame(()=>{
       setTimeout(()=>scrollTimelineToLastItem('smooth'), 120);
     });
   }, []);
+
+  React.useEffect(()=>{
+    if(activeTab !== 'note' || recordLifeMode !== '经期') return;
+    const hasPeriodFeedback = timeline.some(block=>(block.items || block.entries || []).some(item=>item.analysisKind === 'period-start' || item.kind === 'sync-card' && item.periodSummaryLabel === '月经来了'));
+    if(!hasPeriodFeedback || !sisterCycleDone || periodFeelRecorded) return;
+    const timer = setTimeout(()=>{
+      setPeriodFeelVisible(true);
+      setPeriodFeelReady(true);
+      setPeriodFeelGuideVisible(true);
+      requestAnimationFrame(()=>setTimeout(()=>scrollTimelineToLastItem('auto'), 100));
+    }, 500);
+    return ()=>clearTimeout(timer);
+  }, [activeTab, recordLifeMode, timeline, sisterCycleDone, periodFeelRecorded]);
 
   useEffect(()=>{
     if(sisterPlayAnimation > 0){
@@ -563,7 +634,7 @@ function App(){
             : 28;
         const anchor = el.querySelector('.tl-rail-node.is-feed-last') || timelineEndRef.current;
         if(anchor){
-          const top = anchor.getBoundingClientRect().top - el.getBoundingClientRect().top + el.scrollTop - reserve;
+          const top = anchor.getBoundingClientRect().bottom - el.getBoundingClientRect().top + el.scrollTop - (el.clientHeight - reserve);
           if(behavior === 'auto') el.scrollTop = Math.max(0, top);
           else el.scrollTo({ top: Math.max(0, top), behavior });
           return;
@@ -2443,9 +2514,16 @@ function App(){
       }))
     : null;
   const periodDockQuickItems = showPeriodQuickStrip
-    ? PERIOD_DOCK_QUICK_ITEMS.map(item=>({
+    ? [
+        ...(periodFeelVisible ? [{id:'period-feel', label:'经期感受', action:'period-feel', icon:'💧', pulse:periodFeelReady, drop:false}] : []),
+        ...PERIOD_DOCK_QUICK_ITEMS,
+      ].map(item=>({
         ...item,
-        iconNode:item.iconSrc ? <img src={item.iconSrc} alt="" /> : null,
+        iconNode:item.id === 'stool' && item.iconSrc
+          ? <img src={item.iconSrc} alt="" />
+          : (window.UnifiedQuickIcon
+            ? <UnifiedQuickIcon type={item.id}/>
+            : (item.iconSrc ? <img src={item.iconSrc} alt="" /> : null)),
       }))
     : null;
   const dockQuickItems = babyFeedingDockItems || periodDockQuickItems;
@@ -2453,7 +2531,7 @@ function App(){
   return (
     <>
       <div className={'phone' + (homeDetailOpen ? ' is-home-detail-open' : '') + (showDockQuickStrip ? ' is-dock-quick-entry' : '')}>
-        <StatusBar isMember={isMember} onMemberChange={setIsMember}/>
+        <StatusBar isMember={isMember} onMemberChange={setIsMember} showMemberSwitch={showReview}/>
 
       {showHome && HomePage && (
         <HomePage
@@ -2492,6 +2570,9 @@ function App(){
           }}
           onPeriodReset={()=>{
             setShowAnalysisNotice(false);
+            setPeriodFeelVisible(false);
+            setPeriodFeelReady(false);
+            setPeriodFeelModalOpen(false);
             setAnalysisNoticeTitle(PERIOD_START_NOTICE_TITLE);
             setAnalysisNoticeKind('period-start');
             setPeriodEndRecordReady(false);
@@ -2641,7 +2722,7 @@ function App(){
                   <I name="search" size={20} stroke={1.7}/>
                 </button>
               </div>
-              <h1 className="stream-title">点滴</h1>
+          <h1 className="stream-title">点滴</h1>
               <div className="stream-header-side"/>
             </>
           )}
@@ -2708,6 +2789,14 @@ function App(){
           feedingQuickItems={dockQuickItems}
           feedingQuickLabel={showPeriodQuickStrip ? '经期快捷记录' : '宝宝喂养快捷记录'}
           onFeedingQuickSelect={showPeriodQuickStrip ? handlePeriodDockQuickSelect : handleBabyFeedingQuickSelect}
+          onPeriodFeelSelect={()=>{
+            setPeriodFeelGuideVisible(false);
+            setPeriodFeelReady(false);
+            setPeriodFeelModalOpen(true);
+          }}
+          periodFeelLabel="经期感受"
+          periodFeelGuide={periodFeelGuideVisible}
+          periodFeelGuideText="血量变化、经期症状，都能帮你快速记下来，立刻试试吧"
           demoPhase={demoPhase}
           isDemoRunning={isDemoRunning}
         />
@@ -2751,6 +2840,28 @@ function App(){
       )}
 
       {showPhoto && <PhotoSheet onCancel={()=>setShowPhoto(false)} onPick={submitPhoto}/>}
+
+      <PeriodFeelOverlay
+        open={periodFeelModalOpen && showRecordShell}
+        label="记录经期感受"
+        onClose={()=>setPeriodFeelModalOpen(false)}
+          onComplete={(text)=>{
+          setPeriodFeelRecorded(true);
+          setPeriodFeelReady(false);
+          setPeriodFeelGuideVisible(false);
+          const entry = buildTimelineEntry(text, [], {
+            voice:{duration:'10″'},
+            tagLayout:'v3',
+            tags:[{cat:'流量'},{cat:'心情'},{cat:'症状'}],
+          });
+          setTimeline(blocks=>{
+            const dayId = blocks.find(b=>b.type==='day' && b.isToday)?.id;
+            return window.appendTimelineEntry(blocks, entry, {dayId});
+          });
+          setPeriodFeelModalOpen(false);
+          setTimeout(()=>scrollTimelineToBottom('smooth'), 100);
+        }}
+      />
 
       <Toast toasts={toasts}/>
       {showBottomTabBar && (

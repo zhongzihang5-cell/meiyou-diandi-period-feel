@@ -4,8 +4,8 @@
     {
       "name": "index",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8765", "--directory", "/Users/zhongzihang/Projects/meiyou-suiji"],
-      "port": 8765
+      "runtimeArgs": ["/private/tmp/claude-501/-Users-wangyingyue-Documents-Github-meiyou-diandi-jingqi/fbb2bf44-81a7-4cff-bde8-971042b45a0c/scratchpad/proxy.py"],
+      "port": 8766
     }
   ]
 }
