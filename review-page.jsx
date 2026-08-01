@@ -4751,9 +4751,9 @@ const BEVERAGE_COMPOSITION = [
 ];
 
 const BEVERAGE_WEEK_RECORDS = [
-  {time:'今天 10:42', image:'星巴克红茶拿铁.webp', name:'红茶咖啡拿铁鸳鸯', meta:'大杯 / 冰', calories:286, caffeine:95},
-  {time:'周六 15:18', image:'七分甜奶茶.jpeg', name:'杨枝甘露奶茶', meta:'中杯 / 少冰', calories:162, caffeine:60},
-  {time:'周三 09:25', image:'水杯.jpg', name:'茉莉纯茶', meta:'中杯 / 无糖', calories:138, caffeine:40},
+  {time:'今天 10:42', image:'image/星巴克红茶拿铁.webp', name:'红茶咖啡拿铁鸳鸯', meta:'大杯 / 冰', calories:286, caffeine:95},
+  {time:'周六 15:18', image:'image/七分甜奶茶.jpeg', name:'杨枝甘露奶茶', meta:'中杯 / 少冰', calories:162, caffeine:60},
+  {time:'周三 09:25', image:'image/水杯.jpg', name:'茉莉纯茶', meta:'中杯 / 无糖', calories:138, caffeine:40},
 ];
 
 const BEVERAGE_MONTHS = [
@@ -4885,19 +4885,19 @@ function BeverageWeeklyStats(){
 }
 
 const BEVERAGE_WEEK_PHOTO_ROWS = [
-  {label:'第4周', sub:'8/22—8/28', photos:['星巴克红茶拿铁.webp','七分甜奶茶.jpeg','水杯.jpg']},
-  {label:'第3周', sub:'8/15—8/21', photos:['七分甜奶茶.jpeg','水杯.jpg']},
-  {label:'第2周', sub:'8/8—8/14', photos:['水杯.jpg','星巴克红茶拿铁.webp','七分甜奶茶.jpeg','星巴克红茶拿铁.webp']},
-  {label:'第1周', sub:'8/1—8/7', photos:['星巴克红茶拿铁.webp','水杯.jpg','七分甜奶茶.jpeg']},
+  {label:'第4周', sub:'8/22—8/28', photos:['image/星巴克红茶拿铁.webp','image/七分甜奶茶.jpeg','image/水杯.jpg']},
+  {label:'第3周', sub:'8/15—8/21', photos:['image/七分甜奶茶.jpeg','image/水杯.jpg']},
+  {label:'第2周', sub:'8/8—8/14', photos:['image/水杯.jpg','image/星巴克红茶拿铁.webp','image/七分甜奶茶.jpeg','image/星巴克红茶拿铁.webp']},
+  {label:'第1周', sub:'8/1—8/7', photos:['image/星巴克红茶拿铁.webp','image/水杯.jpg','image/七分甜奶茶.jpeg']},
 ];
 
 const BEVERAGE_MONTH_PHOTO_ROWS = [
-  {label:'8月', sub:'6杯', photos:['星巴克红茶拿铁.webp','七分甜奶茶.jpeg','水杯.jpg']},
-  {label:'7月', sub:'14杯', photos:['七分甜奶茶.jpeg','星巴克红茶拿铁.webp','水杯.jpg','七分甜奶茶.jpeg']},
-  {label:'6月', sub:'12杯', photos:['水杯.jpg','七分甜奶茶.jpeg','星巴克红茶拿铁.webp']},
-  {label:'5月', sub:'10杯', photos:['星巴克红茶拿铁.webp','水杯.jpg','七分甜奶茶.jpeg']},
-  {label:'4月', sub:'8杯', photos:['七分甜奶茶.jpeg','水杯.jpg']},
-  {label:'3月', sub:'11杯', photos:['水杯.jpg','星巴克红茶拿铁.webp','七分甜奶茶.jpeg']},
+  {label:'8月', sub:'6杯', photos:['image/星巴克红茶拿铁.webp','image/七分甜奶茶.jpeg','image/水杯.jpg']},
+  {label:'7月', sub:'14杯', photos:['image/七分甜奶茶.jpeg','image/星巴克红茶拿铁.webp','image/水杯.jpg','image/七分甜奶茶.jpeg']},
+  {label:'6月', sub:'12杯', photos:['image/水杯.jpg','image/七分甜奶茶.jpeg','image/星巴克红茶拿铁.webp']},
+  {label:'5月', sub:'10杯', photos:['image/星巴克红茶拿铁.webp','image/水杯.jpg','image/七分甜奶茶.jpeg']},
+  {label:'4月', sub:'8杯', photos:['image/七分甜奶茶.jpeg','image/水杯.jpg']},
+  {label:'3月', sub:'11杯', photos:['image/水杯.jpg','image/星巴克红茶拿铁.webp','image/七分甜奶茶.jpeg']},
 ];
 
 function BeveragePhotoWall({title, rows, caption}){
@@ -5271,7 +5271,7 @@ function SkinMonthView(){
       <div className="review-detail-card">
         <div className="review-camera-detail-head"><b>最近一次记录</b><span>今天 09:36</span></div>
         <div className="review-camera-latest">
-          <img src="长痘.jpg" alt="最近一次皮肤状态记录"/>
+          <img src="image/长痘.jpg" alt="最近一次皮肤状态记录"/>
           <div><b>面颊轻微泛红</b><span>少量可见痘痘</span><p>黄体后期 · 状态轻微</p></div>
         </div>
       </div>

@@ -510,7 +510,8 @@ function ChartBeverageWeek({data}){
 
 function readSavedDailyGoal(kind, fallback){
   try {
-    const value = Number(window.localStorage?.getItem(`meiyou-daily-goal-${kind}`));
+    const key = kind === 'water' ? 'meiyou-daily-goal-water-v2' : `meiyou-daily-goal-${kind}`;
+    const value = Number(window.localStorage?.getItem(key));
     return value > 0 ? value : fallback;
   } catch (error) {
     return fallback;
@@ -579,6 +580,7 @@ function DailyGoalSettingPage({kind, value, onCancel, onSave}){
 }
 
 function ChartDailyGoal({data}){
+  const I = window.Icon;
   const consumed = Math.max(0, Number(data?.consumed) || 0);
   const isWater = data?.kind === 'water';
   const kind = isWater ? 'water' : 'caffeine';
@@ -601,7 +603,8 @@ function ChartDailyGoal({data}){
   }, [kind]);
   const saveGoal = (nextGoal)=>{
     try {
-      window.localStorage?.setItem(`meiyou-daily-goal-${kind}`, String(nextGoal));
+      const key = kind === 'water' ? 'meiyou-daily-goal-water-v2' : `meiyou-daily-goal-${kind}`;
+      window.localStorage?.setItem(key, String(nextGoal));
     } catch (error) {}
     setGoal(nextGoal);
     window.dispatchEvent(new CustomEvent('dailyGoalChange', {
@@ -641,7 +644,14 @@ function ChartDailyGoal({data}){
           </div>
         </div>
         <div className="v3-daily-goal-summary">
-          <span>今日目标</span>
+          <div className="v3-daily-goal-target-label">
+            <span>今日目标</span>
+            {isWater ? (
+              <button type="button" onClick={()=>setSettingOpen(true)} aria-label="编辑饮水目标">
+                <I name="pencil" size={14} stroke={1.9}/>
+              </button>
+            ) : null}
+          </div>
           <strong>{goal}{unit}</strong>
           <div className="v3-daily-goal-remaining">
             <i style={{backgroundColor:color}} aria-hidden="true"/>
@@ -654,9 +664,6 @@ function ChartDailyGoal({data}){
           ? `今天已饮水${consumed}ml，距离${goal}ml目标还差${remaining}ml。`
           : `今天摄入${consumed}mg，还可以摄入${remaining}mg。`}
       </p>
-      <button type="button" className="v3-daily-goal-setting-link" onClick={()=>setSettingOpen(true)}>
-        {isWater ? '设置饮水目标' : '设置咖啡因目标'}
-      </button>
       {settingPage}
     </div>
   );
@@ -1133,8 +1140,6 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
             ]
           : [
             { label:'容量', value:entry.capacityMl ? `${entry.capacityMl}ml` : '' },
-            { label:'冰度', value:entry.iceLevel || '' },
-            { label:'糖度', value:entry.sugarLevel || '' },
             { label:'总热量', value:`${entry.calories || 0} 千卡`, accent:true },
             { label:'咖啡因', value:`${entry.caffeineMg || 0} 毫克` },
           ]
@@ -1149,8 +1154,11 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
               { label:'产品', value:entry.product },
               { label:'管理状态', value:entry.managementStatus },
             ];
+      const beverageContent = `${entry.brand || ''}${entry.beverageName || ''}`.trim()
+        || entry.beverageCategory
+        || '饮品';
       const headline = entry.recordType === 'beverage'
-        ? `${entry.brand || ''}${entry.beverageName || ''}`
+        ? beverageContent
         : entry.recordType === 'skin'
           ? '本次皮肤状态'
           : `${entry.brand || ''} ${entry.product || ''}`;
@@ -1158,18 +1166,16 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
         <section className={'v3-camera-insight is-' + entry.recordType}>
           <div className="v3-camera-insight-heading">
             <img src={recordIconSrc(iconKey)} alt="" aria-hidden="true"/>
-            <span>
-              {entry.recordType === 'beverage' && entry.beverageCategory
-                ? `${entry.recordLabel || '喝水'}（${entry.beverageCategory}）：`
-                : `${entry.recordLabel || '记录'}：`}
-            </span>
+            <span>{entry.recordType === 'beverage'
+              ? `${entry.recordLabel || '喝水'}：${beverageContent}`
+              : `${entry.recordLabel || '记录'}：`}</span>
           </div>
           {entry.photoUrl ? (
             <div className="v3-camera-insight-photo">
               <img src={entry.photoUrl} alt={entry.recordLabel || '拍照记录'}/>
             </div>
           ) : null}
-          <p className="v3-camera-insight-title">{headline}</p>
+          {entry.recordType !== 'beverage' ? <p className="v3-camera-insight-title">{headline}</p> : null}
           <div className="v3-camera-insight-details">
             {detailRows.filter(row => row.value !== '' && row.value != null).map((row) => (
               <div className="v3-camera-insight-detail" key={row.label}>

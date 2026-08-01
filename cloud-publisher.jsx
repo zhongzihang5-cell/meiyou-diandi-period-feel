@@ -255,27 +255,27 @@ function BeverageQuickSheet({onClose, onPhoto, onWater}){
 function WaterQuickSheet({onClose, onSave}){
   const I = window.Icon;
   const categories = ['水', '奶茶', '咖啡', '果茶', '纯茶', '果汁', '果蔬汁', '纯奶饮品', '饮料', '其他'];
-  const iceOptions = ['热', '常温', '去冰', '少冰', '正常冰'];
-  const sugarOptions = ['0%', '30%', '50%', '70%', '100%'];
+  const nutritionPer500 = {
+    奶茶:[420, 60], 咖啡:[120, 95], 果茶:[220, 20], 纯茶:[20, 35],
+    果汁:[230, 0], 果蔬汁:[180, 0], 纯奶饮品:[280, 0], 饮料:[190, 0], 其他:[160, 0],
+  };
   const [category, setCategory] = React.useState('水');
   const [capacityMl, setCapacityMl] = React.useState(300);
   const [brand, setBrand] = React.useState('');
   const [beverageName, setBeverageName] = React.useState('');
-  const [iceLevel, setIceLevel] = React.useState('正常冰');
-  const [sugarLevel, setSugarLevel] = React.useState('100%');
-  const [calories, setCalories] = React.useState('');
-  const [caffeineMg, setCaffeineMg] = React.useState('');
   const isWater = category === '水';
-  const isSimpleCategory = isWater;
+  const nutrition = nutritionPer500[category] || [0, 0];
+  const calories = isWater ? 0 : Math.round(nutrition[0] * capacityMl / 500);
+  const caffeineMg = isWater ? 0 : Math.round(nutrition[1] * capacityMl / 500);
   const submit = ()=>onSave({
     beverageCategory:category,
     capacityMl,
     brand:isWater ? '' : brand.trim(),
-    beverageName:isWater ? '白水' : (beverageName.trim() || category),
-    iceLevel:isSimpleCategory ? '' : iceLevel,
-    sugarLevel:isSimpleCategory ? '' : sugarLevel,
-    calories:isSimpleCategory ? 0 : (Number(calories) || 0),
-    caffeineMg:isSimpleCategory ? 0 : (Number(caffeineMg) || 0),
+    beverageName:isWater ? '白水' : beverageName.trim(),
+    iceLevel:'',
+    sugarLevel:'',
+    calories,
+    caffeineMg,
   });
   return (
     <div className="dock-sheet dock-water-sheet dock-water-entry-sheet">
@@ -334,51 +334,12 @@ function WaterQuickSheet({onClose, onSave}){
             </div>
           </div>
 
-          {!isSimpleCategory ? (
-            <>
-              <div className="dock-water-option-group">
-                <span className="dock-water-entry-label">冰度</span>
-                <div className="dock-water-option-row" role="group" aria-label="冰度">
-                  {iceOptions.map(option=>(
-                    <button
-                      type="button"
-                      className={iceLevel === option ? 'is-active' : ''}
-                      key={option}
-                      onClick={()=>setIceLevel(option)}
-                      aria-pressed={iceLevel === option}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="dock-water-option-group">
-                <span className="dock-water-entry-label">糖度</span>
-                <div className="dock-water-option-row" role="group" aria-label="糖度">
-                  {sugarOptions.map(option=>(
-                    <button
-                      type="button"
-                      className={sugarLevel === option ? 'is-active' : ''}
-                      key={option}
-                      onClick={()=>setSugarLevel(option)}
-                      aria-pressed={sugarLevel === option}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="dock-water-entry-fields is-nutrition">
-                <label>
-                  <span>热量</span>
-                  <div><input value={calories} onChange={(event)=>setCalories(event.target.value)} inputMode="decimal"/><i>千卡</i></div>
-                </label>
-                <label>
-                  <span>咖啡因</span>
-                  <div><input value={caffeineMg} onChange={(event)=>setCaffeineMg(event.target.value)} inputMode="decimal"/><i>毫克</i></div>
-                </label>
-              </div>
-            </>
+          {!isWater ? (
+            <div className="dock-water-nutrition-readonly" aria-label="按容量估算的饮品信息">
+              <div><span>热量</span><strong>{calories}</strong><i>千卡</i></div>
+              <div><span>咖啡因</span><strong>{caffeineMg}</strong><i>毫克</i></div>
+              <p>热量与咖啡因随容量自动估算</p>
+            </div>
           ) : null}
         </section>
       </div>

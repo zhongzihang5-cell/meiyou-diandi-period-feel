@@ -543,6 +543,31 @@
   font-size:13px;
 }
 .dock-water-entry-fields input:focus{border-color:rgba(255,77,136,.45)}
+.dock-water-nutrition-readonly{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin-top:16px;
+}
+.dock-water-nutrition-readonly > div{
+  display:grid;
+  grid-template-columns:1fr auto auto;
+  align-items:baseline;
+  gap:4px;
+  min-width:0;
+  padding:14px;
+  border-radius:8px;
+  background:#f7f7f9;
+}
+.dock-water-nutrition-readonly span{color:#8e8e93;font-size:13px}
+.dock-water-nutrition-readonly strong{color:#323232;font-size:20px;font-weight:600}
+.dock-water-nutrition-readonly i{color:#a0a0a5;font-size:12px;font-style:normal}
+.dock-water-nutrition-readonly p{
+  grid-column:1/-1;
+  margin:0;
+  color:#a0a0a5;
+  font-size:12px;
+}
 .dock-water-entry-fields label > div{position:relative}
 .dock-water-entry-fields label > div input{padding-right:42px}
 .dock-water-entry-fields label i{

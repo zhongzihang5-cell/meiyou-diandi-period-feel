@@ -8,7 +8,7 @@ const CAMERA_RECOGNITION_MODES = [
   {
     id: 'photo',
     label: '照片',
-    capturePhoto: '公园照片.jpg',
+    capturePhoto: 'image/公园照片.jpg',
     iconSrc: 'assets/record-diary.png',
     resultTitle: '保存为照片记录',
     resultDescription: '未提取到记录项，将只保留这张照片',
@@ -18,7 +18,7 @@ const CAMERA_RECOGNITION_MODES = [
   {
     id: 'period',
     label: '月经',
-    capturePhoto: '使用过的量大卫生巾.jpg',
+    capturePhoto: 'image/使用过的量大卫生巾.jpg',
     iconSrc: 'assets/record-flow.png',
     resultTitle: '识别为月经记录',
     resultDescription: '已根据照片估测经量和颜色',
@@ -26,7 +26,7 @@ const CAMERA_RECOGNITION_MODES = [
   {
     id: 'discharge',
     label: '白带',
-    capturePhoto: '白带.jpeg',
+    capturePhoto: 'image/白带.jpeg',
     iconSrc: 'assets/record-discharge.png',
     resultTitle: '识别为白带记录',
     resultDescription: '已根据照片估测颜色和性状',
@@ -42,7 +42,7 @@ const CAMERA_RECOGNITION_MODES = [
   {
     id: 'beverage',
     label: '饮品',
-    capturePhoto: '菊花茶饮料.jpg',
+    capturePhoto: 'image/菊花茶饮料.jpg',
     iconSrc: 'assets/record-beverage.svg',
     resultTitle: '识别为饮品记录',
     resultDescription: '已通过包装标签识别饮品名称、品类、容量和热量',
@@ -52,7 +52,7 @@ const CAMERA_RECOGNITION_MODES = [
   {
     id: 'skin',
     label: '皮肤',
-    capturePhoto: '长痘.jpg',
+    capturePhoto: 'image/长痘.jpg',
     iconSrc: 'assets/record-symptom.png',
     resultTitle: '识别为皮肤状态',
     resultDescription: '已记录照片中可见的皮肤状态',
@@ -62,7 +62,7 @@ const CAMERA_RECOGNITION_MODES = [
   {
     id: 'cosmetic',
     label: '化妆品',
-    capturePhoto: 'SK2.jpeg',
+    capturePhoto: 'image/SK2.jpeg',
     iconSrc: 'assets/record-cosmetic.svg',
     resultTitle: '识别为化妆品',
     resultDescription: '已识别照片中的产品组合',
@@ -72,12 +72,41 @@ const CAMERA_RECOGNITION_MODES = [
   {
     id: 'stool',
     label: '便便',
-    capturePhoto: '便便.jpg',
+    capturePhoto: 'image/便便.jpg',
     iconSrc: 'assets/record-stool.png',
     resultTitle: '识别为便便记录',
     resultDescription: '已根据照片估测形态和颜色',
   },
 ];
+
+const BEVERAGE_OCR_DEMO_PHOTOS = [
+  {
+    id: 'beverage-coffee-no-label',
+    date: '2026-08-01',
+    time: '12:10',
+    thumb: 'image/咖啡无标签图.jpg',
+    type: 'beverage',
+    mode: 'beverage',
+    recognitionVariant: 'coffee-no-label',
+  },
+  {
+    id: 'beverage-coffee-labeled',
+    date: '2026-08-01',
+    time: '12:11',
+    thumb: 'image/咖啡有标签图.jpg',
+    type: 'beverage',
+    mode: 'beverage',
+    recognitionVariant: 'coffee-labeled',
+  },
+];
+
+let beverageOcrCaptureIndex = 0;
+
+function getNextBeverageOcrDemoPhoto() {
+  const photo = BEVERAGE_OCR_DEMO_PHOTOS[beverageOcrCaptureIndex % BEVERAGE_OCR_DEMO_PHOTOS.length];
+  beverageOcrCaptureIndex += 1;
+  return photo;
+}
 
 const CAMERA_RECOGNITION_MODE_MAP = CAMERA_RECOGNITION_MODES.reduce((map, mode) => {
   map[mode.id] = mode;
@@ -102,11 +131,12 @@ const AUTO_DETECT_DEMO_PHOTOS = CAMERA_RECOGNITION_MODES.flatMap((mode, index) =
       id: 'auto-detect-beverage-starbucks',
       date: '2026-07-27',
       time: '09:46',
-      thumb: '星巴克红茶拿铁.webp',
+      thumb: 'image/星巴克红茶拿铁.webp',
       type: 'beverage',
       mode: 'beverage',
       recognitionVariant: 'starbucks',
     });
+    photos.push(...BEVERAGE_OCR_DEMO_PHOTOS);
   }
   return photos;
 });
@@ -158,7 +188,7 @@ function buildCameraRecognitionResult(payload) {
   if (mode === 'beverage') {
     const sourcePhoto = payload?.photo || payload;
     const isStarbucks = sourcePhoto?.recognitionVariant === 'starbucks'
-      || sourcePhoto?.thumb === '星巴克红茶拿铁.webp';
+      || sourcePhoto?.thumb === 'image/星巴克红茶拿铁.webp';
     if (isStarbucks) {
       return {
         ...base,
@@ -166,20 +196,40 @@ function buildCameraRecognitionResult(payload) {
         beverageName: '红茶咖啡拿铁鸳鸯',
         beverageCategory: '咖啡',
         capacityMl: 500,
-        iceLevel: '正常冰',
-        sugarLevel: '100%',
-        spec: '500ml / 正常冰 / 100%',
+        iceLevel: '',
+        sugarLevel: '',
+        spec: '500ml',
         calories: 286,
         caffeineMg: 95,
-        summary: '星巴克红茶咖啡拿铁鸳鸯 · 500ml/正常冰/100%',
+        summary: '星巴克红茶咖啡拿铁鸳鸯 · 500ml',
         summaryItems: [
           { label: '饮品', value: '星巴克 · 红茶咖啡拿铁鸳鸯' },
           { label: '品类', value: '咖啡' },
           { label: '容量', value: '500ml' },
-          { label: '冰度', value: '正常冰' },
-          { label: '糖度', value: '100%' },
           { label: '热量', value: '286 千卡' },
           { label: '咖啡因', value: '95 毫克' },
+        ],
+      };
+    }
+    if (sourcePhoto?.recognitionVariant === 'coffee-labeled') {
+      return {
+        ...base,
+        brand: '',
+        beverageName: '桃子冰美式',
+        beverageCategory: '咖啡',
+        capacityMl: 700,
+        iceLevel: '',
+        sugarLevel: '',
+        spec: '700ml',
+        calories: 128,
+        caffeineMg: 120,
+        summary: '桃子冰美式 · 700ml',
+        summaryItems: [
+          { label: '饮品', value: '桃子冰美式' },
+          { label: '品类', value: '咖啡' },
+          { label: '容量', value: '700ml' },
+          { label: '热量', value: '128 千卡' },
+          { label: '咖啡因', value: '120 毫克' },
         ],
       };
     }
@@ -269,7 +319,7 @@ function measureElementRect(el, container) {
 
 // 模拟相册照片数据（真实用户图片）
 const MOCK_PHOTOS = [
-  { id: 'p0', date: '2026-07-30', time: '18:20', thumb: '公园照片.jpg', type: 'photo', mode: 'photo' },
+  { id: 'p0', date: '2026-07-30', time: '18:20', thumb: 'image/公园照片.jpg', type: 'photo', mode: 'photo' },
   { id: 'p1', date: '2026-06-03', time: '12:35', thumb: 'assets/gallery/IMG_9140-a0794273-c982-414f-8516-52af2c4456e1.png', type: 'food' },
   { id: 'p2', date: '2026-06-03', time: '11:20', thumb: 'assets/gallery/IMG_9145_2-72cf62bb-2ea4-45fa-977a-78f80ac3da58.png', type: 'food' },
   { id: 'p3', date: '2026-06-03', time: '10:15', thumb: 'assets/gallery/IMG_9139-a36f2639-6b62-453c-bdc1-2d7cd67b4d28.png', type: 'food' },
@@ -727,6 +777,7 @@ function CameraRecognitionResult({ result, onChange, onRetake, onSave }) {
 function CameraCaptureAnalyzePanel({
   phase,
   progress = 0,
+  analyzeMode = null,
   errorKind = null,
   onRetry,
   onRetake,
@@ -736,25 +787,33 @@ function CameraCaptureAnalyzePanel({
   const isLoading = phase === 'loading';
   const isTimeoutError = phase === 'error' && errorKind === 'timeout';
   const isNotFoodError = phase === 'error' && errorKind === 'not-food';
+  const isBeverageNoLabelError = phase === 'error' && errorKind === 'beverage-no-label';
+  const loadingSteps = analyzeMode === 'beverage'
+    ? ['饮品识别中', '成分分析中', '热量咖啡因容量统计中']
+    : ['内容识别中', '信息分析中', '记录整理中'];
+  const loadingStep = loadingSteps[progress < 36 ? 0 : progress < 72 ? 1 : 2];
   return (
-    <div className={'camera-analyze-sheet' + (isLoading ? ' is-loading' : '') + (phase === 'error' ? ' is-error' : '') + (isNotFoodError ? ' is-not-food' : '')}>
+    <div className={'camera-analyze-sheet' + (isLoading ? ' is-loading' : '') + (phase === 'error' ? ' is-error' : '') + (isNotFoodError ? ' is-not-food' : '') + (isBeverageNoLabelError ? ' is-beverage-no-label' : '')}>
       <div className="camera-analyze-progress-track" aria-hidden={!isLoading}>
         <div
           className="camera-analyze-progress-fill"
           style={{ width: `${Math.max(0, Math.min(100, progress))}%` }}
         />
+        {isLoading ? (
+          <img
+            className="camera-analyze-progress-logo"
+            src="image/美柚logo.png"
+            alt=""
+            style={{ left: `calc(${Math.max(4, Math.min(96, progress))}% - 14px)` }}
+          />
+        ) : null}
       </div>
       <div className="camera-analyze-status-row">
         {isLoading && (
-          <>
-            <span className="camera-analyze-status-text">正在判断记录类型...</span>
-            <span className="camera-analyze-status-icon" aria-hidden="true">
-              <svg viewBox="0 0 16 16" fill="none">
-                <circle cx="8" cy="8" r="7" fill="#007AFF"/>
-                <path d="M5 8.2l1.8 1.8L11 5.8" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </span>
-          </>
+          <div className="camera-analyze-loading-copy">
+            <strong>AI小柚子分析中…</strong>
+            <span key={loadingStep}>{loadingStep}</span>
+          </div>
         )}
         {isTimeoutError && !isExhausted && (
           <>
@@ -789,6 +848,15 @@ function CameraCaptureAnalyzePanel({
             </button>
           </>
         )}
+        {isBeverageNoLabelError && (
+          <div className="camera-analyze-label-guide">
+            <strong>未识别到有效饮品标签</strong>
+            <p>请对准杯身标签重新拍摄，确保饮品名称、容量等信息清晰可见。</p>
+            <button type="button" className="camera-analyze-label-retake" onClick={onRetake}>
+              重拍
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -806,6 +874,7 @@ function useCameraPhotoAnalyze({ onSuccess, onAnalyzeStart }) {
   const [progress, setProgress] = React.useState(0);
   const [failureCount, setFailureCount] = React.useState(0);
   const [errorKind, setErrorKind] = React.useState(null);
+  const [analyzeMode, setAnalyzeMode] = React.useState(null);
   const analyzeTimerRef = React.useRef(null);
   const progressTimerRef = React.useRef(null);
   const finishTimerRef = React.useRef(null);
@@ -836,6 +905,7 @@ function useCameraPhotoAnalyze({ onSuccess, onAnalyzeStart }) {
     setProgress(0);
     setFailureCount(0);
     setErrorKind(null);
+    setAnalyzeMode(null);
   }, [clearTimers]);
 
   const runAnalyze = React.useCallback(({ url, isRetry = false, forceSuccess = false, meta } = {}) => {
@@ -849,10 +919,15 @@ function useCameraPhotoAnalyze({ onSuccess, onAnalyzeStart }) {
     onAnalyzeStart?.();
 
     const recognitionMode = meta?.mode || 'diet';
+    setAnalyzeMode(recognitionMode);
     const activeScenario = recognitionMode === 'diet' ? readScenario() : 'success';
     const analyzeMs = recognitionMode === 'diet'
       ? resolveAnalyzeMs(activeScenario, loadingMs)
-      : 1500;
+      : recognitionMode === 'beverage'
+        ? 10000
+        : 2600;
+    const isBeverageNoLabel = recognitionMode === 'beverage'
+      && meta?.photo?.recognitionVariant === 'coffee-no-label';
     const isEarlySuccess = activeScenario === 'success';
     const startedAt = Date.now();
     progressTimerRef.current = window.setInterval(() => {
@@ -863,9 +938,11 @@ function useCameraPhotoAnalyze({ onSuccess, onAnalyzeStart }) {
 
     analyzeTimerRef.current = window.setTimeout(() => {
       clearTimers();
-      const result = recognitionMode === 'diet'
-        ? mockRecognize({ scenario: readScenario(), forceSuccess })
-        : { ok: true };
+      const result = isBeverageNoLabel
+        ? { ok: false, reason: 'beverage-no-label' }
+        : recognitionMode === 'diet'
+          ? mockRecognize({ scenario: readScenario(), forceSuccess })
+          : { ok: true };
       if (result?.ok) {
         setProgress(100);
         setPhase('ready');
@@ -876,7 +953,13 @@ function useCameraPhotoAnalyze({ onSuccess, onAnalyzeStart }) {
       }
       setProgress(0);
       setPhase('error');
-      setErrorKind(result?.reason === 'not-food' ? 'not-food' : 'timeout');
+      setErrorKind(
+        result?.reason === 'not-food'
+          ? 'not-food'
+          : result?.reason === 'beverage-no-label'
+            ? 'beverage-no-label'
+            : 'timeout'
+      );
       if (isRetry && result?.reason !== 'not-food') {
         setFailureCount((count) => count + 1);
       }
@@ -896,6 +979,7 @@ function useCameraPhotoAnalyze({ onSuccess, onAnalyzeStart }) {
     setProgress(0);
     setFailureCount(0);
     setErrorKind(null);
+    setAnalyzeMode(null);
   }, [clearTimers]);
 
   React.useEffect(() => () => clearTimers(), [clearTimers]);
@@ -907,6 +991,7 @@ function useCameraPhotoAnalyze({ onSuccess, onAnalyzeStart }) {
     failureCount,
     maxFailures,
     errorKind,
+    analyzeMode,
     isExhausted,
     runAnalyze,
     handleRetry,
@@ -940,6 +1025,7 @@ function CameraView({
   analyzeMaxFailures = 5,
   analyzeExhausted = false,
   analyzeErrorKind = null,
+  analyzeMode = null,
   onAnalyzeRetry,
   onAnalyzeRetake,
   recognitionResult,
@@ -994,11 +1080,12 @@ function CameraView({
               <span className="camera-frame-corner br"/>
             </div>
             <div className="camera-hint camera-auto-detect-hint">
-              <div className="camera-hint-roller" aria-label="随手一拍，记录生活；拍照餐食记录热量；识别奶茶咖啡标签、饮料配料成分表记录饮品">
+              <div className="camera-hint-roller" aria-label="随手一拍，记录生活；拍饮食记热量；拍咖啡机记咖啡因；拍奶茶、饮料识别热量">
                 <div className="camera-hint-track">
                   <span>随手一拍，记录生活</span>
-                  <span>拍照餐食记录热量</span>
-                  <span>识别奶茶咖啡标签、<br/>饮料配料成分表记录饮品</span>
+                  <span>拍饮食记热量</span>
+                  <span>拍咖啡机记咖啡因</span>
+                  <span>拍奶茶、饮料识别热量</span>
                   <span aria-hidden="true">随手一拍，记录生活</span>
                 </div>
               </div>
@@ -1036,6 +1123,7 @@ function CameraView({
             <CameraCaptureAnalyzePanel
               phase={analyzePhase}
               progress={analyzeProgress}
+              analyzeMode={analyzeMode}
               errorKind={analyzeErrorKind}
               onRetry={onAnalyzeRetry}
               onRetake={onAnalyzeRetake}
@@ -1253,7 +1341,9 @@ function CameraTransition({
     const preferredConfig = preferredRecognitionMode
       ? CAMERA_RECOGNITION_MODE_MAP[preferredRecognitionMode]
       : null;
-    const photo = preferredConfig
+    const photo = preferredRecognitionMode === 'beverage'
+      ? getNextBeverageOcrDemoPhoto()
+      : preferredConfig
       ? {
           id: `preferred-${preferredConfig.id}`,
           thumb: preferredConfig.capturePhoto,
@@ -1381,6 +1471,7 @@ function CameraTransition({
             analyzeMaxFailures={analyze.maxFailures}
             analyzeExhausted={analyze.isExhausted}
             analyzeErrorKind={analyze.errorKind}
+            analyzeMode={analyze.analyzeMode}
             onAnalyzeRetry={analyze.handleRetry}
             onAnalyzeRetake={handleAnalyzeRetake}
             recognitionResult={recognitionResult}

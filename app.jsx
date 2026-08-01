@@ -1908,12 +1908,10 @@ function App(){
         label:'喝水',
         icon:'beverage',
         buildDetail:(data)=>{
-          const specParts = [
-            data.capacityMl ? `${data.capacityMl}ml` : '',
-            data.iceLevel || '',
-            data.sugarLevel || '',
-          ].filter(Boolean);
-          return `${data.brand || ''}${data.beverageName || ''}${specParts.length ? ` · ${specParts.join('/')}` : ''}`;
+          const name = `${data.brand || ''}${data.beverageName || ''}`.trim()
+            || data.beverageCategory
+            || '饮品';
+          return `${name}${data.capacityMl ? ` · ${data.capacityMl}ml` : ''}`;
         },
         buildAi:(data)=>({
           title:'今日饮水进度',
@@ -1976,9 +1974,9 @@ function App(){
           beverageName:payload.beverageName,
           beverageCategory:payload.beverageCategory,
           capacityMl:payload.capacityMl,
-          iceLevel:payload.iceLevel,
-          sugarLevel:payload.sugarLevel,
-          spec:payload.spec,
+          iceLevel:'',
+          sugarLevel:'',
+          spec:payload.capacityMl ? `${payload.capacityMl}ml` : '',
           calories:payload.calories,
           caffeineMg:payload.caffeineMg,
           inputSource:'camera-beverage',
@@ -2008,19 +2006,14 @@ function App(){
     const amount = Math.max(1, Math.round(Number(payload.capacityMl ?? payload.value) || 300));
     const category = payload.beverageCategory || '水';
     const isWater = category === '水';
-    const isSimpleCategory = isWater;
     const brand = isWater ? '' : (payload.brand || '');
-    const beverageName = isWater ? '白水' : (payload.beverageName || category);
-    const iceLevel = isSimpleCategory ? '' : (payload.iceLevel || '');
-    const sugarLevel = isSimpleCategory ? '' : (payload.sugarLevel || '');
-    const calories = isSimpleCategory ? 0 : (Number(payload.calories) || 0);
-    const caffeineMg = isSimpleCategory ? 0 : (Number(payload.caffeineMg) || 0);
-    const specParts = [
-      `${amount}ml`,
-      iceLevel,
-      sugarLevel,
-    ].filter(Boolean);
-    const recordName = `${brand}${beverageName}`.trim();
+    const beverageName = isWater ? '白水' : (payload.beverageName || '');
+    const iceLevel = '';
+    const sugarLevel = '';
+    const calories = isWater ? 0 : (Number(payload.calories) || 0);
+    const caffeineMg = isWater ? 0 : (Number(payload.caffeineMg) || 0);
+    const specParts = [`${amount}ml`];
+    const recordName = `${brand}${beverageName}`.trim() || category;
     const recordDetail = `${recordName} · ${specParts.join('/')}`;
     if(recordLifeMode === '育儿'){
       handleBabyFeedingQuickSelect({

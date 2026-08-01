@@ -1294,6 +1294,34 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
   }
+  .edit-beverage-nutrition-item {
+    padding: 13px 14px;
+    border-radius: 8px;
+    background: #f8f8fa;
+  }
+  .edit-beverage-nutrition-item span {
+    display: block;
+    margin-bottom: 8px;
+    color: #8e8e93;
+    font-size: 13px;
+  }
+  .edit-beverage-nutrition-item strong {
+    color: #323232;
+    font-size: 19px;
+    font-weight: 600;
+  }
+  .edit-beverage-nutrition-item i {
+    margin-left: 4px;
+    color: #a0a0a5;
+    font-size: 12px;
+    font-style: normal;
+  }
+  .edit-beverage-nutrition-note {
+    grid-column: 1 / -1;
+    margin: -2px 0 0;
+    color: #a0a0a5;
+    font-size: 11px;
+  }
   .edit-photo-record {
     padding: 0 16px 16px;
   }
@@ -3370,9 +3398,8 @@
       const selectedCategory = dailyRecordState.beverageCategory
         || (dailyRecordState.beverageName === '白水' ? '水' : '奶茶');
       const waterSelected = selectedCategory === '水';
-      const simpleSelected = waterSelected;
-      const iceOptions = ['热', '常温', '去冰', '少冰', '正常冰'];
-      const sugarOptions = ['0%', '30%', '50%', '70%', '100%'];
+      const baseCalories = Number(dailyRecordState.calories) || 0;
+      const baseCaffeine = Number(dailyRecordState.caffeineMg) || 0;
       return `
         <section class="edit-diet-card edit-beverage-card">
           <h3 class="edit-diet-title">喝水信息</h3>
@@ -3404,33 +3431,19 @@
             <input id="editBeverageCapacity" class="edit-beverage-range" type="range" min="100" max="1000" step="1" value="${capacity}" aria-label="饮品容量">
             <div class="edit-beverage-range-labels"><span>100</span><span>300</span><span>500</span><span>750</span><span>1000ml</span></div>
           </div>
-          <div class="edit-beverage-segment-group" data-beverage-extra ${simpleSelected ? 'hidden' : ''}>
-            <span class="edit-beverage-segment-label">冰度</span>
-            <div class="edit-beverage-segments" data-beverage-group="iceLevel">
-              ${iceOptions.map(option=>`<button type="button" class="edit-beverage-segment${dailyRecordState.iceLevel === option ? ' active' : ''}" data-value="${option}">${option}</button>`).join('')}
+          <div class="edit-beverage-nutrition" data-beverage-extra ${waterSelected ? 'hidden' : ''}
+            data-base-capacity="${capacity}" data-base-calories="${baseCalories}" data-base-caffeine="${baseCaffeine}">
+            <div class="edit-beverage-nutrition-item">
+              <span>热量</span>
+              <strong id="editBeverageCaloriesValue">${baseCalories}</strong><i>千卡</i>
+              <input type="hidden" class="edit-camera-input" data-field="calories" value="${baseCalories}">
             </div>
-          </div>
-          <div class="edit-beverage-segment-group" data-beverage-extra ${simpleSelected ? 'hidden' : ''}>
-            <span class="edit-beverage-segment-label">糖度</span>
-            <div class="edit-beverage-segments" data-beverage-group="sugarLevel">
-              ${sugarOptions.map(option=>`<button type="button" class="edit-beverage-segment${dailyRecordState.sugarLevel === option ? ' active' : ''}" data-value="${option}">${option}</button>`).join('')}
+            <div class="edit-beverage-nutrition-item">
+              <span>咖啡因</span>
+              <strong id="editBeverageCaffeineValue">${baseCaffeine}</strong><i>毫克</i>
+              <input type="hidden" class="edit-camera-input" data-field="caffeineMg" value="${baseCaffeine}">
             </div>
-          </div>
-          <div class="edit-beverage-nutrition" data-beverage-extra ${simpleSelected ? 'hidden' : ''}>
-            <div class="edit-camera-field">
-              <label for="edit-camera-calories">热量</label>
-              <div class="edit-camera-input-wrap">
-                <input id="edit-camera-calories" class="edit-camera-input" data-field="calories" value="${escapeHtml(dailyRecordState.calories ?? '')}" inputmode="decimal">
-                <span class="edit-camera-unit">千卡</span>
-              </div>
-            </div>
-            <div class="edit-camera-field">
-              <label for="edit-camera-caffeineMg">咖啡因</label>
-              <div class="edit-camera-input-wrap">
-                <input id="edit-camera-caffeineMg" class="edit-camera-input" data-field="caffeineMg" value="${escapeHtml(dailyRecordState.caffeineMg ?? '')}" inputmode="decimal">
-                <span class="edit-camera-unit">毫克</span>
-              </div>
-            </div>
+            <p class="edit-beverage-nutrition-note">热量与咖啡因根据容量自动换算</p>
           </div>
         </section>
       `;
@@ -3481,16 +3494,15 @@
       const activeValue = (key)=>document.querySelector(`#optionList [data-beverage-group="${key}"] .edit-beverage-segment.active`)?.dataset.value || '';
       const beverageCategory = activeValue('beverageCategory') || '水';
       const waterSelected = beverageCategory === '水';
-      const simpleSelected = waterSelected;
       return {
         brand:waterSelected ? '' : valueOf('brand'),
-        beverageName:waterSelected ? '白水' : (valueOf('beverageName') || beverageCategory),
+        beverageName:waterSelected ? '白水' : valueOf('beverageName'),
         beverageCategory,
         capacityMl:Number(document.getElementById('editBeverageCapacity')?.value) || 0,
-        iceLevel:simpleSelected ? '' : activeValue('iceLevel'),
-        sugarLevel:simpleSelected ? '' : activeValue('sugarLevel'),
-        calories:simpleSelected ? 0 : (Number(valueOf('calories').replace(/[^\d.]/g, '')) || 0),
-        caffeineMg:simpleSelected ? 0 : (Number(valueOf('caffeineMg').replace(/[^\d.]/g, '')) || 0),
+        iceLevel:'',
+        sugarLevel:'',
+        calories:waterSelected ? 0 : (Number(valueOf('calories').replace(/[^\d.]/g, '')) || 0),
+        caffeineMg:waterSelected ? 0 : (Number(valueOf('caffeineMg').replace(/[^\d.]/g, '')) || 0),
       };
     }
     return [...document.querySelectorAll('#optionList .edit-camera-input')].reduce((result, input) => {
@@ -3506,13 +3518,29 @@
   function syncBeverageCategoryFields() {
     const category = document.querySelector('#optionList [data-beverage-group="beverageCategory"] .edit-beverage-segment.active')?.dataset.value || '水';
     const waterSelected = category === '水';
-    const simpleSelected = waterSelected;
     document.querySelectorAll('#optionList [data-beverage-identity]').forEach(element => {
       element.hidden = waterSelected;
     });
     document.querySelectorAll('#optionList [data-beverage-extra]').forEach(element => {
-      element.hidden = simpleSelected;
+      element.hidden = waterSelected;
     });
+  }
+
+  function syncBeverageNutritionByCapacity() {
+    const panel = document.querySelector('#optionList .edit-beverage-nutrition');
+    const capacity = Number(document.getElementById('editBeverageCapacity')?.value) || 0;
+    if(!panel || !capacity) return;
+    const baseCapacity = Number(panel.dataset.baseCapacity) || capacity;
+    const calories = Math.round((Number(panel.dataset.baseCalories) || 0) * capacity / baseCapacity);
+    const caffeine = Math.round((Number(panel.dataset.baseCaffeine) || 0) * capacity / baseCapacity);
+    const caloriesInput = panel.querySelector('[data-field="calories"]');
+    const caffeineInput = panel.querySelector('[data-field="caffeineMg"]');
+    if(caloriesInput) caloriesInput.value = calories;
+    if(caffeineInput) caffeineInput.value = caffeine;
+    const caloriesValue = document.getElementById('editBeverageCaloriesValue');
+    const caffeineValue = document.getElementById('editBeverageCaffeineValue');
+    if(caloriesValue) caloriesValue.textContent = calories;
+    if(caffeineValue) caffeineValue.textContent = caffeine;
   }
 
   function renderDailyRecordEditor() {
@@ -3541,9 +3569,7 @@
       `;
       return;
     }
-    const displayLabel = dailyRecordState.recordType === 'beverage' && dailyRecordState.beverageCategory
-      ? `${label}（${dailyRecordState.beverageCategory}）`
-      : label;
+    const displayLabel = label;
     const value = dailyRecordState.recordDetail || dailyRecordState.recordValue || '';
     const iconHtml = renderDailyRecordIconHtml();
     title.textContent = displayLabel;
@@ -3656,6 +3682,7 @@
         const capacityValue = document.getElementById('editBeverageCapacityValue');
         capacityInput?.addEventListener('input', () => {
           capacityValue.textContent = `${capacityInput.value} ml`;
+          syncBeverageNutritionByCapacity();
         });
         document.querySelectorAll('#optionList .edit-beverage-segment').forEach(button => {
           button.addEventListener('click', () => {
@@ -3777,13 +3804,9 @@
         const fields = collectDailyCameraFields();
         Object.assign(dailyRecordState, fields);
         if(dailyRecordState.recordType === 'beverage'){
-          const simpleSelected = fields.beverageCategory === '水';
-          if(fields.beverageCategory !== '水' && !fields.beverageName) return;
-          nextValue = `${fields.brand || ''}${fields.beverageName}`.trim();
+          nextValue = `${fields.brand || ''}${fields.beverageName || ''}`.trim() || fields.beverageCategory;
           const specParts = [
             fields.capacityMl ? `${fields.capacityMl}ml` : '',
-            simpleSelected ? '' : (fields.iceLevel || ''),
-            simpleSelected ? '' : (fields.sugarLevel || ''),
           ].filter(Boolean);
           dailyRecordState.spec = specParts.join(' / ');
           nextDetail = `${nextValue}${specParts.length ? ` · ${specParts.join('/')}` : ''}`;
