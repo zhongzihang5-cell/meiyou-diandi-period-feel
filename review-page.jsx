@@ -1578,44 +1578,1177 @@ function CycleLandscapePage({open, onClose}){
   );
 }
 
-function WeightChart(){
-  const data = [103.3,98.2,101.4,97.6,98.6,97.5,97.9,97.3,96.5,99.4,102.0,100.6,101.6,99.9,101.0,102.1,100.7,101.3,101.9,100.6,101.5,102.0,101.4,101.1];
+const WEIGHT_LINE = '#43D1AC';
+const WEIGHT_TREND_LINE = '#c2c2c8';
+
+/** 近 30 天体重（斤）：波动更大、整体明显下降，末值 101.1 */
+const WEIGHT_CARD_VALUES = [
+  103.8, 103.2, 102.6, 103.4, 102.1, 101.5, 102.8, 103.6, 102.9, 102.0,
+  101.2, 102.4, 103.1, 102.3, 101.0, 100.4, 101.8, 102.6, 101.9, 100.8,
+  100.1, 101.4, 102.2, 101.3, 100.2,  99.6, 100.8, 101.6, 101.0, 101.1,
+];
+const WEIGHT_CARD_AVG = WEIGHT_CARD_VALUES.reduce((s, v)=>s + v, 0) / WEIGHT_CARD_VALUES.length;
+const WEIGHT_CARD_TODAY = new Date(2026, 7, 2); // 2026-08-02
+
+function weightDateLabel(daysAgo, today = WEIGHT_CARD_TODAY){
+  if(daysAgo === 0) return '今天';
+  const d = new Date(today);
+  d.setDate(today.getDate() - daysAgo);
+  return (d.getMonth() + 1) + '/' + d.getDate();
+}
+
+const WEIGHT_CARD_DATES = WEIGHT_CARD_VALUES.map((_, i)=>weightDateLabel(WEIGHT_CARD_VALUES.length - 1 - i));
+const WEIGHT_CARD_LABELS = (()=>{
+  const n = WEIGHT_CARD_VALUES.length;
+  const idxs = [0, 10, 20, n - 1];
+  const map = {};
+  idxs.forEach(i=>{ map[i] = WEIGHT_CARD_DATES[i]; });
+  return map;
+})();
+
+function buildWeightLandscapeRecords(count = 120){
+  let seed = 20260802;
+  const rnd = ()=>{
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / 233280;
+  };
+  const records = [];
+  for(let daysAgo = count - 1; daysAgo >= 0; daysAgo--){
+    let weight;
+    if(daysAgo < WEIGHT_CARD_VALUES.length){
+      weight = WEIGHT_CARD_VALUES[WEIGHT_CARD_VALUES.length - 1 - daysAgo];
+    } else {
+      // 更早：从约 105 缓慢下降到近 30 天起点附近，叠加日常波动
+      const progress = 1 - (daysAgo - WEIGHT_CARD_VALUES.length) / Math.max(1, count - WEIGHT_CARD_VALUES.length);
+      const base = 105.2 - progress * 1.6;
+      const wave = Math.sin(daysAgo * 0.55) * 0.85 + Math.cos(daysAgo * 0.21) * 0.55;
+      const spike = rnd() < 0.12 ? (rnd() * 1.6 - 0.3) : (rnd() * 0.9 - 0.45);
+      weight = Math.round((base + wave + spike) * 10) / 10;
+    }
+    records.push({date: weightDateLabel(daysAgo), weight});
+  }
+  return records;
+}
+
+const WEIGHT_LANDSCAPE_RECORDS = buildWeightLandscapeRecords(400);
+
+function weightBuildXLabels(dates){
+  const n = dates.length;
+  if(n <= 0) return {};
+  const idxs = n <= 4
+    ? dates.map((_, i)=>i)
+    : [0, Math.round((n - 1) / 3), Math.round((n - 1) * 2 / 3), n - 1]
+      .filter((v, i, arr)=>arr.indexOf(v) === i);
+  const map = {};
+  idxs.forEach(i=>{ map[i] = dates[i]; });
+  return map;
+}
+
+function weightSampleRecords(records, step){
+  if(!records.length) return [];
+  const sampled = [];
+  for(let i = 0; i < records.length; i += step) sampled.push(records[i]);
+  const last = records[records.length - 1];
+  if(sampled[sampled.length - 1] !== last) sampled.push(last);
+  return sampled;
+}
+
+function weightTrendSeries(range){
+  if(range === 'd30'){
+    return {
+      values:WEIGHT_CARD_VALUES,
+      dates:WEIGHT_CARD_DATES,
+      labels:WEIGHT_CARD_LABELS,
+    };
+  }
+  let slice = WEIGHT_LANDSCAPE_RECORDS;
+  let step = 10;
+  if(range === 'half'){
+    slice = WEIGHT_LANDSCAPE_RECORDS.slice(-183);
+    step = 7;
+  } else if(range === 'year'){
+    slice = WEIGHT_LANDSCAPE_RECORDS.slice(-365);
+    step = 7;
+  }
+  const sampled = weightSampleRecords(slice, step);
+  const values = sampled.map(r=>r.weight);
+  const dates = sampled.map(r=>r.date);
+  return {values, dates, labels:weightBuildXLabels(dates)};
+}
+
+const WEIGHT_RANGE_META = {
+  d30:{
+    label:'近30天',
+    dateText:'2026年7月4日至8月2日',
+    recordTimes:32,
+    recordDays:28,
+  },
+  half:{
+    label:'近半年',
+    dateText:'2026年2月2日至8月2日',
+    recordTimes:168,
+    recordDays:142,
+  },
+  year:{
+    label:'近一年',
+    dateText:'2025年8月3日至2026年8月2日',
+    recordTimes:320,
+    recordDays:286,
+  },
+  all:{
+    label:'全部',
+    dateText:'2025年6月29日至2026年8月2日',
+    recordTimes:412,
+    recordDays:360,
+  },
+};
+
+function WeightChart({
+  values = WEIGHT_CARD_VALUES,
+  labels = WEIGHT_CARD_LABELS,
+  height = 168,
+  showDots = true,
+  markLast = true,
+  labelToday = false,
+  showExtremes = false,
+  showArea = true,
+  gradientId = 'weightCardArea',
+  ariaLabel = '近30天体重变化趋势曲线',
+}){
+  const data = values;
   const n = data.length;
-  const W = 340, H = 168, padL = 28, padR = 14, padT = 16, padB = 26;
+  const W = 340, H = height;
+  const padL = 28, padR = labelToday ? 22 : 14, padT = (showExtremes || labelToday) ? 28 : 16, padB = 26;
   const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
-  const yMin = 96, yMax = 104;
-  const X = i => x0 + (x1 - x0) * (i / (n - 1));
-  const Y = v => y1 - (v - yMin) / (yMax - yMin) * (y1 - y0);
+  const dataMin = Math.min(...data);
+  const dataMax = Math.max(...data);
+  const pad = Math.max(0.6, (dataMax - dataMin) * 0.18);
+  const yMin = Math.floor(dataMin - pad);
+  const yMax = Math.ceil(dataMax + pad);
+  const mid = Math.round((yMin + yMax) / 2);
+  const yTicks = [yMin, mid, yMax].filter((v, i, arr)=>arr.indexOf(v) === i);
+  const X = i => x0 + (n <= 1 ? 0 : (x1 - x0) * (i / (n - 1)));
+  const Y = v => y1 - (v - yMin) / Math.max(0.1, yMax - yMin) * (y1 - y0);
   const pts = data.map((v, i)=>[X(i), Y(v)]);
-  const labels = {0:'25.12', 11:'26.3', 23:'26.6'};
+  const linePath = reviewSmoothPath(pts);
+  const areaPath = linePath && pts.length
+    ? linePath
+      + ' L' + pts[pts.length - 1][0].toFixed(1) + ' ' + y1.toFixed(1)
+      + ' L' + pts[0][0].toFixed(1) + ' ' + y1.toFixed(1)
+      + ' Z'
+    : '';
+  const trend = reviewLinearTrend(data);
+  const clampY = v => Math.max(y0, Math.min(y1, Y(v)));
+  const strokeW = 2.6;
+  const dotR = 1.9;
+  const lastI = n - 1;
   let maxI = 0, minI = 0;
   data.forEach((v, i)=>{ if(v > data[maxI]) maxI = i; if(v < data[minI]) minI = i; });
+  const extremeMarks = [];
+  if(showExtremes && n > 1){
+    if(maxI !== lastI || !labelToday) extremeMarks.push({i:maxI, key:'max'});
+    if(minI !== maxI && (minI !== lastI || !labelToday)) extremeMarks.push({i:minI, key:'min'});
+  }
   return (
-    <svg viewBox="0 0 340 168" preserveAspectRatio="xMidYMid meet" role="img" aria-label="体重变化趋势曲线">
-      {[98,100,102].map(g=>(
+    <svg viewBox={'0 0 ' + W + ' ' + H} preserveAspectRatio="xMidYMid meet" role="img" aria-label={ariaLabel}>
+      <defs>
+        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={WEIGHT_LINE} stopOpacity="0.24"/>
+          <stop offset="55%" stopColor={WEIGHT_LINE} stopOpacity="0.08"/>
+          <stop offset="100%" stopColor={WEIGHT_LINE} stopOpacity="0.01"/>
+        </linearGradient>
+      </defs>
+      {yTicks.map(g=>(
         <React.Fragment key={g}>
-          <line x1={x0} y1={Y(g)} x2={x1} y2={Y(g)} stroke="rgba(0,0,0,0.05)" strokeWidth="1"/>
+          <line
+            x1={x0}
+            y1={Y(g)}
+            x2={x1}
+            y2={Y(g)}
+            stroke="rgba(0,0,0,0.05)"
+            strokeWidth="1"
+            strokeDasharray="3 4"
+          />
           <text x={x0 - 5} y={Y(g) + 3} textAnchor="end" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{g}</text>
         </React.Fragment>
       ))}
-      <path d={reviewSmoothPath(pts)} fill="none" stroke="#4f7cae" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round"/>
-      {data.map((v, i)=>{
-        const isMax = i === maxI;
-        const isMin = i === minI;
-        const isLast = i === n - 1;
+      {n >= 2 ? (
+        <line
+          x1={X(0)}
+          y1={clampY(trend.a)}
+          x2={X(n - 1)}
+          y2={clampY(trend.a + trend.b * (n - 1))}
+          stroke={WEIGHT_TREND_LINE}
+          strokeWidth="1.5"
+          strokeDasharray="4 3"
+          strokeLinecap="round"
+        />
+      ) : null}
+      {showArea && areaPath ? <path d={areaPath} fill={'url(#' + gradientId + ')'} stroke="none"/> : null}
+      <path d={linePath} fill="none" stroke={WEIGHT_LINE} strokeWidth={strokeW} strokeLinejoin="round" strokeLinecap="round"/>
+      {showDots ? pts.map((p, i)=>{
+        if(markLast && i === lastI) return null;
+        if(extremeMarks.some(m=>m.i === i)) return null;
         return (
-          <React.Fragment key={i}>
-            <circle cx={X(i)} cy={Y(v)} r={isMax || isMin ? 4 : (isLast ? 4.5 : 2.2)} fill="#4f7cae" stroke={isMax || isMin || isLast ? '#fff' : 'none'} strokeWidth={isLast ? 2 : 1.5}/>
-            {isMax ? <text x={X(i) + 7} y={Y(v) + 3} textAnchor="start" fontSize="9.5" fontWeight="600" fill="#4f7cae" fontFamily="PingFang SC">{reviewFmt1(v)}斤 最高</text> : null}
-            {isMin ? <text x={X(i)} y={Y(v) + 16} textAnchor="middle" fontSize="9.5" fontWeight="600" fill="#4f7cae" fontFamily="PingFang SC">{reviewFmt1(v)}斤 最低</text> : null}
-            {isLast ? <text x={X(i)} y={Y(v) - 8} textAnchor="end" fontSize="9.5" fontWeight="600" fill="#4f7cae" fontFamily="PingFang SC">{reviewFmt1(v)}斤</text> : null}
+          <circle
+            key={i}
+            cx={p[0]}
+            cy={p[1]}
+            r={dotR}
+            fill={WEIGHT_LINE}
+            opacity="0.88"
+          />
+        );
+      }) : null}
+      {extremeMarks.map(mark=>{
+        const isMin = mark.key === 'min';
+        const cx = X(mark.i);
+        const cy = Y(data[mark.i]);
+        const labelY = isMin ? Math.min(H - 12, cy + 14) : Math.max(12, cy - 10);
+        return (
+          <React.Fragment key={mark.key}>
+            <circle cx={cx} cy={cy} r="3.2" fill={WEIGHT_LINE}/>
+            <text
+              x={cx}
+              y={labelY}
+              textAnchor="middle"
+              fontSize="10"
+              fontWeight="500"
+              fill={WEIGHT_LINE}
+              fontFamily="PingFang SC"
+            >{reviewFmt1(data[mark.i])}斤</text>
           </React.Fragment>
         );
       })}
+      {markLast && n > 0 ? (
+        <React.Fragment>
+          <circle
+            cx={X(lastI)}
+            cy={Y(data[lastI])}
+            r={labelToday ? 4.6 : 2.6}
+            fill={labelToday ? '#fff' : WEIGHT_LINE}
+            stroke={WEIGHT_LINE}
+            strokeWidth={labelToday ? 2.2 : 0}
+          />
+          {labelToday ? (
+            <text
+              x={X(lastI)}
+              y={Math.max(13, Y(data[lastI]) - 12)}
+              textAnchor="middle"
+              fontSize="11"
+              fontWeight="500"
+              fill={WEIGHT_LINE}
+              fontFamily="PingFang SC"
+            >{reviewFmt1(data[lastI])}斤</text>
+          ) : null}
+        </React.Fragment>
+      ) : null}
       {Object.keys(labels).map(k=>(
-        <text key={k} x={X(+k)} y={H - 8} textAnchor="middle" fontSize="9" fill="#bbbbbf" fontFamily="PingFang SC">{labels[k]}</text>
+        <text
+          key={k}
+          x={X(+k)}
+          y={H - 8}
+          textAnchor="middle"
+          fontSize="9"
+          fill="#bbbbbf"
+          fontFamily="PingFang SC"
+          fontWeight="400"
+        >{labels[k]}</text>
       ))}
     </svg>
+  );
+}
+
+function ExpandedWeightChart(){
+  const records = WEIGHT_LANDSCAPE_RECORDS;
+  const vals = records.map(r=>r.weight);
+  const n = vals.length;
+  const W = Math.max(1160, n * 22);
+  const H = 250;
+  const padL = 40, padR = 34, padT = 18, padB = 32;
+  const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
+  const dataMin = Math.min(...vals);
+  const dataMax = Math.max(...vals);
+  const pad = Math.max(0.8, (dataMax - dataMin) * 0.12);
+  const yMin = Math.floor(dataMin - pad);
+  const yMax = Math.ceil(dataMax + pad);
+  const tickStep = Math.max(1, Math.round((yMax - yMin) / 3));
+  const yTicks = [];
+  for(let t = yMin; t <= yMax; t += tickStep) yTicks.push(t);
+  if(yTicks[yTicks.length - 1] !== yMax) yTicks.push(yMax);
+  const X = i => x0 + (n <= 1 ? 0 : (x1 - x0) * (i / (n - 1)));
+  const Y = v => y1 - (v - yMin) / Math.max(0.1, yMax - yMin) * (y1 - y0);
+  const pts = vals.map((v, i)=>[X(i), Y(v)]);
+  const path = reviewSmoothPath(pts);
+  const areaPath = path
+    ? path
+      + ' L' + pts[pts.length - 1][0].toFixed(1) + ' ' + y1.toFixed(1)
+      + ' L' + pts[0][0].toFixed(1) + ' ' + y1.toFixed(1)
+      + ' Z'
+    : '';
+  const trend = reviewLinearTrend(vals);
+  const clampY = v => Math.max(y0, Math.min(y1, Y(v)));
+  const labelIndexes = records.map((_r, i)=>i).filter(i=>i % 5 === 0 || i === n - 1);
+  const last = pts[n - 1];
+
+  return (
+    <svg
+      viewBox={'0 0 ' + W + ' ' + H}
+      style={{width:W + 'px'}}
+      preserveAspectRatio="none"
+      role="img"
+      aria-label="全部体重记录趋势曲线"
+    >
+      <defs>
+        <linearGradient id="weightLandscapeArea" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={WEIGHT_LINE} stopOpacity="0.22"/>
+          <stop offset="55%" stopColor={WEIGHT_LINE} stopOpacity="0.07"/>
+          <stop offset="100%" stopColor={WEIGHT_LINE} stopOpacity="0.01"/>
+        </linearGradient>
+      </defs>
+      {yTicks.map(g=>(
+        <React.Fragment key={g}>
+          <line x1={x0} y1={Y(g)} x2={x1} y2={Y(g)} stroke="rgba(0,0,0,0.05)" strokeWidth="1" strokeDasharray="3 4"/>
+          <text x={x0 - 8} y={Y(g) + 3.5} textAnchor="end" fontSize="10" fill="#bbbbbf" fontFamily="PingFang SC">{g}</text>
+        </React.Fragment>
+      ))}
+      {n >= 2 ? (
+        <line
+          x1={X(0)}
+          y1={clampY(trend.a)}
+          x2={X(n - 1)}
+          y2={clampY(trend.a + trend.b * (n - 1))}
+          stroke={WEIGHT_TREND_LINE}
+          strokeWidth="1.5"
+          strokeDasharray="4 3"
+          strokeLinecap="round"
+        />
+      ) : null}
+      {areaPath ? <path d={areaPath} fill="url(#weightLandscapeArea)" stroke="none"/> : null}
+      <path d={path} fill="none" stroke={WEIGHT_LINE} strokeWidth="2.6" strokeLinejoin="round" strokeLinecap="round"/>
+      {pts.map((p, i)=>{
+        if(i === n - 1) return null;
+        if(i % 2 !== 0) return null;
+        return <circle key={i} cx={p[0]} cy={p[1]} r="1.8" fill={WEIGHT_LINE} opacity="0.85"/>;
+      })}
+      {last ? <circle cx={last[0]} cy={last[1]} r="3.2" fill={WEIGHT_LINE}/> : null}
+      {last ? (
+        <text
+          x={last[0]}
+          y={last[1] - 10}
+          textAnchor="end"
+          fontSize="11"
+          fontWeight="500"
+          fill={WEIGHT_LINE}
+          fontFamily="PingFang SC"
+        >{reviewFmt1(vals[n - 1])}斤</text>
+      ) : null}
+      {labelIndexes.map(i=>(
+        <text
+          key={i}
+          x={X(i)}
+          y={H - 10}
+          textAnchor="middle"
+          fontSize="10"
+          fill="#bbbbbf"
+          fontFamily="PingFang SC"
+          fontWeight="400"
+        >{records[i].date}</text>
+      ))}
+    </svg>
+  );
+}
+
+function WeightLandscapePage({open, onClose}){
+  const scrollerRef = React.useRef(null);
+
+  React.useEffect(()=>{
+    if(!open) return undefined;
+    const scroller = scrollerRef.current;
+    if(scroller) scroller.scrollLeft = scroller.scrollWidth;
+    const handleKeyDown = event=>{ if(event.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handleKeyDown);
+    return ()=>document.removeEventListener('keydown', handleKeyDown);
+  }, [open, onClose]);
+
+  return (
+    <section
+      className={'review-cycle-landscape' + (open ? ' is-open' : '')}
+      aria-hidden={!open}
+      role="dialog"
+      aria-modal="true"
+      aria-label="全部体重记录横屏图表"
+    >
+      <div className="review-cycle-landscape-surface">
+        <header className="review-cycle-landscape-head">
+          <div>
+            <h2>全部体重记录</h2>
+            <p>共 {WEIGHT_LANDSCAPE_RECORDS.length} 天 · 左右滑动查看</p>
+          </div>
+          <button type="button" className="review-cycle-landscape-close" aria-label="关闭横屏图表" onClick={onClose}>×</button>
+        </header>
+        <div className="review-cycle-landscape-legend">
+          <span className="review-legend-item is-weight"><i></i>体重（斤）</span>
+          <span className="review-legend-item is-trend"><i></i>趋势</span>
+          <span className="review-cycle-landscape-tip">← 滑动查看更多 →</span>
+        </div>
+        <div className="review-cycle-landscape-scroll" ref={scrollerRef}>
+          <ExpandedWeightChart/>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function WeightReviewCard({onOpen, onLandscapeOpen}){
+  const weightLast = WEIGHT_CARD_VALUES[WEIGHT_CARD_VALUES.length - 1];
+  return (
+    <ReviewCard
+      title="体重"
+      iconClass="is-weight"
+      icon={<ReviewScaleIcon/>}
+      headAction={typeof onLandscapeOpen === 'function' ? (
+        <button
+          type="button"
+          className="review-cycle-expand-btn"
+          aria-label="横屏展开全部体重"
+          onKeyDown={event=>event.stopPropagation()}
+          onClick={event=>{
+            event.stopPropagation();
+            onLandscapeOpen();
+          }}
+        >
+          <ReviewExpandIcon/>
+        </button>
+      ) : null}
+      chart={<WeightChart labelToday/>}
+      legend={(
+        <>
+          <span className="review-legend-item is-weight"><i></i>体重（斤）</span>
+          <span className="review-legend-item is-trend"><i></i>趋势</span>
+        </>
+      )}
+      metrics={(
+        <>
+          <ReviewMetric value={reviewFmt1(weightLast)} unit="斤" label="最近体重"/>
+          <ReviewMetric value={reviewFmt1(WEIGHT_CARD_AVG)} unit="斤" label="近30天均值"/>
+          <ReviewMetric value="↘ 下降" label="整体趋势" trend tone="weight-down"/>
+        </>
+      )}
+      more="查看完整体重变化"
+      onOpen={onOpen}
+    />
+  );
+}
+
+/** 折线图下方数据模块：BMI 指数 + 体重记录概览 */
+function WeightTrendSummary({range = 'd30'}){
+  const meta = WEIGHT_RANGE_META[range] || WEIGHT_RANGE_META.d30;
+  const series = weightTrendSeries(range);
+  const latestJin = series.values[series.values.length - 1] || WEIGHT_CARD_VALUES[WEIGHT_CARD_VALUES.length - 1];
+  const bmi = weightJinToBmi(latestJin);
+  const dropJin = 2.5;
+  return (
+    <div className="review-mood-trend-block">
+      <div className="review-mood-trend-head-main">
+        <div className="review-mood-trend-title review-mood-section-title">体重趋势</div>
+        <div className="review-mood-trend-range">{meta.dateText}</div>
+      </div>
+      <div className="review-chart review-detail-chart review-mood-trend-chart">
+        <WeightChart
+          values={series.values}
+          labels={series.labels}
+          showExtremes
+          labelToday
+          markLast
+          showDots
+          showArea
+          gradientId={'weightDetailArea-' + range}
+          ariaLabel={meta.label + '体重趋势'}
+        />
+      </div>
+      <div className="review-legend">
+        <span className="review-legend-item is-weight"><i></i>体重（斤）</span>
+        <span className="review-legend-item is-trend"><i></i>趋势</span>
+      </div>
+      <div className="review-mood-trend-foot">
+        <WeightBmiIndexCard bmi={bmi}/>
+        <div className="review-mood-trend-insight-row review-weight-stat-row">
+          <div className="review-mood-trend-record-card review-weight-stat-card">
+            <span className="review-mood-trend-record-card-title">体重记录</span>
+            <p><b>{meta.recordTimes}</b><em>次</em></p>
+          </div>
+          <div className="review-mood-trend-record-card review-weight-stat-card">
+            <span className="review-mood-trend-record-card-title">记录天数</span>
+            <p><b>{meta.recordDays}</b><em>天</em></p>
+          </div>
+          <div className="review-mood-trend-record-card review-weight-stat-card is-vs-baseline">
+            <span className="review-mood-trend-record-card-title">比8月1日</span>
+            <p>
+              <b>-{reviewFmt1(dropJin)}</b>
+              <em>斤</em>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** 蓝/黄/红沿用心情三档，绿色自选 */
+const WEIGHT_BMI_ZONE = [
+  {key:'thin', label:'偏瘦', color:'#8EC4F8', max:18.5},
+  {key:'normal', label:'正常', color:WEIGHT_LINE, max:24},
+  {key:'over', label:'超重', color:'#FFD966', max:28},
+  {key:'obese', label:'肥胖', color:'#FF9EB0', max:Infinity},
+];
+
+function weightBmiZone(bmi){
+  return WEIGHT_BMI_ZONE.find(z=>bmi < z.max) || WEIGHT_BMI_ZONE[WEIGHT_BMI_ZONE.length - 1];
+}
+
+/** 四段等宽映射；正常区间略向右内缩，避免贴着 18 刻度 */
+function weightBmiMarkerPct(bmi){
+  const v = Number(bmi) || 0;
+  if(v < 18.5) return Math.max(0, Math.min(23, ((v - 14) / (18.5 - 14)) * 23));
+  if(v < 24){
+    const t = (v - 18.5) / (24 - 18.5);
+    // 正常段从约 30% 起排，拉开与 18 刻度的距离
+    return 30 + t * 18;
+  }
+  if(v < 28) return 50 + ((v - 24) / (28 - 24)) * 25;
+  return 75 + Math.min(25, ((v - 28) / (34 - 28)) * 25);
+}
+
+function WeightBmiIndexCard({bmi = 19.5}){
+  const zone = weightBmiZone(bmi);
+  const markerPct = weightBmiMarkerPct(bmi);
+  const bmiText = Number(bmi).toFixed(1);
+  const ticks = [
+    {value:'18', left:'25%'},
+    {value:'24', left:'50%'},
+    {value:'28', left:'75%'},
+  ];
+  return (
+    <div className="review-mood-trend-tri review-weight-bmi-card">
+      <div className="review-mood-trend-tri-head">
+        <span>BMI 指数</span>
+      </div>
+      <div className="review-weight-bmi-scale" aria-label={'当前 BMI ' + bmiText + '，' + zone.label}>
+        <div className="review-weight-bmi-ticks" aria-hidden="true">
+          {ticks.map(t=>(
+            <em key={t.value} style={{left:t.left}}>{t.value}</em>
+          ))}
+        </div>
+        <div className="review-weight-bmi-track-wrap">
+          <div className="review-mood-trend-tri-track review-weight-bmi-track">
+            {WEIGHT_BMI_ZONE.map(item=>(
+              <i key={item.key} style={{width:'25%', background:item.color}}/>
+            ))}
+          </div>
+          <span
+            className="review-weight-bmi-marker"
+            style={{left:markerPct + '%', borderColor:zone.color, background:zone.color, color:zone.color}}
+          >
+            <em>{bmiText}</em>
+          </span>
+        </div>
+      </div>
+      <div className="review-mood-trend-tri-legend">
+        {WEIGHT_BMI_ZONE.map(item=>(
+          <span key={item.key}>
+            <i style={{background:item.color}}/>
+            <em>{item.label}</em>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// 周期体重曲线：y 越小越靠上（体重越高）；完整周期 4 锚点，进行中止于当前阶段
+const WEIGHT_CYCLE_SPARK_ROWS = [
+  {
+    key:'w1',
+    cycleLabel:'上上周期',
+    range:'5/4~6/1',
+    anchors:[{y:22, v:102.4}, {y:38, v:100.8}, {y:52, v:99.2}, {y:18, v:102.8}],
+    ongoing:false,
+  },
+  {
+    key:'w2',
+    cycleLabel:'上周期',
+    range:'6/2~6/29',
+    anchors:[{y:26, v:101.9}, {y:42, v:100.4}, {y:48, v:99.6}, {y:16, v:103.1}],
+    ongoing:false,
+  },
+  {
+    key:'w3',
+    cycleLabel:'本周期',
+    range:'6/30～今天',
+    anchors:[{y:24, v:102.1}, {y:40, v:100.6}],
+    ongoing:true,
+  },
+];
+
+function WeightCycleSparkLine({row}){
+  const anchors = row.anchors || [];
+  const n = anchors.length;
+  const color = WEIGHT_LINE;
+  const pts = anchors.map((a, i)=>({
+    x:MOOD_X_ANCHOR_XS[i],
+    y:a.y,
+    v:a.v,
+    color,
+  }));
+  const first = pts[0];
+  const last = pts[n - 1];
+  const pathPts = [];
+  if(first){
+    pathPts.push({x:0, y:first.y + 8});
+    pathPts.push(...pts);
+    if(!row.ongoing && last){
+      pathPts.push({x:MOOD_X_W, y:last.y + 5});
+    }
+  }
+  const path = moodXCycleCurve(pathPts);
+  const strokeGradId = 'weightXStroke-' + row.key;
+  const fillGradId = 'weightXFill-' + row.key;
+  const endPt = pathPts[pathPts.length - 1];
+  const startPt = pathPts[0];
+  const area = path && startPt && endPt
+    ? path
+      + ' L' + endPt.x.toFixed(2) + ' ' + MOOD_X_BASE_Y
+      + ' L' + startPt.x.toFixed(2) + ' ' + MOOD_X_BASE_Y
+      + ' Z'
+    : '';
+  return (
+    <svg
+      className="review-mood-x-cycle-svg"
+      viewBox={'0 0 ' + MOOD_X_W + ' ' + MOOD_X_H}
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
+      <defs>
+        <linearGradient id={strokeGradId} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor={color} stopOpacity="0.75"/>
+          <stop offset="1" stopColor={color}/>
+        </linearGradient>
+        <linearGradient id={fillGradId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor={color} stopOpacity="0.22"/>
+          <stop offset="1" stopColor={color} stopOpacity="0.02"/>
+        </linearGradient>
+      </defs>
+      {MOOD_X_DIVIDER_XS.map((x, i)=>(
+        <line
+          key={row.key + '-div' + i}
+          x1={x}
+          y1="7"
+          x2={x}
+          y2={MOOD_X_BASE_Y}
+          stroke="rgba(0,0,0,0.14)"
+          strokeWidth="1"
+          strokeDasharray="3 4"
+        />
+      ))}
+      {area ? <path d={area} fill={'url(#' + fillGradId + ')'}/> : null}
+      {path ? (
+        <path
+          d={path}
+          fill="none"
+          stroke={'url(#' + strokeGradId + ')'}
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      ) : null}
+      {pts.map((p, i)=>{
+        const isBreath = row.ongoing && i === n - 1;
+        if(isBreath){
+          return (
+            <g key={row.key + '-b' + i} className="review-mood-x-breath" transform={'translate(' + p.x + ' ' + p.y + ')'}>
+              <g className="review-mood-x-breath-pulse">
+                <circle cx="0" cy="0" r="6" fill={p.color}/>
+              </g>
+              <circle cx="0" cy="0" r="5" fill={p.color} stroke="#fff" strokeWidth="2"/>
+            </g>
+          );
+        }
+        const labelAbove = p.y > 22;
+        const labelY = labelAbove ? p.y - 7 : p.y + 11;
+        return (
+          <g key={row.key + '-d' + i}>
+            <circle
+              cx={p.x}
+              cy={p.y}
+              r="4"
+              fill={p.color}
+            />
+            {p.v != null ? (
+              <text
+                x={p.x}
+                y={labelY}
+                textAnchor="middle"
+                fontSize="9"
+                fontWeight="500"
+                fill={WEIGHT_LINE}
+                fontFamily="PingFang SC, -apple-system, sans-serif"
+              >{Number(p.v).toFixed(1)}</text>
+            ) : null}
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+function WeightCycleCompareChart(){
+  return (
+    <div className="review-mood-x-cycle" aria-label="近三个周期体重曲线">
+      <div className="review-mood-x-cycle-title">最近3次月经周期体重规律</div>
+      <div className="review-mood-x-cycle-rows">
+        {WEIGHT_CYCLE_SPARK_ROWS.map(row=>(
+          <div className={'review-mood-x-cycle-row' + (row.ongoing ? ' is-ongoing' : '')} key={row.key}>
+            <div className="review-mood-x-cycle-meta">
+              <strong>{row.cycleLabel}</strong>
+              <span>{row.range}</span>
+            </div>
+            <div className="review-mood-x-cycle-plot">
+              <WeightCycleSparkLine row={row}/>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="review-mood-x-cycle-phases" aria-hidden="true">
+        {MOOD_CYCLE_PHASE_LABELS.map(label=>(
+          <span key={label}>{label}</span>
+        ))}
+      </div>
+      <div className="review-legend review-mood-x-cycle-legend" aria-hidden="true">
+        <span className="review-legend-item is-weight-fill"><i></i>体重走势</span>
+      </div>
+    </div>
+  );
+}
+
+const WEIGHT_TRAJ_DAYS = 28;
+const WEIGHT_TRAJ_MIN = 98;
+const WEIGHT_TRAJ_MAX = 103;
+const WEIGHT_TRAJ_Y_LABELS = [
+  {label:'103', v:103},
+  {label:'100.5', v:100.5},
+  {label:'98', v:98},
+];
+// 月经期偏高 → 卵泡下降 → 排卵最低 → 黄体回升（水钠潴留）
+const WEIGHT_TRAJ_POINTS = [
+  {day:1, v:101.9},
+  {day:3, v:101.4},
+  {day:5, v:100.8},
+  {day:7, v:100.2},
+  {day:9, v:99.6},
+  {day:11, v:99.1},
+  {day:13, v:98.7},
+  {day:14, v:98.5},
+  {day:16, v:99.0},
+  {day:18, v:99.8},
+  {day:20, v:100.6},
+  {day:22, v:101.4},
+  {day:24, v:102.1},
+  {day:26, v:102.4},
+  {day:28, v:101.8},
+];
+
+function weightTrajY(v, top, bot){
+  const t = (WEIGHT_TRAJ_MAX - Math.max(WEIGHT_TRAJ_MIN, Math.min(WEIGHT_TRAJ_MAX, v)))
+    / (WEIGHT_TRAJ_MAX - WEIGHT_TRAJ_MIN);
+  return top + t * (bot - top);
+}
+
+function WeightPhaseDistChart({expanded = false} = {}){
+  const uid = expanded ? 'Exp' : '';
+  const W = expanded ? 760 : 360, H = 300;
+  const padL = 14, padR = 16, padT = 36, padB = 26;
+  const x0 = padL, x1 = W - padR;
+  const plotW = x1 - x0;
+  const dayW = plotW / (WEIGHT_TRAJ_DAYS - 1);
+  const weightTop = padT;
+  const weightBot = 156;
+  const hormTop = 176;
+  const hormBot = H - padB;
+  const X = day => x0 + ((day - 1) / (WEIGHT_TRAJ_DAYS - 1)) * plotW;
+  const phaseLeft = ph => X(ph.start) - (ph.start === 1 ? 0 : dayW / 2);
+  const phaseRight = ph => X(ph.end) + (ph.end === WEIGHT_TRAJ_DAYS ? 0 : dayW / 2);
+  const WY = v => weightTrajY(v, weightTop, weightBot);
+  const hormY = v => hormTop + (1 - Math.max(0, Math.min(1, v))) * (hormBot - hormTop);
+  const days = [];
+  for(let d = 1; d <= WEIGHT_TRAJ_DAYS; d++) days.push(d);
+  const e2Pts = days.map(d => ({x:X(d), y:hormY(moodTrajEstrogen(d))}));
+  const p4Pts = days.map(d => ({x:X(d), y:hormY(moodTrajProgesterone(d))}));
+  const weightPts = WEIGHT_TRAJ_POINTS.map(p => ({...p, x:X(p.day), y:WY(p.v)}));
+  const e2Line = moodTrajSmoothLine(e2Pts);
+  const p4Line = moodTrajSmoothLine(p4Pts);
+  const weightLine = moodTrajSmoothLine(weightPts);
+  const toArea = (line, pts, baseY) => {
+    const last = pts[pts.length - 1];
+    const first = pts[0];
+    return line + ' L ' + last.x.toFixed(2) + ' ' + baseY.toFixed(2)
+      + ' L ' + first.x.toFixed(2) + ' ' + baseY.toFixed(2) + ' Z';
+  };
+  const yAxisTicks = WEIGHT_TRAJ_Y_LABELS.map(item=>({
+    ...item,
+    top:WY(item.v),
+  }));
+  const midY = (weightBot + hormTop) / 2;
+  const phases = MOOD_TRAJ_PHASES;
+  return (
+    <div className={'review-mood-traj review-weight-traj' + (expanded ? ' is-expanded' : '')}>
+      <div className="review-mood-traj-plot">
+        <div className="review-mood-traj-yaxis" aria-hidden="true">
+          {yAxisTicks.map(item=>(
+            <span
+              key={item.label}
+              style={{top:item.top + 'px', color:WEIGHT_LINE}}
+            >{item.label}</span>
+          ))}
+        </div>
+        <div className="review-mood-traj-scroll" aria-label="左右滑动查看完整周期">
+          <div className="review-mood-traj-canvas">
+            <svg viewBox={'0 0 ' + W + ' ' + H} preserveAspectRatio="xMidYMid meet" role="img" aria-label="本周期体重变化与激素轨迹">
+              <defs>
+                <linearGradient id={'weightTrajFill' + uid} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stopColor={WEIGHT_LINE} stopOpacity="0.28"/>
+                  <stop offset="1" stopColor={WEIGHT_LINE} stopOpacity="0.02"/>
+                </linearGradient>
+                <linearGradient id={'weightTrajE2Fill' + uid} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stopColor={MOOD_TRAJ_E2} stopOpacity="0.35"/>
+                  <stop offset="1" stopColor={MOOD_TRAJ_E2} stopOpacity="0.02"/>
+                </linearGradient>
+                <linearGradient id={'weightTrajP4Fill' + uid} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stopColor={MOOD_TRAJ_P4} stopOpacity="0.32"/>
+                  <stop offset="1" stopColor={MOOD_TRAJ_P4} stopOpacity="0.02"/>
+                </linearGradient>
+                <clipPath id={'weightTrajWeightClip' + uid}>
+                  <rect x={x0} y={weightTop} width={plotW} height={weightBot - weightTop}/>
+                </clipPath>
+                <clipPath id={'weightTrajHormClip' + uid}>
+                  <rect x={x0} y={hormTop} width={plotW} height={hormBot - hormTop}/>
+                </clipPath>
+              </defs>
+
+              {phases.map(ph=>{
+                const left = phaseLeft(ph);
+                const right = phaseRight(ph);
+                return (
+                  <rect
+                    key={'bg-' + ph.key}
+                    x={left}
+                    y={weightTop}
+                    width={Math.max(2, right - left)}
+                    height={hormBot - weightTop}
+                    fill={ph.bg}
+                  />
+                );
+              })}
+
+              <g clipPath={'url(#weightTrajWeightClip' + uid + ')'}>
+                <path d={toArea(weightLine, weightPts, weightBot)} fill={'url(#weightTrajFill' + uid + ')'}/>
+                <path d={weightLine} fill="none" stroke={WEIGHT_LINE} strokeWidth="2.4" strokeLinejoin="round" strokeLinecap="round"/>
+              </g>
+              {weightPts.map((p, i)=>{
+                const labelAbove = p.y > weightTop + 14;
+                const labelY = labelAbove ? p.y - 8 : p.y + 12;
+                const isFirst = i === 0;
+                const isLast = i === weightPts.length - 1;
+                const textAnchor = isFirst ? 'start' : (isLast ? 'end' : 'middle');
+                const labelX = isFirst ? p.x + 4 : (isLast ? p.x - 4 : p.x);
+                return (
+                  <g key={'wd' + i}>
+                    <circle
+                      cx={p.x}
+                      cy={p.y}
+                      r="3"
+                      fill={WEIGHT_LINE}
+                      stroke="#fff"
+                      strokeWidth="1.2"
+                    />
+                    <text
+                      x={labelX}
+                      y={labelY}
+                      textAnchor={textAnchor}
+                      fontSize="8.5"
+                      fontWeight="500"
+                      fill={WEIGHT_LINE}
+                      fontFamily="PingFang SC, -apple-system, sans-serif"
+                    >{Number(p.v).toFixed(1)}</text>
+                  </g>
+                );
+              })}
+
+              <g clipPath={'url(#weightTrajHormClip' + uid + ')'}>
+                <path d={toArea(e2Line, e2Pts, hormBot)} fill={'url(#weightTrajE2Fill' + uid + ')'}/>
+                <path d={toArea(p4Line, p4Pts, hormBot)} fill={'url(#weightTrajP4Fill' + uid + ')'}/>
+                <path d={e2Line} fill="none" stroke={MOOD_TRAJ_E2} strokeWidth="1.6" strokeLinejoin="round" strokeLinecap="round"/>
+                <path d={p4Line} fill="none" stroke={MOOD_TRAJ_P4} strokeWidth="1.6" strokeLinejoin="round" strokeLinecap="round"/>
+              </g>
+
+              <line x1={x0} y1={midY} x2={x1} y2={midY} stroke="rgba(0,0,0,0.08)" strokeWidth="1"/>
+              <text
+                x={x0 + 2}
+                y={midY + 14}
+                textAnchor="start"
+                fontSize="9"
+                fill="rgba(0,0,0,0.35)"
+                fontFamily="PingFang SC, -apple-system, sans-serif"
+              >激素解读</text>
+
+              <line x1={x0} y1={hormBot} x2={x1} y2={hormBot} stroke="rgba(0,0,0,0.08)" strokeWidth="1"/>
+              {phases.map(ph=>{
+                const cx = (phaseLeft(ph) + phaseRight(ph)) / 2;
+                return (
+                  <text
+                    key={'x-' + ph.key}
+                    x={cx}
+                    y={H - 8}
+                    textAnchor="middle"
+                    fontSize="11"
+                    fill={ph.color}
+                    fontFamily="PingFang SC, -apple-system, sans-serif"
+                  >{ph.label}</text>
+                );
+              })}
+            </svg>
+          </div>
+        </div>
+      </div>
+      {expanded ? null : (
+        <div className="review-mood-traj-legend" aria-hidden="true">
+          <span><i className="is-weight"/>体重（斤）</span>
+          <span><i className="is-e2"/>雌激素 E2</span>
+          <span><i className="is-p4"/>孕激素 P4</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function WeightCycleCombinedCard({onExpand, showCompare = true, showPhase = true}){
+  if(!showCompare && !showPhase) return null;
+  return (
+    <div className="review-love-cycle-combined-wrap">
+      <div className="review-love-trend-title">月经周期与体重</div>
+      <div className="review-detail-card review-love-mini-card review-love-cycle-combined">
+        {showCompare ? (
+          <div className="review-love-cycle-block">
+            <WeightCycleCompareChart/>
+            <div className="review-love-insight">
+              最近 2 个完整周期里，体重都呈现出相似节奏：<b>排卵前后</b>相对偏低，进入<b>黄体期</b>后逐渐回升。当前周期也延续这一趋势，波动多与周期内的水钠潴留有关，不必过度焦虑。
+            </div>
+          </div>
+        ) : null}
+        {showCompare && showPhase ? <div className="review-love-cycle-divider" aria-hidden="true"/> : null}
+        {showPhase ? (
+          <div className="review-love-cycle-block review-mood-traj-block review-weight-traj-block">
+            <div className="review-love-cycle-subhead review-cycle-subhead-expand-row">
+              <span>本周期体重变化</span>
+              {typeof onExpand === 'function' && (
+                <button type="button" className="review-cycle-card-expand-btn" aria-label="全屏查看本周期体重变化" onClick={onExpand}>
+                  <ReviewExpandIcon/>
+                </button>
+              )}
+            </div>
+            <WeightPhaseDistChart/>
+            <div className="review-love-insight">
+              本周期体重变化可能与激素节奏有关。<b>雌激素</b>升高阶段身体更易排水、体重偏轻；进入<b>黄体期</b>后，<b>孕激素</b>上升常伴随轻度水肿，体重短暂回升很常见。了解阶段规律，有助于更平和地看待数字波动。
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function WeightDetailBody({range, onExpandPhase}){
+  return (
+    <>
+      <WeightTrendSummary range={range}/>
+      <div className="review-mood-detail-lower">
+        {range === 'd30' ? (
+          <WeightCycleCombinedCard onExpand={onExpandPhase} showCompare={false} showPhase/>
+        ) : null}
+        {range === 'half' ? (
+          <WeightCycleCombinedCard showCompare showPhase={false}/>
+        ) : null}
+      </div>
+    </>
+  );
+}
+
+function WeightDetailPage({open, onClose}){
+  const [range, setRange] = React.useState('d30');
+  const [phaseLandscapeOpen, setPhaseLandscapeOpen] = React.useState(false);
+  const [allRecordsOpen, setAllRecordsOpen] = React.useState(false);
+  const ranges = [
+    {key:'d30', label:'近30天'},
+    {key:'half', label:'近半年'},
+    {key:'year', label:'近一年'},
+    {key:'all', label:'全部'},
+  ];
+  const nestedOpen = phaseLandscapeOpen || allRecordsOpen;
+  React.useEffect(()=>{
+    if(!open){
+      setPhaseLandscapeOpen(false);
+      setAllRecordsOpen(false);
+      return;
+    }
+    setRange('d30');
+  }, [open]);
+  return (
+    <>
+    <section
+      className={'review-cycle-detail is-fullscreen-detail' + (open ? ' is-open' : '') + (nestedOpen ? ' is-timeline-open' : '')}
+      aria-hidden={!open}
+      aria-label="体重详情"
+    >
+      <div className="review-detail-nav">
+        <button type="button" className="review-detail-back" aria-label="返回" onClick={onClose}>
+          <ReviewBackIcon/>
+        </button>
+        <span className="review-detail-title">体重</span>
+        <button type="button" className="review-detail-all-records" onClick={()=>setAllRecordsOpen(true)}>所有记录</button>
+      </div>
+      <div className="review-detail-content review-mood-detail-content">
+        <div className="review-mood-detail-top">
+          <div className="review-segment" role="tablist" aria-label="时间范围">
+            {ranges.map(item=>(
+              <button
+                key={item.key}
+                type="button"
+                className={range === item.key ? 'is-active' : ''}
+                aria-selected={range === item.key}
+                onClick={()=>setRange(item.key)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <WeightDetailBody range={range} onExpandPhase={()=>setPhaseLandscapeOpen(true)}/>
+      </div>
+    </section>
+    <WeightAllRecordsPage open={open && allRecordsOpen} onClose={()=>setAllRecordsOpen(false)}/>
+    <PhaseChartLandscapePage
+      open={open && phaseLandscapeOpen}
+      onClose={()=>setPhaseLandscapeOpen(false)}
+      title="本周期体重变化"
+      subtitle="体重与激素走势 · 左右滑动查看"
+      legend={(
+        <>
+          <span className="review-mood-traj-legend-item"><i className="is-weight"/>体重（斤）</span>
+          <span className="review-mood-traj-legend-item"><i className="is-e2"/>雌激素 E2</span>
+          <span className="review-mood-traj-legend-item"><i className="is-p4"/>孕激素 P4</span>
+          <span className="review-cycle-landscape-tip">← 滑动查看更多 →</span>
+        </>
+      )}
+    >
+      <WeightPhaseDistChart expanded/>
+    </PhaseChartLandscapePage>
+    </>
+  );
+}
+
+const WEIGHT_BMI_HEIGHT_M = 1.6;
+function weightJinToBmi(jin){
+  const kg = jin / 2;
+  return Math.round((kg / (WEIGHT_BMI_HEIGHT_M * WEIGHT_BMI_HEIGHT_M)) * 10) / 10;
+}
+
+function weightFormatAllDate(daysAgo){
+  const d = new Date(WEIGHT_CARD_TODAY);
+  d.setDate(WEIGHT_CARD_TODAY.getDate() - daysAgo);
+  return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+}
+
+const WEIGHT_ALL_RECORDS = (()=>{
+  let seed = 20260803;
+  const rnd = ()=>{
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / 233280;
+  };
+  const times = ['18:17', '14:04', '19:36', '08:22', '21:05', '12:40', '16:58', '09:11'];
+  const rows = [];
+  // 倒序：今天起，覆盖 landscape 中较新的记录，并穿插同日多次
+  const source = WEIGHT_LANDSCAPE_RECORDS.slice().reverse();
+  source.forEach((rec, idx)=>{
+    const daysAgo = source.length - 1 - idx;
+    const date = weightFormatAllDate(daysAgo);
+    const time = times[Math.floor(rnd() * times.length)];
+    rows.push({
+      id:'w-' + daysAgo + '-a',
+      date,
+      time,
+      weight:rec.weight,
+      bmi:weightJinToBmi(rec.weight),
+    });
+    // 部分日期额外一条（对齐设计稿同日多条）
+    if(rnd() < 0.18 && daysAgo > 0){
+      const extra = Math.round((rec.weight + (rnd() * 1.2 - 0.4)) * 100) / 100;
+      rows.push({
+        id:'w-' + daysAgo + '-b',
+        date,
+        time:times[Math.floor(rnd() * times.length)],
+        weight:extra,
+        bmi:weightJinToBmi(extra),
+      });
+    }
+  });
+  // 只展示最近约 60 条，避免列表过长
+  return rows.slice(0, 60);
+})();
+
+function WeightAllRecordsPage({open, onClose}){
+  React.useEffect(()=>{
+    if(!open) return undefined;
+    const handleKeyDown = event=>{ if(event.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handleKeyDown);
+    return ()=>document.removeEventListener('keydown', handleKeyDown);
+  }, [open, onClose]);
+  return (
+    <section
+      className={'review-cycle-detail is-fullscreen-detail review-mood-all-records-page review-weight-all-records-page' + (open ? ' is-open' : '')}
+      aria-hidden={!open}
+      aria-label="体重所有记录"
+    >
+      <div className="review-detail-nav">
+        <button type="button" className="review-detail-back" aria-label="返回" onClick={onClose}>
+          <ReviewBackIcon/>
+        </button>
+        <span className="review-detail-title">所有记录</span>
+      </div>
+      <div className="review-detail-content review-mood-all-records-content review-weight-all-records-content">
+        <div className="review-weight-all-records-cols" aria-hidden="true">
+          <span>日期</span>
+          <span>体重 (斤)</span>
+          <span>BMI 指数</span>
+        </div>
+        <div className="review-detail-card review-mood-all-records-card review-weight-all-records-card">
+          <ul className="review-weight-all-records-list">
+            {WEIGHT_ALL_RECORDS.map(row=>(
+              <li key={row.id} className="review-weight-all-records-row">
+                <div className="review-weight-all-records-date">
+                  <span>{row.date}</span>
+                  <em>{row.time}</em>
+                </div>
+                <span className="review-weight-all-records-weight">{row.weight.toFixed(2)}</span>
+                <span className="review-weight-all-records-bmi">{row.bmi.toFixed(1)}</span>
+                <span className="review-weight-all-records-chevron" aria-hidden="true">
+                  <svg viewBox="0 0 12 12"><path d="M4.2 2.5 7.7 6 4.2 9.5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -3642,16 +4775,18 @@ function DietTrendSummary({range = 'd7'}){
             ))}
           </div>
         </div>
-        <div className="review-diet-insight-grid" aria-label="饮食概览">
-          <div className="review-diet-insight-cell">
-            <span className="review-diet-insight-title">饮食记录</span>
-            <p className="review-diet-insight-value"><b>{meta.mealCount}</b><em>餐</em></p>
-            <small className="review-diet-insight-sub">记录覆盖{meta.coverDays}天</small>
+        <div className="review-mood-trend-insight-row review-weight-stat-row">
+          <div className="review-mood-trend-record-card review-weight-stat-card review-diet-stat-card">
+            <span className="review-mood-trend-record-card-title">饮食记录</span>
+            <p><b>{meta.mealCount}</b><em>餐</em></p>
           </div>
-          <div className="review-diet-insight-cell">
-            <span className="review-diet-insight-title">热量最高餐次</span>
-            <p className="review-diet-insight-value is-meal"><b>{topMeal.label}</b></p>
-            <small className="review-diet-insight-sub">占全天热量摄入 {topMeal.pct}%</small>
+          <div className="review-mood-trend-record-card review-weight-stat-card review-diet-stat-card">
+            <span className="review-mood-trend-record-card-title">记录天数</span>
+            <p><b>{meta.coverDays}</b><em>天</em></p>
+          </div>
+          <div className="review-mood-trend-record-card review-weight-stat-card review-diet-stat-card is-meal">
+            <span className="review-mood-trend-record-card-title">热量最高餐次</span>
+            <p className="review-diet-top-meal"><b>{topMeal.label}</b></p>
           </div>
         </div>
       </div>
@@ -3716,8 +4851,10 @@ function DietDistributionDetailPage({open, onClose}){
               onOpenBudget={()=>setBudgetOpen(true)}
             />
           ) : null}
-          <DietHabitDistributionCard goal={calorieGoal}/>
-          <DietFoodJarCard/>
+          {false && (
+            <DietHabitDistributionCard goal={calorieGoal}/>
+          )}
+          {range === 'd7' || range === 'd30' ? <DietFoodJarCard/> : null}
         </div>
       </div>
       <DietBudgetSettingsPage
@@ -4913,6 +6050,7 @@ const MOOD_RANGE_META = {
     ],
     recoverHighlight:'2-3',
     recoverDetail:'这 30 天出现过 4 次低落，每一次都回升了',
+    topMoods:'平静、易怒',
   },
   half:{
     label:'近半年',
@@ -4931,6 +6069,7 @@ const MOOD_RANGE_META = {
     ],
     recoverHighlight:'2-3',
     recoverDetail:'近半年出现过多次低落，大多数都能较快回升',
+    topMoods:'挺开心、平静',
   },
   year:{
     label:'近1年',
@@ -4949,6 +6088,7 @@ const MOOD_RANGE_META = {
     ],
     recoverHighlight:'3',
     recoverDetail:'近1年低落之后，多数时候都能在几天内缓过来',
+    topMoods:'平静、疲惫',
   },
   all:{
     label:'全部',
@@ -4967,6 +6107,7 @@ const MOOD_RANGE_META = {
     ],
     recoverHighlight:'2-3',
     recoverDetail:'从全部记录看，低落之后通常都能回升过来',
+    topMoods:'平静、挺开心',
   },
 };
 
@@ -6297,12 +7438,8 @@ function MoodTrendSummary({range = 'd30'}){
   const hourly = MOOD_HOURLY_BY_RANGE[range] || MOOD_HOURLY_BY_RANGE.d30;
   const recordCount = hourly.reduce((s, n)=>s + n, 0);
   const triShare = meta.triShare || MOOD_RANGE_META.d30.triShare;
-  const totalDays = Number(meta.recordDaysTotal) || 1;
-  const intervalDays = Math.max(1, Math.round(totalDays / Math.max(recordCount, 1)));
-  const cnNum = n => (['零','一','两','三','四','五','六','七','八','九','十'][n] || String(n));
-  const cadenceText = intervalDays <= 1
-    ? '大约每天记录一次'
-    : ('大约每' + cnNum(intervalDays) + '天记录一次');
+  const recordDays = meta.recordDaysMain || '26';
+  const topMoods = meta.topMoods || '平静、易怒';
   return (
     <div className="review-mood-trend-block">
       <div className="review-mood-trend-head-main">
@@ -6333,18 +7470,18 @@ function MoodTrendSummary({range = 'd30'}){
             ))}
           </div>
         </div>
-        <div className="review-mood-trend-insight-row">
-          <div className="review-mood-trend-record-card">
+        <div className="review-mood-trend-insight-row review-weight-stat-row">
+          <div className="review-mood-trend-record-card review-weight-stat-card review-mood-stat-card">
             <span className="review-mood-trend-record-card-title">心情记录</span>
             <p><b>{recordCount}</b><em>次</em></p>
-            <small>{cadenceText}</small>
           </div>
-          <div className="review-mood-trend-recover">
-            <div className="review-mood-trend-recover-copy">
-              <strong>情绪恢复力</strong>
-              <p><b>{meta.recoverHighlight}</b><em>天</em></p>
-              <span>每次状态都能稳稳回升</span>
-            </div>
+          <div className="review-mood-trend-record-card review-weight-stat-card review-mood-stat-card">
+            <span className="review-mood-trend-record-card-title">记录天数</span>
+            <p><b>{recordDays}</b><em>天</em></p>
+          </div>
+          <div className="review-mood-trend-record-card review-weight-stat-card review-mood-stat-card is-freq">
+            <span className="review-mood-trend-record-card-title">高频心情</span>
+            <p className="review-mood-freq-words"><b>{topMoods}</b></p>
           </div>
         </div>
       </div>
@@ -6390,7 +7527,7 @@ const MOOD_CYCLE_SPARK_ROWS = [
   {
     key:'c3',
     cycleLabel:'本周期',
-    range:'6/30 起',
+    range:'6/30～今天',
     anchors:[
       {level:'neu', y:42},
       {level:'pos', y:17},
@@ -6444,8 +7581,6 @@ const MOOD_TRAJ_POINTS = [
 const MOOD_TRAJ_MOOD = '#F2B8C4';
 const MOOD_TRAJ_E2 = '#FF7AA8';
 const MOOD_TRAJ_P4 = '#E8A040';
-const MOOD_TRAJ_PEAK_DAY = 14;
-const MOOD_TRAJ_DIP_DAY = 23;
 function moodTrajEstrogen(day){
   const main = Math.exp(-Math.pow((day - 14) / 1.8, 2)) * 0.95;
   const mid = Math.exp(-Math.pow((day - 22) / 3.0, 2)) * 0.4;
@@ -6609,8 +7744,8 @@ function moodTrajSmoothLine(pts){
 
 function MoodPhaseDistChart({expanded = false} = {}){
   const uid = expanded ? 'Exp' : '';
-  const W = expanded ? 760 : 520, H = 300;
-  const padL = 2, padR = 12, padT = 36, padB = 26;
+  const W = expanded ? 760 : 360, H = 300;
+  const padL = 8, padR = 12, padT = 36, padB = 26;
   const x0 = padL, x1 = W - padR;
   const plotW = x1 - x0;
   const dayW = plotW / (MOOD_TRAJ_DAYS - 1);
@@ -6646,14 +7781,6 @@ function MoodPhaseDistChart({expanded = false} = {}){
     ...item,
     top:moodY(item.v),
   }));
-  const peakX = X(MOOD_TRAJ_PEAK_DAY);
-  const dipX = X(MOOD_TRAJ_DIP_DAY);
-  const markers = [
-    {x:peakX, lines:['雌激素达峰', '心情最好'], color:'#9A6FD4', bg:'#F3EAFB'},
-    {x:dipX, lines:['激素回落', '情绪易低'], color:'#C48A3A', bg:'#F8F0E4'},
-  ];
-  const tagW = 64;
-  const tagH = 30;
   const midY = (moodBot + hormTop) / 2;
   return (
     <div className={'review-mood-traj' + (expanded ? ' is-expanded' : '')}>
@@ -6733,48 +7860,6 @@ function MoodPhaseDistChart({expanded = false} = {}){
           fontFamily="PingFang SC, -apple-system, sans-serif"
         >激素解读</text>
 
-        {markers.map((m, i)=>{
-          const tagX = Math.min(Math.max(m.x - tagW / 2, 2), W - tagW - 2);
-          return (
-            <g key={'mk' + i}>
-              <line
-                x1={m.x}
-                y1={moodTop}
-                x2={m.x}
-                y2={hormBot}
-                stroke={m.color}
-                strokeWidth="1.2"
-                strokeDasharray="3.5 2.5"
-                strokeOpacity="0.85"
-              />
-              <rect
-                x={tagX}
-                y={2}
-                width={tagW}
-                height={tagH}
-                rx="8"
-                ry="8"
-                fill={m.bg}
-                stroke={m.color}
-                strokeWidth="0.8"
-                strokeOpacity="0.35"
-              />
-              {m.lines.map((line, li)=>(
-                <text
-                  key={li}
-                  x={tagX + tagW / 2}
-                  y={12 + li * 11}
-                  textAnchor="middle"
-                  fontSize="9"
-                  fill={m.color}
-                  fontFamily="PingFang SC, -apple-system, sans-serif"
-                  fontWeight="500"
-                >{line}</text>
-              ))}
-            </g>
-          );
-        })}
-
         <line x1={x0} y1={hormBot} x2={x1} y2={hormBot} stroke="rgba(0,0,0,0.08)" strokeWidth="1"/>
         {MOOD_TRAJ_PHASES.map(ph=>{
           const cx = (phaseLeft(ph) + phaseRight(ph)) / 2;
@@ -6805,32 +7890,37 @@ function MoodPhaseDistChart({expanded = false} = {}){
   );
 }
 
-function MoodCycleCombinedCard({onExpand}){
+function MoodCycleCombinedCard({onExpand, showCompare = true, showPhase = true}){
+  if(!showCompare && !showPhase) return null;
   return (
     <div className="review-love-cycle-combined-wrap">
       <div className="review-love-trend-title">月经周期与心情</div>
       <div className="review-detail-card review-love-mini-card review-love-cycle-combined">
-        <div className="review-love-cycle-block">
-          <MoodCycleCompareChart/>
-          <div className="review-love-insight">
-            最近2个完整周期里，你的心情呈现出相似轨迹：<b>排卵前后</b>状态较好，进入<b>黄体期</b>后逐渐回落。当前周期也延续这一趋势，你似乎形成了自己的“<b>周期节拍</b>”。情绪变化时，可以多一点理解和接纳自己。
+        {showCompare ? (
+          <div className="review-love-cycle-block">
+            <MoodCycleCompareChart/>
+            <div className="review-love-insight">
+              最近2个完整周期里，你的心情呈现出相似轨迹：<b>排卵前后</b>状态较好，进入<b>黄体期</b>后逐渐回落。当前周期也延续这一趋势，你似乎形成了自己的“<b>周期节拍</b>”。情绪变化时，可以多一点理解和接纳自己。
+            </div>
           </div>
-        </div>
-        <div className="review-love-cycle-divider" aria-hidden="true"/>
-        <div className="review-love-cycle-block review-mood-traj-block">
-          <div className="review-love-cycle-subhead review-cycle-subhead-expand-row">
-            <span>本周期心情变化</span>
-            {typeof onExpand === 'function' && (
-              <button type="button" className="review-cycle-card-expand-btn" aria-label="全屏查看本周期心情变化" onClick={onExpand}>
-                <ReviewExpandIcon/>
-              </button>
-            )}
+        ) : null}
+        {showCompare && showPhase ? <div className="review-love-cycle-divider" aria-hidden="true"/> : null}
+        {showPhase ? (
+          <div className="review-love-cycle-block review-mood-traj-block">
+            <div className="review-love-cycle-subhead review-cycle-subhead-expand-row">
+              <span>本周期心情变化</span>
+              {typeof onExpand === 'function' && (
+                <button type="button" className="review-cycle-card-expand-btn" aria-label="全屏查看本周期心情变化" onClick={onExpand}>
+                  <ReviewExpandIcon/>
+                </button>
+              )}
+            </div>
+            <MoodPhaseDistChart/>
+            <div className="review-love-insight">
+              本周期的心情变化，可能与体内激素节奏有关。随着<b>雌激素</b>升高，状态通常更容易保持积极；进入<b>黄体期</b>后，<b>孕激素</b>变化和激素波动，可能让人更容易疲惫或敏感。提前了解这些阶段，可以更好安排休息调节。
+            </div>
           </div>
-          <MoodPhaseDistChart/>
-          <div className="review-love-insight">
-            本周期的心情变化，可能与体内激素节奏有关。随着<b>雌激素</b>升高，状态通常更容易保持积极；进入<b>黄体期</b>后，<b>孕激素</b>变化和激素波动，可能让人更容易疲惫或敏感。提前了解这些阶段，可以更好安排休息调节。
-          </div>
-        </div>
+        ) : null}
       </div>
     </div>
   );
@@ -6931,8 +8021,15 @@ function MoodDetailBody({range, onExpandPhase}){
     <>
       <MoodTrendSummary range={range}/>
       <div className="review-mood-detail-lower">
-        {showCycle ? <MoodCycleCombinedCard onExpand={onExpandPhase}/> : null}
-        <MoodTimeDistributionCard range={range}/>
+        {range === 'd30' ? (
+          <MoodCycleCombinedCard onExpand={onExpandPhase} showCompare={false} showPhase/>
+        ) : null}
+        {range === 'half' ? (
+          <MoodCycleCombinedCard showCompare showPhase={false}/>
+        ) : null}
+        {false && (
+          <MoodTimeDistributionCard range={range}/>
+        )}
         {showCycle ? <MoodRecordCard/> : null}
       </div>
     </>
@@ -11438,6 +12535,8 @@ function ReviewPage({mode='经期', isMember=false, shareState, onShareStateChan
   const [dietLandscapeOpen, setDietLandscapeOpen] = useState(false);
   const [moodDetailOpen, setMoodDetailOpen] = useState(false);
   const [moodLandscapeOpen, setMoodLandscapeOpen] = useState(false);
+  const [weightLandscapeOpen, setWeightLandscapeOpen] = useState(false);
+  const [weightDetailOpen, setWeightDetailOpen] = useState(false);
   const [stoolDetailOpen, setStoolDetailOpen] = useState(false);
   const [stoolLandscapeOpen, setStoolLandscapeOpen] = useState(false);
   const [loveLandscapeOpen, setLoveLandscapeOpen] = useState(false);
@@ -11445,9 +12544,6 @@ function ReviewPage({mode='经期', isMember=false, shareState, onShareStateChan
   const [beverageDetailOpen, setBeverageDetailOpen] = useState(false);
   const [skinDetailOpen, setSkinDetailOpen] = useState(false);
   const isPeriodMode = mode === '经期';
-  const weightData = [103.3,98.2,101.4,97.6,98.6,97.5,97.9,97.3,96.5,99.4,102.0,100.6,101.6,99.9,101.0,102.1,100.7,101.3,101.9,100.6,101.5,102.0,101.4,101.1];
-  const weightAvg = weightData.reduce((s, x)=>s + x, 0) / weightData.length;
-  const weightDelta = weightData[weightData.length - 1] - weightData[0];
   const I = window.Icon;
   const ReviewSearchOverlay = window.ReviewSearchOverlay;
 
@@ -11492,20 +12588,9 @@ function ReviewPage({mode='经期', isMember=false, shareState, onShareStateChan
 
       {isPeriodMode ? <PeriodReviewCard/> : null}
 
-      <ReviewCard
-        title="体重"
-        iconClass="is-weight"
-        icon={<ReviewScaleIcon/>}
-        chart={<WeightChart/>}
-        legend={<span className="review-legend-item is-weight"><i></i>体重（斤）</span>}
-        metrics={(
-          <>
-            <ReviewMetric value={reviewFmt1(weightData[weightData.length - 1])} unit="斤" label="最近体重"/>
-            <ReviewMetric value={reviewFmt1(weightAvg)} unit="斤" label="半年均值"/>
-            <ReviewMetric value={(weightDelta > 0 ? '+' : '') + reviewFmt1(weightDelta)} unit="斤" label="较半年前"/>
-          </>
-        )}
-        more="查看完整体重变化"
+      <WeightReviewCard
+        onOpen={()=>setWeightDetailOpen(true)}
+        onLandscapeOpen={()=>setWeightLandscapeOpen(true)}
       />
 
       <DietDistributionCard
@@ -11549,6 +12634,8 @@ function ReviewPage({mode='经期', isMember=false, shareState, onShareStateChan
       <DietDistributionDetailPage open={dietDistDetailOpen} onClose={()=>setDietDistDetailOpen(false)}/>
       <MoodDetailPage open={moodDetailOpen} onClose={()=>setMoodDetailOpen(false)}/>
       <MoodLandscapePage open={moodLandscapeOpen} onClose={()=>setMoodLandscapeOpen(false)}/>
+      <WeightLandscapePage open={weightLandscapeOpen} onClose={()=>setWeightLandscapeOpen(false)}/>
+      <WeightDetailPage open={weightDetailOpen} onClose={()=>setWeightDetailOpen(false)}/>
       <StoolDetailPage open={stoolDetailOpen} onClose={()=>setStoolDetailOpen(false)}/>
       <StoolLandscapePage open={stoolLandscapeOpen} onClose={()=>setStoolLandscapeOpen(false)}/>
       <LoveLandscapePage open={loveLandscapeOpen} onClose={()=>setLoveLandscapeOpen(false)}/>
