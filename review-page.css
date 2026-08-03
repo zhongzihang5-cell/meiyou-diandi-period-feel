@@ -3267,10 +3267,26 @@
 }
 .review-diet-timeline,
 .review-diet-budget-page{
-  z-index:160;
+  z-index:280;
   top:0 !important;
   bottom:0;
   background:var(--my-bg);
+}
+.review-cycle-detail.review-diet-budget-page.is-fullscreen-detail,
+.review-cycle-detail.review-diet-timeline.is-fullscreen-detail{
+  z-index:280;
+}
+/* 点滴时间线 portal 到 .phone 时，按手机框绝对铺满，避免 fixed + 居中错位 */
+.phone > .review-diet-budget-page.review-cycle-detail.is-fullscreen-detail{
+  position:absolute;
+  left:0;
+  right:0;
+  width:100%;
+  max-width:none;
+  transform:translateX(100%);
+}
+.phone > .review-diet-budget-page.review-cycle-detail.is-fullscreen-detail.is-open{
+  transform:translateX(0);
 }
 .review-cycle-detail.is-timeline-open > .review-detail-nav{
   visibility:hidden;

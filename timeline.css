@@ -3848,10 +3848,34 @@
   font-variant-numeric:tabular-nums;
 }
 .v3-chart-cal-target{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
   font-size:11px;
   font-weight:400;
   color:#8E8E93;
   margin-left:4px;
+  vertical-align:baseline;
+}
+.v3-chart-cal-edit{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:18px;
+  height:18px;
+  margin:0;
+  padding:0;
+  border:0;
+  border-radius:4px;
+  background:transparent;
+  color:rgba(0,0,0,0.35);
+  cursor:pointer;
+  flex-shrink:0;
+  -webkit-tap-highlight-color:transparent;
+}
+.v3-chart-cal-edit:active{
+  color:#ff4d88;
+  background:rgba(255,77,136,0.08);
 }
 .v3-chart-cal-remain{
   margin-top:6px;

@@ -12561,4 +12561,6 @@ function ReviewPage({mode='经期', isMember=false, shareState, onShareStateChan
   );
 }
 
+window.DietBudgetSettingsPage = DietBudgetSettingsPage;
+window.DIET_TARGET_GOAL = DIET_TARGET_GOAL;
 window.ReviewPage = ReviewPage;

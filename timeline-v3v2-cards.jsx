@@ -370,40 +370,104 @@ function ChartWeightTrend({compact = false, data, unit = 'kg'}){
 }
 
 function ChartCaloriePanel({compact = false}){
+  const I = window.Icon;
+  const DietBudgetSettingsPage = window.DietBudgetSettingsPage;
+  const [budgetOpen, setBudgetOpen] = React.useState(false);
+  const [target, setTarget] = React.useState(()=> Number(window.DIET_TARGET_GOAL) || 1800);
   const consumed = 1126;
-  const target = 1800;
-  const pct = consumed / target;
+  // 演示卡保留原「还可以吃 339」口径；目标变更后按剩余热量重算
+  const remain = target === 1800
+    ? 339
+    : Math.max(0, target - consumed);
+  const pct = target > 0 ? consumed / target : 0;
   const r = compact ? 22 : 28;
   const c = 2 * Math.PI * r;
   const size = r * 2 + 8;
   const percent = Math.round(pct * 100);
+
+  React.useEffect(()=>{
+    const next = Number(window.DIET_TARGET_GOAL);
+    if(Number.isFinite(next) && next > 0) setTarget(next);
+  }, [budgetOpen]);
+
+  const budgetPage = DietBudgetSettingsPage ? (
+    <DietBudgetSettingsPage
+      open={budgetOpen}
+      onClose={()=>setBudgetOpen(false)}
+      initialGoal={target}
+      onComplete={(next)=>{
+        const goal = next && typeof next === 'object' ? Number(next.goal) : Number(next);
+        if(Number.isFinite(goal) && goal > 0){
+          setTarget(goal);
+          window.DIET_TARGET_GOAL = goal;
+        }
+      }}
+    />
+  ) : null;
+  const budgetPortal = budgetPage && window.ReactDOM?.createPortal
+    ? window.ReactDOM.createPortal(
+        budgetPage,
+        document.querySelector('.phone') || document.body
+      )
+    : budgetPage;
+
   return (
-    <div className="v3-chart-cal">
-      <div className="v3-chart-cal-ring" style={{width:size, height:size}}>
-        <svg width={size} height={size} viewBox={'0 0 ' + size + ' ' + size} aria-hidden="true">
-          <circle cx={size / 2} cy={size / 2} r={r} stroke={TL_SOFT} strokeWidth="5" fill="none"/>
-          <circle
-            cx={size / 2}
-            cy={size / 2}
-            r={r}
-            stroke={TL_PRIMARY}
-            strokeWidth="5"
-            fill="none"
-            strokeDasharray={c * pct + ' ' + c}
-            strokeLinecap="round"
-            transform={'rotate(-90 ' + (size / 2) + ' ' + (size / 2) + ')'}
-          />
-        </svg>
-        <div className="v3-chart-cal-pct">{percent}%</div>
-      </div>
-      <div className="v3-chart-cal-meta">
-        <div className="v3-chart-cal-lbl">已摄入</div>
-        <div className="v3-chart-cal-val">
-          {consumed}
-          <span className="v3-chart-cal-target">/ {target} kcal</span>
+    <>
+      <div className="v3-chart-cal">
+        <div className="v3-chart-cal-ring" style={{width:size, height:size}}>
+          <svg width={size} height={size} viewBox={'0 0 ' + size + ' ' + size} aria-hidden="true">
+            <circle cx={size / 2} cy={size / 2} r={r} stroke={TL_SOFT} strokeWidth="5" fill="none"/>
+            <circle
+              cx={size / 2}
+              cy={size / 2}
+              r={r}
+              stroke={TL_PRIMARY}
+              strokeWidth="5"
+              fill="none"
+              strokeDasharray={c * Math.min(pct, 1) + ' ' + c}
+              strokeLinecap="round"
+              transform={'rotate(-90 ' + (size / 2) + ' ' + (size / 2) + ')'}
+            />
+          </svg>
+          <div className="v3-chart-cal-pct">{percent}%</div>
+        </div>
+        <div className="v3-chart-cal-meta">
+          <div className="v3-chart-cal-lbl">已摄入</div>
+          <div className="v3-chart-cal-val">
+            {consumed}
+            <span className="v3-chart-cal-target">
+              <span>/ {target} kcal</span>
+              <button
+                type="button"
+                className="v3-chart-cal-edit"
+                aria-label="编辑热量目标"
+                title="编辑热量目标"
+                onClick={(event)=>{
+                  event.preventDefault();
+                  event.stopPropagation();
+                  setBudgetOpen(true);
+                }}
+              >
+                {I ? (
+                  <I name="pen" size={12} stroke={1.8}/>
+                ) : (
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M14 5l5 5-10 10H4v-5z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M13 6l5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                )}
+              </button>
+            </span>
+          </div>
         </div>
       </div>
-    </div>
+      {!compact ? (
+        <div className="v3-weight-curve-note">
+          日目标 {target}kcal，已摄入 {consumed}kcal，还可以吃 {remain}kcal
+        </div>
+      ) : null}
+      {budgetPortal}
+    </>
   );
 }
 
@@ -1544,7 +1608,9 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
         <V3v2Header time={a.time} title={a.title} isNew={isNew} entryId={derivedId} entryKind={derivedKind} editPayload={editPayload}/>
         <div style={{marginTop:8}}>
           <TLChart type={a.chartType} data={a.chartData} weightUnit={a.weightUnit}/>
-          {a.note && <div style={{fontSize:11, color:TL_MUTED, marginTop:8}}>{a.note}</div>}
+          {a.note && a.chartType !== 'caloriePanel' && (
+            <div style={{fontSize:11, color:TL_MUTED, marginTop:8}}>{a.note}</div>
+          )}
         </div>
       </div>
     );
@@ -1600,7 +1666,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
                 animateIn={isNew}
               >
                 {a.chartType && <TLChart type={a.chartType} data={a.chartData} weightUnit={a.weightUnit}/>}
-                {(a.noteParts || a.note) && (
+                {a.chartType !== 'caloriePanel' && (a.noteParts || a.note) && (
                   streamNote ? (
                     <div className="v3-weight-curve-note">
                       <TypewriterText text={a.note} active followScroll/>
@@ -1635,7 +1701,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
             {open && (
               <div ref={aiPanelRef} className="v3-ai-panel-in" style={{paddingBottom:12}}>
                 {a.chartType && <TLChart type={a.chartType} data={a.chartData} weightUnit={a.weightUnit}/>}
-                {(a.noteParts || a.note) && (
+                {a.chartType !== 'caloriePanel' && (a.noteParts || a.note) && (
                   streamNote ? (
                     <div className="v3-weight-curve-note">
                       <TypewriterText text={a.note} active followScroll/>
