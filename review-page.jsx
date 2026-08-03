@@ -2000,27 +2000,13 @@ function WeightLandscapePage({open, onClose}){
   );
 }
 
-function WeightReviewCard({onOpen, onLandscapeOpen}){
+function WeightReviewCard({onOpen}){
   const weightLast = WEIGHT_CARD_VALUES[WEIGHT_CARD_VALUES.length - 1];
   return (
     <ReviewCard
       title="体重"
       iconClass="is-weight"
       icon={<ReviewScaleIcon/>}
-      headAction={typeof onLandscapeOpen === 'function' ? (
-        <button
-          type="button"
-          className="review-cycle-expand-btn"
-          aria-label="横屏展开全部体重"
-          onKeyDown={event=>event.stopPropagation()}
-          onClick={event=>{
-            event.stopPropagation();
-            onLandscapeOpen();
-          }}
-        >
-          <ReviewExpandIcon/>
-        </button>
-      ) : null}
       chart={<WeightChart labelToday/>}
       legend={(
         <>
@@ -3533,26 +3519,12 @@ function DietBudgetSettingsPage({open, onClose, onComplete, initialGoal = 1440, 
   );
 }
 
-function DietDistributionCard({onOpen, onLandscapeOpen, title='饮食', more='查看完整饮食记录'}){
+function DietDistributionCard({onOpen, title='饮食', more='查看完整饮食记录'}){
   return (
     <ReviewCard
       title={title}
       iconClass="is-diet"
       icon={<ReviewDietIcon/>}
-      headAction={typeof onLandscapeOpen === 'function' ? (
-        <button
-          type="button"
-          className="review-cycle-expand-btn"
-          aria-label="横屏展开全部饮食热量"
-          onKeyDown={event=>event.stopPropagation()}
-          onClick={event=>{
-            event.stopPropagation();
-            onLandscapeOpen();
-          }}
-        >
-          <ReviewExpandIcon/>
-        </button>
-      ) : null}
       chart={<DietDistributionChart/>}
       legend={(
         <>
@@ -8152,7 +8124,7 @@ function MoodDetailPage({open, onClose}){
   );
 }
 
-function MoodReviewCard({onOpen, onLandscapeOpen}){
+function MoodReviewCard({onOpen}){
   const monthAvg = MOOD_MONTH_VALS.reduce((s, v)=>s + v, 0) / MOOD_MONTH_VALS.length;
 
   return (
@@ -8160,20 +8132,6 @@ function MoodReviewCard({onOpen, onLandscapeOpen}){
       title="心情"
       iconClass="is-mood"
       icon={<ReviewMoodIcon/>}
-      headAction={typeof onLandscapeOpen === 'function' ? (
-        <button
-          type="button"
-          className="review-cycle-expand-btn"
-          aria-label="横屏展开全部心情"
-          onKeyDown={event=>event.stopPropagation()}
-          onClick={event=>{
-            event.stopPropagation();
-            onLandscapeOpen();
-          }}
-        >
-          <ReviewExpandIcon/>
-        </button>
-      ) : null}
       chart={<MoodLineChart vals={MOOD_MONTH_VALS} dates={MOOD_MONTH_DATES} gradientId="moodCardGrad" markToday showDots dotStep={2} triScale showArea={false} ariaLabel="近30天心情波动折线图"/>}
       legend={<MoodChartLegend/>}
       metrics={(
@@ -11210,7 +11168,7 @@ function StoolDetailPage({open, onClose}){
   );
 }
 
-function StoolReviewCard({onOpen, onLandscapeOpen}){
+function StoolReviewCard({onOpen}){
   const avgText = (Math.round(STOOL_L1_AVG * 10) / 10).toFixed(1).replace(/\.0$/, '');
   const deltaAbs = Math.abs(Math.round(STOOL_L1_DELTA * 10) / 10);
   const deltaText = (STOOL_L1_DELTA > 0.05 ? '↗ ' : STOOL_L1_DELTA < -0.05 ? '↘ ' : '→ ')
@@ -11222,20 +11180,6 @@ function StoolReviewCard({onOpen, onLandscapeOpen}){
       title="便便"
       iconClass="is-stool"
       icon={<ReviewStoolIcon/>}
-      headAction={typeof onLandscapeOpen === 'function' ? (
-        <button
-          type="button"
-          className="review-cycle-expand-btn"
-          aria-label="横屏展开全部便便"
-          onKeyDown={event=>event.stopPropagation()}
-          onClick={event=>{
-            event.stopPropagation();
-            onLandscapeOpen();
-          }}
-        >
-          <ReviewExpandIcon/>
-        </button>
-      ) : null}
       chart={(
         <StoolReviewChart
           values={STOOL_L1_VALUES}
@@ -11476,26 +11420,12 @@ function LoveLandscapePage({open, onClose}){
   );
 }
 
-function LoveReviewCard({onOpen, onLandscapeOpen}){
+function LoveReviewCard({onOpen}){
   return (
     <ReviewCard
       title="爱爱"
       iconClass="is-love"
       icon={<ReviewLoveIcon/>}
-      headAction={typeof onLandscapeOpen === 'function' ? (
-        <button
-          type="button"
-          className="review-cycle-expand-btn"
-          aria-label="横屏展开全部爱爱"
-          onKeyDown={event=>event.stopPropagation()}
-          onClick={event=>{
-            event.stopPropagation();
-            onLandscapeOpen();
-          }}
-        >
-          <ReviewExpandIcon/>
-        </button>
-      ) : null}
       chart={<LoveReviewChart/>}
       legend={<span className="review-legend-item is-love"><i></i>爱爱次数</span>}
       metrics={(
@@ -12530,16 +12460,10 @@ function ReviewPage({mode='经期', isMember=false, shareState, onShareStateChan
   const [reviewSearchOpen, setReviewSearchOpen] = useState(false);
   const [cycleUpdated, setCycleUpdated] = useState(true);
   const [cycleDetailOpen, setCycleDetailOpen] = useState(false);
-  const [cycleLandscapeOpen, setCycleLandscapeOpen] = useState(false);
   const [dietDistDetailOpen, setDietDistDetailOpen] = useState(false);
-  const [dietLandscapeOpen, setDietLandscapeOpen] = useState(false);
   const [moodDetailOpen, setMoodDetailOpen] = useState(false);
-  const [moodLandscapeOpen, setMoodLandscapeOpen] = useState(false);
-  const [weightLandscapeOpen, setWeightLandscapeOpen] = useState(false);
   const [weightDetailOpen, setWeightDetailOpen] = useState(false);
   const [stoolDetailOpen, setStoolDetailOpen] = useState(false);
-  const [stoolLandscapeOpen, setStoolLandscapeOpen] = useState(false);
-  const [loveLandscapeOpen, setLoveLandscapeOpen] = useState(false);
   const [loveDetailOpen, setLoveDetailOpen] = useState(false);
   const [beverageDetailOpen, setBeverageDetailOpen] = useState(false);
   const [skinDetailOpen, setSkinDetailOpen] = useState(false);
@@ -12590,12 +12514,10 @@ function ReviewPage({mode='经期', isMember=false, shareState, onShareStateChan
 
       <WeightReviewCard
         onOpen={()=>setWeightDetailOpen(true)}
-        onLandscapeOpen={()=>setWeightLandscapeOpen(true)}
       />
 
       <DietDistributionCard
         onOpen={()=>setDietDistDetailOpen(true)}
-        onLandscapeOpen={()=>setDietLandscapeOpen(true)}
       />
       {!isPeriodMode ? <DietPhotoWallCard/> : null}
 
@@ -12604,7 +12526,6 @@ function ReviewPage({mode='经期', isMember=false, shareState, onShareStateChan
       {isPeriodMode ? (
         <LoveReviewCard
           onOpen={()=>setLoveDetailOpen(true)}
-          onLandscapeOpen={()=>setLoveLandscapeOpen(true)}
         />
       ) : null}
 
@@ -12612,13 +12533,11 @@ function ReviewPage({mode='经期', isMember=false, shareState, onShareStateChan
 
       <MoodReviewCard
         onOpen={()=>setMoodDetailOpen(true)}
-        onLandscapeOpen={()=>setMoodLandscapeOpen(true)}
       />
 
       {isPeriodMode ? (
         <StoolReviewCard
           onOpen={()=>setStoolDetailOpen(true)}
-          onLandscapeOpen={()=>setStoolLandscapeOpen(true)}
         />
       ) : null}
 
@@ -12633,17 +12552,11 @@ function ReviewPage({mode='经期', isMember=false, shareState, onShareStateChan
       ) : null}
       <DietDistributionDetailPage open={dietDistDetailOpen} onClose={()=>setDietDistDetailOpen(false)}/>
       <MoodDetailPage open={moodDetailOpen} onClose={()=>setMoodDetailOpen(false)}/>
-      <MoodLandscapePage open={moodLandscapeOpen} onClose={()=>setMoodLandscapeOpen(false)}/>
-      <WeightLandscapePage open={weightLandscapeOpen} onClose={()=>setWeightLandscapeOpen(false)}/>
       <WeightDetailPage open={weightDetailOpen} onClose={()=>setWeightDetailOpen(false)}/>
       <StoolDetailPage open={stoolDetailOpen} onClose={()=>setStoolDetailOpen(false)}/>
-      <StoolLandscapePage open={stoolLandscapeOpen} onClose={()=>setStoolLandscapeOpen(false)}/>
-      <LoveLandscapePage open={loveLandscapeOpen} onClose={()=>setLoveLandscapeOpen(false)}/>
       <LoveDetailPage open={loveDetailOpen} onClose={()=>setLoveDetailOpen(false)}/>
       <BeverageDetailPage open={beverageDetailOpen} onClose={()=>setBeverageDetailOpen(false)}/>
       <SkinDetailPage open={skinDetailOpen} onClose={()=>setSkinDetailOpen(false)}/>
-      <DietLandscapePage open={dietLandscapeOpen} onClose={()=>setDietLandscapeOpen(false)}/>
-      <CycleLandscapePage open={cycleLandscapeOpen} onClose={()=>setCycleLandscapeOpen(false)}/>
     </main>
   );
 }
