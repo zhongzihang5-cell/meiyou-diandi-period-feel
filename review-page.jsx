@@ -2032,6 +2032,9 @@ function WeightTrendSummary({range = 'd30'}){
   const meta = WEIGHT_RANGE_META[range] || WEIGHT_RANGE_META.d30;
   const series = weightTrendSeries(range);
   const latestJin = series.values[series.values.length - 1] || WEIGHT_CARD_VALUES[WEIGHT_CARD_VALUES.length - 1];
+  const avgJin = series.values.length
+    ? series.values.reduce((sum, v)=>sum + v, 0) / series.values.length
+    : latestJin;
   const bmi = weightJinToBmi(latestJin);
   const dropJin = 2.5;
   return (
@@ -2053,9 +2056,12 @@ function WeightTrendSummary({range = 'd30'}){
           ariaLabel={meta.label + '体重趋势'}
         />
       </div>
-      <div className="review-legend">
-        <span className="review-legend-item is-weight"><i></i>体重（斤）</span>
-        <span className="review-legend-item is-trend"><i></i>趋势</span>
+      <div className="review-legend review-trend-legend-with-days">
+        <div className="review-trend-legend-items">
+          <span className="review-legend-item is-weight"><i></i>体重（斤）</span>
+          <span className="review-legend-item is-trend"><i></i>趋势</span>
+        </div>
+        <span className="review-trend-legend-days">记录{meta.recordDays}天</span>
       </div>
       <div className="review-mood-trend-foot">
         <WeightBmiIndexCard bmi={bmi}/>
@@ -2065,8 +2071,8 @@ function WeightTrendSummary({range = 'd30'}){
             <p><b>{meta.recordTimes}</b><em>次</em></p>
           </div>
           <div className="review-mood-trend-record-card review-weight-stat-card">
-            <span className="review-mood-trend-record-card-title">记录天数</span>
-            <p><b>{meta.recordDays}</b><em>天</em></p>
+            <span className="review-mood-trend-record-card-title">平均体重</span>
+            <p><b>{reviewFmt1(avgJin)}</b><em>斤</em></p>
           </div>
           <div className="review-mood-trend-record-card review-weight-stat-card is-vs-baseline">
             <span className="review-mood-trend-record-card-title">比8月1日</span>
@@ -2561,7 +2567,7 @@ function WeightDetailBody({range, onExpandPhase}){
         {range === 'd30' ? (
           <WeightCycleCombinedCard onExpand={onExpandPhase} showCompare={false} showPhase/>
         ) : null}
-        {range === 'half' ? (
+        {false && range === 'half' ? (
           <WeightCycleCombinedCard showCompare showPhase={false}/>
         ) : null}
       </div>
@@ -3291,7 +3297,7 @@ function DietBudgetHeadAction({goal = DIET_TARGET_GOAL, onOpen}){
 }
 
 const DIET_ACTIVITY_OPTIONS = [
-  {id:'sedentary', title:'久坐活动', short:'久坐', desc:'几乎不运动', factor:1.2},
+  {id:'sedentary', title:'久坐不动', short:'久坐', desc:'几乎不运动', factor:1.2},
   {id:'light', title:'轻度活动', short:'轻度', desc:'每周1-3次', factor:1.375},
   {id:'moderate', title:'中度活动', short:'中度', desc:'每周3-5次', factor:1.55},
   {id:'vigorous', title:'高度活动', short:'高度', desc:'每周6-7次', factor:1.725},
@@ -3982,7 +3988,7 @@ function DietNutrientIntakeCard({goal = DIET_TARGET_GOAL, activityId = 'light', 
   return (
     <div className="review-love-cycle-combined-wrap">
       <div className="review-love-trend-title review-diet-balance-title-row">
-        <span>每日营养均衡</span>
+        <span>营养分析</span>
         <DietBalanceGoalCapsule goal={goal} activityId={activityId} onAdjust={onOpenBudget}/>
       </div>
       <div className="review-detail-card review-love-mini-card review-diet-daily-card review-diet-balance-card">
@@ -4723,9 +4729,12 @@ function DietTrendSummary({range = 'd7'}){
         <div className="review-love-trend-range">{meta.dateText}</div>
       </div>
       <DietTrendMainChart days={trendDays} range={range}/>
-      <div className="review-legend">
-        <span className="review-legend-item is-diet-line"><i></i>每日热量</span>
-        <span className="review-legend-item is-trend"><i></i>趋势</span>
+      <div className="review-legend review-trend-legend-with-days">
+        <div className="review-trend-legend-items">
+          <span className="review-legend-item is-diet"><i></i>每日热量</span>
+          <span className="review-legend-item is-trend"><i></i>趋势</span>
+        </div>
+        <span className="review-trend-legend-days">记录{meta.coverDays}天</span>
       </div>
       <div className="review-mood-trend-foot review-diet-card-foot">
         <div className="review-mood-trend-tri">
@@ -4753,8 +4762,8 @@ function DietTrendSummary({range = 'd7'}){
             <p><b>{meta.mealCount}</b><em>餐</em></p>
           </div>
           <div className="review-mood-trend-record-card review-weight-stat-card review-diet-stat-card">
-            <span className="review-mood-trend-record-card-title">记录天数</span>
-            <p><b>{meta.coverDays}</b><em>天</em></p>
+            <span className="review-mood-trend-record-card-title">日均热量</span>
+            <p><b>{meta.avg}</b><em>kcal</em></p>
           </div>
           <div className="review-mood-trend-record-card review-weight-stat-card review-diet-stat-card is-meal">
             <span className="review-mood-trend-record-card-title">热量最高餐次</span>
@@ -5782,14 +5791,10 @@ function MoodLineChart({
       if(vals[i] > vals[maxI]) maxI = i;
       if(vals[i] < vals[minI]) minI = i;
     }
-    const labelAt = (i)=>{
-      if(dates && dates[i]) return dates[i];
-      if(xLabels && xLabels[i] != null) return xLabels[i];
-      return String(i + 1);
-    };
+    // 最高/最低点标具体心情词，不用日期
     const marks = [
-      {key:'max', i:maxI, label:labelAt(maxI), color:colorAt(vals[maxI])},
-      {key:'min', i:minI, label:labelAt(minI), color:colorAt(vals[minI])},
+      {key:'max', i:maxI, label:'挺开心', color:colorAt(vals[maxI])},
+      {key:'min', i:minI, label:'内耗', color:colorAt(vals[minI])},
     ];
     if(maxI === minI) return marks.slice(0, 1);
     return marks;
@@ -6849,16 +6854,31 @@ function MoodCyclePhaseLegend(){
   );
 }
 
-function MoodChartLegend(){
+function MoodChartLegend({recordDays}){
   return (
-    <div className="review-legend review-mood-chart-legend">
-      <span className="review-legend-item is-mood"><i></i>每日心情</span>
-      <span className="review-legend-item is-trend"><i></i>趋势</span>
-      <span className="review-legend-item is-mood-pos"><i></i>积极</span>
-      <span className="review-legend-item is-mood-neu"><i></i>中性</span>
-      <span className="review-legend-item is-mood-neg"><i></i>消极</span>
+    <div className="review-legend review-mood-chart-legend review-trend-legend-with-days">
+      <div className="review-trend-legend-items">
+        <span className="review-legend-item is-mood"><i></i>每日心情</span>
+        <span className="review-legend-item is-trend"><i></i>趋势</span>
+        <span className="review-legend-item is-mood-pos"><i></i>积极</span>
+        <span className="review-legend-item is-mood-neu"><i></i>中性</span>
+        <span className="review-legend-item is-mood-neg"><i></i>消极</span>
+      </div>
+      {recordDays != null ? (
+        <span className="review-trend-legend-days">记录{recordDays}天</span>
+      ) : null}
     </div>
   );
+}
+
+function moodAvgLabelFromVals(vals = []){
+  if(!vals.length) return '一般';
+  const avg = vals.reduce((sum, v)=>sum + Number(v || 0), 0) / vals.length;
+  if(avg >= 4.5) return '超开心';
+  if(avg >= 3.5) return '挺开心';
+  if(avg >= 2.5) return '一般';
+  if(avg >= 1.5) return '不开心';
+  return '好伤心';
 }
 
 function computeMoodMonthStats(vals, dates){
@@ -7411,6 +7431,7 @@ function MoodTrendSummary({range = 'd30'}){
   const recordCount = hourly.reduce((s, n)=>s + n, 0);
   const triShare = meta.triShare || MOOD_RANGE_META.d30.triShare;
   const recordDays = meta.recordDaysMain || '26';
+  const avgMood = moodAvgLabelFromVals(chartProps.vals || []);
   const topMoods = meta.topMoods || '平静、易怒';
   return (
     <div className="review-mood-trend-block">
@@ -7421,7 +7442,7 @@ function MoodTrendSummary({range = 'd30'}){
       <div className={'review-chart review-detail-chart review-mood-trend-chart' + (isCompact ? ' is-compact' : '')}>
         <MoodLineChart {...chartProps}/>
       </div>
-      <MoodChartLegend/>
+      <MoodChartLegend recordDays={recordDays}/>
       <div className="review-mood-trend-foot">
         <div className="review-mood-trend-tri">
           <div className="review-mood-trend-tri-head">
@@ -7447,9 +7468,9 @@ function MoodTrendSummary({range = 'd30'}){
             <span className="review-mood-trend-record-card-title">心情记录</span>
             <p><b>{recordCount}</b><em>次</em></p>
           </div>
-          <div className="review-mood-trend-record-card review-weight-stat-card review-mood-stat-card">
-            <span className="review-mood-trend-record-card-title">记录天数</span>
-            <p><b>{recordDays}</b><em>天</em></p>
+          <div className="review-mood-trend-record-card review-weight-stat-card review-mood-stat-card is-avg">
+            <span className="review-mood-trend-record-card-title">平均心情</span>
+            <p className="review-mood-freq-words"><b>{avgMood}</b></p>
           </div>
           <div className="review-mood-trend-record-card review-weight-stat-card review-mood-stat-card is-freq">
             <span className="review-mood-trend-record-card-title">高频心情</span>
@@ -7996,7 +8017,7 @@ function MoodDetailBody({range, onExpandPhase}){
         {range === 'd30' ? (
           <MoodCycleCombinedCard onExpand={onExpandPhase} showCompare={false} showPhase/>
         ) : null}
-        {range === 'half' ? (
+        {false && range === 'half' ? (
           <MoodCycleCombinedCard showCompare showPhase={false}/>
         ) : null}
         {false && (

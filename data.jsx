@@ -372,7 +372,7 @@ const TIMELINE_BLOCKS = [
         },
         ai:{
           id:'t4', time:'12:06', kind:'chart', chartType:'caloriePanel',
-          title:'今日卡路里摄入量', note:'日目标 1800kcal，已摄入 1126kcal，还可以吃 339kcal',
+          title:'卡路里摄入量', note:'日目标 1800kcal，已摄入 1126kcal，还可以吃 339kcal',
         },
         aiDefaultOpen:true,
       },
@@ -387,6 +387,23 @@ const TIMELINE_BLOCKS = [
             { cat:'饮食', icon:'food' },
           ],
         },
+      },
+      {
+        kind:'record-group', id:'t3-over-g',
+        primary:{
+          id:'t3-over', time:'19:40', kind:'image', label:'晚餐',
+          useRealImage:true,
+          photo:{ src:'assets/meal-519.png', alt:'晚餐记录' },
+          text:'黄焖鸡米饭 1 份；可乐 500ml；炸鸡块 6 块；冰淇淋 1 杯',
+          totalKcal:980,
+        },
+        ai:{
+          id:'t4-over', time:'19:41', kind:'chart', chartType:'caloriePanel',
+          title:'卡路里摄入量',
+          chartData:{ consumed:2700, target:1800 },
+          note:'日目标 1800kcal，已摄入 2700kcal，已超出 900kcal',
+        },
+        aiDefaultOpen:true,
       },
     ],
   },

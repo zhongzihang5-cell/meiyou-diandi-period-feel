@@ -38,96 +38,18 @@ function formatDietLeadingLabel(leadingLabel = '', mealTypeLabel = ''){
   return `${base}（${mealTypeLabel}）：`;
 }
 
-// ===== 7日热量柱状图 =====
+// ===== 卡路里环形图（复用点滴 ChartCaloriePanel） =====
 function DietTrendChart({ data, todayKcal }){
-  const days = ['周一','周二','周三','周四','周五','周六','今天'];
-  const maxVal = Math.max(2000, ...data.map(d => d || 0), todayKcal || 0);
-  const barW = 30;
-  const gap = 10;
-  const chartW = 340;
-  const chartH = 100;
-  const baseY = 100;
-  
-  const getBarHeight = (val) => val ? (val / maxVal) * 80 : 0;
-  const getBarY = (val) => baseY - getBarHeight(val);
-  
+  const ChartCaloriePanel = window.ChartCaloriePanel;
+  if (!ChartCaloriePanel) return null;
   return (
-    <div className="diet-fb-chart-box">
-      <svg viewBox="0 0 340 120" preserveAspectRatio="none">
-        {/* 参考线 */}
-        <line x1="20" y1="15" x2="330" y2="15" stroke="rgba(0,0,0,0.03)" strokeWidth=".5"/>
-        <line x1="20" y1="40" x2="330" y2="40" stroke="rgba(0,0,0,0.03)" strokeWidth=".5"/>
-        <line x1="20" y1="65" x2="330" y2="65" stroke="rgba(0,0,0,0.03)" strokeWidth=".5"/>
-        <text x="18" y="18" fontSize="8" fill="rgba(0,0,0,0.2)" textAnchor="end" fontFamily="PingFang SC">2000</text>
-        <text x="18" y="43" fontSize="8" fill="rgba(0,0,0,0.2)" textAnchor="end" fontFamily="PingFang SC">1500</text>
-        <text x="18" y="68" fontSize="8" fill="rgba(0,0,0,0.2)" textAnchor="end" fontFamily="PingFang SC">1000</text>
-        
-        {/* 柱状图 */}
-        {data.map((val, i) => {
-          const x = 32 + i * 40;
-          const isToday = i === 6;
-          const displayVal = isToday ? todayKcal : val;
-          if(!displayVal) return null;
-          
-          const h = getBarHeight(displayVal);
-          const y = getBarY(displayVal);
-          
-          return (
-            <g key={i}>
-              <rect 
-                x={x} 
-                y={y} 
-                width={barW} 
-                height={h} 
-                rx="4" 
-                fill={DIET_FB_PRIMARY} 
-                opacity={isToday ? 0.7 : 0.25}
-                className="diet-fb-bar-anim"
-                style={{ animationDelay: `${i * 60}ms` }}
-              />
-              {isToday && displayVal && (
-                <text 
-                  x={x + barW/2} 
-                  y={y - 4} 
-                  fontSize="9" 
-                  fill={DIET_FB_PRIMARY} 
-                  fontWeight="500" 
-                  textAnchor="middle" 
-                  fontFamily="PingFang SC"
-                >
-                  {displayVal}
-                </text>
-              )}
-            </g>
-          );
-        })}
-        
-        {/* X轴标签 */}
-        {days.map((day, i) => {
-          const x = 32 + i * 40 + barW/2;
-          const hasData = i === 6 ? todayKcal : data[i];
-          const isToday = i === 6;
-          return (
-            <text 
-              key={i}
-              x={x} 
-              y="112" 
-              fontSize={isToday ? "8.5" : "8"} 
-              fill={isToday ? DIET_FB_PRIMARY : (hasData ? "rgba(0,0,0,0.25)" : "rgba(0,0,0,0.15)")}
-              fontWeight={isToday ? "500" : "400"}
-              textAnchor="middle" 
-              fontFamily="PingFang SC"
-            >
-              {day}
-            </text>
-          );
-        })}
-      </svg>
+    <div className="diet-fb-chart-box diet-fb-calorie-ring">
+      <ChartCaloriePanel consumed={todayKcal}/>
     </div>
   );
 }
 
-function DietSecBHeader({ title = '近7天饮食热量' }){
+function DietSecBHeader({ title = '卡路里摄入量' }){
   return (
     <div className="diet-fb-b-header">
       <span className="diet-fb-ai-badge">
@@ -443,24 +365,15 @@ function DietCalorieAiBody({
     return <>{blockOrder.map((blockType) => renderAiBlock(blockType))}</>;
   }
 
-  const showChart = daysWithRecord >= 3;
   const showAvg = daysWithRecord >= 5;
 
-  if (showChart) {
-    return (
-      <>
-        <DietTrendChart data={weekData} todayKcal={todayKcal}/>
-        {showAvg && avgKcal ? (
-          <div className="diet-fb-b-stats">7日日均约 <strong>{formatKcal(avgKcal)} kcal</strong></div>
-        ) : (
-          <div className="diet-fb-b-stats hint">再记录 {Math.max(0, 5 - daysWithRecord)} 天，解锁 7 日均值分析</div>
-        )}
-      </>
-    );
-  }
-
   return (
-    <div className="diet-fb-guide-text">再记录 {Math.max(0, 3 - daysWithRecord)} 天饮食，即可解锁热量趋势图。</div>
+    <>
+      <DietTrendChart data={weekData} todayKcal={todayKcal}/>
+      {showAvg && avgKcal ? (
+        <div className="diet-fb-b-stats">7日日均约 <strong>{formatKcal(avgKcal)} kcal</strong></div>
+      ) : null}
+    </>
   );
 }
 
@@ -487,7 +400,7 @@ function DietAiInsightsShell({ displayScenario, isNew, children }){
 }
 
 function DietAiCollapsibleSection({
-  title = '近7天饮食热量',
+  title = '卡路里摄入量',
   defaultOpen = true,
   animateIn = false,
   embedded = false,

@@ -650,6 +650,27 @@
   color:var(--my-text-tertiary);
   flex-wrap:wrap;
 }
+.review-trend-legend-with-days{
+  flex-wrap:nowrap;
+  justify-content:space-between;
+  gap:8px;
+}
+.review-trend-legend-items{
+  display:flex;
+  flex:1 1 auto;
+  min-width:0;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:6px 14px;
+}
+.review-trend-legend-days{
+  flex:0 0 auto;
+  margin-left:auto;
+  font-size:11px;
+  line-height:1.29;
+  color:rgba(0,0,0,0.45);
+  white-space:nowrap;
+}
 .review-legend-item{
   display:inline-flex;
   align-items:center;
@@ -7479,10 +7500,12 @@
   min-height:22px;
   align-items:baseline;
 }
-.review-mood-stat-card.is-freq p.review-mood-freq-words{
+.review-mood-stat-card.is-freq p.review-mood-freq-words,
+.review-mood-stat-card.is-avg p.review-mood-freq-words{
   margin-top:6px;
 }
-.review-mood-stat-card.is-freq p.review-mood-freq-words b{
+.review-mood-stat-card.is-freq p.review-mood-freq-words b,
+.review-mood-stat-card.is-avg p.review-mood-freq-words b{
   font-size:15px;
   font-weight:500;
   line-height:22px;

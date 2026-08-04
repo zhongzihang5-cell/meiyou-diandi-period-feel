@@ -369,26 +369,54 @@ function ChartWeightTrend({compact = false, data, unit = 'kg'}){
   );
 }
 
-function ChartCaloriePanel({compact = false}){
-  const I = window.Icon;
+function formatCalorieNum(n){
+  const num = Math.max(0, Math.round(Number(n) || 0));
+  return String(num).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+function ChartCaloriePanel({compact = false, consumed: consumedProp, target: targetProp}){
   const DietBudgetSettingsPage = window.DietBudgetSettingsPage;
   const [budgetOpen, setBudgetOpen] = React.useState(false);
-  const [target, setTarget] = React.useState(()=> Number(window.DIET_TARGET_GOAL) || 1800);
-  const consumed = 1126;
-  // 演示卡保留原「还可以吃 339」口径；目标变更后按剩余热量重算
-  const remain = target === 1800
+  const [target, setTarget] = React.useState(()=>{
+    const fromProp = Number(targetProp);
+    if(Number.isFinite(fromProp) && fromProp > 0) return fromProp;
+    return Number(window.DIET_TARGET_GOAL) || 1800;
+  });
+  const hasConsumedProp = consumedProp != null && Number.isFinite(Number(consumedProp));
+  const consumed = hasConsumedProp ? Math.max(0, Math.round(Number(consumedProp))) : 1126;
+  const over = consumed > target;
+  const excess = Math.max(0, consumed - target);
+  // 演示静态卡保留原「还可以吃 339」口径；有外部摄入值或目标变更后按剩余热量重算
+  const remain = (!hasConsumedProp && !over && target === 1800)
     ? 339
     : Math.max(0, target - consumed);
+  const mainVal = over ? excess : remain;
   const pct = target > 0 ? consumed / target : 0;
-  const r = compact ? 22 : 28;
+  const accent = over ? '#FF8C42' : '#43D1AC';
+  const r = compact ? 26 : 32;
+  const stroke = compact ? 5.5 : 6.5;
   const c = 2 * Math.PI * r;
-  const size = r * 2 + 8;
+  const size = r * 2 + stroke + 4;
   const percent = Math.round(pct * 100);
+  const note = over
+    ? `日目标 ${target}kcal，已摄入 ${consumed}kcal，已超出 ${excess}kcal`
+    : `日目标 ${target}kcal，已摄入 ${consumed}kcal，还可以吃 ${remain}kcal`;
 
   React.useEffect(()=>{
+    const fromProp = Number(targetProp);
+    if(Number.isFinite(fromProp) && fromProp > 0){
+      setTarget(fromProp);
+      return;
+    }
     const next = Number(window.DIET_TARGET_GOAL);
     if(Number.isFinite(next) && next > 0) setTarget(next);
-  }, [budgetOpen]);
+  }, [budgetOpen, targetProp]);
+
+  const openBudget = (event)=>{
+    event.preventDefault();
+    event.stopPropagation();
+    setBudgetOpen(true);
+  };
 
   const budgetPage = DietBudgetSettingsPage ? (
     <DietBudgetSettingsPage
@@ -413,58 +441,55 @@ function ChartCaloriePanel({compact = false}){
 
   return (
     <>
-      <div className="v3-chart-cal">
-        <div className="v3-chart-cal-ring" style={{width:size, height:size}}>
-          <svg width={size} height={size} viewBox={'0 0 ' + size + ' ' + size} aria-hidden="true">
-            <circle cx={size / 2} cy={size / 2} r={r} stroke={TL_SOFT} strokeWidth="5" fill="none"/>
+      <div className={'v3-chart-cal' + (over ? ' is-over' : '') + (compact ? ' is-compact' : '')}>
+        <div className="v3-chart-cal-ring" style={{width:size, height:size}} aria-hidden="true">
+          <svg width={size} height={size} viewBox={'0 0 ' + size + ' ' + size}>
             <circle
               cx={size / 2}
               cy={size / 2}
               r={r}
-              stroke={TL_PRIMARY}
-              strokeWidth="5"
+              stroke="rgba(0,0,0,0.06)"
+              strokeWidth={stroke}
               fill="none"
-              strokeDasharray={c * Math.min(pct, 1) + ' ' + c}
+            />
+            <circle
+              cx={size / 2}
+              cy={size / 2}
+              r={r}
+              stroke={accent}
+              strokeWidth={stroke}
+              fill="none"
+              strokeDasharray={(c * Math.min(pct, 1)) + ' ' + c}
               strokeLinecap="round"
               transform={'rotate(-90 ' + (size / 2) + ' ' + (size / 2) + ')'}
             />
           </svg>
-          <div className="v3-chart-cal-pct">{percent}%</div>
+          <div className="v3-chart-cal-pct" style={{color:accent}}>{percent}%</div>
         </div>
         <div className="v3-chart-cal-meta">
-          <div className="v3-chart-cal-lbl">已摄入</div>
-          <div className="v3-chart-cal-val">
-            {consumed}
-            <span className="v3-chart-cal-target">
-              <span>/ {target} kcal</span>
-              <button
-                type="button"
-                className="v3-chart-cal-edit"
-                aria-label="编辑热量目标"
-                title="编辑热量目标"
-                onClick={(event)=>{
-                  event.preventDefault();
-                  event.stopPropagation();
-                  setBudgetOpen(true);
-                }}
-              >
-                {I ? (
-                  <I name="pen" size={12} stroke={1.8}/>
-                ) : (
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="M14 5l5 5-10 10H4v-5z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M13 6l5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                )}
-              </button>
+          <div className="v3-chart-cal-lbl">{over ? '你已吃超' : '还可以吃'}</div>
+          <div className="v3-chart-cal-remain-row">
+            <span className="v3-chart-cal-remain-val" style={{color:accent}}>
+              {formatCalorieNum(mainVal)}
             </span>
+            <span className="v3-chart-cal-remain-unit">kcal</span>
+          </div>
+          <div className="v3-chart-cal-foot">
+            <span className="v3-chart-cal-intake">已摄入 {formatCalorieNum(consumed)}</span>
+            <button
+              type="button"
+              className="v3-chart-cal-goal"
+              aria-label="编辑热量目标"
+              onClick={openBudget}
+            >
+              目标 {formatCalorieNum(target)}
+              <span aria-hidden="true">›</span>
+            </button>
           </div>
         </div>
       </div>
       {!compact ? (
-        <div className="v3-weight-curve-note">
-          日目标 {target}kcal，已摄入 {consumed}kcal，还可以吃 {remain}kcal
-        </div>
+        <div className="v3-weight-curve-note">{note}</div>
       ) : null}
       {budgetPortal}
     </>
@@ -899,7 +924,13 @@ function ChartSymptomDots({data}){
 function TLChart({type, compact = false, data, weightUnit}){
   if(type === 'moodWeek') return <ChartMoodWeek compact={compact}/>;
   if(type === 'weightTrend') return <ChartWeightTrend compact={compact} data={data} unit={weightUnit}/>;
-  if(type === 'caloriePanel') return <ChartCaloriePanel compact={compact}/>;
+  if(type === 'caloriePanel') return (
+    <ChartCaloriePanel
+      compact={compact}
+      consumed={data?.consumed}
+      target={data?.target}
+    />
+  );
   if(type === 'symptomDots') return <ChartSymptomDots data={data}/>;
   if(type === 'todayMoodWave') return <ChartTodayMoodWave data={data} compact={compact}/>;
   if(type === 'beverageWeek') return <ChartBeverageWeek data={data}/>;
@@ -1736,5 +1767,5 @@ function V3RecordGroupCard({group, isNew}){
 }
 
 Object.assign(window, {
-  V3RecordGroupCard, V3v2Card, V3v2PrimaryBody, V3v2Header, TLChart, TLTag,
+  V3RecordGroupCard, V3v2Card, V3v2PrimaryBody, V3v2Header, TLChart, TLTag, ChartCaloriePanel,
 });
