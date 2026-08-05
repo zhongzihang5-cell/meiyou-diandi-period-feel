@@ -2032,11 +2032,13 @@ function WeightTrendSummary({range = 'd30'}){
   const meta = WEIGHT_RANGE_META[range] || WEIGHT_RANGE_META.d30;
   const series = weightTrendSeries(range);
   const latestJin = series.values[series.values.length - 1] || WEIGHT_CARD_VALUES[WEIGHT_CARD_VALUES.length - 1];
+  const firstJin = series.values[0] != null ? series.values[0] : latestJin;
   const avgJin = series.values.length
     ? series.values.reduce((sum, v)=>sum + v, 0) / series.values.length
     : latestJin;
   const bmi = weightJinToBmi(latestJin);
-  const dropJin = 2.5;
+  const deltaJin = latestJin - firstJin;
+  const deltaText = (deltaJin > 0 ? '+' : '') + reviewFmt1(deltaJin);
   return (
     <div className="review-mood-trend-block">
       <div className="review-mood-trend-head-main">
@@ -2074,10 +2076,10 @@ function WeightTrendSummary({range = 'd30'}){
             <span className="review-mood-trend-record-card-title">平均体重</span>
             <p><b>{reviewFmt1(avgJin)}</b><em>斤</em></p>
           </div>
-          <div className="review-mood-trend-record-card review-weight-stat-card is-vs-baseline">
-            <span className="review-mood-trend-record-card-title">比8月1日</span>
+          <div className={'review-mood-trend-record-card review-weight-stat-card is-vs-baseline' + (deltaJin < 0 ? ' is-down' : deltaJin > 0 ? ' is-up' : '')}>
+            <span className="review-mood-trend-record-card-title">体重变化</span>
             <p>
-              <b>-{reviewFmt1(dropJin)}</b>
+              <b>{deltaText}</b>
               <em>斤</em>
             </p>
           </div>
@@ -2974,13 +2976,18 @@ function DietTotalBarChart({
   showTotals = true,
   labelStep = 1,
   showTrendLine = true,
+  barRatio = null,
+  minBarWidth = null,
+  showExtremes = false,
 }){
-  const W = width, H = height, padL = wide ? 36 : 34, padR = wide ? 20 : 10, padT = 22, padB = wide ? 32 : 26;
+  const W = width, H = height, padL = wide ? 36 : 34, padR = wide ? 20 : 10, padT = showExtremes ? 30 : 22, padB = wide ? 32 : 26;
   const x0 = padL, x1 = W - padR, y0 = padT, y1 = H - padB;
   const yMax = 2500;
   const band = (x1 - x0) / Math.max(days.length, 1);
-  const barWidth = Math.min(wide ? 16 : 18, Math.max(8, band * (wide ? 0.58 : 0.62)));
-  const radius = wide ? 5 : 7;
+  const ratio = barRatio != null ? barRatio : (wide ? 0.58 : 0.62);
+  const minW = minBarWidth != null ? minBarWidth : 8;
+  const barWidth = Math.min(wide ? 16 : 18, Math.max(minW, band * ratio));
+  const radius = Math.min(wide ? 5 : 7, Math.max(2, barWidth / 2));
   const X = i => x0 + band * i + band / 2;
   const Y = value => y1 - value / yMax * (y1 - y0);
   const trendPts = days
@@ -2988,6 +2995,18 @@ function DietTotalBarChart({
     .filter(p=>p.v != null);
   const trendFit = reviewLinearTrend(trendPts.map(p=>p.v));
   const clampY = v => Math.max(y0, Math.min(y1, Y(v)));
+  let maxI = -1;
+  let minI = -1;
+  if(trendPts.length){
+    maxI = trendPts[0].i;
+    minI = trendPts[0].i;
+    let maxV = trendPts[0].v;
+    let minV = trendPts[0].v;
+    trendPts.forEach((p)=>{
+      if(p.v > maxV){ maxV = p.v; maxI = p.i; }
+      if(p.v < minV){ minV = p.v; minI = p.i; }
+    });
+  }
   return (
     <svg
       viewBox={'0 0 ' + W + ' ' + H}
@@ -3032,9 +3051,16 @@ function DietTotalBarChart({
         const top = Y(dayTotal);
         const barH = Math.max(y1 - top, 2);
         const isToday = !!day.highlight;
+        const isMax = showExtremes && i === maxI;
+        const isMin = showExtremes && i === minI && minI !== maxI;
+        const extremeColor = isMax ? '#ff9500' : '#ff7a3d';
+        const labelAnchor = i <= 1 ? 'start' : (i >= days.length - 2 ? 'end' : 'middle');
+        const labelX = labelAnchor === 'start'
+          ? X(i)
+          : (labelAnchor === 'end' ? X(i) : X(i));
         return (
           <React.Fragment key={day.date + '-' + i}>
-            {showTotals ? (
+            {showTotals && !isMax && !isMin ? (
               <text
                 x={X(i)}
                 y={top - 6}
@@ -3053,6 +3079,27 @@ function DietTotalBarChart({
               rx={radius}
               fill={isToday ? DIET_TOTAL_BAR_TODAY : 'url(#dietTotalPastGrad)'}
             />
+            {(isMax || isMin) ? (
+              <g>
+                <circle
+                  cx={X(i)}
+                  cy={top}
+                  r="4"
+                  fill={extremeColor}
+                  stroke="#fff"
+                  strokeWidth="1.5"
+                />
+                <text
+                  x={labelX}
+                  y={Math.max(12, top - 10)}
+                  textAnchor={labelAnchor}
+                  fontSize="9"
+                  fontWeight="500"
+                  fill={isMax ? '#e8930f' : '#ff7a3d'}
+                  fontFamily="PingFang SC, -apple-system, sans-serif"
+                >{dayTotal} kcal</text>
+              </g>
+            ) : null}
             {showLabel ? (
               <text x={X(i)} y={H - 8} textAnchor="middle" fontSize={wide ? 9.5 : 9} fontWeight={isToday ? '500' : '400'} fill={isToday ? DIET_TOTAL_BAR_TODAY : '#bbbbbf'} fontFamily="PingFang SC">{day.date}</text>
             ) : null}
@@ -3310,6 +3357,29 @@ const DIET_PLAN_OPTIONS = [
 ];
 
 const DIET_DEFAULT_BIRTH = '1999.03.15';
+const DIET_WEEKLY_WEIGHT_CHANGE_KG = 0.45;
+
+function dietSuggestedWeightRangeKg(heightCm){
+  const h = Math.max(1, Number(heightCm) || 160) / 100;
+  // 以 BMI 18.5–23.9 估算建议体重区间（由身高推导）
+  const min = Math.round(18.5 * h * h * 10) / 10;
+  const max = Math.round(23.9 * h * h * 10) / 10;
+  return {min, max};
+}
+
+function dietDefaultTargetWeightKg(planId, weightKg, heightCm){
+  const range = dietSuggestedWeightRangeKg(heightCm);
+  const current = Number(weightKg) || 50;
+  if(planId === 'gain'){
+    return Math.round(Math.min(range.max, Math.max(current + 2, range.min + 1)) * 100) / 100;
+  }
+  return Math.round(Math.max(range.min, Math.min(current - 2, range.max - 1)) * 100) / 100;
+}
+
+function dietSuggestedPlanWeeks(currentKg, targetKg){
+  const diff = Math.abs((Number(currentKg) || 0) - (Number(targetKg) || 0));
+  return Math.max(12, Math.ceil(diff / DIET_WEEKLY_WEIGHT_CHANGE_KG));
+}
 
 function parseDietBirthDate(text){
   const match = String(text || '').trim().match(/^(\d{4})[.\/\-年](\d{1,2})[.\/\-月](\d{1,2})/);
@@ -3354,9 +3424,15 @@ function DietBudgetSettingsPage({open, onClose, onComplete, initialGoal = 1440, 
   const [weight, setWeight] = useState(50);
   const [activity, setActivity] = useState(initialActivity);
   const [plan, setPlan] = useState('maintain');
+  const [targetWeight, setTargetWeight] = useState(()=>dietDefaultTargetWeightKg('lose', 50, 160));
+  const [planWeeks, setPlanWeeks] = useState(12);
   const [goal, setGoal] = useState(initialGoal);
   const [goalDirty, setGoalDirty] = useState(false);
   const age = dietAgeFromBirth(birthDate);
+  const showWeightPlanFields = plan === 'lose' || plan === 'gain';
+  const weightRange = dietSuggestedWeightRangeKg(height);
+  const suggestedWeeks = dietSuggestedPlanWeeks(weight, targetWeight);
+  const changeVerb = plan === 'gain' ? '增重' : '减重';
 
   React.useEffect(()=>{
     if(!open) return;
@@ -3366,6 +3442,8 @@ function DietBudgetSettingsPage({open, onClose, onComplete, initialGoal = 1440, 
     setWeight(50);
     setActivity(nextActivity);
     setPlan('maintain');
+    setTargetWeight(dietDefaultTargetWeightKg('lose', 50, 160));
+    setPlanWeeks(12);
     setGoal(initialGoal || calcDietCalorieGoal(160, 50, dietAgeFromBirth(DIET_DEFAULT_BIRTH), nextActivity, 'maintain'));
     setGoalDirty(true);
   }, [open, initialGoal, initialActivity]);
@@ -3376,18 +3454,24 @@ function DietBudgetSettingsPage({open, onClose, onComplete, initialGoal = 1440, 
   }, [open, height, weight, age, activity, plan, goalDirty]);
 
   React.useEffect(()=>{
+    if(!open || !showWeightPlanFields) return;
+    setPlanWeeks(prev=>Math.max(prev, suggestedWeeks));
+  }, [open, showWeightPlanFields, suggestedWeeks]);
+
+  React.useEffect(()=>{
     if(!open) return undefined;
     const handleKeyDown = event=>{ if(event.key === 'Escape') onClose(); };
     document.addEventListener('keydown', handleKeyDown);
     return ()=>document.removeEventListener('keydown', handleKeyDown);
   }, [open, onClose]);
 
-  const editNumber = (label, value, unit, min, max, onChange)=>{
+  const editNumber = (label, value, unit, min, max, onChange, precision = 1)=>{
     const next = window.prompt(label + '（' + unit + '）', String(value));
     if(next == null) return;
     const num = Number(next);
     if(!Number.isFinite(num)) return;
-    onChange(Math.min(max, Math.max(min, Math.round(num * 10) / 10)));
+    const factor = Math.pow(10, precision);
+    onChange(Math.min(max, Math.max(min, Math.round(num * factor) / factor)));
     setGoalDirty(false);
   };
 
@@ -3398,6 +3482,16 @@ function DietBudgetSettingsPage({open, onClose, onComplete, initialGoal = 1440, 
     if(!parsed) return;
     setBirthDate(formatDietBirthDate(parsed));
     setGoalDirty(false);
+  };
+
+  const selectPlan = (nextPlan)=>{
+    setPlan(nextPlan);
+    setGoalDirty(false);
+    if(nextPlan === 'lose' || nextPlan === 'gain'){
+      const nextTarget = dietDefaultTargetWeightKg(nextPlan, weight, height);
+      setTargetWeight(nextTarget);
+      setPlanWeeks(dietSuggestedPlanWeeks(weight, nextTarget));
+    }
   };
 
   return (
@@ -3429,20 +3523,20 @@ function DietBudgetSettingsPage({open, onClose, onComplete, initialGoal = 1440, 
               type="button"
               className="review-diet-budget-row"
               role="listitem"
-              onClick={()=>editNumber('身高', height, 'cm', 100, 220, setHeight)}
+              onClick={()=>editNumber('身高', height, '厘米', 100, 220, setHeight)}
             >
               <span className="review-diet-budget-label">身高</span>
-              <span className="review-diet-budget-value is-editable">{height.toFixed(1)} cm</span>
+              <span className="review-diet-budget-value is-editable">{height.toFixed(1)} 厘米</span>
               <span className="review-diet-budget-chevron" aria-hidden="true">›</span>
             </button>
             <button
               type="button"
               className="review-diet-budget-row"
               role="listitem"
-              onClick={()=>editNumber('体重', weight, 'kg', 30, 150, setWeight)}
+              onClick={()=>editNumber('体重', weight, '公斤', 30, 150, setWeight)}
             >
               <span className="review-diet-budget-label">体重</span>
-              <span className="review-diet-budget-value is-editable">{weight.toFixed(1)} kg</span>
+              <span className="review-diet-budget-value is-editable">{weight.toFixed(1)} 公斤</span>
               <span className="review-diet-budget-chevron" aria-hidden="true">›</span>
             </button>
           </div>
@@ -3476,7 +3570,7 @@ function DietBudgetSettingsPage({open, onClose, onComplete, initialGoal = 1440, 
                   role="radio"
                   aria-checked={plan === option.id}
                   className={'review-diet-budget-plan-card' + (plan === option.id ? ' is-active' : '')}
-                  onClick={()=>{ setPlan(option.id); setGoalDirty(false); }}
+                  onClick={()=>selectPlan(option.id)}
                 >
                   {option.title}
                 </button>
@@ -3484,7 +3578,40 @@ function DietBudgetSettingsPage({open, onClose, onComplete, initialGoal = 1440, 
             </div>
           </div>
 
-          <div className="review-diet-budget-section">
+          {showWeightPlanFields ? (
+            <div className="review-diet-budget-plan-fields" role="list">
+              <div className="review-diet-budget-field" role="listitem">
+                <button
+                  type="button"
+                  className="review-diet-budget-row"
+                  onClick={()=>editNumber('目标体重', targetWeight, '公斤', 30, 150, setTargetWeight, 2)}
+                >
+                  <span className="review-diet-budget-label">目标体重</span>
+                  <span className="review-diet-budget-value is-plan-accent">{targetWeight.toFixed(2)} 公斤</span>
+                  <span className="review-diet-budget-chevron" aria-hidden="true">›</span>
+                </button>
+                <p className="review-diet-budget-field-hint">
+                  目标体重建议在 {weightRange.min.toFixed(1)} 公斤-{weightRange.max.toFixed(1)} 公斤内 (由你的BMI计算得出)
+                </p>
+              </div>
+              <div className="review-diet-budget-field" role="listitem">
+                <button
+                  type="button"
+                  className="review-diet-budget-row"
+                  onClick={()=>editNumber('计划时间', planWeeks, '周', 1, 104, (v)=>setPlanWeeks(Math.round(v)), 0)}
+                >
+                  <span className="review-diet-budget-label">计划时间</span>
+                  <span className="review-diet-budget-value is-plan-accent">{planWeeks} 周</span>
+                  <span className="review-diet-budget-chevron" aria-hidden="true">›</span>
+                </button>
+                <p className="review-diet-budget-field-hint">
+                  建议计划不少于 {suggestedWeeks} 周 (每周{changeVerb}不超过 {DIET_WEEKLY_WEIGHT_CHANGE_KG} 公斤)
+                </p>
+              </div>
+            </div>
+          ) : null}
+
+          <div className="review-diet-budget-section is-goal">
             <div className="review-diet-budget-section-title">热量目标</div>
             <div className="review-diet-budget-goal">
               <label className="review-diet-budget-goal-main">
@@ -3503,7 +3630,7 @@ function DietBudgetSettingsPage({open, onClose, onComplete, initialGoal = 1440, 
                     setGoalDirty(true);
                   }}
                 />
-                <span className="review-diet-budget-goal-unit">kcal / 天</span>
+                <span className="review-diet-budget-goal-unit">千卡/每日</span>
               </label>
             </div>
           </div>
@@ -3513,7 +3640,15 @@ function DietBudgetSettingsPage({open, onClose, onComplete, initialGoal = 1440, 
             type="button"
             className="review-diet-budget-done"
             onClick={()=>{
-              if(typeof onComplete === 'function') onComplete({goal, activity});
+              if(typeof onComplete === 'function'){
+                onComplete({
+                  goal,
+                  activity,
+                  plan,
+                  targetWeight: showWeightPlanFields ? targetWeight : null,
+                  planWeeks: showWeightPlanFields ? planWeeks : null,
+                });
+              }
               onClose();
             }}
           >
@@ -4592,6 +4727,73 @@ const DIET_WAVE_TREND = {
   }),
 };
 
+/** 近半年及以上：按月日均热量柱（不再用天级颗粒度） */
+function buildDietMonthlyBars({startYear, startMonth, count, base, drift, amp, seed}){
+  let s = seed;
+  const rnd = ()=>{
+    s = (s * 9301 + 49297) % 233280;
+    return s / 233280;
+  };
+  const out = [];
+  let year = startYear;
+  let month = startMonth;
+  for(let i = 0; i < count; i++){
+    const t = i / Math.max(count - 1, 1);
+    const trend = base + drift * t;
+    const wave = Math.sin(i * 0.55) * amp * 0.45 + Math.sin(i * 0.22 + 0.6) * amp * 0.35;
+    const noise = (rnd() - 0.48) * amp * 0.5;
+    const total = Math.round(Math.max(1520, Math.min(2280, trend + wave + noise)));
+    const isLast = i === count - 1;
+    const yy = String(year).slice(2);
+    out.push({
+      date: isLast ? '今天' : (yy + '.' + month),
+      total: isLast ? 1731 : total,
+      highlight: isLast,
+    });
+    month += 1;
+    if(month > 12){
+      month = 1;
+      year += 1;
+    }
+  }
+  return out;
+}
+
+const DIET_MONTHLY_BARS = {
+  half:[
+    {date:'2月', total:2010},
+    {date:'3月', total:1984},
+    {date:'4月', total:1956},
+    {date:'5月', total:1918},
+    {date:'6月', total:1862},
+    {date:'7月', total:1731, highlight:true},
+  ],
+  year:[
+    {date:'25.8', total:2068},
+    {date:'25.9', total:2042},
+    {date:'25.10', total:2016},
+    {date:'25.11', total:1990},
+    {date:'25.12', total:2035},
+    {date:'26.1', total:1988},
+    {date:'26.2', total:1964},
+    {date:'26.3', total:1938},
+    {date:'26.4', total:1910},
+    {date:'26.5', total:1886},
+    {date:'26.6', total:1824},
+    {date:'今天', total:1731, highlight:true},
+  ],
+  // 全部：2024.8–2026.7，每月一根柱
+  all: buildDietMonthlyBars({
+    startYear:2024,
+    startMonth:8,
+    count:24,
+    base:2110,
+    drift:-360,
+    amp:90,
+    seed:240801,
+  }),
+};
+
 function dietRangeDays(range){
   const meta = DIET_RANGE_META[range] || DIET_RANGE_META.d30;
   const all = REVIEW_DIET_ALL_DAYS;
@@ -4600,6 +4802,8 @@ function dietRangeDays(range){
 }
 
 function dietTrendPoints(range){
+  if(range === 'd7' || range === 'd30') return dietRangeDays(range);
+  if(DIET_MONTHLY_BARS[range]) return DIET_MONTHLY_BARS[range];
   if(range === 'half'){
     return dietHalfTrendSeries(dietRangeDays('half'));
   }
@@ -4608,6 +4812,28 @@ function dietTrendPoints(range){
 }
 
 function DietTrendMainChart({days, range = 'd7'}){
+  const isDailyBar = range === 'd7' || range === 'd30';
+  const isMonthlyBar = range === 'half' || range === 'year' || range === 'all';
+  if(isDailyBar || isMonthlyBar){
+    const useThinBars = range === 'd30' || range === 'all';
+    return (
+      <DietTotalBarChart
+        days={days}
+        height={176}
+        showTotals={range === 'd7'}
+        showExtremes={range !== 'd7'}
+        labelStep={range === 'd30' ? 5 : (range === 'all' ? 4 : (range === 'year' ? 2 : 1))}
+        showTrendLine={isDailyBar}
+        barRatio={useThinBars ? 0.38 : null}
+        minBarWidth={useThinBars ? 4 : null}
+        ariaLabel={
+          isMonthlyBar
+            ? (DIET_RANGE_META[range]?.avgLabel || '月均') + '热量柱状图'
+            : (DIET_RANGE_META[range]?.avgLabel || '每日') + '热量柱状图'
+        }
+      />
+    );
+  }
   const isWave = range === 'year' || range === 'all';
   const points = days.filter(day=>!day.empty);
   const n = points.length;
@@ -4722,6 +4948,7 @@ function DietTrendSummary({range = 'd7'}){
   const trendDays = dietTrendPoints(range);
   const mealShare = meta.mealShare || DIET_RANGE_META.d7.mealShare;
   const topMeal = dietTopMealFromShare(mealShare);
+  const isMonthly = range === 'half' || range === 'year' || range === 'all';
   return (
     <div className="review-love-trend-block is-detail-main is-diet-main">
       <div className="review-love-trend-head">
@@ -4731,8 +4958,8 @@ function DietTrendSummary({range = 'd7'}){
       <DietTrendMainChart days={trendDays} range={range}/>
       <div className="review-legend review-trend-legend-with-days">
         <div className="review-trend-legend-items">
-          <span className="review-legend-item is-diet"><i></i>每日热量</span>
-          <span className="review-legend-item is-trend"><i></i>趋势</span>
+          <span className="review-legend-item is-diet"><i></i>{isMonthly ? '月均热量' : '每日热量'}</span>
+          {isMonthly ? null : <span className="review-legend-item is-trend"><i></i>趋势</span>}
         </div>
         <span className="review-trend-legend-days">记录{meta.coverDays}天</span>
       </div>

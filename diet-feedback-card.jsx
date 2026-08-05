@@ -578,27 +578,67 @@ const FEEDBACK_DIM_DEMO_PRESETS = {
     ctx: {
       daysWithRecord: 2,
       dayMealCount: 2,
-      dayTotalKcal: 1126,
-      weekData: [null, 980, null, null, null, null, 1126],
+      dayTotalKcal: 1100,
+      weekData: [null, 980, null, null, null, null, 1100],
     },
+    mealKcal: 700,
+    mealType: '午餐',
+    ironFoodName: '菠菜',
+    foodTags: ['含铁食物'],
   },
   'dim-b': {
     food: 'lunch',
-    ctx: { daysWithRecord: 5 },
+    ctx: {
+      daysWithRecord: 5,
+      dayMealCount: 2,
+      dayTotalKcal: 1100,
+      avgKcal: 1380,
+    },
+    mealKcal: 700,
   },
   'dim-c': {
     food: 'feastMeal',
-    ctx: {},
+    ctx: {
+      dayMealCount: 2,
+      dayTotalKcal: 1100,
+    },
+    mealKcal: 700,
   },
   'dim-d': {
     food: 'coldDrinkMeal',
-    ctx: { cycleData: { phase: 'period', day: 2 } },
+    ctx: {
+      cycleData: { phase: 'period', day: 2 },
+      dayMealCount: 2,
+      dayTotalKcal: 1100,
+    },
+    mealKcal: 700,
+    ironFoodName: '菠菜',
+    foodTags: ['含铁食物'],
   },
   'dim-e': {
     food: 'dinner',
-    ctx: { todayFoodCount: 5, dayMealCount: 3, dayTotalKcal: 1676 },
+    ctx: {
+      todayFoodCount: 5,
+      dayMealCount: 2,
+      dayTotalKcal: 1100,
+    },
+    mealKcal: 700,
   },
 };
+
+function applyDietFeedbackDemoPreset(entry, preset) {
+  if (preset.mealKcal != null) entry.dietData.totalKcal = preset.mealKcal;
+  if (preset.foodTags) entry.dietData.foodTags = preset.foodTags;
+  if (preset.mealType) entry.dietData.mealType = preset.mealType;
+  if (preset.ironFoodName) {
+    entry.dietData.foods = Array.from(new Set([...(entry.dietData.foods || []), preset.ironFoodName]));
+    entry.dietData.items = [
+      ...(entry.dietData.items || []),
+      { name: preset.ironFoodName, kcal: 50, tags: ['含铁食物'] },
+    ];
+  }
+  return entry;
+}
 
 function createDietFeedbackDisplayDemoEntry(displayScenario) {
   const scenario = normalizeDietFeedbackDisplayScenario(
@@ -611,6 +651,7 @@ function createDietFeedbackDisplayDemoEntry(displayScenario) {
   entry.displayScenario = scenario;
   entry.recognitionScenario = 'success';
   entry.userContext = buildDietUserContext(data, preset.ctx);
+  applyDietFeedbackDemoPreset(entry, preset);
   return entry;
 }
 
@@ -621,9 +662,9 @@ const DIET_FEEDBACK_COMBO_SCENARIOS = [
 ];
 
 const COMBO_HINTS = {
-  'combo-bce': '柱状图 + B/C/E 三维度文案连续展示（不换行）',
-  'combo-acd': '柱状图 + A/C/D 三维度文案连续展示（不换行）',
-  'combo-bcd': '柱状图 + B/C/D 三维度文案连续展示（不换行）',
+  'combo-bce': '长句：今天已记录2餐，累计1100千卡，午餐约700千卡…慢跑90分钟…菠菜补铁',
+  'combo-acd': '长句：今天已记录2餐，累计1100千卡，午餐约700千卡…慢跑90分钟…菠菜补铁',
+  'combo-bcd': '长句：今天已记录2餐，累计1100千卡，午餐约700千卡…慢跑90分钟…菠菜补铁',
 };
 
 const COMBO_PERIOD_CTX = { phase: 'period', day: 2 };
@@ -634,28 +675,40 @@ const COMBO_DEMO_PRESETS = {
     ctx: {
       daysWithRecord: 5,
       todayFoodCount: 5,
-      dayMealCount: 3,
-      dayTotalKcal: 1676,
+      dayMealCount: 2,
+      dayTotalKcal: 1100,
     },
+    mealKcal: 700,
+    mealType: '午餐',
+    ironFoodName: '菠菜',
+    foodTags: ['含铁食物'],
   },
   'combo-acd': {
     food: 'feastMeal',
     ctx: {
       daysWithRecord: 2,
       dayMealCount: 2,
-      dayTotalKcal: 1126,
-      weekData: [null, 980, null, null, null, null, 1126],
+      dayTotalKcal: 1100,
+      weekData: [null, 980, null, null, null, null, 1100],
       cycleData: COMBO_PERIOD_CTX,
     },
-    foodTags: ['冷饮冰品'],
+    mealKcal: 700,
+    mealType: '午餐',
+    ironFoodName: '菠菜',
+    foodTags: ['含铁食物'],
   },
   'combo-bcd': {
     food: 'feastMeal',
     ctx: {
       daysWithRecord: 5,
+      dayMealCount: 2,
+      dayTotalKcal: 1100,
       cycleData: COMBO_PERIOD_CTX,
     },
-    foodTags: ['冷饮冰品'],
+    mealKcal: 700,
+    mealType: '午餐',
+    ironFoodName: '菠菜',
+    foodTags: ['含铁食物'],
   },
 };
 
@@ -667,9 +720,7 @@ function createDietFeedbackComboDemoEntry(comboScenario = 'combo-bce') {
   entry.displayScenario = comboScenario;
   entry.recognitionScenario = 'success';
   entry.userContext = buildDietUserContext(data, preset.ctx);
-  if (preset.foodTags) {
-    entry.dietData.foodTags = preset.foodTags;
-  }
+  applyDietFeedbackDemoPreset(entry, preset);
   return entry;
 }
 
@@ -766,11 +817,11 @@ function DietFeedbackDisplayScenarioBar() {
   };
 
   const hintByScenario = {
-    'dim-a': '柱状图 + 今天饮食打卡 N 次，合计总热量千卡',
-    'dim-b': '柱状图 + 过去一周平均每天均值千卡',
-    'dim-c': '柱状图 + 这顿挺丰盛…相当于慢跑 N 分钟（按 5 分钟取整）',
-    'dim-d': '柱状图 + 经期吃冰品提示',
-    'dim-e': '柱状图 + 今日食物种类丰富提示',
+    'dim-a': '环形图 + 今天饮食打卡2餐，合计1100千卡',
+    'dim-b': '环形图 + 过去一周平均每天均值千卡',
+    'dim-c': '环形图 + 这顿700千卡，分量刚刚好',
+    'dim-d': '环形图 + 经期吃菠菜很不错，有助于补充铁元素',
+    'dim-e': '环形图 + 今天的饮食种类很丰富，5种食物…',
   };
 
   return (

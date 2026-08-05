@@ -44,7 +44,7 @@ function DietTrendChart({ data, todayKcal }){
   if (!ChartCaloriePanel) return null;
   return (
     <div className="diet-fb-chart-box diet-fb-calorie-ring">
-      <ChartCaloriePanel consumed={todayKcal}/>
+      <ChartCaloriePanel consumed={todayKcal} hideNote />
     </div>
   );
 }
@@ -132,28 +132,116 @@ function roundRunMinutes(kcal){
   return Math.max(5, Math.round(raw / 5) * 5);
 }
 
+function resolveIronFoodName({ items = [], foods = [], foodTags = [], fallback = '菠菜' } = {}){
+  const tagged = (items || []).find((it)=>Array.isArray(it?.tags) && it.tags.includes('含铁食物'));
+  if(tagged?.name) return String(tagged.name).replace(/（.*）/, '');
+  const nameFromItem = (items || []).find((it)=>/菠菜|红肉|黑木耳|猪肝|牛肉|鸡胸/.test(it?.name || ''));
+  if(nameFromItem?.name) return String(nameFromItem.name).replace(/（.*）/, '');
+  const nameFromFoods = (foods || []).find((name)=>/菠菜|红肉|黑木耳|猪肝|牛肉|鸡胸/.test(name || ''));
+  if(nameFromFoods) return nameFromFoods;
+  if((foodTags || []).includes('含铁食物')) return fallback;
+  return fallback;
+}
+
+function DietNum({ children }){
+  return <span className="diet-fb-stat-accent">{children}</span>;
+}
+
+function buildDietFeedbackLongCopy({
+  dayMealCount = 2,
+  dayTotalKcal = 1100,
+  mealTypeLabel = '午餐',
+  mealKcal = 700,
+  ironFoodName = '菠菜',
+} = {}){
+  const meals = Math.max(1, Number(dayMealCount) || 2);
+  const dayTotal = dayTotalKcal != null ? dayTotalKcal : 1100;
+  const meal = mealKcal != null ? mealKcal : 700;
+  const mealType = mealTypeLabel || '午餐';
+  const iron = ironFoodName || '菠菜';
+  const runMin = roundRunMinutes(meal);
+  return `今天已记录${meals}餐，累计摄入${formatKcal(dayTotal)}千卡，${mealType}约${formatKcal(meal)}千卡，热量不低，相当于慢跑${runMin}分钟，经期吃${iron}很不错，有助于补充铁元素`;
+}
+
+function renderDietFeedbackLongCopy(ctx = {}){
+  const meals = Math.max(1, Number(ctx.dayMealCount) || 2);
+  const dayTotal = ctx.dayTotalKcal != null ? ctx.dayTotalKcal : 1100;
+  const meal = ctx.mealKcal != null ? ctx.mealKcal : 700;
+  const mealType = ctx.mealTypeLabel || '午餐';
+  const iron = ctx.ironFoodName || '菠菜';
+  const runMin = roundRunMinutes(meal);
+  return (
+    <>
+      今天已记录<DietNum>{formatKcal(meals)}</DietNum>餐，累计摄入<DietNum>{formatKcal(dayTotal)}</DietNum>千卡，{mealType}约<DietNum>{formatKcal(meal)}</DietNum>千卡，热量不低，相当于慢跑<DietNum>{formatKcal(runMin)}</DietNum>分钟，经期吃{iron}很不错，有助于补充铁元素
+    </>
+  );
+}
+
 function getFeedbackDimCopy(dim, {
-  dayMealCount = 0,
-  dayTotalKcal,
+  dayMealCount = 2,
+  dayTotalKcal = 1100,
   avgKcal,
-  mealKcal,
+  mealKcal = 700,
   todayFoodCount = 0,
+  ironFoodName = '菠菜',
 } = {}){
   switch (dim) {
     case 'A':
-      if (dayTotalKcal == null) return null;
-      return `今天饮食打卡 ${dayMealCount} 次，合计 ${formatKcal(dayTotalKcal)} 千卡。`;
+      return `今天饮食打卡${dayMealCount || 2}餐，合计${formatKcal(dayTotalKcal ?? 1100)}千卡。`;
     case 'B':
       if (avgKcal == null) return null;
-      return `过去一周平均每天 ${formatKcal(avgKcal)} 千卡。`;
+      return `过去一周平均每天${formatKcal(avgKcal)}千卡。`;
     case 'C':
-      if (mealKcal == null) return null;
-      return `这顿挺丰盛的，约 ${formatKcal(mealKcal)} 千卡，相当于慢跑 ${roundRunMinutes(mealKcal)} 分钟。`;
+      return `这顿${formatKcal(mealKcal ?? 700)}千卡，分量刚刚好。`;
     case 'D':
-      return '经期吃冰品因人而异，如果你容易痛经，减少冰品可能会舒服一些。';
-    case 'E':
-      if (todayFoodCount < 5) return null;
-      return `今天吃了 ${todayFoodCount} 种食物，种类很丰富。多样性能确保微量元素不缺乏。`;
+      return `经期吃${ironFoodName || '菠菜'}很不错，有助于补充铁元素`;
+    case 'E': {
+      const n = todayFoodCount >= 5 ? todayFoodCount : 5;
+      return `今天的饮食种类很丰富，${n}种食物能给身体带来多元营养`;
+    }
+    default:
+      return null;
+  }
+}
+
+function renderFeedbackDimCopy(dim, {
+  dayMealCount = 2,
+  dayTotalKcal = 1100,
+  avgKcal,
+  mealKcal = 700,
+  todayFoodCount = 0,
+  ironFoodName = '菠菜',
+} = {}){
+  switch (dim) {
+    case 'A':
+      return (
+        <>
+          今天饮食打卡<DietNum>{formatKcal(dayMealCount || 2)}</DietNum>餐，合计<DietNum>{formatKcal(dayTotalKcal ?? 1100)}</DietNum>千卡。
+        </>
+      );
+    case 'B':
+      if (avgKcal == null) return null;
+      return (
+        <>
+          过去一周平均每天<DietNum>{formatKcal(avgKcal)}</DietNum>千卡。
+        </>
+      );
+    case 'C':
+      return (
+        <>
+          这顿<DietNum>{formatKcal(mealKcal ?? 700)}</DietNum>千卡，分量刚刚好。
+        </>
+      );
+    case 'D':
+      return <>经期吃{ironFoodName || '菠菜'}很不错，有助于补充铁元素</>;
+    case 'E': {
+      const n = todayFoodCount >= 5 ? todayFoodCount : 5;
+      return (
+        <>
+          今天的饮食种类很丰富，<DietNum>{formatKcal(n)}</DietNum>种食物能给身体带来多元营养
+        </>
+      );
+    }
     default:
       return null;
   }
@@ -161,19 +249,34 @@ function getFeedbackDimCopy(dim, {
 
 function getFeedbackDimComboCopy(dims, ctx){
   if (!dims?.length) return null;
-  const parts = dims
-    .map((dim) => getFeedbackDimCopy(dim, ctx))
-    .filter(Boolean);
-  return parts.length ? parts.join('') : null;
+  return buildDietFeedbackLongCopy(ctx);
 }
 
-function DietFeedbackDimCopy({ dim, dims, dayMealCount, dayTotalKcal, avgKcal, mealKcal, todayFoodCount }){
-  const ctx = { dayMealCount, dayTotalKcal, avgKcal, mealKcal, todayFoodCount };
-  const text = dims?.length
-    ? getFeedbackDimComboCopy(dims, ctx)
-    : getFeedbackDimCopy(dim, ctx);
-  if (!text) return null;
-  return <p className="diet-fb-b-stats">{text}</p>;
+function DietFeedbackDimCopy({
+  dim,
+  dims,
+  dayMealCount,
+  dayTotalKcal,
+  avgKcal,
+  mealKcal,
+  todayFoodCount,
+  mealTypeLabel,
+  ironFoodName,
+}){
+  const ctx = {
+    dayMealCount,
+    dayTotalKcal,
+    avgKcal,
+    mealKcal,
+    todayFoodCount,
+    mealTypeLabel,
+    ironFoodName,
+  };
+  const content = dims?.length
+    ? renderDietFeedbackLongCopy(ctx)
+    : renderFeedbackDimCopy(dim, ctx);
+  if (!content) return null;
+  return <p className="diet-fb-b-stats">{content}</p>;
 }
 
 function DietAiAvgStats({ avgKcal, diversityCount, cycleText, cycleSplitParagraph }){
@@ -279,11 +382,19 @@ function DietCalorieAiBody({
   displayScenario,
   cycleData = null,
   todayFoodCount = 0,
+  time = '',
+  foods = [],
+  items = [],
+  foodTags = [],
+  mealTypeLabel: mealTypeLabelProp,
+  ironFoodName: ironFoodNameProp,
 }){
   const getConfig = window.getDietFeedbackDisplayConfig;
   const cfg = displayScenario && getConfig
     ? getConfig(displayScenario)
     : null;
+  const mealTypeLabel = mealTypeLabelProp || resolveMealTypeFromTime(time) || '午餐';
+  const ironFoodName = ironFoodNameProp || resolveIronFoodName({ items, foods, foodTags, fallback:'菠菜' });
 
   if (cfg?.feedbackDim || cfg?.feedbackDims?.length) {
     return (
@@ -293,10 +404,12 @@ function DietCalorieAiBody({
           dim={cfg.feedbackDim}
           dims={cfg.feedbackDims}
           dayMealCount={dayMealCount}
-          dayTotalKcal={dayTotalKcal ?? todayKcal}
+          dayTotalKcal={dayTotalKcal ?? todayKcal ?? 1100}
           avgKcal={avgKcal}
-          mealKcal={mealKcal ?? todayKcal}
+          mealKcal={mealKcal ?? todayKcal ?? 700}
           todayFoodCount={todayFoodCount}
+          mealTypeLabel={mealTypeLabel}
+          ironFoodName={ironFoodName}
         />
       </>
     );
@@ -458,19 +571,23 @@ function DietMealInsightCard({ insight }){
   if (insight.type === 'high-meal') {
     content = (
       <>
-        这顿热量比较高，约 <strong>{insight.kcal}</strong> kcal，相当于慢跑 <strong>{insight.runMin}</strong> 分钟，
+        这顿约<strong>{insight.kcal}</strong>千卡，热量不低，相当于慢跑<strong>{insight.runMin}</strong>分钟，
         <span className="diet-fb-meal-insight-soft">偶尔吃一顿大餐没关系～</span>
       </>
     );
   } else if (insight.type === 'feast') {
     content = (
       <>
-        这顿挺丰盛的，约 <strong>{insight.kcal}</strong> kcal，相当于慢跑 <strong>{insight.runMin}</strong> 分钟
+        这顿约<strong>{insight.kcal}</strong>千卡，热量不低，相当于慢跑<strong>{insight.runMin}</strong>分钟
       </>
+    );
+  } else if (insight.type === 'just-right') {
+    content = (
+      <>这顿<strong>{insight.kcal}</strong>千卡，分量刚刚好。</>
     );
   } else if (insight.type === 'light') {
     content = (
-      <>这顿比较清淡，约 <strong>{insight.kcal}</strong> kcal，注意营养要均衡哦</>
+      <>这顿比较清淡，约<strong>{insight.kcal}</strong>千卡，注意营养要均衡哦</>
     );
   }
   if (!content) return null;
@@ -632,11 +749,15 @@ function DietRecordSyncPhotoCard({
             daysWithRecord={ctx.daysWithRecord || 0}
             avgKcal={ctx.avgKcal}
             dayMealCount={ctx.dayMealCount || 2}
-            dayTotalKcal={ctx.dayTotalKcal}
-            mealKcal={totalKcal}
+            dayTotalKcal={ctx.dayTotalKcal ?? 1100}
+            mealKcal={totalKcal ?? 700}
             displayScenario={displayScenario}
             cycleData={ctx.cycleData}
             todayFoodCount={ctx.todayFoodCount ?? 0}
+            time={time}
+            foods={foods}
+            items={items}
+            foodTags={foodTags}
           />
         </DietAiInsightsShell>
       ) : null}
@@ -942,11 +1063,15 @@ function DietPhotoFeedbackCard({
               daysWithRecord={ctx.daysWithRecord || 0}
               avgKcal={ctx.avgKcal}
               dayMealCount={ctx.dayMealCount || 2}
-              dayTotalKcal={ctx.dayTotalKcal}
-              mealKcal={totalKcal}
+              dayTotalKcal={ctx.dayTotalKcal ?? 1100}
+              mealKcal={totalKcal ?? 700}
               displayScenario={displayScenario}
               cycleData={ctx.cycleData}
               todayFoodCount={ctx.todayFoodCount ?? 0}
+              time={time}
+              foods={foods}
+              items={items}
+              foodTags={foodTags}
             />
           </DietAiInsightsShell>
         )}
@@ -1063,11 +1188,14 @@ function DietTextFeedbackCard({
               daysWithRecord={ctx.daysWithRecord || 0}
               avgKcal={ctx.avgKcal}
               dayMealCount={ctx.dayMealCount || 2}
-              dayTotalKcal={ctx.dayTotalKcal}
-              mealKcal={totalKcal}
+              dayTotalKcal={ctx.dayTotalKcal ?? 1100}
+              mealKcal={totalKcal ?? 700}
               displayScenario={displayScenario}
               cycleData={ctx.cycleData}
               todayFoodCount={ctx.todayFoodCount ?? 0}
+              time={time}
+              items={items}
+              foodTags={foodTags}
             />
           </DietAiInsightsShell>
         )}
@@ -1208,17 +1336,14 @@ function DietSecFail(){
 function getCalorieInterpretation(kcal){
   if(kcal == null) return null;
   if(kcal < 300){
-    return `🥗 这顿比较清淡，约 ${kcal} kcal，注意营养要均衡哦`;
+    return `这顿比较清淡，约${formatKcal(kcal)}千卡，注意营养要均衡哦`;
   }
   if(kcal >= 300 && kcal <= 700){
-    return null; // 常规餐不特别解读
+    return `这顿${formatKcal(kcal)}千卡，分量刚刚好。`;
   }
-  if(kcal > 700 && kcal <= 1000){
-    const runMin = Math.round(kcal / 8);
-    return `🍽️ 这顿挺丰盛的，约 ${kcal} kcal，相当于慢跑 ${runMin} 分钟`;
-  }
-  if(kcal > 1000){
-    return `⚡ 这顿热量较高（约 ${kcal} kcal），建议搭配适量运动`;
+  if(kcal > 700){
+    const runMin = roundRunMinutes(kcal);
+    return `这顿约${formatKcal(kcal)}千卡，热量不低，相当于慢跑${runMin}分钟`;
   }
   return null;
 }
@@ -1229,7 +1354,7 @@ function getMealCalorieInsight(kcal){
     type: 'high-meal',
     icon: '🏃‍♀️',
     kcal: formatKcal(kcal),
-    runMin: Math.round(kcal / 8),
+    runMin: roundRunMinutes(kcal),
   };
 }
 
@@ -1247,10 +1372,14 @@ function getCalorieInsightCard(kcal){
       type: 'feast',
       icon: '🍽️',
       kcal: formatKcal(kcal),
-      runMin: Math.round(kcal / 8),
+      runMin: roundRunMinutes(kcal),
     };
   }
-  return null;
+  return {
+    type: 'just-right',
+    icon: '🍽️',
+    kcal: formatKcal(kcal),
+  };
 }
 
 function resolveCalorieInsightBelowTotal(totalKcal, displayCfg){
@@ -1278,9 +1407,10 @@ function getCycleInsight(cycleData, foodTags){
       };
     }
     if(hasIronFood){
+      const ironName = resolveIronFoodName({ foodTags, fallback:'菠菜' });
       return {
         type: 'iron-confirm',
-        text: '经期吃含铁食物很不错，有助于补充铁元素 👍',
+        text: `经期吃${ironName}很不错，有助于补充铁元素`,
         subText: `当前经期第 ${day} 天`,
       };
     }
@@ -1612,6 +1742,8 @@ Object.assign(window, {
   DietCalorieAiBody,
   DietAiChevron,
   DietTrendChart,
+  buildDietFeedbackLongCopy,
+  resolveIronFoodName,
   DietSecA,
   DietSecB,
   DietSecC,

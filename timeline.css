@@ -3813,6 +3813,11 @@
   color:#ff4d4d;
   font-weight:500;
 }
+.v3-weight-curve-note .v3-diet-note-em{
+  color:#ff4d88;
+  font-weight:500;
+  font-variant-numeric:tabular-nums;
+}
 .v3-chart-cal{
   display:flex;
   align-items:center;
@@ -3855,7 +3860,7 @@
   font-size:26px;
   font-weight:500;
   line-height:1.15;
-  color:#43D1AC;
+  color:#ff4d88;
   font-variant-numeric:tabular-nums;
   letter-spacing:-0.02em;
 }

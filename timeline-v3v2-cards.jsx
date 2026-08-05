@@ -374,7 +374,24 @@ function formatCalorieNum(n){
   return String(num).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
-function ChartCaloriePanel({compact = false, consumed: consumedProp, target: targetProp}){
+function emphasizeDietNoteNumbers(text){
+  if(text == null || text === '') return null;
+  if(typeof text !== 'string') return text;
+  const parts = text.split(/(\d[\d,]*)/g);
+  return parts.map((part, index) => (
+    /^\d[\d,]*$/.test(part)
+      ? <b key={`n-${index}`} className="v3-diet-note-em">{part}</b>
+      : part
+  ));
+}
+
+function ChartCaloriePanel({
+  compact = false,
+  consumed: consumedProp,
+  target: targetProp,
+  note: noteProp,
+  hideNote = false,
+}){
   const DietBudgetSettingsPage = window.DietBudgetSettingsPage;
   const [budgetOpen, setBudgetOpen] = React.useState(false);
   const [target, setTarget] = React.useState(()=>{
@@ -392,15 +409,18 @@ function ChartCaloriePanel({compact = false, consumed: consumedProp, target: tar
     : Math.max(0, target - consumed);
   const mainVal = over ? excess : remain;
   const pct = target > 0 ? consumed / target : 0;
-  const accent = over ? '#FF8C42' : '#43D1AC';
+  const accent = over ? '#FF8C42' : '#ff4d88';
   const r = compact ? 26 : 32;
   const stroke = compact ? 5.5 : 6.5;
   const c = 2 * Math.PI * r;
   const size = r * 2 + stroke + 4;
   const percent = Math.round(pct * 100);
-  const note = over
+  const autoNote = over
     ? `日目标 ${target}kcal，已摄入 ${consumed}kcal，已超出 ${excess}kcal`
     : `日目标 ${target}kcal，已摄入 ${consumed}kcal，还可以吃 ${remain}kcal`;
+  const note = noteProp != null && String(noteProp).trim() !== ''
+    ? String(noteProp)
+    : autoNote;
 
   React.useEffect(()=>{
     const fromProp = Number(targetProp);
@@ -488,8 +508,8 @@ function ChartCaloriePanel({compact = false, consumed: consumedProp, target: tar
           </div>
         </div>
       </div>
-      {!compact ? (
-        <div className="v3-weight-curve-note">{note}</div>
+      {!compact && !hideNote && note ? (
+        <div className="v3-weight-curve-note">{emphasizeDietNoteNumbers(note)}</div>
       ) : null}
       {budgetPortal}
     </>
@@ -921,7 +941,7 @@ function ChartSymptomDots({data}){
   );
 }
 
-function TLChart({type, compact = false, data, weightUnit}){
+function TLChart({type, compact = false, data, weightUnit, note}){
   if(type === 'moodWeek') return <ChartMoodWeek compact={compact}/>;
   if(type === 'weightTrend') return <ChartWeightTrend compact={compact} data={data} unit={weightUnit}/>;
   if(type === 'caloriePanel') return (
@@ -929,6 +949,8 @@ function TLChart({type, compact = false, data, weightUnit}){
       compact={compact}
       consumed={data?.consumed}
       target={data?.target}
+      note={note != null ? note : data?.note}
+      hideNote={!!data?.hideNote}
     />
   );
   if(type === 'symptomDots') return <ChartSymptomDots data={data}/>;
@@ -1638,7 +1660,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
       }}>
         <V3v2Header time={a.time} title={a.title} isNew={isNew} entryId={derivedId} entryKind={derivedKind} editPayload={editPayload}/>
         <div style={{marginTop:8}}>
-          <TLChart type={a.chartType} data={a.chartData} weightUnit={a.weightUnit}/>
+          <TLChart type={a.chartType} data={a.chartData} weightUnit={a.weightUnit} note={a.note}/>
           {a.note && a.chartType !== 'caloriePanel' && (
             <div style={{fontSize:11, color:TL_MUTED, marginTop:8}}>{a.note}</div>
           )}
@@ -1696,7 +1718,14 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
                 embedded
                 animateIn={isNew}
               >
-                {a.chartType && <TLChart type={a.chartType} data={a.chartData} weightUnit={a.weightUnit}/>}
+                {a.chartType && (
+                  <TLChart
+                    type={a.chartType}
+                    data={a.chartData}
+                    weightUnit={a.weightUnit}
+                    note={a.note}
+                  />
+                )}
                 {a.chartType !== 'caloriePanel' && (a.noteParts || a.note) && (
                   streamNote ? (
                     <div className="v3-weight-curve-note">
@@ -1731,7 +1760,14 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
             </button>
             {open && (
               <div ref={aiPanelRef} className="v3-ai-panel-in" style={{paddingBottom:12}}>
-                {a.chartType && <TLChart type={a.chartType} data={a.chartData} weightUnit={a.weightUnit}/>}
+                {a.chartType && (
+                  <TLChart
+                    type={a.chartType}
+                    data={a.chartData}
+                    weightUnit={a.weightUnit}
+                    note={a.note}
+                  />
+                )}
                 {a.chartType !== 'caloriePanel' && (a.noteParts || a.note) && (
                   streamNote ? (
                     <div className="v3-weight-curve-note">

@@ -3326,17 +3326,19 @@
   flex:1 1 auto;
   display:flex;
   flex-direction:column;
-  padding-bottom:calc(20px + var(--my-safe-bottom, 0px));
+  padding:6px 12px calc(10px + var(--my-safe-bottom, 0px));
+  gap:0;
 }
 .review-diet-budget-card{
   flex:0 0 auto;
+  padding:12px 14px 10px;
 }
 .review-diet-budget-list{
   margin:0;
 }
 .review-diet-budget-row{
   width:100%;
-  min-height:61px;
+  min-height:48px;
   margin:0;
   padding:0;
   border:0;
@@ -3358,7 +3360,7 @@
 }
 .review-diet-budget-label{
   flex:0 0 auto;
-  font-size:17px;
+  font-size:15px;
   font-weight:500;
   color:var(--my-text-primary);
   line-height:1.19;
@@ -3366,10 +3368,10 @@
 .review-diet-budget-value{
   flex:1 1 auto;
   text-align:right;
-  font-size:17px;
+  font-size:15px;
   font-weight:400;
   color:var(--my-text-secondary);
-  line-height:1.47;
+  line-height:1.29;
   font-variant-numeric:tabular-nums;
 }
 .review-diet-budget-value.is-editable{
@@ -3378,30 +3380,30 @@
 .review-diet-budget-chevron{
   flex:0 0 auto;
   color:rgba(0,0,0,0.25);
-  font-size:18px;
+  font-size:16px;
   line-height:1;
   transform:translateY(-1px);
 }
 .review-diet-budget-section{
-  margin-top:28px;
+  margin-top:14px;
 }
 .review-diet-budget-section-title{
-  font-size:17px;
+  font-size:15px;
   font-weight:500;
   color:var(--my-text-primary);
   line-height:1.19;
-  margin-bottom:12px;
+  margin-bottom:8px;
 }
 .review-diet-budget-activity{
   display:flex;
   flex-wrap:wrap;
-  gap:8px;
+  gap:6px;
 }
 .review-diet-budget-activity-card{
-  flex:1 1 calc(50% - 4px);
+  flex:1 1 calc(50% - 3px);
   min-width:0;
-  min-height:64px;
-  padding:12px 8px;
+  min-height:50px;
+  padding:8px 6px;
   border:1px solid rgba(0,0,0,0.08);
   border-radius:8px;
   background:#fff;
@@ -3409,19 +3411,19 @@
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  gap:4px;
+  gap:2px;
   font-family:inherit;
   cursor:pointer;
   -webkit-tap-highlight-color:transparent;
 }
 .review-diet-budget-activity-card b{
-  font-size:15px;
+  font-size:14px;
   font-weight:500;
   color:var(--my-text-primary);
   line-height:1.19;
 }
 .review-diet-budget-activity-card span{
-  font-size:12px;
+  font-size:11px;
   font-weight:400;
   color:var(--my-text-tertiary);
   line-height:1.29;
@@ -3436,18 +3438,18 @@
 }
 .review-diet-budget-plan{
   display:flex;
-  gap:8px;
+  gap:6px;
 }
 .review-diet-budget-plan-card{
   flex:1 1 0;
   min-width:0;
-  height:40px;
+  height:36px;
   padding:0 8px;
   border:1px solid rgba(0,0,0,0.08);
   border-radius:8px;
   background:#fff;
   color:var(--my-text-primary);
-  font-size:15px;
+  font-size:14px;
   font-weight:500;
   font-family:inherit;
   line-height:1;
@@ -3459,10 +3461,40 @@
   background:rgba(255,77,136,0.06);
   color:var(--my-brand-red);
 }
+.review-diet-budget-plan-fields{
+  margin-top:8px;
+}
+.review-diet-budget-field{
+  border-bottom:0.5px solid var(--my-line);
+  padding-bottom:2px;
+}
+.review-diet-budget-field:last-child{
+  border-bottom:0;
+  padding-bottom:0;
+}
+.review-diet-budget-field .review-diet-budget-row{
+  border-bottom:0;
+  min-height:48px;
+}
+.review-diet-budget-value.is-plan-accent{
+  color:var(--my-text-primary);
+  font-weight:400;
+}
+.review-diet-budget-field-hint{
+  margin:0 0 10px;
+  padding:0;
+  font-size:11px;
+  font-weight:400;
+  line-height:1.29;
+  color:rgba(0,0,0,0.45);
+}
+.review-diet-budget-section.is-goal{
+  margin-top:18px;
+}
 .review-diet-budget-goal{
   display:flex;
   align-items:flex-end;
-  padding-bottom:8px;
+  padding-bottom:6px;
   border-bottom:1px solid var(--my-brand-red);
 }
 .review-diet-budget-goal-main{
@@ -3472,13 +3504,13 @@
   min-width:0;
 }
 .review-diet-budget-goal-input{
-  width:4.2em;
+  width:3.6em;
   border:0;
   outline:none;
   padding:0;
   background:transparent;
   color:var(--my-brand-red);
-  font-size:36px;
+  font-size:28px;
   font-weight:500;
   font-family:inherit;
   line-height:1.1;
@@ -3491,15 +3523,15 @@
   margin:0;
 }
 .review-diet-budget-goal-unit{
-  font-size:15px;
+  font-size:14px;
   font-weight:400;
   color:var(--my-text-secondary);
   line-height:1.19;
 }
 .review-diet-budget-footer{
   flex:0 0 auto;
-  margin-top:auto;
-  padding-top:24px;
+  margin-top:12px;
+  padding-top:0;
 }
 .review-diet-budget-done{
   width:100%;
@@ -7474,6 +7506,12 @@
 .review-weight-stat-card.review-mood-trend-record-card p b{
   font-size:22px;
   font-weight:500;
+  color:#43D1AC;
+}
+.review-weight-stat-card.is-vs-baseline.is-down p b{
+  color:#ff4d88;
+}
+.review-weight-stat-card.is-vs-baseline.is-up p b{
   color:#43D1AC;
 }
 .review-weight-stat-card.is-vs-baseline p{

@@ -372,7 +372,8 @@ const TIMELINE_BLOCKS = [
         },
         ai:{
           id:'t4', time:'12:06', kind:'chart', chartType:'caloriePanel',
-          title:'卡路里摄入量', note:'日目标 1800kcal，已摄入 1126kcal，还可以吃 339kcal',
+          title:'卡路里摄入量',
+          note:'今天饮食打卡2餐，合计1100千卡。这顿700千卡，分量刚刚好。今天的饮食种类很丰富，4种食物能给身体带来多元营养',
         },
         aiDefaultOpen:true,
       },
@@ -401,7 +402,7 @@ const TIMELINE_BLOCKS = [
           id:'t4-over', time:'19:41', kind:'chart', chartType:'caloriePanel',
           title:'卡路里摄入量',
           chartData:{ consumed:2700, target:1800 },
-          note:'日目标 1800kcal，已摄入 2700kcal，已超出 900kcal',
+          note:'今天已记录2餐，累计摄入2700千卡，晚餐约980千卡，热量不低，相当于慢跑120分钟，经期吃菠菜很不错，有助于补充铁元素',
         },
         aiDefaultOpen:true,
       },
