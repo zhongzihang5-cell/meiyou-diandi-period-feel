@@ -164,6 +164,7 @@ const PERIOD_DOCK_QUICK_ITEMS = [
   { id:'mood', label:'心情', action:'mood', iconSrc:'assets/record-mood.png' },
   { id:'diet', label:'饮食', action:'diet', iconSrc:'assets/record-diet.png' },
   { id:'beverage', label:'喝水', action:'beverage', iconSrc:'assets/record-beverage.svg', text:'喝水' },
+  { id:'custom', label:'自定义', text:'自定义' },
   { id:'stool', label:'便便', iconSrc:'assets/record-stool.svg', text:'便便' },
   { id:'exercise', label:'运动', icon:'🏃', text:'运动' },
   { id:'sleep', label:'睡眠', icon:'🌙', text:'睡眠' },
@@ -175,6 +176,28 @@ const PERIOD_DOCK_QUICK_ITEMS = [
   { id:'travel', label:'旅行', icon:'✈️', text:'旅行' },
   { id:'pet', label:'宠物', icon:'🐾', text:'宠物' },
 ];
+
+function CustomQuickIcon(){
+  return (
+    <svg viewBox="0 0 64 64" width="44" height="44" aria-hidden="true">
+      <defs>
+        <radialGradient id="custom-quick-bg" cx="50%" cy="34%" r="72%">
+          <stop offset="0" stopColor="#fff"/><stop offset="1" stopColor="#f0f8e9"/>
+        </radialGradient>
+        <linearGradient id="custom-quick-body" x1="18" y1="14" x2="47" y2="50" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#b6dd8a"/><stop offset="52%" stopColor="#93c95f"/><stop offset="100%" stopColor="#6ba83a"/>
+        </linearGradient>
+        <radialGradient id="custom-quick-highlight"><stop stopColor="#fff" stopOpacity=".95"/><stop offset="1" stopColor="#fff" stopOpacity="0"/></radialGradient>
+      </defs>
+      <circle cx="32" cy="32" r="32" fill="url(#custom-quick-bg)"/>
+      <ellipse cx="32" cy="51" rx="15" ry="4.6" fill="#6ba83a" opacity=".22"/>
+      <rect x="14" y="14" width="36" height="36" rx="12" fill="url(#custom-quick-body)"/>
+      <path d="M26 14h12a12 12 0 0 1 12 12v2c0-6.6-5.4-12-12-12H26c-6.6 0-12 5.4-12 12v-2a12 12 0 0 1 12-12z" fill="#fff" opacity=".3"/>
+      <g fill="#fff"><rect x="29.4" y="21.6" width="5.2" height="20.8" rx="2.6"/><rect x="21.6" y="29.4" width="20.8" height="5.2" rx="2.6"/></g>
+      <ellipse cx="23.4" cy="22.6" rx="5.4" ry="3.4" fill="url(#custom-quick-highlight)" transform="rotate(-22 23.4 22.6)"/>
+    </svg>
+  );
+}
 
 function BabyFeedingQuickIcon({type}){
   if(type === 'breast'){
@@ -2519,10 +2542,12 @@ function App(){
         ...PERIOD_DOCK_QUICK_ITEMS,
       ].map(item=>({
         ...item,
-        iconNode:item.id === 'stool' && item.iconSrc
+        iconNode:item.id === 'custom'
+          ? <CustomQuickIcon />
+          : item.id === 'stool' && item.iconSrc
           ? <img src={item.iconSrc} alt="" />
           : (window.UnifiedQuickIcon
-            ? <UnifiedQuickIcon type={item.id}/>
+            ? <UnifiedQuickIcon type={item.id === 'beverage' ? 'water' : item.id}/>
             : (item.iconSrc ? <img src={item.iconSrc} alt="" /> : null)),
       }))
     : null;

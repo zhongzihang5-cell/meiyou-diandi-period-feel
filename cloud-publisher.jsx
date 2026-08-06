@@ -591,6 +591,16 @@ function DockPublisher({
     onDockExpandedChange?.(!!dockSheet || !!quickSelected);
   }, [dockSheet, quickSelected, onDockExpandedChange]);
 
+  React.useEffect(()=>{
+    if(!dockSheet) return undefined;
+    const handleOutsidePointerDown = (event)=>{
+      if(event.target.closest?.('.dock-sheet')) return;
+      closeDockSheet();
+    };
+    document.addEventListener('pointerdown', handleOutsidePointerDown);
+    return ()=>document.removeEventListener('pointerdown', handleOutsidePointerDown);
+  }, [dockSheet]);
+
   const isDockExpanded = !!dockSheet;
   const isQuickActive = quickOpen || !!quickSelected;
   const inputPlaceholder = dockPlaceholder || DOCK_PLACEHOLDER;
