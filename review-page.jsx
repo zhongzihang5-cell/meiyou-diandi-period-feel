@@ -865,69 +865,6 @@ function CycleDetailChart({range}){
   );
 }
 
-function CycleDetailBarChart({range}){
-  const source = range === '6c'
-    ? REVIEW_CYCLE_ALL_DATA.slice(-6)
-    : range === '1y'
-      ? REVIEW_CYCLE_ALL_DATA.slice(-12)
-      : range === '3y'
-        ? REVIEW_CYCLE_ALL_DATA.slice(-36)
-        : REVIEW_CYCLE_ALL_DATA;
-  const sixCycleDates = ['2/8','3/10','4/10','5/9','6/8','7/7'];
-  const oneYearDates = ['8/9','9/7','10/11','11/7','12/10','1/7','2/8','3/10','4/10','5/9','6/8','7/7'];
-  const data = source.map((item, index)=>{
-    const rawDate = range === '6c' ? sixCycleDates[index] : range === '1y' ? oneYearDates[index] : item[0];
-    const dateParts = rawDate.split(/[./]/);
-    const isPreciseDate = rawDate.includes('/');
-    const year = isPreciseDate
-      ? (range === '1y' && index < 5 ? '2025年' : '2026年')
-      : ('20' + dateParts[0] + '年');
-    const date = isPreciseDate ? (dateParts[0] + '月' + dateParts[1] + '日') : (dateParts[1] + '月');
-    const delta = item[1] - 29;
-    return {
-      date,
-      year,
-      cycle:item[1],
-      status:delta === 0 ? '准时' : (delta < 0 ? `提前${Math.abs(delta)}天` : `推迟${delta}天`),
-      normal:item[1] >= 21 && item[1] <= 35,
-      current:index === source.length - 1,
-    };
-  }).reverse();
-
-  return (
-    <div className="review-cycle-bar-module" role="img" aria-label={`${data.length}次月经周期天数柱状图`}>
-      <div className="review-cycle-bar-header">
-        <span>月经开始</span>
-        <span>是否准时</span>
-        <span>周期天数</span>
-        <b>正常范围21-35天</b>
-      </div>
-      <div className="review-cycle-bar-rows">
-        {data.map((item, index)=>{
-          const barPercent = Math.min(item.cycle / 35 * 100, 100);
-          return (
-            <div className="review-cycle-bar-row" key={item.year + item.date + index}>
-              <div className="review-cycle-bar-date">
-                {item.date}
-                <small>{item.year}</small>
-              </div>
-              <div className="review-cycle-bar-status">{item.status}</div>
-              <div className="review-cycle-bar-wrap">
-                <span
-                  className={'review-cycle-bar-value' + (item.normal ? ' is-normal' : ' is-abnormal')}
-                  style={{width:barPercent + '%'}}
-                >
-                  {item.current ? `当前周期${item.cycle}天` : `${item.cycle}天`}
-                </span>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 function ReviewShareQr(){
   const modules = [];
   const isFinder = (x, y, ox, oy)=>x >= ox && x < ox + 7 && y >= oy && y < oy + 7;
@@ -1397,7 +1334,6 @@ function CycleAllRecordsPage({open, onClose}){
 
 function CycleDetailPage({open, onClose, isMember=false}){
   const [range, setRange] = useState('6c');
-  const [chartMode, setChartMode] = useState('line');
   const [allRecordsOpen, setAllRecordsOpen] = useState(false);
   const ranges = [
     {key:'6c', label:'近6个周期'},
@@ -1526,7 +1462,6 @@ function CycleDetailPage({open, onClose, isMember=false}){
   React.useEffect(()=>{
     if(!open){
       setAllRecordsOpen(false);
-      setChartMode('line');
     }
   }, [open]);
 
@@ -1559,28 +1494,16 @@ function CycleDetailPage({open, onClose, isMember=false}){
 
         <div className="review-cycle-sample-area">
         <div className="review-detail-card review-cycle-overview-card">
-          <div className={'review-chart review-detail-chart' + (chartMode === 'bar' ? ' is-cycle-bar-mode' : '')}>
-            {chartMode === 'bar' ? <CycleDetailBarChart range={range}/> : <CycleDetailChart range={range}/>}
+          <div className="review-chart review-detail-chart">
+            <CycleDetailChart range={range}/>
           </div>
           <div className="review-legend review-cycle-chart-legend">
             <div className="review-cycle-chart-legend-items">
-            {chartMode === 'bar' ? <>
-              <span className="review-legend-item is-cycle-bar-normal"><i></i>正常周期</span>
-              <span className="review-legend-item is-cycle-bar-abnormal"><i></i>超出正常范围</span>
-            </> : <>
               <span className="review-legend-item is-cycle"><i></i>周期天数</span>
               <span className="review-legend-item is-trend"><i></i>趋势</span>
               {hasRangeUpper ? <span className="review-legend-item is-cycle-upper"><i></i>正常范围上限35天</span> : null}
               {hasRangeLower ? <span className="review-legend-item is-cycle-lower"><i></i>正常范围下限21天</span> : null}
-            </>}
             </div>
-            <button
-              type="button"
-              className="review-cycle-chart-toggle"
-              onClick={()=>setChartMode(mode=>mode === 'line' ? 'bar' : 'line')}
-            >
-              {chartMode === 'line' ? '切换柱状图' : '切换折线图'}
-            </button>
           </div>
         </div>
 
