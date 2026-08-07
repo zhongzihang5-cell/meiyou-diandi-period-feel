@@ -131,6 +131,213 @@
   font-weight:500;
 }
 
+/* 回顾首页：紧凑趋势卡片 */
+.review-page.is-compact-overview .review-nav{
+  height:44px;
+  flex-basis:44px;
+}
+.review-page.is-compact-overview .review-nav-title{
+  font-size:18px;
+  font-weight:600;
+}
+.review-page.is-compact-overview .review-content{
+  padding:2px 12px 14px;
+}
+.review-page.is-compact-overview .review-page-greeting{
+  margin:0 0 12px;
+  padding-left:1px;
+  font-size:15px;
+  line-height:24px;
+  color:#9a9a9f;
+}
+.review-page.is-compact-overview .review-page-greeting b{
+  color:#3b3b3d;
+  font-weight:600;
+}
+.review-overview-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.review-overview-card{
+  min-height:134px;
+  padding:13px 14px 12px;
+  border-radius:13px;
+  background:#fff;
+  box-shadow:none;
+  color:var(--my-text-primary);
+  overflow:hidden;
+}
+.review-overview-card.is-actionable{
+  cursor:pointer;
+}
+.review-overview-card.is-actionable:active{
+  transform:scale(.995);
+  background:#fefefe;
+}
+.review-overview-card.is-actionable:focus-visible{
+  outline:2px solid rgba(255,77,136,.34);
+  outline-offset:1px;
+}
+.review-overview-head{
+  min-height:26px;
+  display:flex;
+  align-items:center;
+  gap:9px;
+}
+.review-overview-head h2{
+  margin:0;
+  font-size:17px;
+  line-height:26px;
+  font-weight:600;
+  color:#303033;
+}
+.review-overview-icon{
+  width:16px;
+  height:16px;
+  flex:0 0 16px;
+  display:grid;
+  place-items:center;
+  color:#fff;
+}
+.review-overview-icon svg{
+  width:15px;
+  height:15px;
+  display:block;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.review-overview-icon.is-cycle,
+.review-overview-icon.is-weight,
+.review-overview-icon.is-mood{
+  width:16px;
+  height:16px;
+  border-radius:5px;
+}
+.review-overview-icon.is-cycle{background:linear-gradient(145deg,#ff8bb3,#ff4d88)}
+.review-overview-icon.is-weight{background:linear-gradient(145deg,#79dda7,#00bf91)}
+.review-overview-icon.is-mood{
+  border-radius:50%;
+  background:#ffc400;
+}
+.review-overview-icon.is-cycle svg,
+.review-overview-icon.is-weight svg,
+.review-overview-icon.is-mood svg{
+  width:12px;
+  height:12px;
+  stroke-width:2.2;
+}
+.review-overview-icon.is-diet{color:#ff8b61}
+.review-overview-icon.is-beverage{color:#29b7ad}
+.review-overview-icon.is-skin{color:#eb7891}
+.review-overview-icon.is-love{color:#ff4d88}
+.review-overview-icon.is-love svg{fill:currentColor;stroke:none}
+.review-overview-icon.is-symptom{color:#6f9fdc}
+.review-overview-icon.is-stool{color:#a87543}
+.review-overview-status{
+  margin-left:auto;
+  font-size:14px;
+  line-height:20px;
+  color:#9b9b9f;
+  white-space:nowrap;
+}
+.review-overview-chevron{
+  width:18px;
+  height:22px;
+  margin-left:auto;
+  display:grid;
+  place-items:center;
+  color:#c9c9cc;
+}
+.review-overview-status + .review-overview-chevron{
+  margin-left:3px;
+}
+.review-overview-chevron svg{
+  width:18px;
+  height:18px;
+  display:block;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.review-overview-body{
+  margin-top:9px;
+  min-height:73px;
+  display:grid;
+  grid-template-columns:minmax(0, 44%) minmax(0, 56%);
+  align-items:end;
+}
+.review-overview-metric{
+  min-width:0;
+  align-self:end;
+  padding:0 5px 2px 2px;
+}
+.review-overview-metric > span{
+  display:block;
+  margin-bottom:3px;
+  font-size:14px;
+  line-height:20px;
+  color:#aaaab0;
+  white-space:nowrap;
+}
+.review-overview-metric strong{
+  display:block;
+  font-size:17px;
+  line-height:26px;
+  font-weight:600;
+  letter-spacing:0;
+  color:#303033;
+  white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+}
+.review-overview-metric strong small{
+  margin-left:3px;
+  font-size:17px;
+  font-weight:600;
+  letter-spacing:0;
+}
+.review-overview-trend{
+  min-width:0;
+  align-self:stretch;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:flex-end;
+}
+.review-overview-trend-label{
+  height:26px;
+  margin:0 0 3px;
+  padding:0 11px;
+  border-radius:10px;
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  background:#fafafb;
+  color:#3d3d40;
+  font-size:14px;
+  line-height:26px;
+  white-space:nowrap;
+}
+.review-overview-trend-label b{
+  font-weight:500;
+}
+.review-overview-chart{
+  width:100%;
+  height:48px;
+  overflow:hidden;
+}
+.review-overview-chart svg{
+  display:block;
+  width:100%;
+  height:48px;
+  overflow:visible;
+}
+
 .review-card{
   background:var(--my-surface);
   border-radius:var(--r-md);

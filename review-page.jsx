@@ -566,6 +566,212 @@ function ReviewCard({title, iconClass='', icon, chart, legend, metrics, more, mo
   );
 }
 
+function ReviewOverviewBars({values, color, softColor}){
+  const max = Math.max(...values, 1);
+  const W = 158, H = 48, gap = 10;
+  const barW = (W - gap * (values.length - 1)) / values.length;
+  return (
+    <svg viewBox={'0 0 ' + W + ' ' + H} preserveAspectRatio="none" role="img" aria-label="近期趋势柱状图">
+      {values.map((value, index)=>{
+        const height = Math.max(12, value / max * 42);
+        return <rect
+          key={index}
+          x={index * (barW + gap)}
+          y={H - height}
+          width={barW}
+          height={height}
+          rx={barW / 2}
+          fill={index === values.length - 1 ? color : (softColor || color)}
+        />;
+      })}
+    </svg>
+  );
+}
+
+function ReviewOverviewLine({values, color, fill, bands=false}){
+  const W = 158, H = 48, padX = 4, padY = 6;
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const span = Math.max(1, max - min);
+  const X = index => padX + (W - padX * 2) * index / (values.length - 1);
+  const Y = value => padY + (H - padY * 2) * (1 - (value - min) / span);
+  const points = values.map((value, index)=>[X(index), Y(value)]);
+  const path = reviewSmoothPath(points);
+  const area = path + 'L' + X(values.length - 1) + ' ' + H + 'L' + X(0) + ' ' + H + 'Z';
+  return (
+    <svg viewBox={'0 0 ' + W + ' ' + H} preserveAspectRatio="none" role="img" aria-label="近期趋势折线图">
+      {bands ? <>
+        <rect x="0" y="0" width={W} height="16" fill="rgba(86,205,187,.10)"/>
+        <rect x="0" y="16" width={W} height="16" fill="rgba(255,221,105,.10)"/>
+        <rect x="0" y="32" width={W} height="16" fill="rgba(255,90,139,.07)"/>
+      </> : null}
+      {fill ? <path d={area} fill={fill}/> : null}
+      <path d={path} fill="none" stroke={color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+      {points.map((point, index)=><circle key={index} cx={point[0]} cy={point[1]} r="3.2" fill="#fff" stroke={color} strokeWidth="2"/>)}
+    </svg>
+  );
+}
+
+function ReviewOverviewCard({title, iconClass, icon, status, trendPrefix, trendText, metricLabel, value, unit, chart, onOpen}){
+  const isActionable = typeof onOpen === 'function';
+  const handleKeyDown = event=>{
+    if(!isActionable) return;
+    if(event.key === 'Enter' || event.key === ' '){
+      event.preventDefault();
+      onOpen();
+    }
+  };
+  return (
+    <article
+      className={'review-overview-card' + (isActionable ? ' is-actionable' : '')}
+      role={isActionable ? 'button' : undefined}
+      tabIndex={isActionable ? 0 : undefined}
+      onClick={onOpen}
+      onKeyDown={handleKeyDown}
+      aria-label={title + '，' + metricLabel + value + (unit || '') + '，' + trendPrefix + trendText}
+    >
+      <header className="review-overview-head">
+        <span className={'review-overview-icon ' + iconClass} aria-hidden="true">{icon}</span>
+        <h2>{title}</h2>
+        {status ? <span className="review-overview-status">{status}</span> : null}
+        <span className="review-overview-chevron" aria-hidden="true"><ReviewChevron/></span>
+      </header>
+      <div className="review-overview-body">
+        <div className="review-overview-metric">
+          <span>{metricLabel}</span>
+          <strong>{value}{unit ? <small>{unit}</small> : null}</strong>
+        </div>
+        <div className="review-overview-trend">
+          <div className="review-overview-trend-label"><span>{trendPrefix}</span><b>{trendText}</b></div>
+          <div className="review-overview-chart">{chart}</div>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function ReviewPeriodOverview({
+  cycleUpdated,
+  onOpenCycle,
+  onOpenWeight,
+  onOpenMood,
+  onOpenDiet,
+  onOpenBeverage,
+  onOpenSkin,
+  onOpenLove,
+  onOpenStool,
+}){
+  return (
+    <div className="review-overview-list">
+      <ReviewOverviewCard
+        title="月经周期"
+        iconClass="is-cycle"
+        icon={<ReviewDropletIcon/>}
+        status={cycleUpdated ? '已更新' : null}
+        trendPrefix="近6次趋势"
+        trendText="缩短"
+        metricLabel="最近周期"
+        value="28"
+        unit="天"
+        chart={<ReviewOverviewBars values={[30,32,25,30,27,22]} color="#ff6599" softColor="#ffb1cb"/>}
+        onOpen={onOpenCycle}
+      />
+      <ReviewOverviewCard
+        title="体重"
+        iconClass="is-weight"
+        icon={<ReviewScaleIcon/>}
+        trendPrefix="近7天趋势"
+        trendText="下降"
+        metricLabel="最新记录"
+        value="52.4"
+        unit="公斤"
+        chart={<ReviewOverviewLine values={[54.1,52.8,52.8,52.9,54.8,53.1,53.3,52.7]} color="#08c49c" fill="rgba(8,196,156,.10)"/>}
+        onOpen={onOpenWeight}
+      />
+      <ReviewOverviewCard
+        title="心情"
+        iconClass="is-mood"
+        icon={<ReviewMoodIcon/>}
+        trendPrefix="近7天趋势"
+        trendText="更积极"
+        metricLabel="最新记录"
+        value="挺开心"
+        chart={<ReviewOverviewLine values={[3.8,2.1,3.0,4.0,2.2,3.0,4.2,4.5]} color="#ff4f87" bands/>}
+        onOpen={onOpenMood}
+      />
+      <ReviewOverviewCard
+        title="饮食"
+        iconClass="is-diet"
+        icon={<ReviewDietIcon/>}
+        trendPrefix="近7天趋势"
+        trendText="下降"
+        metricLabel="近7天日均"
+        value="1784"
+        unit="千卡"
+        chart={<ReviewOverviewBars values={[1520,1280,1490,1760,1500,1450,1190]} color="#ff8b68" softColor="#ff8b68"/>}
+        onOpen={onOpenDiet}
+      />
+      <ReviewOverviewCard
+        title="饮品"
+        iconClass="is-beverage"
+        icon={<ReviewBeverageIcon/>}
+        trendPrefix="近7天趋势"
+        trendText="上升"
+        metricLabel="最新记录"
+        value="286"
+        unit="千卡"
+        chart={<ReviewOverviewBars values={[0,138,0,0,162,0,286]} color="#29b7ad" softColor="#8bd9d2"/>}
+        onOpen={onOpenBeverage}
+      />
+      <ReviewOverviewCard
+        title="皮肤状态"
+        iconClass="is-skin"
+        icon={<ReviewSkinIcon/>}
+        trendPrefix="近30天趋势"
+        trendText="改善"
+        metricLabel="最新记录"
+        value="轻微"
+        chart={<ReviewOverviewLine values={[3,2,2,1,2,1,1,1]} color="#eb7891" fill="rgba(235,120,145,.09)"/>}
+        onOpen={onOpenSkin}
+      />
+      <ReviewOverviewCard
+        title="爱爱"
+        iconClass="is-love"
+        icon={<ReviewLoveIcon/>}
+        trendPrefix="近6月趋势"
+        trendText="增长"
+        metricLabel="本月记录"
+        value="4"
+        unit="次"
+        chart={<ReviewOverviewBars values={[2,4,3,5,3,4]} color="#ff4d88" softColor="#ffabc5"/>}
+        onOpen={onOpenLove}
+      />
+      <ReviewOverviewCard
+        title="症状"
+        iconClass="is-symptom"
+        icon={<ReviewSymptomIcon/>}
+        trendPrefix="近30天趋势"
+        trendText="减少"
+        metricLabel="最常出现"
+        value="乳房胀痛"
+        chart={<ReviewOverviewBars values={[9,7,5,4,3]} color="#7aa8e8" softColor="#a9c7ef"/>}
+      />
+      <ReviewOverviewCard
+        title="便便"
+        iconClass="is-stool"
+        icon={<ReviewStoolIcon/>}
+        trendPrefix="近7天趋势"
+        trendText="下降"
+        metricLabel="近7天日均"
+        value="0.6"
+        unit="次"
+        chart={<ReviewOverviewBars values={[1,1,0,1,0,1,0]} color="#ae7a47" softColor="#d4b18e"/>}
+        onOpen={onOpenStool}
+      />
+    </div>
+  );
+}
+
 function ReviewUpdateTag(){
   return <span className="review-update-tag">已更新</span>;
 }
@@ -12720,9 +12926,9 @@ function ReviewPage({mode='经期', isMember=false, shareState, onShareStateChan
   const ReviewSearchOverlay = window.ReviewSearchOverlay;
 
   return (
-    <main className={'review-page' + (reviewSearchOpen ? ' is-review-search-open' : '')} aria-label="回顾">
+    <main className={'review-page' + (isPeriodMode ? ' is-compact-overview' : '') + (reviewSearchOpen ? ' is-review-search-open' : '')} aria-label="回顾">
       <div className="review-nav">
-        <button
+        {!isPeriodMode ? <button
           type="button"
           className="review-nav-search"
           aria-label="搜索"
@@ -12730,13 +12936,30 @@ function ReviewPage({mode='经期', isMember=false, shareState, onShareStateChan
           onClick={()=>setReviewSearchOpen(true)}
         >
           <I name="search" size={20} stroke={1.7}/>
-        </button>
+        </button> : null}
         <span className="review-nav-title">回顾</span>
       </div>
       <div className="review-content">
-        <p className="review-page-greeting">已记录 <b>350 天</b>，共 <b>{isPeriodMode ? 11 : 7} 项</b>可回顾</p>
+        <p className="review-page-greeting">已记录 <b>350</b>天，共<b>{isPeriodMode ? 9 : 7}</b>项{isPeriodMode ? '回顾' : '可回顾'}</p>
 
-      {isPeriodMode && isMember ? <PeriodHealthImageCard/> : null}
+      {isPeriodMode ? (
+        <ReviewPeriodOverview
+          cycleUpdated={cycleUpdated}
+          onOpenCycle={()=>{
+            setCycleUpdated(false);
+            setCycleDetailOpen(true);
+          }}
+          onOpenWeight={()=>setWeightDetailOpen(true)}
+          onOpenMood={()=>setMoodDetailOpen(true)}
+          onOpenDiet={()=>setDietDistDetailOpen(true)}
+          onOpenBeverage={()=>setBeverageDetailOpen(true)}
+          onOpenSkin={()=>setSkinDetailOpen(true)}
+          onOpenLove={()=>setLoveDetailOpen(true)}
+          onOpenStool={()=>setStoolDetailOpen(true)}
+        />
+      ) : <>
+
+      {isMember ? <PeriodHealthImageCard/> : null}
 
       <ReviewCard
         title="月经周期"
@@ -12788,6 +13011,8 @@ function ReviewPage({mode='经期', isMember=false, shareState, onShareStateChan
           onOpen={()=>setStoolDetailOpen(true)}
         />
       ) : null}
+
+      </>}
 
       </div>
       <CycleDetailPage
