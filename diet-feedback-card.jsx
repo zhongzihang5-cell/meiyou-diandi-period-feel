@@ -383,6 +383,12 @@ function tryCreateDietTextFeedbackEntry(text, recordScenario, voice) {
   return createDietTextFeedbackEntry({ text, voice, parsed });
 }
 
+function inferDietFeedbackDisplayScenario(totalKcal){
+  if (totalKcal == null) return null;
+  if (totalKcal <= 1000) return 'dim-c';
+  return 'dim-a';
+}
+
 function createDietCaptureGroup({ photoUrl, scenario } = {}) {
   const sceneKey = scenario || pickDietScenario();
   const data = DIET_SCENARIOS[sceneKey] || DIET_SCENARIOS.lunch;
@@ -399,7 +405,7 @@ function createDietCaptureGroup({ photoUrl, scenario } = {}) {
     leadingIconSrc: 'assets/quick-icon-diet.png',
     leadingLabel: '饮食：',
     recognitionScenario: readDietRecognitionScenario(),
-    displayScenario: readDietFeedbackDisplayScenario(),
+    displayScenario: readDietFeedbackDisplayScenario() || inferDietFeedbackDisplayScenario(data.totalKcal),
     dietData: {
       time,
       foods,
@@ -472,7 +478,7 @@ function getDietFeedbackDisplayConfig(scenario) {
     case 'meal-insight':
       return {
         showGuide: true,
-        showChart: false,
+        showChart: true,
         showDayTotal: false,
         showAvg: false,
         showMealInsight: true,

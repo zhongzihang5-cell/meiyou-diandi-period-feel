@@ -4060,7 +4060,7 @@ function DietBalanceWeekStrip({days, goal, selectedIndex, onSelect}){
   );
 }
 
-function DietBalanceIntakePanel({day, goal}){
+function DietBalanceIntakePanel({day, goal, onOpenBudget}){
   const intake = day.kcal || 0;
   const {min, max} = dietGoalBand(goal);
   const zone = dietCalorieZone(intake, min, max);
@@ -4073,6 +4073,9 @@ function DietBalanceIntakePanel({day, goal}){
         <b>{intake}</b>
         <span>kcal</span>
         <em className={'review-diet-balance-badge is-' + zone}>{meta.label}</em>
+        {typeof onOpenBudget === 'function' ? (
+          <DietBalanceGoalCapsule goal={goal} onAdjust={onOpenBudget}/>
+        ) : null}
       </div>
       <div className="review-diet-calorie-zone" aria-label={'热量区间 ' + meta.label}>
         <div className="review-diet-calorie-zone-scale" aria-hidden="true">
@@ -4253,7 +4256,6 @@ function DietNutrientIntakeCard({goal = DIET_TARGET_GOAL, activityId = 'light', 
     <div className="review-love-cycle-combined-wrap">
       <div className="review-love-trend-title review-diet-balance-title-row">
         <span>营养分析</span>
-        <DietBalanceGoalCapsule goal={goal} activityId={activityId} onAdjust={onOpenBudget}/>
       </div>
       <div className="review-detail-card review-love-mini-card review-diet-daily-card review-diet-balance-card">
         <DietBalanceWeekStrip
@@ -4262,7 +4264,7 @@ function DietNutrientIntakeCard({goal = DIET_TARGET_GOAL, activityId = 'light', 
           selectedIndex={selectedIndex}
           onSelect={setSelectedIndex}
         />
-        <DietBalanceIntakePanel day={selected} goal={goal}/>
+        <DietBalanceIntakePanel day={selected} goal={goal} onOpenBudget={onOpenBudget}/>
         <DietBalanceMacroSection day={selected}/>
         <div className="review-love-insight review-diet-balance-insight">
           {dietBalanceInsight(selected, goal)}

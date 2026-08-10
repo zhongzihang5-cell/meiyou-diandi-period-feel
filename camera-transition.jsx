@@ -363,9 +363,49 @@ const PHOTO_PICKER_ITEMS = [
   ...PHOTO_PICKER_PLACEHOLDERS,
 ];
 
-function PhotoPicker({ onSelect, onClose }) {
+const DIET_DEMO_PHOTOS = MOCK_PHOTOS
+  .filter((photo) => photo.type === 'food' || photo.mode === 'diet')
+  .map((photo, index) => ({
+    ...photo,
+    id: `diet-demo-${photo.id || index}`,
+    type: 'diet',
+    mode: 'diet',
+  }));
+
+let dietCaptureIndex = 0;
+
+function getNextDietDemoPhoto() {
+  const list = DIET_DEMO_PHOTOS.length
+    ? DIET_DEMO_PHOTOS
+    : [{
+        id: 'diet-fallback',
+        thumb: CAMERA_RECOGNITION_MODE_MAP.diet.capturePhoto,
+        type: 'diet',
+        mode: 'diet',
+      }];
+  const photo = list[dietCaptureIndex % list.length];
+  dietCaptureIndex += 1;
+  return photo;
+}
+
+function getPhotoPickerItems(preferredMode = null) {
+  if (preferredMode === 'diet') {
+    const foodThumbs = new Set(DIET_DEMO_PHOTOS.map((photo) => photo.thumb));
+    const foodPlaceholders = PHOTO_PICKER_PLACEHOLDERS
+      .filter((photo) => foodThumbs.has(photo.thumb) || photo.thumb?.includes('gallery/'))
+      .map((photo, index) => ({ ...photo, id: `diet-placeholder-${index}` }));
+    return [
+      ...DIET_DEMO_PHOTOS,
+      ...foodPlaceholders,
+    ];
+  }
+  return PHOTO_PICKER_ITEMS;
+}
+
+function PhotoPicker({ onSelect, onClose, preferredMode = null }) {
   const I = window.Icon;
   const [activeTab, setActiveTab] = React.useState('photos');
+  const pickerItems = getPhotoPickerItems(preferredMode);
 
   return (
     <div className="photo-picker">
@@ -399,7 +439,7 @@ function PhotoPicker({ onSelect, onClose }) {
       <div className="photo-picker-content">
         {activeTab === 'photos' ? (
           <div className="photo-grid">
-            {PHOTO_PICKER_ITEMS.map(photo => (
+            {pickerItems.map(photo => (
               photo.placeholder ? (
                 <div
                   key={photo.id}
@@ -439,7 +479,7 @@ function PhotoPicker({ onSelect, onClose }) {
   );
 }
 
-function PhotoPickerSheet({ onSelect, onClose }) {
+function PhotoPickerSheet({ onSelect, onClose, preferredMode = null }) {
   const [entered, setEntered] = React.useState(false);
 
   React.useEffect(() => {
@@ -456,7 +496,7 @@ function PhotoPickerSheet({ onSelect, onClose }) {
         aria-label="关闭相册"
       />
       <div className="photo-picker-sheet-panel">
-        <PhotoPicker onSelect={onSelect} onClose={onClose} />
+        <PhotoPicker onSelect={onSelect} onClose={onClose} preferredMode={preferredMode} />
       </div>
     </div>
   );
@@ -1050,6 +1090,7 @@ function CameraView({
   recognitionResult,
   onRecognitionChange,
   onRecognitionSave,
+  preferredRecognitionMode = null,
 }) {
   const I = window.Icon;
   const [flash, setFlash] = React.useState(false);
@@ -1126,6 +1167,7 @@ function CameraView({
         <PhotoPickerSheet
           onSelect={onSelectPhoto}
           onClose={onCloseGallery}
+          preferredMode={preferredRecognitionMode}
         />
       )}
 
@@ -1383,6 +1425,8 @@ function CameraTransition({
       : null;
     const selectedPhoto = preferredRecognitionMode === 'beverage'
       ? getNextBeverageOcrDemoPhoto()
+      : preferredRecognitionMode === 'diet'
+      ? getNextDietDemoPhoto()
       : preferredConfig
       ? {
           id: `preferred-${preferredConfig.id}`,
@@ -1392,22 +1436,26 @@ function CameraTransition({
         }
       : getNextAutoDetectDemoPhoto();
     const photo = resolveBeverageRetakePhoto(selectedPhoto);
+    const recognitionMode = preferredRecognitionMode || inferCameraRecognitionMode(photo);
     analyze.runAnalyze({
       url: photo.thumb,
-      meta: { type: 'capture', photo, mode: inferCameraRecognitionMode(photo) },
+      meta: { type: 'capture', photo, mode: recognitionMode },
     });
   };
   
   const handleSelectPhoto = (photo) => {
     setShowGallery(false);
-    const selectedPhoto = resolveBeverageRetakePhoto(photo);
+    const selectedPhoto = preferredRecognitionMode === 'diet'
+      ? { ...resolveBeverageRetakePhoto(photo), type: 'diet', mode: 'diet' }
+      : resolveBeverageRetakePhoto(photo);
     const photoUrl = selectedPhoto?.thumb || selectedPhoto?.url || window.pickFallbackPhoto?.() || null;
+    const recognitionMode = preferredRecognitionMode || inferCameraRecognitionMode(selectedPhoto);
     analyze.runAnalyze({
       url: photoUrl,
       meta: {
         type: 'select',
         photo: selectedPhoto,
-        mode: inferCameraRecognitionMode(selectedPhoto),
+        mode: recognitionMode,
       },
     });
   };
@@ -1526,6 +1574,7 @@ function CameraTransition({
             recognitionResult={recognitionResult}
             onRecognitionChange={setRecognitionResult}
             onRecognitionSave={handleRecognitionSave}
+            preferredRecognitionMode={preferredRecognitionMode}
           />
       </div>
       

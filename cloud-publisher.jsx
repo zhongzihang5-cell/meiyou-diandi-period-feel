@@ -567,7 +567,7 @@ function DockPublisher({
   };
 
   const handleDietFanTap = (buttonEl)=>{
-    openRecognitionCamera(buttonEl);
+    openRecognitionCamera(buttonEl, 'diet');
   };
 
   const handleCameraCaptureSuccess = (payload)=>{
@@ -624,7 +624,7 @@ function DockPublisher({
     if(dy > 18) setFeedingExpanded(false);
   };
 
-  const handleDockQuickItemSelect = (item)=>{
+  const handleDockQuickItemSelect = (item, buttonEl)=>{
     if(item?.action === 'period-feel'){
       onPeriodFeelSelect?.();
       return;
@@ -644,8 +644,7 @@ function DockPublisher({
       return;
     }
     if(item?.action === 'diet'){
-      setQuickOpen(false);
-      setQuickSelected('diet');
+      openRecognitionCamera(buttonEl, 'diet');
       return;
     }
     if(item?.action === 'beverage'){
@@ -777,7 +776,7 @@ function DockPublisher({
                       key={item.id}
                       type="button"
                       className={'dock-feeding-quick-item'+(item.id === 'period-feel' ? ' is-period-feel-enter' : '')+(item.drop ? ' is-period-feel-drop' : '')+(item.plan3Shift ? ' is-period-feel-plan3-shift' : '')+(item.pulse ? ' is-period-feel-pulse' : '')}
-                      onClick={()=>handleDockQuickItemSelect(item)}
+                      onClick={(event)=>handleDockQuickItemSelect(item, event.currentTarget)}
                     >
                       <span className="dock-feeding-quick-icon" aria-hidden="true">
                         {item.iconNode || item.icon || '🍼'}

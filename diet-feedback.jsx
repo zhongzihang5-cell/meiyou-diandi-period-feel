@@ -388,6 +388,8 @@ function DietCalorieAiBody({
   foodTags = [],
   mealTypeLabel: mealTypeLabelProp,
   ironFoodName: ironFoodNameProp,
+  mealInterpretation = null,
+  mealCalorieInsight = null,
 }){
   const getConfig = window.getDietFeedbackDisplayConfig;
   const cfg = displayScenario && getConfig
@@ -436,7 +438,15 @@ function DietCalorieAiBody({
         );
       case 'chart':
         if (!cfg.showChart) return null;
-        return <DietTrendChart key="chart" data={weekData} todayKcal={todayKcal}/>;
+        return (
+          <React.Fragment key="chart">
+            <DietTrendChart data={weekData} todayKcal={todayKcal}/>
+            <DietMealInsightBelowChart
+              interpretation={mealInterpretation}
+              insight={mealCalorieInsight}
+            />
+          </React.Fragment>
+        );
       case 'avg':
         if (!cfg.showAvg || avgKcal == null) return null;
         return (
@@ -483,6 +493,10 @@ function DietCalorieAiBody({
   return (
     <>
       <DietTrendChart data={weekData} todayKcal={todayKcal}/>
+      <DietMealInsightBelowChart
+        interpretation={mealInterpretation}
+        insight={mealCalorieInsight}
+      />
       {showAvg && avgKcal ? (
         <div className="diet-fb-b-stats">7日日均约 <strong>{formatKcal(avgKcal)} kcal</strong></div>
       ) : null}
@@ -564,32 +578,46 @@ function formatFoodItemText(item){
   return name;
 }
 
-function DietMealInsightCard({ insight }){
+function renderMealInsightPlainCopy(insight){
   if (!insight) return null;
-
-  let content = null;
   if (insight.type === 'high-meal') {
-    content = (
+    return (
       <>
         这顿约<strong>{insight.kcal}</strong>千卡，热量不低，相当于慢跑<strong>{insight.runMin}</strong>分钟，
         <span className="diet-fb-meal-insight-soft">偶尔吃一顿大餐没关系～</span>
       </>
     );
-  } else if (insight.type === 'feast') {
-    content = (
+  }
+  if (insight.type === 'feast') {
+    return (
       <>
         这顿约<strong>{insight.kcal}</strong>千卡，热量不低，相当于慢跑<strong>{insight.runMin}</strong>分钟
       </>
     );
-  } else if (insight.type === 'just-right') {
-    content = (
-      <>这顿<strong>{insight.kcal}</strong>千卡，分量刚刚好。</>
-    );
-  } else if (insight.type === 'light') {
-    content = (
-      <>这顿比较清淡，约<strong>{insight.kcal}</strong>千卡，注意营养要均衡哦</>
-    );
   }
+  if (insight.type === 'just-right') {
+    return <>这顿<strong>{insight.kcal}</strong>千卡，分量刚刚好。</>;
+  }
+  if (insight.type === 'light') {
+    return <>这顿比较清淡，约<strong>{insight.kcal}</strong>千卡，注意营养要均衡哦</>;
+  }
+  return null;
+}
+
+function DietMealInsightBelowChart({ interpretation, insight }){
+  const content = interpretation || renderMealInsightPlainCopy(insight);
+  if (!content) return null;
+  return (
+    <p className="diet-fb-b-stats diet-fb-stagger-in">
+      {content}
+    </p>
+  );
+}
+
+function DietMealInsightCard({ insight }){
+  if (!insight) return null;
+
+  const content = renderMealInsightPlainCopy(insight);
   if (!content) return null;
 
   return (
@@ -1012,6 +1040,11 @@ function DietPhotoFeedbackCard({
   const mealInterpretation = !usesFeedbackDim && showAiInsights && !hasInlineCalorieInsight
     ? interpretation
     : null;
+  const chartMealInterpretation = mealInterpretation;
+  const chartMealCalorieInsight = !usesFeedbackDim && showAiInsights && hasInlineCalorieInsight
+    ? calorieInsight
+    : null;
+  const sectionACalorieInsight = showAiInsights ? null : calorieInsight;
 
   return (
     <>
@@ -1031,7 +1064,7 @@ function DietPhotoFeedbackCard({
             items={items}
             totalKcal={totalKcal}
             revealStep={revealStep}
-            calorieInsight={calorieInsight}
+            calorieInsight={sectionACalorieInsight}
             diversityCount={diversityCount}
             compact={!!displayCfg?.useCompactMeal}
             guideBelowTotalDays={guideBelowTotalDays}
@@ -1072,6 +1105,8 @@ function DietPhotoFeedbackCard({
               foods={foods}
               items={items}
               foodTags={foodTags}
+              mealInterpretation={chartMealInterpretation}
+              mealCalorieInsight={chartMealCalorieInsight}
             />
           </DietAiInsightsShell>
         )}
@@ -1084,9 +1119,6 @@ function DietPhotoFeedbackCard({
           </>
         )}
       </div>
-      {showAiInsights && mealInterpretation && (
-        <div className="diet-fb-outer-text diet-fb-stagger-in diet-fb-stagger-in-delay">{mealInterpretation}</div>
-      )}
     </>
   );
 }
@@ -1156,6 +1188,11 @@ function DietTextFeedbackCard({
   const interpretation = !usesFeedbackDim && showAiInsights && !hasInlineCalorieInsight
     ? getCalorieInterpretation(totalKcal)
     : null;
+  const chartMealInterpretation = interpretation;
+  const chartMealCalorieInsight = !usesFeedbackDim && showAiInsights && hasInlineCalorieInsight
+    ? calorieInsight
+    : null;
+  const sectionACalorieInsight = showAiInsights ? null : calorieInsight;
 
   return (
     <>
@@ -1172,7 +1209,7 @@ function DietTextFeedbackCard({
           items={tagItems}
           totalKcal={showCalories ? totalKcal : null}
           revealStep={revealStep}
-          calorieInsight={calorieInsight}
+          calorieInsight={sectionACalorieInsight}
           diversityCount={diversityCount}
           compact={!!displayCfg?.useCompactMeal}
           guideBelowTotalDays={guideBelowTotalDays}
@@ -1196,13 +1233,12 @@ function DietTextFeedbackCard({
               time={time}
               items={items}
               foodTags={foodTags}
+              mealInterpretation={chartMealInterpretation}
+              mealCalorieInsight={chartMealCalorieInsight}
             />
           </DietAiInsightsShell>
         )}
       </div>
-      {interpretation && (
-        <div className="diet-fb-outer-text diet-fb-stagger-in diet-fb-stagger-in-delay">{interpretation}</div>
-      )}
     </>
   );
 }
