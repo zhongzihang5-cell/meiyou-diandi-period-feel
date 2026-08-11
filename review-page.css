@@ -960,7 +960,7 @@
   stroke-linejoin:round;
 }
 .review-legend-item.is-weight i{border-top:2px solid #43D1AC}
-.review-legend-item.is-mood i{border-top:2px solid #8EC4F8}
+.review-legend-item.is-mood i{border-top:2px solid #FFD966}
 .review-legend-item.is-mood-pos i,
 .review-legend-item.is-mood-neu i,
 .review-legend-item.is-mood-neg i{
@@ -969,8 +969,8 @@
   border-radius:50%;
   border-top:0;
 }
-.review-legend-item.is-mood-pos i{background:#8EC4F8}
-.review-legend-item.is-mood-neu i{background:#FFD966}
+.review-legend-item.is-mood-pos i{background:#FFD966}
+.review-legend-item.is-mood-neu i{background:#8EC4F8}
 .review-legend-item.is-mood-neg i{background:#FF9EB0}
 .review-legend-item.is-diet i{border-top:2px solid var(--my-warning)}
 .review-legend-item.is-diet-band i{
@@ -1350,7 +1350,7 @@
   font-weight:600;
   color:var(--my-text-primary);
 }
-.review-mood-word.is-trend{color:#8EC4F8}
+.review-mood-word.is-trend{color:#FFD966}
 
 .review-card-more{
   display:flex;
@@ -5738,7 +5738,7 @@
   line-height:1.15;
 }
 .review-mood-insight b.is-up{
-  color:#8EC4F8;
+  color:#FFD966;
 }
 .review-mood-insight b.is-down{
   color:#ff4d4d;
@@ -6292,8 +6292,8 @@
   place-items:center;
   flex:0 0 72px;
 }
-.review-mood-emotion-avatar.is-neu{background:#FFF6DD}
-.review-mood-emotion-avatar.is-pos{background:#FFE8EE}
+.review-mood-emotion-avatar.is-neu{background:#E8F2FC}
+.review-mood-emotion-avatar.is-pos{background:#FFF6DD}
 .review-mood-emotion-avatar.is-neg{background:#FFE8EE}
 .review-mood-emotion-avatar > span{
   font-size:40px;
@@ -6433,10 +6433,10 @@
     90deg,
     #FF9EB0 0%,
     #FF9EB0 28%,
-    #FFD966 42%,
-    #FFD966 58%,
-    #8EC4F8 72%,
-    #8EC4F8 100%
+    #8EC4F8 42%,
+    #8EC4F8 58%,
+    #FFD966 72%,
+    #FFD966 100%
   );
 }
 .review-mood-spectrum-knob{
@@ -6464,18 +6464,18 @@
   transform:translate(-50%, -50%);
 }
 .review-mood-spectrum-knob.is-pos{
-  border-color:#8EC4F8;
-  box-shadow:0 2px 10px rgba(142,196,248,0.35);
-}
-.review-mood-spectrum-knob.is-pos::after{
-  background:#8EC4F8;
-}
-.review-mood-spectrum-knob.is-neu{
   border-color:#FFD966;
   box-shadow:0 2px 10px rgba(255,217,102,0.35);
 }
-.review-mood-spectrum-knob.is-neu::after{
+.review-mood-spectrum-knob.is-pos::after{
   background:#FFD966;
+}
+.review-mood-spectrum-knob.is-neu{
+  border-color:#8EC4F8;
+  box-shadow:0 2px 10px rgba(142,196,248,0.35);
+}
+.review-mood-spectrum-knob.is-neu::after{
+  background:#8EC4F8;
 }
 .review-mood-spectrum-knob.is-neg{
   border-color:#FF9EB0;
@@ -6497,8 +6497,8 @@
   font-size:10px;
 }
 .review-mood-scale-lbl .is-active.is-neg{color:#FF9EB0}
-.review-mood-scale-lbl .is-active.is-neu{color:#FFD966}
-.review-mood-scale-lbl .is-active.is-pos{color:#8EC4F8}
+.review-mood-scale-lbl .is-active.is-neu{color:#8EC4F8}
+.review-mood-scale-lbl .is-active.is-pos{color:#FFD966}
 .review-mood-scale-lbl .is-active.is-vneg{color:#FF6B6B}
 .review-mood-scale-lbl .is-active.is-vpos{color:#FFB347}
 .review-mood-today-lead{
@@ -7781,10 +7781,10 @@
   font-size:15px;
 }
 .review-mood-trend-metric-value.is-trend.is-up{
-  color:#8EC4F8;
+  color:#D4A03A;
 }
 .review-mood-trend-metric-value.is-trend.is-flat{
-  color:#E8A04A;
+  color:#6BA3D9;
 }
 .review-mood-trend-metric-value.is-trend.is-down{
   color:#4F7CAE;
@@ -9294,7 +9294,7 @@
   position:relative;
   height:8px;
   border-radius:80px;
-  background:linear-gradient(90deg, #F5C9CF 0%, #F3DFC0 50%, #CBD8EF 100%);
+  background:linear-gradient(90deg, #F5C9CF 0%, #CBD8EF 50%, #F3DFC0 100%);
 }
 .review-mood-trend-track > span{
   position:absolute;
@@ -9306,8 +9306,8 @@
   border:3px solid #fff;
   box-shadow:0 2px 6px rgba(0,0,0,0.18);
 }
-.review-mood-trend-track > span.is-pos{background:#3B7DE8;}
-.review-mood-trend-track > span.is-mid{background:#F39A1E;}
+.review-mood-trend-track > span.is-pos{background:#F0A01E;}
+.review-mood-trend-track > span.is-mid{background:#5B9CFF;}
 .review-mood-trend-track > span.is-neg{background:#E8434F;}
 .review-mood-trend-tag{
   position:absolute;
@@ -9322,9 +9322,9 @@
   color:#fff;
   white-space:nowrap;
 }
-.review-mood-trend-tag.is-pos{background:#5B9CFF;}
+.review-mood-trend-tag.is-pos{background:#F0A01E;}
 .review-mood-trend-tag.is-neg{background:#F05666;}
-.review-mood-trend-tag.is-mid{background:#F0A01E; color:#fff;}
+.review-mood-trend-tag.is-mid{background:#5B9CFF; color:#fff;}
 .review-mood-dist-legend{
   display:flex;
   justify-content:flex-start;
@@ -9346,8 +9346,8 @@
   border-radius:50%;
   display:inline-block;
 }
-.review-mood-dist-legend i.is-pos{background:#3B7DE8;}
-.review-mood-dist-legend i.is-mid{background:#F39A1E;}
+.review-mood-dist-legend i.is-pos{background:#F0A01E;}
+.review-mood-dist-legend i.is-mid{background:#5B9CFF;}
 .review-mood-dist-legend i.is-neg{background:#E8434F;}
 .review-love-traj-scroll{
   flex:1 1 auto;

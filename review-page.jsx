@@ -601,9 +601,9 @@ function ReviewOverviewLine({values, color, fill, bands=false}){
   return (
     <svg viewBox={'0 0 ' + W + ' ' + H} preserveAspectRatio="none" role="img" aria-label="近期趋势折线图">
       {bands ? <>
-        <rect x="0" y="0" width={W} height="16" fill="rgba(86,205,187,.10)"/>
-        <rect x="0" y="16" width={W} height="16" fill="rgba(255,221,105,.10)"/>
-        <rect x="0" y="32" width={W} height="16" fill="rgba(255,90,139,.07)"/>
+        <rect x="0" y="0" width={W} height="16" fill="rgba(255,217,102,.14)"/>
+        <rect x="0" y="16" width={W} height="16" fill="rgba(142,196,248,.12)"/>
+        <rect x="0" y="32" width={W} height="16" fill="rgba(255,158,176,.10)"/>
       </> : null}
       {fill ? <path d={area} fill={fill}/> : null}
       <path d={path} fill="none" stroke={color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -5849,14 +5849,14 @@ function moodColorAtLevel(v){
   return 'rgb(' + r + ',' + g + ',' + bl + ')';
 }
 
-// 回顾/内页三档：消极40% / 中性20% / 积极40%；再亮一点、略浓一点
+// 回顾/内页三档：积极黄 / 中性蓝 / 消极红
 const MOOD_TRI_NEG = '#FF9EB0';
-const MOOD_TRI_NEU = '#FFD966';
-const MOOD_TRI_POS = '#8EC4F8';
+const MOOD_TRI_NEU = '#8EC4F8';
+const MOOD_TRI_POS = '#FFD966';
 const MOOD_TRI_AXIS = [
-  {label:'消极', t:0.2},
-  {label:'中性', t:0.5},
-  {label:'积极', t:0.8},
+  {label:'消极', t:0.2, color:'#E06B6B'},
+  {label:'中性', t:0.5, color:'#6BA3D9'},
+  {label:'积极', t:0.8, color:'#D4A03A'},
 ];
 
 function moodTriFraction(v){
@@ -5893,7 +5893,7 @@ function collectMoodDotIndexes(vals, step = 2){
 }
 
 function moodTriGradientStops(y0, y1, id, fill){
-  // 自上而下：淡蓝 → 暖黄 → 柔粉，保留柔和过渡
+  // 自上而下：积极黄 → 中性蓝 → 消极红
   if(fill){
     return (
       <linearGradient id={id} x1="0" y1={y0} x2="0" y2={y1} gradientUnits="userSpaceOnUse">
@@ -5907,9 +5907,9 @@ function moodTriGradientStops(y0, y1, id, fill){
     <linearGradient id={id} x1="0" y1={y0} x2="0" y2={y1} gradientUnits="userSpaceOnUse">
       <stop offset="0" stopColor={MOOD_TRI_POS}/>
       <stop offset="0.28" stopColor={MOOD_TRI_POS}/>
-      <stop offset="0.42" stopColor="#B8C988"/>
+      <stop offset="0.42" stopColor="#C5D48A"/>
       <stop offset="0.5" stopColor={MOOD_TRI_NEU}/>
-      <stop offset="0.58" stopColor="#EFB58A"/>
+      <stop offset="0.58" stopColor="#D4A0B8"/>
       <stop offset="0.72" stopColor={MOOD_TRI_NEG}/>
       <stop offset="1" stopColor={MOOD_TRI_NEG}/>
     </linearGradient>
@@ -6226,7 +6226,7 @@ function MoodLineChart({
               y={y1 - item.t * plotH + 3.5}
               textAnchor="end"
               fontSize="10"
-              fill="#bbbbbf"
+              fill={item.color}
               fontFamily="PingFang SC"
             >{item.label}</text>
           ))}
@@ -6769,7 +6769,7 @@ function MoodCapsuleRangeChart({
           y={y1 - item.t * plotH + 3.5}
           textAnchor="end"
           fontSize="10"
-          fill="#bbbbbf"
+          fill={item.color}
           fontFamily="PingFang SC"
         >{item.label}</text>
       ))}
@@ -6917,10 +6917,10 @@ function MoodWeekBarChart({rows = [], ariaLabel = '心情星期分布'}){
   const x0 = padL, x1 = W - padR;
   const yTop = padT, yBot = H - padB;
   const plotH = yBot - yTop;
-  // 纵坐标沿用「本周期心情变化」轴色；柱色用原先三档色
+  // 纵坐标：积极黄 / 中性蓝 / 消极红
   const levels = [
-    {key:'pos', label:'积极', t:0.88, color:'#8EB4D8'},
-    {key:'neu', label:'中性', t:0.50, color:'#D4B06A'},
+    {key:'pos', label:'积极', t:0.88, color:'#D4A03A'},
+    {key:'neu', label:'中性', t:0.50, color:'#6BA3D9'},
     {key:'neg', label:'消极', t:0.16, color:'#E06B6B'},
   ];
   const Y = t => yBot - Math.max(0.08, Math.min(1, t)) * plotH;
@@ -6931,9 +6931,9 @@ function MoodWeekBarChart({rows = [], ariaLabel = '心情星期分布'}){
   const weekendX = x0 + weekendStart * band;
   const weekendW = band * 2;
   const colorOf = (mood)=>{
-    if(mood === 'pos') return {top:MOOD_TRI_POS, bot:'#D9ECFC'};
+    if(mood === 'pos') return {top:MOOD_TRI_POS, bot:'#FFF6D6'};
     if(mood === 'neg') return {top:MOOD_TRI_NEG, bot:'#FCE8EE'};
-    return {top:MOOD_TRI_NEU, bot:'#FFF6D6'};
+    return {top:MOOD_TRI_NEU, bot:'#D9ECFC'};
   };
   const heightT = (row)=>{
     const p = typeof row.pos === 'number' ? row.pos : (row.mood === 'pos' ? 70 : row.mood === 'neg' ? 35 : 50);
@@ -7341,8 +7341,8 @@ function MoodMonthAnalysisPanel({vals = MOOD_MONTH_VALS, dates = MOOD_MONTH_DATE
 
 const MOOD_TRI_LEVEL_SHARE = [
   {level:1, label:'消极', face:'😞', color:MOOD_TRI_NEG, bg:'#ffe8ee', count:5, pct:33},
-  {level:2, label:'中性', face:'😐', color:MOOD_TRI_NEU, bg:'#fff6dd', count:4, pct:27},
-  {level:3, label:'积极', face:'😄', color:MOOD_TRI_POS, bg:'#e8f2fc', count:6, pct:40},
+  {level:2, label:'中性', face:'😐', color:MOOD_TRI_NEU, bg:'#e8f2fc', count:4, pct:27},
+  {level:3, label:'积极', face:'😄', color:MOOD_TRI_POS, bg:'#fff6dd', count:6, pct:40},
 ];
 
 const MOOD_SHARE_BAR_ROWS = [
@@ -7354,18 +7354,18 @@ const MOOD_SHARE_BAR_ROWS = [
 const MOOD_SHARE_ROWS_BY_RANGE = {
   d30: MOOD_SHARE_BAR_ROWS,
   half: [
-    {level:3, label:'积极', face:'😄', color:MOOD_TRI_POS, bg:'#e8f2fc', count:78, pct:55},
-    {level:2, label:'中性', face:'😐', color:MOOD_TRI_NEU, bg:'#fff6dd', count:40, pct:28},
+    {level:3, label:'积极', face:'😄', color:MOOD_TRI_POS, bg:'#fff6dd', count:78, pct:55},
+    {level:2, label:'中性', face:'😐', color:MOOD_TRI_NEU, bg:'#e8f2fc', count:40, pct:28},
     {level:1, label:'消极', face:'😞', color:MOOD_TRI_NEG, bg:'#ffe8ee', count:24, pct:17},
   ],
   year: [
-    {level:3, label:'积极', face:'😄', color:MOOD_TRI_POS, bg:'#e8f2fc', count:148, pct:52},
-    {level:2, label:'中性', face:'😐', color:MOOD_TRI_NEU, bg:'#fff6dd', count:84, pct:29},
+    {level:3, label:'积极', face:'😄', color:MOOD_TRI_POS, bg:'#fff6dd', count:148, pct:52},
+    {level:2, label:'中性', face:'😐', color:MOOD_TRI_NEU, bg:'#e8f2fc', count:84, pct:29},
     {level:1, label:'消极', face:'😞', color:MOOD_TRI_NEG, bg:'#ffe8ee', count:54, pct:19},
   ],
   all: [
-    {level:3, label:'积极', face:'😄', color:MOOD_TRI_POS, bg:'#e8f2fc', count:281, pct:54},
-    {level:2, label:'中性', face:'😐', color:MOOD_TRI_NEU, bg:'#fff6dd', count:149, pct:29},
+    {level:3, label:'积极', face:'😄', color:MOOD_TRI_POS, bg:'#fff6dd', count:281, pct:54},
+    {level:2, label:'中性', face:'😐', color:MOOD_TRI_NEU, bg:'#e8f2fc', count:149, pct:29},
     {level:1, label:'消极', face:'😞', color:MOOD_TRI_NEG, bg:'#ffe8ee', count:90, pct:17},
   ],
 };
@@ -7707,8 +7707,8 @@ function moodKnobCenterByZone(zone){
 const MOOD_TRI_SCALE_LABELS = ['消极', '中性', '积极'];
 
 const MOOD_TODAY_TAG_COUNTS = [
-  {key:'pos', label:'积极', count:2, color:MOOD_TRI_POS, bg:'#EAF3FC'},
-  {key:'neu', label:'平静', count:1, color:MOOD_TRI_NEU, bg:'#FFF8E6'},
+  {key:'pos', label:'积极', count:2, color:MOOD_TRI_POS, bg:'#FFF8E6'},
+  {key:'neu', label:'平静', count:1, color:MOOD_TRI_NEU, bg:'#EAF3FC'},
   {key:'neg', label:'低落', count:1, color:MOOD_TRI_NEG, bg:'#FFE8EE'},
 ];
 
@@ -8132,8 +8132,8 @@ function MoodPhaseDistChart({expanded = false} = {}){
       + ' L ' + first.x.toFixed(2) + ' ' + baseY.toFixed(2) + ' Z';
   };
   const moodAxis = [
-    {label:'积极', v:5, color:'#8EB4D8'},
-    {label:'中性', v:3, color:'#D4B06A'},
+    {label:'积极', v:5, color:'#D4A03A'},
+    {label:'中性', v:3, color:'#6BA3D9'},
     {label:'消极', v:1, color:'#E06B6B'},
   ];
   const yAxisTicks = moodAxis.map(item=>({
@@ -8605,7 +8605,7 @@ function ExpandedMoodChart(){
           y={y1 - item.t * plotH + 3.5}
           textAnchor="end"
           fontSize="10"
-          fill="#bbbbbf"
+          fill={item.color}
           fontFamily="PingFang SC"
         >{item.label}</text>
       ))}
