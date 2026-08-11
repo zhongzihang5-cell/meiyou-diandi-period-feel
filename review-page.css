@@ -7986,9 +7986,28 @@
 }
 .review-cycle-subhead-expand-row{
   display:flex;
-  align-items:center;
+  align-items:flex-start;
   justify-content:space-between;
   gap:8px;
+}
+.review-cycle-subhead-copy{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  min-width:0;
+}
+.review-cycle-subhead-range{
+  font-size:12px;
+  font-weight:400;
+  font-style:normal;
+  color:rgba(0,0,0,0.4);
+  line-height:1.29;
+}
+.review-love-cycle-subhead:has(.review-cycle-subhead-range){
+  margin-bottom:4px;
+}
+.review-mood-traj-block .review-love-cycle-subhead:has(.review-cycle-subhead-range){
+  margin-bottom:4px;
 }
 .review-cycle-card-expand-btn{
   display:flex;

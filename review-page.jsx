@@ -2455,6 +2455,20 @@ function WeightCycleCompareChart(){
 }
 
 const WEIGHT_TRAJ_DAYS = 28;
+// 本周期：从月经期第 1 天起算，取完整 28 天周期
+const WEIGHT_CYCLE_START = new Date(2026, 6, 5);
+function formatZhDateRange(start, days){
+  const end = new Date(start);
+  end.setDate(start.getDate() + Math.max(1, days) - 1);
+  const startText = start.getFullYear() + '年' + (start.getMonth() + 1) + '月' + start.getDate() + '日';
+  const sameYear = start.getFullYear() === end.getFullYear();
+  const sameMonth = sameYear && start.getMonth() === end.getMonth();
+  const endText = (sameYear ? '' : end.getFullYear() + '年')
+    + (sameMonth ? '' : (end.getMonth() + 1) + '月')
+    + end.getDate() + '日';
+  return startText + '至' + endText;
+}
+const WEIGHT_CYCLE_DATE_TEXT = formatZhDateRange(WEIGHT_CYCLE_START, WEIGHT_TRAJ_DAYS);
 const WEIGHT_TRAJ_MIN = 98;
 const WEIGHT_TRAJ_MAX = 103;
 const WEIGHT_TRAJ_Y_LABELS = [
@@ -2672,7 +2686,10 @@ function WeightCycleCombinedCard({onExpand, showCompare = true, showPhase = true
         {showPhase ? (
           <div className="review-love-cycle-block review-mood-traj-block review-weight-traj-block">
             <div className="review-love-cycle-subhead review-cycle-subhead-expand-row">
-              <span>本周期体重变化</span>
+              <div className="review-cycle-subhead-copy">
+                <span>本周期体重变化</span>
+                <em className="review-cycle-subhead-range">{WEIGHT_CYCLE_DATE_TEXT}</em>
+              </div>
               {typeof onExpand === 'function' && (
                 <button type="button" className="review-cycle-card-expand-btn" aria-label="全屏查看本周期体重变化" onClick={onExpand}>
                   <ReviewExpandIcon/>
@@ -2763,7 +2780,7 @@ function WeightDetailPage({open, onClose}){
       open={open && phaseLandscapeOpen}
       onClose={()=>setPhaseLandscapeOpen(false)}
       title="本周期体重变化"
-      subtitle="体重与激素走势 · 左右滑动查看"
+      subtitle={WEIGHT_CYCLE_DATE_TEXT + ' · 左右滑动查看'}
       legend={(
         <>
           <span className="review-mood-traj-legend-item"><i className="is-weight"/>体重（斤）</span>
@@ -8267,7 +8284,10 @@ function MoodCycleCombinedCard({onExpand, showCompare = true, showPhase = true})
         {showPhase ? (
           <div className="review-love-cycle-block review-mood-traj-block">
             <div className="review-love-cycle-subhead review-cycle-subhead-expand-row">
-              <span>本周期心情变化</span>
+              <div className="review-cycle-subhead-copy">
+                <span>本周期心情变化</span>
+                <em className="review-cycle-subhead-range">{WEIGHT_CYCLE_DATE_TEXT}</em>
+              </div>
               {typeof onExpand === 'function' && (
                 <button type="button" className="review-cycle-card-expand-btn" aria-label="全屏查看本周期心情变化" onClick={onExpand}>
                   <ReviewExpandIcon/>
@@ -8495,7 +8515,7 @@ function MoodDetailPage({open, onClose}){
       open={open && phaseLandscapeOpen}
       onClose={()=>setPhaseLandscapeOpen(false)}
       title="本周期心情变化"
-      subtitle="心情与激素走势 · 左右滑动查看"
+      subtitle={WEIGHT_CYCLE_DATE_TEXT + ' · 左右滑动查看'}
       legend={(
         <>
           <span className="review-mood-traj-legend-item"><i className="is-mood"/>心情</span>

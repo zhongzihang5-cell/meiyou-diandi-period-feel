@@ -69,19 +69,20 @@ function PartnerMe({onOpenReview}){
   return <div className="partner-body"><div className="partner-me-head"><span>阿泽</span><div><b>阿泽</b><small>♥ 关心中 · 小柚</small></div></div><div className="partner-relation"><div><span>柚</span><p><b>小柚（伴侣）</b><small><i></i>已连接 · 今天起</small></p></div><button type="button" onClick={onOpenReview}>查看她共享的回顾</button></div><div className="partner-me-list"><div>🎙️<span>我的点滴</span><small>已记录 5 天</small>›</div><div>📈<span>我的回顾</span>›</div><div>🔔<span>消息与提醒</span>›</div></div><div className="partner-me-list"><div>🔒<span>隐私说明</span>›</div><div>⚙️<span>设置</span>›</div></div></div>;
 }
 
-function PartnerTabIcon({tab}){
-  const I = window.Icon;
+function PartnerTabIcon({tab, active}){
   const icons = window.TABBAR_ICONS || {};
-  if(tab === 'home') return <img src={icons.home} alt="" aria-hidden="true"/>;
-  if(tab === 'me') return <img src={icons.me} alt="" aria-hidden="true"/>;
-  return <I name={tab === 'diandi' ? 'mic' : 'line-chart'} size={24} stroke={1.7}/>;
+  const src = tab === 'home' ? icons.home
+    : tab === 'me' ? icons.me
+    : tab === 'diandi' ? (active ? (icons.noteActive || icons.note) : icons.note)
+    : (active ? (icons.reviewActive || icons.review) : icons.review);
+  return <img src={src} alt="" aria-hidden="true"/>;
 }
 
 function PartnerApp({shareState, onClose}){
   const [tab, setTab] = useMeState('home');
   const title = tab === 'home' ? '首页' : tab === 'diandi' ? '点滴' : tab === 'review' ? '回顾' : '我';
   const tabs = [{id:'home',label:'首页'},{id:'diandi',label:'点滴'},{id:'review',label:'回顾'},{id:'me',label:'我'}];
-  return <div className="partner-preview-screen partner-app"><PartnerPreviewHeader title={title} onBack={onClose}/>{tab === 'home' ? <PartnerHome/> : tab === 'diandi' ? <PartnerTimeline/> : tab === 'review' ? <PartnerReview/> : <PartnerMe onOpenReview={()=>setTab('review')}/>}<div className="partner-tabs">{tabs.map(item=><button type="button" key={item.id} className={tab === item.id ? 'is-on' : ''} onClick={()=>setTab(item.id)}><span className="partner-tab-icon"><PartnerTabIcon tab={item.id}/></span>{item.label}</button>)}</div></div>;
+  return <div className="partner-preview-screen partner-app"><PartnerPreviewHeader title={title} onBack={onClose}/>{tab === 'home' ? <PartnerHome/> : tab === 'diandi' ? <PartnerTimeline/> : tab === 'review' ? <PartnerReview/> : <PartnerMe onOpenReview={()=>setTab('review')}/>}<div className="partner-tabs">{tabs.map(item=><button type="button" key={item.id} className={tab === item.id ? 'is-on' : ''} onClick={()=>setTab(item.id)}><span className="partner-tab-icon"><PartnerTabIcon tab={item.id} active={tab === item.id}/></span>{item.label}</button>)}</div></div>;
 }
 
 function PartnerPreview({open, shareState, onClose, onAccept}){

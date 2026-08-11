@@ -232,7 +232,6 @@ function TabBar({
   onNoteVoiceMove,
   onNoteVoiceEnd,
 }){
-  const I = window.Icon;
   const pointerVoiceActiveRef = React.useRef(false);
   const voiceHoldActiveRef = React.useRef(false);
   const finishVoiceHoldRef = React.useRef(null);
@@ -270,11 +269,21 @@ function TabBar({
   const icon = (id) => (
     <img className="tab-icon-img" src={tabIcons[id]} alt="" aria-hidden="true" />
   );
+  const noteSrc = active === 'note'
+    ? (tabIcons.noteActive || tabIcons.note)
+    : tabIcons.note;
+  const reviewSrc = active === 'cash'
+    ? (tabIcons.reviewActive || tabIcons.review)
+    : tabIcons.review;
   const tabs = [
     {id:'home', label:'美柚', custom:icon('home')},
     {id:'cal', label:'记录', custom:icon('cal')},
-    {id:'note', label:noteLabel, custom:<I name="mic" size={26} stroke={1.7}/>, notif: noteUnread},
-    {id:'cash', label:'回顾', custom:<I name="line-chart" size={26} stroke={1.7}/>},
+    {id:'note', label:noteLabel, custom:(
+      <img className="tab-icon-img tab-icon-img--native" src={noteSrc} alt="" aria-hidden="true" />
+    ), notif: noteUnread},
+    {id:'cash', label:'回顾', custom:(
+      <img className="tab-icon-img tab-icon-img--native" src={reviewSrc} alt="" aria-hidden="true" />
+    )},
     {id:'me', label:'我', custom:icon('me')},
   ];
   return (
