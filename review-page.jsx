@@ -2799,14 +2799,15 @@ const WEIGHT_ALL_RECORDS = (()=>{
   };
   const times = ['18:17', '14:04', '19:36', '08:22', '21:05', '12:40', '16:58', '09:11'];
   const rows = [];
-  // 倒序：今天起，覆盖 landscape 中较新的记录，并穿插同日多次
+  // landscape 为旧→新；反转后从今天起倒序生成，最新在最前
   const source = WEIGHT_LANDSCAPE_RECORDS.slice().reverse();
   source.forEach((rec, idx)=>{
-    const daysAgo = source.length - 1 - idx;
+    const daysAgo = idx;
     const date = weightFormatAllDate(daysAgo);
     const time = times[Math.floor(rnd() * times.length)];
     rows.push({
       id:'w-' + daysAgo + '-a',
+      daysAgo,
       date,
       time,
       weight:rec.weight,
@@ -2817,6 +2818,7 @@ const WEIGHT_ALL_RECORDS = (()=>{
       const extra = Math.round((rec.weight + (rnd() * 1.2 - 0.4)) * 100) / 100;
       rows.push({
         id:'w-' + daysAgo + '-b',
+        daysAgo,
         date,
         time:times[Math.floor(rnd() * times.length)],
         weight:extra,
@@ -2824,8 +2826,14 @@ const WEIGHT_ALL_RECORDS = (()=>{
       });
     }
   });
-  // 只展示最近约 60 条，避免列表过长
-  return rows.slice(0, 60);
+  // 日期倒序（今天优先），同日按时间倒序；只展示最近约 60 条
+  return rows
+    .sort((a, b)=>{
+      if(a.daysAgo !== b.daysAgo) return a.daysAgo - b.daysAgo;
+      return String(b.time).localeCompare(String(a.time));
+    })
+    .slice(0, 60)
+    .map(({daysAgo, ...row})=>row);
 })();
 
 function WeightAllRecordsPage({open, onClose}){
