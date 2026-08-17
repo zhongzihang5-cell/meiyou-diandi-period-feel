@@ -711,6 +711,7 @@ const MOOD_GUIDE_AFTER_CHART_MS = 900;
 
 function MoodInsightCard({item, isNew}){
   const TypewriterText = window.TypewriterText;
+  const MoodTrendReviewEntry = window.MoodTrendReviewEntry;
   const scrollFeed = window.scrollFeedContentIntoView;
   const cardRef = React.useRef(null);
   const [aiOpen, setAiOpen] = React.useState(true);
@@ -817,6 +818,7 @@ function MoodInsightCard({item, isNew}){
           </button>
 
           {aiOpen && step >= 4 && (
+            <>
             <div className="tl-mood-insight-ai-body">
               {chart.data?.length > 0 && (
                 <div className="tl-mood-insight-chart-block">
@@ -835,6 +837,8 @@ function MoodInsightCard({item, isNew}){
                 </div>
               )}
             </div>
+            {MoodTrendReviewEntry ? <MoodTrendReviewEntry/> : null}
+            </>
           )}
         </div>
       )}

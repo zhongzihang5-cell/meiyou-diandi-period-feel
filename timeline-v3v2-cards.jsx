@@ -791,6 +791,34 @@ function WeightAnalysisNote({ noteParts, note }){
   return <div className="v3-weight-curve-note">{note}</div>;
 }
 
+function TimelineReviewEntry({label, eventName}){
+  return (
+    <button
+      type="button"
+      className="tl-card-review-entry"
+      onClick={()=>window.dispatchEvent(new CustomEvent(eventName))}
+      aria-label={label}
+    >
+      <span>{label}</span>
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M9 6l6 6-6 6"/>
+      </svg>
+    </button>
+  );
+}
+
+function WeightTrendReviewEntry(){
+  return <TimelineReviewEntry label="查看近30天体重变化趋势" eventName="openReviewWeightDetail"/>;
+}
+
+function DietCalorieReviewEntry(){
+  return <TimelineReviewEntry label="查看近7天饮食热量变化" eventName="openReviewDietDetail"/>;
+}
+
+function MoodTrendReviewEntry(){
+  return <TimelineReviewEntry label="查看近30天心情变化趋势" eventName="openReviewMoodDetail"/>;
+}
+
 function ChartSymptomDots({data}){
   const todayLabels = Array.isArray(data?.todayLabels) ? data.todayLabels : [];
 
@@ -1717,6 +1745,11 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
                 defaultOpen={aiDefaultOpen}
                 embedded
                 animateIn={isNew}
+                footer={
+                  a.chartType === 'weightTrend' ? <WeightTrendReviewEntry/> :
+                  a.chartType === 'caloriePanel' ? <DietCalorieReviewEntry/> :
+                  null
+                }
               >
                 {a.chartType && (
                   <TLChart
@@ -1777,6 +1810,8 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
                     <WeightAnalysisNote noteParts={a.noteParts} note={a.note}/>
                   )
                 )}
+                {a.chartType === 'weightTrend' ? <WeightTrendReviewEntry/> : null}
+                {a.chartType === 'caloriePanel' ? <DietCalorieReviewEntry/> : null}
               </div>
             )}
           </div>
@@ -1804,4 +1839,5 @@ function V3RecordGroupCard({group, isNew}){
 
 Object.assign(window, {
   V3RecordGroupCard, V3v2Card, V3v2PrimaryBody, V3v2Header, TLChart, TLTag, ChartCaloriePanel,
+  TimelineReviewEntry, WeightTrendReviewEntry, DietCalorieReviewEntry, MoodTrendReviewEntry,
 });

@@ -507,6 +507,8 @@ function DietCalorieAiBody({
 function DietAiInsightsShell({ displayScenario, isNew, children }){
   const getConfig = window.getDietFeedbackDisplayConfig;
   const plainShell = displayScenario && getConfig?.(displayScenario)?.plainShell;
+  const DietCalorieReviewEntry = window.DietCalorieReviewEntry;
+  const reviewEntry = DietCalorieReviewEntry ? <DietCalorieReviewEntry/> : null;
 
   if (plainShell) {
     return (
@@ -515,12 +517,13 @@ function DietAiInsightsShell({ displayScenario, isNew, children }){
         <div className={'diet-fb-sec-b-plain' + (isNew ? ' diet-fb-stagger-in' : '')}>
           {children}
         </div>
+        {reviewEntry}
       </>
     );
   }
 
   return (
-    <DietAiCollapsibleSection defaultOpen animateIn={isNew}>
+    <DietAiCollapsibleSection defaultOpen animateIn={isNew} footer={reviewEntry}>
       {children}
     </DietAiCollapsibleSection>
   );
@@ -531,6 +534,7 @@ function DietAiCollapsibleSection({
   defaultOpen = true,
   animateIn = false,
   embedded = false,
+  footer = null,
   children,
 }){
   const [open, setOpen] = React.useState(defaultOpen);
@@ -556,6 +560,7 @@ function DietAiCollapsibleSection({
             <div className="diet-fb-sec-b-content">
               {children}
             </div>
+            {footer}
           </div>
         </div>
       </div>
@@ -1284,8 +1289,12 @@ function DietSecA({ foods, totalKcal, items, dayMealCount, dayTotalKcal, matchSt
 
 // ===== 维度B：7日趋势 =====
 function DietSecB({ weekData, todayKcal, daysWithRecord, avgKcal, defaultOpen = true }){
+  const DietCalorieReviewEntry = window.DietCalorieReviewEntry;
   return (
-    <DietAiCollapsibleSection defaultOpen={defaultOpen}>
+    <DietAiCollapsibleSection
+      defaultOpen={defaultOpen}
+      footer={DietCalorieReviewEntry ? <DietCalorieReviewEntry/> : null}
+    >
       <DietCalorieAiBody
         weekData={weekData}
         todayKcal={todayKcal}

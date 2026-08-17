@@ -370,6 +370,12 @@ function App(){
   });
   const [reviewCycleOpenRequest, setReviewCycleOpenRequest] = useState(0);
   const [reviewCycleReturnTab, setReviewCycleReturnTab] = useState(null);
+  const [reviewWeightOpenRequest, setReviewWeightOpenRequest] = useState(0);
+  const [reviewWeightReturnTab, setReviewWeightReturnTab] = useState(null);
+  const [reviewDietOpenRequest, setReviewDietOpenRequest] = useState(0);
+  const [reviewDietReturnTab, setReviewDietReturnTab] = useState(null);
+  const [reviewMoodOpenRequest, setReviewMoodOpenRequest] = useState(0);
+  const [reviewMoodReturnTab, setReviewMoodReturnTab] = useState(null);
   const [isMember, setIsMember] = useState(false);
   const [recordLifeMode, setRecordLifeMode] = useState('经期');
   const [reviewShareState, setReviewShareState] = useState(DEFAULT_REVIEW_SHARE_STATE);
@@ -418,8 +424,31 @@ function App(){
       setRecordLifeMode('经期');
       setActiveTab('cash');
     };
+    const handleOpenReviewWeight = ()=>{
+      setReviewWeightOpenRequest(request=>request + 1);
+      setReviewWeightReturnTab('note');
+      setActiveTab('cash');
+    };
+    const handleOpenReviewDiet = ()=>{
+      setReviewDietOpenRequest(request=>request + 1);
+      setReviewDietReturnTab('note');
+      setActiveTab('cash');
+    };
+    const handleOpenReviewMood = ()=>{
+      setReviewMoodOpenRequest(request=>request + 1);
+      setReviewMoodReturnTab('note');
+      setActiveTab('cash');
+    };
     window.addEventListener('openReviewCycleDetail', handleOpenReviewCycle);
-    return ()=>window.removeEventListener('openReviewCycleDetail', handleOpenReviewCycle);
+    window.addEventListener('openReviewWeightDetail', handleOpenReviewWeight);
+    window.addEventListener('openReviewDietDetail', handleOpenReviewDiet);
+    window.addEventListener('openReviewMoodDetail', handleOpenReviewMood);
+    return ()=>{
+      window.removeEventListener('openReviewCycleDetail', handleOpenReviewCycle);
+      window.removeEventListener('openReviewWeightDetail', handleOpenReviewWeight);
+      window.removeEventListener('openReviewDietDetail', handleOpenReviewDiet);
+      window.removeEventListener('openReviewMoodDetail', handleOpenReviewMood);
+    };
   }, []);
 
   const scheme3FirstVisitRef = useRef(null);
@@ -2657,6 +2686,30 @@ function App(){
             if(!reviewCycleReturnTab) return;
             const returnTab = reviewCycleReturnTab;
             setReviewCycleReturnTab(null);
+            setActiveTab(returnTab);
+          }}
+          openWeightDetailRequest={reviewWeightOpenRequest}
+          onWeightDetailRequestHandled={()=>setReviewWeightOpenRequest(0)}
+          onWeightDetailReturn={()=>{
+            if(!reviewWeightReturnTab) return;
+            const returnTab = reviewWeightReturnTab;
+            setReviewWeightReturnTab(null);
+            setActiveTab(returnTab);
+          }}
+          openDietDetailRequest={reviewDietOpenRequest}
+          onDietDetailRequestHandled={()=>setReviewDietOpenRequest(0)}
+          onDietDetailReturn={()=>{
+            if(!reviewDietReturnTab) return;
+            const returnTab = reviewDietReturnTab;
+            setReviewDietReturnTab(null);
+            setActiveTab(returnTab);
+          }}
+          openMoodDetailRequest={reviewMoodOpenRequest}
+          onMoodDetailRequestHandled={()=>setReviewMoodOpenRequest(0)}
+          onMoodDetailReturn={()=>{
+            if(!reviewMoodReturnTab) return;
+            const returnTab = reviewMoodReturnTab;
+            setReviewMoodReturnTab(null);
             setActiveTab(returnTab);
           }}
           shareState={reviewShareState}

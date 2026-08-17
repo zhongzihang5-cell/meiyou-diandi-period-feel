@@ -12886,7 +12886,7 @@ function LoveDetailPage({open, onClose}){
   );
 }
 
-function ReviewPage({mode='经期', isMember=false, openCycleDetailRequest=0, onCycleDetailRequestHandled, onCycleDetailReturn, shareState, onShareStateChange, onOpenPartnerPreview}){
+function ReviewPage({mode='经期', isMember=false, openCycleDetailRequest=0, onCycleDetailRequestHandled, onCycleDetailReturn, openWeightDetailRequest=0, onWeightDetailRequestHandled, onWeightDetailReturn, openDietDetailRequest=0, onDietDetailRequestHandled, onDietDetailReturn, openMoodDetailRequest=0, onMoodDetailRequestHandled, onMoodDetailReturn, shareState, onShareStateChange, onOpenPartnerPreview}){
   const [reviewSearchOpen, setReviewSearchOpen] = useState(false);
   const [cycleUpdated, setCycleUpdated] = useState(true);
   const [cycleDetailOpen, setCycleDetailOpen] = useState(false);
@@ -12907,6 +12907,24 @@ function ReviewPage({mode='经期', isMember=false, openCycleDetailRequest=0, on
     setCycleDetailOpen(true);
     onCycleDetailRequestHandled?.();
   }, [openCycleDetailRequest]);
+
+  React.useEffect(()=>{
+    if(openWeightDetailRequest <= 0) return;
+    setWeightDetailOpen(true);
+    onWeightDetailRequestHandled?.();
+  }, [openWeightDetailRequest]);
+
+  React.useEffect(()=>{
+    if(openDietDetailRequest <= 0) return;
+    setDietDistDetailOpen(true);
+    onDietDetailRequestHandled?.();
+  }, [openDietDetailRequest]);
+
+  React.useEffect(()=>{
+    if(openMoodDetailRequest <= 0) return;
+    setMoodDetailOpen(true);
+    onMoodDetailRequestHandled?.();
+  }, [openMoodDetailRequest]);
 
   return (
     <main className={'review-page' + (isPeriodMode ? ' is-compact-overview' : '') + (reviewSearchOpen ? ' is-review-search-open' : '')} aria-label="回顾">
@@ -13012,9 +13030,27 @@ function ReviewPage({mode='经期', isMember=false, openCycleDetailRequest=0, on
       {reviewSearchOpen && ReviewSearchOverlay ? (
         <ReviewSearchOverlay onClose={()=>setReviewSearchOpen(false)}/>
       ) : null}
-      <DietDistributionDetailPage open={dietDistDetailOpen} onClose={()=>setDietDistDetailOpen(false)}/>
-      <MoodDetailPage open={moodDetailOpen} onClose={()=>setMoodDetailOpen(false)}/>
-      <WeightDetailPage open={weightDetailOpen} onClose={()=>setWeightDetailOpen(false)}/>
+      <DietDistributionDetailPage
+        open={dietDistDetailOpen}
+        onClose={()=>{
+          setDietDistDetailOpen(false);
+          onDietDetailReturn?.();
+        }}
+      />
+      <MoodDetailPage
+        open={moodDetailOpen}
+        onClose={()=>{
+          setMoodDetailOpen(false);
+          onMoodDetailReturn?.();
+        }}
+      />
+      <WeightDetailPage
+        open={weightDetailOpen}
+        onClose={()=>{
+          setWeightDetailOpen(false);
+          onWeightDetailReturn?.();
+        }}
+      />
       <StoolDetailPage open={stoolDetailOpen} onClose={()=>setStoolDetailOpen(false)}/>
       <LoveDetailPage open={loveDetailOpen} onClose={()=>setLoveDetailOpen(false)}/>
       <BeverageDetailPage open={beverageDetailOpen} onClose={()=>setBeverageDetailOpen(false)}/>

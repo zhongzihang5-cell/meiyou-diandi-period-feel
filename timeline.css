@@ -1960,7 +1960,8 @@
 .tl-sister-ai-panel.is-collapsed{
   display:none;
 }
-.tl-period-review-entry{
+.tl-period-review-entry,
+.tl-card-review-entry{
   width:calc(100% + 32px);
   min-height:44px;
   margin:0 -16px -4px;
@@ -1979,10 +1980,37 @@
   text-align:left;
   cursor:pointer;
 }
-.tl-period-review-entry:active{
+.tl-card-review-entry{
+  width:calc(100% + 24px);
+  margin:0 -12px -4px;
+  padding:11px 12px 10px;
+  color:rgba(0,0,0,.6);
+  font-weight:400;
+}
+.diet-fb-card .tl-card-review-entry{
+  width:100%;
+  margin:0;
+  padding:11px 16px 12px;
+}
+.diet-fb-ai-panel-inner > .tl-card-review-entry{
+  width:100%;
+  margin:0;
+  padding:11px 0 4px;
+}
+.diet-fb-card .diet-fb-ai-panel-inner > .tl-card-review-entry{
+  padding:11px 16px 12px;
+}
+.tl-mood-insight .tl-card-review-entry{
+  width:100%;
+  margin:0;
+  padding:11px 12px 10px;
+}
+.tl-period-review-entry:active,
+.tl-card-review-entry:active{
   background:rgba(0,0,0,.025);
 }
-.tl-period-review-entry svg{
+.tl-period-review-entry svg,
+.tl-card-review-entry svg{
   width:16px;
   height:16px;
   flex:0 0 16px;
