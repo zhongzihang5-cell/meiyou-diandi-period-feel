@@ -1427,7 +1427,7 @@ function CycleDetailPage({open, onClose, isMember=false}){
         {
           tone:'is-good',
           title:'长期规律性：稳定',
-          text:<>全部 50 次记录覆盖约 4 年，周期平均约 <b>30.9 天</b>，绝大多数集中在 28-34 天。长期波动标准差约 <b>1.8 天</b>，说明整体节奏一直比较规律。</>,
+          text:<>全部 50 次记录覆盖约 4 年，周期平均约 <b>31.0 天</b>，绝大多数集中在 28-34 天。长期波动标准差约 <b>1.8 天</b>，说明整体节奏一直比较规律。</>,
         },
         {
           tone:'is-note',
@@ -1456,6 +1456,12 @@ function CycleDetailPage({open, onClose, isMember=false}){
       : range === '3y'
         ? REVIEW_CYCLE_ALL_DATA.slice(-36)
         : REVIEW_CYCLE_ALL_DATA;
+  const coreMetricData = {
+    '6c': {averageLabel:'近6次平均', average:'29.5', trendLabel:'近6次趋势', trend:'小幅缩短'},
+    '1y': {averageLabel:'近1年平均', average:'30.0', trendLabel:'近1年趋势', trend:'小幅缩短'},
+    '3y': {averageLabel:'近3年平均', average:'30.8', trendLabel:'近3年趋势', trend:'缓慢缩短'},
+    'all': {averageLabel:'全部平均', average:'31.0', trendLabel:'长期趋势', trend:'缓慢缩短'},
+  }[range];
   const hasRangeUpper = rangeData.some(item=>item[1] > 35);
   const hasRangeLower = rangeData.some(item=>item[1] < 21);
 
@@ -1505,6 +1511,20 @@ function CycleDetailPage({open, onClose, isMember=false}){
               {hasRangeLower ? <span className="review-legend-item is-cycle-lower"><i></i>正常范围下限21天</span> : null}
             </div>
           </div>
+          <section className="review-cycle-core-metrics" aria-label={ranges.find(item=>item.key === range).label + '核心数据'}>
+              <div className="review-cycle-core-metric">
+                <div className="review-cycle-core-label">最近周期</div>
+                <div className="review-cycle-core-value">28<span>天</span></div>
+              </div>
+              <div className="review-cycle-core-metric">
+                <div className="review-cycle-core-label">{coreMetricData.averageLabel}</div>
+                <div className="review-cycle-core-value">{coreMetricData.average}<span>天</span></div>
+              </div>
+              <div className="review-cycle-core-metric">
+                <div className="review-cycle-core-label">{coreMetricData.trendLabel}</div>
+                <div className="review-cycle-core-value is-trend"><i>↘</i>{coreMetricData.trend}</div>
+              </div>
+          </section>
         </div>
 
         <div className="review-cycle-detail-lower">

@@ -2567,6 +2567,62 @@
   border-radius:0;
   box-shadow:none;
 }
+.review-cycle-core-metrics{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+  margin:14px 16px 0;
+  padding:11px 0 12px;
+  border-radius:12px;
+  background:#fafafb;
+  overflow:hidden;
+}
+.review-cycle-core-metric{
+  position:relative;
+  min-width:0;
+  padding:0 8px;
+  text-align:center;
+}
+.review-cycle-core-metric + .review-cycle-core-metric::before{
+  content:"";
+  position:absolute;
+  top:7px;
+  bottom:7px;
+  left:0;
+  width:.5px;
+  background:var(--my-line);
+}
+.review-cycle-core-label{
+  color:var(--my-text-tertiary);
+  font-size:11px;
+  line-height:16px;
+}
+.review-cycle-core-value{
+  min-height:25px;
+  margin-top:2px;
+  color:var(--my-text-primary);
+  font-size:20px;
+  font-weight:600;
+  line-height:25px;
+  letter-spacing:-.2px;
+  white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+}
+.review-cycle-core-value span{
+  margin-left:1px;
+  color:var(--my-text-secondary);
+  font-size:11px;
+  font-weight:500;
+}
+.review-cycle-core-value.is-trend{
+  color:var(--my-brand-red);
+  font-size:14px;
+  letter-spacing:0;
+}
+.review-cycle-core-value.is-trend i{
+  margin-right:3px;
+  font-size:16px;
+  font-style:normal;
+}
 .review-cycle-overview-card .review-cycle-chart-toolbar{
   padding-left:16px;
   padding-right:16px;
