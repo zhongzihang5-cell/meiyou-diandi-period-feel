@@ -12886,7 +12886,7 @@ function LoveDetailPage({open, onClose}){
   );
 }
 
-function ReviewPage({mode='经期', isMember=false, shareState, onShareStateChange, onOpenPartnerPreview}){
+function ReviewPage({mode='经期', isMember=false, openCycleDetailRequest=0, onCycleDetailRequestHandled, onCycleDetailReturn, shareState, onShareStateChange, onOpenPartnerPreview}){
   const [reviewSearchOpen, setReviewSearchOpen] = useState(false);
   const [cycleUpdated, setCycleUpdated] = useState(true);
   const [cycleDetailOpen, setCycleDetailOpen] = useState(false);
@@ -12900,6 +12900,13 @@ function ReviewPage({mode='经期', isMember=false, shareState, onShareStateChan
   const isPeriodMode = mode === '经期';
   const I = window.Icon;
   const ReviewSearchOverlay = window.ReviewSearchOverlay;
+
+  React.useEffect(()=>{
+    if(openCycleDetailRequest <= 0) return;
+    setCycleUpdated(false);
+    setCycleDetailOpen(true);
+    onCycleDetailRequestHandled?.();
+  }, [openCycleDetailRequest]);
 
   return (
     <main className={'review-page' + (isPeriodMode ? ' is-compact-overview' : '') + (reviewSearchOpen ? ' is-review-search-open' : '')} aria-label="回顾">
@@ -12997,7 +13004,10 @@ function ReviewPage({mode='经期', isMember=false, shareState, onShareStateChan
       <CycleDetailPage
         open={cycleDetailOpen}
         isMember={isMember}
-        onClose={()=>setCycleDetailOpen(false)}
+        onClose={()=>{
+          setCycleDetailOpen(false);
+          onCycleDetailReturn?.();
+        }}
       />
       {reviewSearchOpen && ReviewSearchOverlay ? (
         <ReviewSearchOverlay onClose={()=>setReviewSearchOpen(false)}/>

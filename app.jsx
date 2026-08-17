@@ -368,6 +368,8 @@ function App(){
     }
     return initial.activeTab;
   });
+  const [reviewCycleOpenRequest, setReviewCycleOpenRequest] = useState(0);
+  const [reviewCycleReturnTab, setReviewCycleReturnTab] = useState(null);
   const [isMember, setIsMember] = useState(false);
   const [recordLifeMode, setRecordLifeMode] = useState('经期');
   const [reviewShareState, setReviewShareState] = useState(DEFAULT_REVIEW_SHARE_STATE);
@@ -408,6 +410,17 @@ function App(){
   const [showSearchPage, setShowSearchPage] = useState(false);
   const [babyFeedingPanelMode, setBabyFeedingPanelMode] = useState(null);
   const [searchCriteria, setSearchCriteria] = useState(null);
+
+  React.useEffect(()=>{
+    const handleOpenReviewCycle = ()=>{
+      setReviewCycleOpenRequest(request=>request + 1);
+      setReviewCycleReturnTab('note');
+      setRecordLifeMode('经期');
+      setActiveTab('cash');
+    };
+    window.addEventListener('openReviewCycleDetail', handleOpenReviewCycle);
+    return ()=>window.removeEventListener('openReviewCycleDetail', handleOpenReviewCycle);
+  }, []);
 
   const scheme3FirstVisitRef = useRef(null);
   const searchCloseScrollRef = useRef(null);
@@ -538,6 +551,8 @@ function App(){
     setShowPhoto(false);
     setShowSearchPage(false);
     setSearchCriteria(null);
+    setReviewCycleOpenRequest(0);
+    setReviewCycleReturnTab(null);
     periodRecordRef.current = null;
     scheme3FirstVisitRef.current = null;
     setFirstDropAnim(null);
@@ -1031,6 +1046,8 @@ function App(){
   }, []);
 
   const handleTabChange = (tab)=>{
+    setReviewCycleOpenRequest(0);
+    setReviewCycleReturnTab(null);
     if(tab === 'note' && activeTab !== 'note'){
       recordEnterModeRef.current = 'manual';
       if(periodDetailRecordEnabled || periodEndRecordCompleted) submitPeriodDetailDraftToTimeline();
@@ -2634,6 +2651,14 @@ function App(){
         <ReviewPage
           mode={recordLifeMode}
           isMember={isMember}
+          openCycleDetailRequest={reviewCycleOpenRequest}
+          onCycleDetailRequestHandled={()=>setReviewCycleOpenRequest(0)}
+          onCycleDetailReturn={()=>{
+            if(!reviewCycleReturnTab) return;
+            const returnTab = reviewCycleReturnTab;
+            setReviewCycleReturnTab(null);
+            setActiveTab(returnTab);
+          }}
           shareState={reviewShareState}
           onShareStateChange={setReviewShareState}
           onOpenPartnerPreview={()=>{

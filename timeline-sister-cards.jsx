@@ -1125,6 +1125,19 @@ function SisterAnalysisCollapsible({playAnimation, onCycleComplete, animateText,
             />
           </div>
         )}
+        {periodStyle && analysisKind === 'period-start' ? (
+          <button
+            type="button"
+            className="tl-period-review-entry"
+            onClick={()=>window.dispatchEvent(new CustomEvent('openReviewCycleDetail'))}
+            aria-label="查看月经周期变化趋势"
+          >
+            <span>查看月经周期变化趋势</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 6l6 6-6 6"/>
+            </svg>
+          </button>
+        ) : null}
       </section>
     </>
   );
