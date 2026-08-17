@@ -1274,17 +1274,12 @@ function CycleHealthScoreCard(){
 }
 
 const REVIEW_CYCLE_ALL_RECORDS = [
-  {date:'当前周期：7月5日-今天', period:5, cycle:28},
-  {date:'6月16日-7月4日', period:5, cycle:19},
-  {date:'6月1日-6月15日', period:5, cycle:15},
-  {date:'5月8日-5月31日', period:5, cycle:24},
-  {date:'4月10日-5月7日', period:5, cycle:28},
-  {date:'3月10日-4月9日', period:5, cycle:31},
-  {date:'2月7日-3月9日', period:5, cycle:31},
-  {date:'1月9日-2月6日', period:5, cycle:29},
-  {date:'2025年12月11日-2026年1月8日', period:5, cycle:29},
-  {date:'2025年11月11日-2025年12月10日', period:5, cycle:30},
-  {date:'2025年10月11日-2025年11月10日', period:5, cycle:31},
+  {date:'7月7日', year:'2026年', status:'提前1天', cycle:28, current:true},
+  {date:'6月8日', year:'2026年', status:'准时', cycle:29},
+  {date:'5月9日', year:'2026年', status:'推迟1天', cycle:30},
+  {date:'4月10日', year:'2026年', status:'准时', cycle:29},
+  {date:'3月10日', year:'2026年', status:'推迟2天', cycle:31},
+  {date:'2月8日', year:'2026年', status:'推迟1天', cycle:30},
 ];
 
 function CycleAllRecordsPage({open, onClose}){
@@ -1308,24 +1303,32 @@ function CycleAllRecordsPage({open, onClose}){
         <span className="review-detail-title">所有记录</span>
       </div>
       <div className="review-detail-content review-cycle-all-records-content">
-        <div className="review-cycle-all-records-list">
+        <div className="review-cycle-bar-module" role="img" aria-label="最近6次月经周期记录">
+          <div className="review-cycle-bar-header">
+            <span>月经开始</span>
+            <span>是否准时</span>
+            <span>周期天数</span>
+            <b>正常范围21-35天</b>
+          </div>
+          <div className="review-cycle-bar-rows">
           {REVIEW_CYCLE_ALL_RECORDS.map((record, index)=>{
             const barPercent = Math.min(record.cycle / 35 * 100, 100);
             return (
-              <div className="review-cycle-all-record" key={record.date + index}>
-                <div className="review-cycle-all-record-date">{record.date}</div>
-                <div className="review-cycle-all-record-bar-row">
-                  <span className="review-cycle-all-record-period">{record.period}</span>
-                  <div className="review-cycle-all-record-cycle">
-                    <span className="review-cycle-all-record-track" aria-hidden="true">
-                      <i style={{width:barPercent + '%'}}></i>
-                    </span>
-                    <span className="review-cycle-all-record-length">{record.cycle}</span>
-                  </div>
+              <div className="review-cycle-bar-row" key={record.year + record.date + index}>
+                <div className="review-cycle-bar-date">
+                  {record.date}
+                  <small>{record.year}</small>
+                </div>
+                <div className="review-cycle-bar-status">{record.status}</div>
+                <div className="review-cycle-bar-wrap">
+                  <span className="review-cycle-bar-value is-normal" style={{width:barPercent + '%'}}>
+                    {record.current ? `当前周期${record.cycle}天` : `${record.cycle}天`}
+                  </span>
                 </div>
               </div>
             );
           })}
+          </div>
         </div>
       </div>
     </section>
@@ -12916,6 +12919,8 @@ function ReviewPage({mode='经期', isMember=false, shareState, onShareStateChan
         <p className="review-page-greeting">已记录 <b>350</b>天，共<b>{isPeriodMode ? 9 : 7}</b>项{isPeriodMode ? '回顾' : '可回顾'}</p>
 
       {isPeriodMode ? (
+        <>
+        {isMember ? <PeriodHealthImageCard/> : null}
         <ReviewPeriodOverview
           cycleUpdated={cycleUpdated}
           onOpenCycle={()=>{
@@ -12930,6 +12935,7 @@ function ReviewPage({mode='经期', isMember=false, shareState, onShareStateChan
           onOpenLove={()=>setLoveDetailOpen(true)}
           onOpenStool={()=>setStoolDetailOpen(true)}
         />
+        </>
       ) : <>
 
       {isMember ? <PeriodHealthImageCard/> : null}
