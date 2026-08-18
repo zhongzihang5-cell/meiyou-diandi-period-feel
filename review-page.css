@@ -4352,8 +4352,35 @@
   line-height:22px;
   color:#ff7a3d;
 }
+.review-diet-stat-card.is-kcal-trend p{
+  align-items:baseline;
+  gap:4px;
+}
+.review-diet-stat-card.is-kcal-trend p b{
+  font-size:22px;
+  font-weight:500;
+  line-height:22px;
+  color:#ff7a3d;
+}
+.review-diet-stat-card.is-food p.review-diet-top-food{
+  margin-top:6px;
+  min-height:22px;
+  align-items:baseline;
+  flex-wrap:nowrap;
+  white-space:nowrap;
+  gap:2px;
+}
+.review-diet-stat-card.is-food p.review-diet-top-food b{
+  font-size:15px;
+  font-weight:500;
+  line-height:22px;
+  color:#ff7a3d;
+}
 .review-diet-card-foot .review-weight-stat-row{
   margin-top:10px;
+}
+.review-diet-card-foot.is-long-range .review-weight-stat-row{
+  margin-top:0;
 }
 .review-love-trend-block.is-diet-main .review-diet-card-foot{
   margin-top:12px;
@@ -7705,7 +7732,8 @@
   gap:2px;
 }
 .review-diet-stat-card.review-weight-stat-card.review-mood-trend-record-card p b,
-.review-diet-stat-card.is-meal p.review-diet-top-meal b{
+.review-diet-stat-card.is-meal p.review-diet-top-meal b,
+.review-diet-stat-card.is-food p.review-diet-top-food b{
   color:#ff7a3d;
 }
 .review-mood-stat-card.review-mood-trend-record-card p b{
@@ -7731,6 +7759,19 @@
 .review-mood-stat-card.is-freq p.review-mood-freq-words b,
 .review-mood-stat-card.is-avg p.review-mood-freq-words b{
   font-size:15px;
+  font-weight:500;
+  line-height:22px;
+  color:#FF4D88;
+}
+.review-mood-stat-card.is-trend .review-mood-trend-record-card-title{
+  white-space:nowrap;
+}
+.review-mood-stat-card.is-trend p{
+  align-items:baseline;
+  gap:4px;
+}
+.review-mood-stat-card.is-trend p b{
+  font-size:22px;
   font-weight:500;
   line-height:22px;
   color:#FF4D88;

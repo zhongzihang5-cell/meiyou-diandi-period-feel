@@ -4789,6 +4789,7 @@ const DIET_RANGE_META = {
     mealCount:267,
     coverDays:102,
     mealShare:dietMealShareRows({breakfast:18, lunch:28, dinner:40, snack:9, other:5}),
+    topFood:{name:'番茄炒蛋', count:15},
   },
   year:{
     dateText:'2025年7月1日至2026年7月13日',
@@ -4802,6 +4803,7 @@ const DIET_RANGE_META = {
     mealCount:980,
     coverDays:298,
     mealShare:dietMealShareRows({breakfast:19, lunch:32, dinner:34, snack:10, other:5}),
+    topFood:{name:'番茄炒蛋', count:32},
   },
   all:{
     dateText:'2024年8月1日至2026年7月13日',
@@ -4815,6 +4817,7 @@ const DIET_RANGE_META = {
     mealCount:1680,
     coverDays:520,
     mealShare:dietMealShareRows({breakfast:20, lunch:33, dinner:31, snack:11, other:5}),
+    topFood:{name:'番茄炒蛋', count:51},
   },
 };
 
@@ -5128,6 +5131,10 @@ function DietTrendSummary({range = 'd7'}){
   const mealShare = meta.mealShare || DIET_RANGE_META.d7.mealShare;
   const topMeal = dietTopMealFromShare(mealShare);
   const isMonthly = range === 'half' || range === 'year' || range === 'all';
+  const topFood = meta.topFood || {name:'番茄炒蛋', count:15};
+  const trendParts = String(meta.trend || '↘ 下降').split(' ');
+  const trendArrow = trendParts[0] || '↘';
+  const trendText = trendParts.slice(1).join(' ') || '下降';
   return (
     <div className="review-love-trend-block is-detail-main is-diet-main">
       <div className="review-love-trend-head">
@@ -5142,39 +5149,55 @@ function DietTrendSummary({range = 'd7'}){
         </div>
         <span className="review-trend-legend-days">记录{meta.coverDays}天</span>
       </div>
-      <div className="review-mood-trend-foot review-diet-card-foot">
-        <div className="review-mood-trend-tri">
-          <div className="review-mood-trend-tri-head">
-            <span>餐次热量构成</span>
+      <div className={'review-mood-trend-foot review-diet-card-foot' + (isMonthly ? ' is-long-range' : '')}>
+        {isMonthly ? null : (
+          <div className="review-mood-trend-tri">
+            <div className="review-mood-trend-tri-head">
+              <span>餐次热量构成</span>
+            </div>
+            <div className="review-mood-trend-tri-track" aria-hidden="true">
+              {mealShare.map(item=>(
+                <i key={item.key} style={{width:item.pct + '%', background:item.color}}/>
+              ))}
+            </div>
+            <div className="review-mood-trend-tri-legend">
+              {mealShare.map(item=>(
+                <span key={item.key}>
+                  <i style={{background:item.color}}/>
+                  <em>{item.label}</em>
+                  <b>{item.pct}%</b>
+                </span>
+              ))}
+            </div>
           </div>
-          <div className="review-mood-trend-tri-track" aria-hidden="true">
-            {mealShare.map(item=>(
-              <i key={item.key} style={{width:item.pct + '%', background:item.color}}/>
-            ))}
-          </div>
-          <div className="review-mood-trend-tri-legend">
-            {mealShare.map(item=>(
-              <span key={item.key}>
-                <i style={{background:item.color}}/>
-                <em>{item.label}</em>
-                <b>{item.pct}%</b>
-              </span>
-            ))}
-          </div>
-        </div>
+        )}
         <div className="review-mood-trend-insight-row review-weight-stat-row">
           <div className="review-mood-trend-record-card review-weight-stat-card review-diet-stat-card">
             <span className="review-mood-trend-record-card-title">饮食记录</span>
             <p><b>{meta.mealCount}</b><em>餐</em></p>
           </div>
-          <div className="review-mood-trend-record-card review-weight-stat-card review-diet-stat-card">
-            <span className="review-mood-trend-record-card-title">日均热量</span>
-            <p><b>{meta.avg}</b><em>kcal</em></p>
-          </div>
-          <div className="review-mood-trend-record-card review-weight-stat-card review-diet-stat-card is-meal">
-            <span className="review-mood-trend-record-card-title">热量最高餐次</span>
-            <p className="review-diet-top-meal"><b>{topMeal.label}</b></p>
-          </div>
+          {isMonthly ? (
+            <div className={'review-mood-trend-record-card review-weight-stat-card review-diet-stat-card is-kcal-trend is-' + (meta.tone || 'down')}>
+              <span className="review-mood-trend-record-card-title">热量趋势</span>
+              <p><b>{trendArrow}</b><em>{trendText}</em></p>
+            </div>
+          ) : (
+            <div className="review-mood-trend-record-card review-weight-stat-card review-diet-stat-card">
+              <span className="review-mood-trend-record-card-title">日均热量</span>
+              <p><b>{meta.avg}</b><em>kcal</em></p>
+            </div>
+          )}
+          {isMonthly ? (
+            <div className="review-mood-trend-record-card review-weight-stat-card review-diet-stat-card is-food">
+              <span className="review-mood-trend-record-card-title">最常吃食物</span>
+              <p className="review-diet-top-food"><b>{topFood.name}</b><em>{topFood.count}次</em></p>
+            </div>
+          ) : (
+            <div className="review-mood-trend-record-card review-weight-stat-card review-diet-stat-card is-meal">
+              <span className="review-mood-trend-record-card-title">热量最高餐次</span>
+              <p className="review-diet-top-meal"><b>{topMeal.label}</b></p>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -5241,7 +5264,7 @@ function DietDistributionDetailPage({open, onClose}){
           {false && (
             <DietHabitDistributionCard goal={calorieGoal}/>
           )}
-          {range === 'd7' || range === 'd30' ? <DietFoodJarCard/> : null}
+          {false && <DietFoodJarCard/>}
         </div>
       </div>
       <DietBudgetSettingsPage
@@ -6424,7 +6447,7 @@ const MOOD_RANGE_META = {
     recordDaysTotal:'30',
     streakDays:12,
     compareValue:'周末',
-    trend:'↗ 更积极',
+    trend:'↗ 上升',
     freqHint:'差不多每两天记一次',
     triShare:[
       {key:'pos', label:'积极', pct:54, color:MOOD_TRI_POS},
@@ -6443,7 +6466,7 @@ const MOOD_RANGE_META = {
     recordDaysTotal:'183',
     streakDays:18,
     compareValue:'春季',
-    trend:'↗ 更积极',
+    trend:'↘ 下降',
     freqHint:'平均约每 1.3 天记一次',
     triShare:[
       {key:'pos', label:'积极', pct:55, color:MOOD_TRI_POS},
@@ -6481,7 +6504,7 @@ const MOOD_RANGE_META = {
     recordDaysTotal:'730',
     streakDays:42,
     compareValue:'夏季',
-    trend:'↗ 更积极',
+    trend:'↗ 上升',
     freqHint:'长期保持较稳定的记录节奏',
     triShare:[
       {key:'pos', label:'积极', pct:54, color:MOOD_TRI_POS},
@@ -7837,8 +7860,10 @@ function MoodTrendSummary({range = 'd30'}){
   const recordCount = hourly.reduce((s, n)=>s + n, 0);
   const triShare = meta.triShare || MOOD_RANGE_META.d30.triShare;
   const recordDays = meta.recordDaysMain || '26';
-  const avgMood = moodAvgLabelFromVals(chartProps.vals || []);
   const topMoods = meta.topMoods || '平静、易怒';
+  const trendParts = String(meta.trend || '↗ 上升').split(' ');
+  const trendArrow = trendParts[0] || '↗';
+  const trendText = trendParts.slice(1).join(' ') || '上升';
   return (
     <div className="review-mood-trend-block">
       <div className="review-mood-trend-head-main">
@@ -7874,9 +7899,9 @@ function MoodTrendSummary({range = 'd30'}){
             <span className="review-mood-trend-record-card-title">心情记录</span>
             <p><b>{recordCount}</b><em>次</em></p>
           </div>
-          <div className="review-mood-trend-record-card review-weight-stat-card review-mood-stat-card is-avg">
-            <span className="review-mood-trend-record-card-title">平均心情</span>
-            <p className="review-mood-freq-words"><b>{avgMood}</b></p>
+          <div className="review-mood-trend-record-card review-weight-stat-card review-mood-stat-card is-trend">
+            <span className="review-mood-trend-record-card-title">心情趋势</span>
+            <p><b>{trendArrow}</b><em>{trendText}</em></p>
           </div>
           <div className="review-mood-trend-record-card review-weight-stat-card review-mood-stat-card is-freq">
             <span className="review-mood-trend-record-card-title">高频心情</span>
@@ -8432,7 +8457,7 @@ function MoodDetailBody({range, onExpandPhase}){
         {false && (
           <MoodTimeDistributionCard range={range}/>
         )}
-        {showCycle ? <MoodRecordCard/> : null}
+        {false && showCycle ? <MoodRecordCard/> : null}
       </div>
     </>
   );
