@@ -534,6 +534,7 @@ function DietAiCollapsibleSection({
   defaultOpen = true,
   animateIn = false,
   embedded = false,
+  compact = false,
   footer = null,
   children,
 }){
@@ -542,7 +543,7 @@ function DietAiCollapsibleSection({
   return (
     <>
       <div className={'diet-fb-divider' + (embedded ? ' diet-fb-divider-bleed' : '')}/>
-      <div className={'diet-fb-ai-collapsible' + (embedded ? ' is-embedded' : '') + (animateIn ? ' diet-fb-stagger-in' : '')}>
+      <div className={'diet-fb-ai-collapsible' + (embedded ? ' is-embedded' : '') + (animateIn ? ' diet-fb-stagger-in' : '') + (compact ? ' is-copy-only' : '')}>
         <button
           type="button"
           className="diet-fb-ai-toggle"

@@ -1744,6 +1744,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
                 title={a.title || 'AI 分析'}
                 defaultOpen={aiDefaultOpen}
                 embedded
+                compact={!a.chartType}
                 animateIn={isNew}
                 footer={
                   a.chartType === 'weightTrend' ? <WeightTrendReviewEntry/> :

@@ -486,6 +486,9 @@
 .diet-fb-ai-collapsible.is-embedded .diet-fb-sec-b-content{
   padding:0 0 12px;
 }
+.diet-fb-ai-collapsible.is-copy-only.is-embedded .diet-fb-ai-toggle{
+  padding:14px 0 10px;
+}
 
 .diet-fb-ai-badge{
   width:24px;
