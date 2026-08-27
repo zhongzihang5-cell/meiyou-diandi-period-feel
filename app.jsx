@@ -16,6 +16,12 @@ const PERIOD_FEEL_GUIDE_COPY = {
   scheme3Link: '记录本次血量变化、经期症状',
 };
 
+const HEADER_ATM_SCHEME3_PHRASES = [
+  '在美柚，记一切',
+  '一句话，记下生活点滴',
+  '今天想记点什么？',
+];
+
 function PeriodFeelOverlay({open, onClose, onComplete, label='记录经期感受'}){
   const [state, setState] = React.useState('ready');
   const [text, setText] = React.useState('');
@@ -479,6 +485,18 @@ function App(){
   const [periodFeelScheme1Breath, setPeriodFeelScheme1Breath] = useState(false);
   const periodFeelScheme1BreathTimerRef = useRef(null);
   const periodFeelGuideScheme = t.periodFeelGuideScheme || '方案一';
+  const headerAtmosphereScheme = ['方案一', '方案二', '方案三', '方案四'].includes(t.headerAtmosphereScheme)
+    ? t.headerAtmosphereScheme
+    : '方案一';
+  const demoTheme = ['默认', '暖白', '柔粉', '暗黑'].includes(t.demoTheme) ? t.demoTheme : '默认';
+  const feedbackDisplayScheme = ['方案一', '方案二', '方案三'].includes(t.feedbackDisplayScheme)
+    ? t.feedbackDisplayScheme
+    : '方案一';
+  // 同步写入，保证子组件同一次渲染就能读到（勿放 useEffect，否则会晚一拍）
+  window.__FEEDBACK_DISPLAY_SCHEME = feedbackDisplayScheme;
+  const [headerCollapseProgress, setHeaderCollapseProgress] = useState(0);
+  const [scheme3PhraseIndex, setScheme3PhraseIndex] = useState(0);
+  const [scheme3PhraseVisible, setScheme3PhraseVisible] = useState(true);
 
   const clearPeriodFeelScheme1Breath = React.useCallback(()=>{
     if(periodFeelScheme1BreathTimerRef.current){
@@ -1740,6 +1758,9 @@ function App(){
   const pushToTimeline = (entry, text)=>{
     const dayId = window.resolveEntryDayId(text || entry.body || '', timeline);
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
+    requestAnimationFrame(()=>{
+      setTimeout(()=>scrollTimelineToLastItem('smooth'), 80);
+    });
   };
 
   const revealFirstDropEntry = React.useCallback(()=>{
@@ -1848,101 +1869,7 @@ function App(){
     }, 220);
   };
 
-  // ====== 6 阶段演示流程 ======
-  const runDemoFlow = ()=>{
-    setIsDemoRunning(true);
-    setDemoPhase('recognizing');
-
-    const demoR1Id = 'demo-r1-'+Date.now();
-    const demoR2Id = 'demo-r2-'+Date.now();
-    const demoR3Id = 'demo-r3-'+Date.now();
-    demoIdsRef.current = [demoR1Id, demoR2Id, demoR3Id];
-
-    const DEMO_TEXT = '昨天下午来了姨妈，来之前，上午就开始头痛。';
-
-    // 阶段 2：识别中 800ms → 浮层消失
-    setTimeout(()=>{
-      setDemoPhase(null);
-
-      // 阶段 3：插入记录 1、2 到 5-17 block（200ms 后）
-      setTimeout(()=>{
-        const r1 = {
-          kind:'record-group', id:demoR1Id, isNew:true, _demoCard:true,
-          primary:{ id:demoR1Id, time:'10:00', kind:'text',
-            kind:'symptom',
-            symptomLabel:'症状',
-            symptomValue:'头痛',
-            text:'头痛',
-            tags:[{cat:'症状', val:'头痛', icon:'sym'}],
-          },
-        };
-        const r2 = {
-          kind:'record-group', id:demoR2Id, isNew:true, _demoCard:true,
-          primary:{ id:demoR2Id, time:'16:00', kind:'text',
-            kind:'period',
-            periodLabel:'月经来了',
-            text:'月经来了',
-            tags:[{cat:'月经', val:'', icon:'period'}],
-          },
-        };
-        setTimeline(blocks=>{
-          // 动态插入 d-5-17 day block（如果不存在）
-          let next = blocks;
-          if(!next.find(b=>b.id==='d-5-17')){
-            const todayIdx = next.findIndex(b=>b.type==='day'&&b.isToday);
-            const ins = { type:'day', id:'d-5-17', date:'5/17', weekday:'周日', items:[] };
-            next = [...next];
-            next.splice(todayIdx >= 0 ? todayIdx : next.length, 0, ins);
-          }
-          next = window.appendTimelineEntry(next, r1, {dayId:'d-5-17'});
-          next = window.appendTimelineEntry(next, r2, {dayId:'d-5-17'});
-          return next;
-        });
-
-        // 阶段 4：停留 200ms，追加记录 3 占位
-        setTimeout(()=>{
-          const r3 = {
-            kind:'voice-card', id:demoR3Id, isNew:true, _demoCard:true,
-            time:'12:00',
-            body:'',
-            voiceText:'',
-            voice:{ duration:'0:05' },
-            tagLayout:'t5',
-            tags:[],
-            _demoTypewriter: true,
-            _demoFullText: DEMO_TEXT,
-            _demoTags:[
-              {cat:'月经', val:'开始', icon:'period'},
-              {cat:'症状', val:'头痛', icon:'sym'},
-            ],
-          };
-          setTimeline(blocks=>{
-            const todayId = blocks.find(b=>b.type==='day'&&b.isToday)?.id;
-            return window.appendTimelineEntry(blocks, r3, {dayId: todayId});
-          });
-
-          // 滚动到记录 3
-          setTimeout(()=>{
-            const el = document.querySelector('[data-entry-id="'+demoR3Id+'"]');
-            if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
-          }, 80);
-
-          // 阶段 5 由 SegmentedRecordCard 的 TypewriterText 完成回调驱动
-          // 阶段 6：回填来源标签
-          // 通过 window event 监听 typewriter 完成
-          const onTypewriterDone = ()=>{
-            window.removeEventListener('demoTypewriterDone', onTypewriterDone);
-            setTimeout(()=>{
-              setIsDemoRunning(false);
-            }, 900);
-          };
-          window.addEventListener('demoTypewriterDone', onTypewriterDone);
-
-        }, 200); // 阶段 4 delay
-      }, 200); // 阶段 3 delay after float disappears
-    }, 800); // 阶段 2 ASR delay
-  };
-
+  // ====== 按住说话：每次松手都在「今天」新增一条 ======
   const submitVoice = (transcript, durSec)=>{
     const recordScenario = window.readCameraPermissionScenario?.() || 'unauthorized';
     if (window.isDietTextRecordScenario?.(recordScenario)) {
@@ -1957,19 +1884,33 @@ function App(){
     }
 
     markUserRecorded();
-    setDemoPhase('listening');
-    // 清除上一轮演示卡片，然后启动新流程
-    clearDemoCards(()=> runDemoFlow());
+    setDemoPhase(null);
+    setIsDemoRunning(false);
+    const text = (transcript || '').trim();
+    if(!text) return;
 
-    // 真实 ASR 接入时启用以下逻辑：
-    // const text = transcript.trim();
-    // if(!text) return;
-    // const hits = window.extractKeywords(text);
-    // const entry = buildTimelineEntry(text, hits, {
-    //   voice: { duration: window.formatVoiceDur(durSec) },
-    // });
-    // if(recordFeedback && tryStartFirstDrop(entry, text)) return;
-    // pushToTimeline(entry, text);
+    const hits = window.extractKeywords(text);
+    const entry = buildTimelineEntry(text, hits, {
+      voice: { duration: window.formatVoiceDur?.(Math.max(durSec || 0, 3)) || '0:03' },
+    });
+    // 避免同毫秒撞 id；语音一律记到今天，避免文案含「昨天」被分到别的日期
+    entry.id = 'e-voice-'+Date.now()+'-'+Math.random().toString(36).slice(2, 7);
+    const todayId = timeline.find(b=>b.type==='day' && b.isToday)?.id;
+
+    const finish = ()=>{
+      // 语音不走水滴落点，统一用节点高亮+涟漪
+      firstRecordAnimDoneRef.current = true;
+      setTimeline(blocks=>{
+        const dayId = todayId || blocks.find(b=>b.type==='day' && b.isToday)?.id
+          || window.resolveEntryDayId('', blocks);
+        return window.appendTimelineEntry(blocks, entry, { dayId });
+      });
+      requestAnimationFrame(()=>{
+        setTimeout(()=>scrollTimelineToLastItem('smooth'), 80);
+      });
+    };
+    if(demoIdsRef.current.length) clearDemoCards(finish);
+    else finish();
   };
 
   const submitQuickMark = (mark)=>{
@@ -2701,6 +2642,95 @@ function App(){
     && recordLifeMode === '育儿'
     && !voiceTranscribe;
   const showStreamHeader = showBabyFeedingHeader ? true : !showSearchPage;
+  const headerAtmosphereReady = showRecordShell
+    && !showBabyFeedingHeader
+    && !showRecordEmpty
+    && !showRecordBlank
+    && !voiceTranscribe
+    && !isSearchActive;
+  const useHeaderAtmosphereScheme1 = headerAtmosphereScheme === '方案一' && headerAtmosphereReady;
+  const useHeaderAtmosphereScheme2 = headerAtmosphereScheme === '方案二' && headerAtmosphereReady;
+  const useHeaderAtmosphereScheme3 = headerAtmosphereScheme === '方案三' && headerAtmosphereReady;
+  // 方案四：仅居中标题「记录」；Tab 改为 日历 / 记录（仅本方案）
+  const useHeaderAtmosphereScheme4 = headerAtmosphereScheme === '方案四';
+  const useHeaderAtmosphereCollapse = useHeaderAtmosphereScheme1 || useHeaderAtmosphereScheme2;
+
+  React.useEffect(()=>{
+    if(!useHeaderAtmosphereScheme3){
+      setScheme3PhraseIndex(0);
+      setScheme3PhraseVisible(true);
+      return undefined;
+    }
+    let fadeTimer = null;
+    const tick = setInterval(()=>{
+      setScheme3PhraseVisible(false);
+      fadeTimer = setTimeout(()=>{
+        setScheme3PhraseIndex((i)=> (i + 1) % HEADER_ATM_SCHEME3_PHRASES.length);
+        setScheme3PhraseVisible(true);
+      }, 280);
+    }, 3200);
+    return ()=>{
+      clearInterval(tick);
+      if(fadeTimer) clearTimeout(fadeTimer);
+    };
+  }, [useHeaderAtmosphereScheme3]);
+
+  React.useEffect(()=>{
+    if(!useHeaderAtmosphereCollapse){
+      setHeaderCollapseProgress(0);
+      return undefined;
+    }
+    const el = streamRef.current;
+    if(!el) return undefined;
+    const COLLAPSE_DISTANCE = 72;
+    const onScroll = ()=>{
+      let next = 0;
+      if(useHeaderAtmosphereScheme2){
+        const todayHead = el.querySelector('.tl-day-section-head.is-today');
+        if(!todayHead){
+          next = 1;
+        } else {
+          const heads = Array.from(el.querySelectorAll('.tl-day-section-head[data-day-id]'));
+          const idx = heads.indexOf(todayHead);
+          const nextHead = idx >= 0 ? heads[idx + 1] : null;
+          const streamRect = el.getBoundingClientRect();
+          const viewTop = streamRect.top;
+          const viewBottom = streamRect.bottom;
+          const todayStart = todayHead.getBoundingClientRect().top;
+          const feedEnd = el.querySelector('.tl-feed-end');
+          const todayEnd = nextHead
+            ? nextHead.getBoundingClientRect().top
+            : (feedEnd ? feedEnd.getBoundingClientRect().top : todayHead.getBoundingClientRect().bottom + 320);
+          const overlap = Math.min(todayEnd, viewBottom) - Math.max(todayStart, viewTop);
+          if(overlap >= 48){
+            next = 0;
+          } else if(overlap <= 0){
+            next = 1;
+          } else {
+            next = 1 - overlap / 48;
+          }
+        }
+      } else {
+        next = Math.min(1, Math.max(0, el.scrollTop / COLLAPSE_DISTANCE));
+      }
+      setHeaderCollapseProgress((prev)=> (Math.abs(prev - next) < 0.01 ? prev : next));
+    };
+    onScroll();
+    el.addEventListener('scroll', onScroll, { passive:true });
+    window.addEventListener('resize', onScroll);
+    return ()=>{
+      el.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, [useHeaderAtmosphereCollapse, useHeaderAtmosphereScheme1, useHeaderAtmosphereScheme2, activeTab, showRecordShell, displayTimeline]);
+
+  React.useEffect(()=>{
+    if(!useHeaderAtmosphereScheme2) return undefined;
+    const t1 = setTimeout(()=>scrollTimelineToBottom('auto'), 40);
+    const t2 = setTimeout(()=>scrollTimelineToBottom('auto'), 200);
+    return ()=>{ clearTimeout(t1); clearTimeout(t2); };
+  }, [useHeaderAtmosphereScheme2, activeTab, showRecordShell]);
+
   const babyFeedingDockItems = showBabyFeedingQuickStrip
     ? BABY_FEEDING_QUICK_ITEMS.map(item=>({
         ...item,
@@ -2725,7 +2755,14 @@ function App(){
 
   return (
     <>
-      <div className={'phone' + (homeDetailOpen ? ' is-home-detail-open' : '') + (showDockQuickStrip ? ' is-dock-quick-entry' : '')}>
+      <div className={
+        'phone'
+        + (homeDetailOpen ? ' is-home-detail-open' : '')
+        + (showDockQuickStrip ? ' is-dock-quick-entry' : '')
+        + (demoTheme === '暗黑' ? ' is-theme-dark' : '')
+        + (demoTheme === '暖白' ? ' is-theme-warm' : '')
+        + (demoTheme === '柔粉' ? ' is-theme-soft-pink' : '')
+      }>
         <StatusBar isMember={isMember} onMemberChange={setIsMember} showMemberSwitch={showReview}/>
 
       {showHome && HomePage && (
@@ -2846,7 +2883,7 @@ function App(){
       )}
 
       <div
-        className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordBlank ? ' suiji-shell--blank' : '')+(voiceTranscribe ? ' suiji-shell--voice' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')+(showSearchPage && !showBabyFeedingHeader ? ' is-search-open':'')+(babyFeedingPanelMode === 'all' ? ' is-filter-panel-open':'')+(babyFeedingPanelMode === 'search' ? ' is-xhs-search-open':'')+(isSearchActive?' is-search-filtered':'')}
+        className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordBlank ? ' suiji-shell--blank' : '')+(voiceTranscribe ? ' suiji-shell--voice' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')+(showSearchPage && !showBabyFeedingHeader ? ' is-search-open':'')+(babyFeedingPanelMode === 'all' ? ' is-filter-panel-open':'')+(babyFeedingPanelMode === 'search' ? ' is-xhs-search-open':'')+(isSearchActive?' is-search-filtered':'')+(useHeaderAtmosphereScheme2?' is-atm-scheme2':'')+(useHeaderAtmosphereScheme3?' is-atm-scheme3':'')}
         aria-hidden={!showRecordShell}
       >
         {showRecordEmpty ? (
@@ -2909,7 +2946,7 @@ function App(){
         ) : (
         <>
         {showStreamHeader ? (
-        <div className={'stream-header' + (showBabyFeedingHeader ? ' is-baby-feeding-header' : '')}>
+        <div className={'stream-header' + (showBabyFeedingHeader ? ' is-baby-feeding-header' : '') + (useHeaderAtmosphereScheme2 && headerCollapseProgress > 0.45 ? ' is-atm-collapsed' : '') + (useHeaderAtmosphereScheme3 ? ' is-mini-atm' : '')}>
           {showBabyFeedingHeader ? (
             <>
               <div className="stream-actions">
@@ -2936,6 +2973,16 @@ function App(){
               </button>
               <div className="stream-header-side"/>
             </>
+          ) : useHeaderAtmosphereScheme3 ? (
+            <>
+              <h1 className="stream-mini-title">点滴</h1>
+              <p
+                className={'stream-mini-tagline'+(scheme3PhraseVisible ? ' is-in' : ' is-out')}
+                key={scheme3PhraseIndex}
+              >
+                {HEADER_ATM_SCHEME3_PHRASES[scheme3PhraseIndex]}
+              </p>
+            </>
           ) : (
             <>
               <div className="stream-actions">
@@ -2949,20 +2996,62 @@ function App(){
                   <I name="search" size={20} stroke={1.7}/>
                 </button>
               </div>
-          <h1 className="stream-title">点滴</h1>
+          <h1
+            className={
+              'stream-title'
+              + (useHeaderAtmosphereCollapse
+                ? (' is-atmosphere-collapse' + (headerCollapseProgress > 0.45 ? ' is-shown' : ''))
+                : '')
+            }
+            aria-hidden={useHeaderAtmosphereCollapse && headerCollapseProgress <= 0.45}
+          >
+            {useHeaderAtmosphereScheme4 ? '记录' : '点滴'}
+          </h1>
               <div className="stream-header-side"/>
             </>
           )}
         </div>
+        ) : null}
+        {useHeaderAtmosphereScheme2 ? (
+          <div
+            className="stream-hero-title is-scheme2"
+            style={{
+              opacity: Math.max(0, 1 - headerCollapseProgress * 1.25),
+              maxHeight: `${Math.max(0, (1 - headerCollapseProgress) * 78)}px`,
+              paddingBottom: `${Math.max(0, (1 - headerCollapseProgress) * 12)}px`,
+              transform: `translateY(${-headerCollapseProgress * 8}px)`,
+            }}
+            aria-hidden={headerCollapseProgress > 0.85}
+          >
+            <h2 className="stream-hero-heading">点滴</h2>
+            <p className="stream-hero-sub">在美柚，记一切</p>
+          </div>
         ) : null}
         <div
           className={
             'suiji-stream'
             + (recordLifeMode === '育儿' && !isSearchActive && babyDiscoverVisible && !babyFeedingEntryActive ? ' has-baby-discover' : '')
             + (showDockQuickStrip ? ' has-dock-quick-strip' : '')
+            + (useHeaderAtmosphereScheme1 ? ' has-hero-title' : '')
+            + (useHeaderAtmosphereScheme2 ? ' has-hero-title-scheme2' : '')
           }
           ref={streamRef}
         >
+
+          {useHeaderAtmosphereScheme1 ? (
+            <div
+              className="stream-hero-title"
+              style={{
+                opacity: Math.max(0, 1 - headerCollapseProgress * 1.35),
+                transform: `translateY(${-headerCollapseProgress * 10}px) scale(${1 - headerCollapseProgress * 0.08})`,
+                transformOrigin: 'left top',
+              }}
+              aria-hidden={headerCollapseProgress > 0.85}
+            >
+              <h2 className="stream-hero-heading">点滴</h2>
+              <p className="stream-hero-sub">在美柚，记一切</p>
+            </div>
+          ) : null}
 
           {scene.record.showHealthCard && (
             <div className="stream-health">
@@ -2980,12 +3069,14 @@ function App(){
             </div>
           ) : (
           <TimelineStream
+            key={'tl-fb-'+feedbackDisplayScheme}
             blocks={displayTimeline}
             endRef={timelineEndRef}
             sisterPlayAnimation={sisterPlayAnimation}
             sisterCycleDone={sisterCycleDone}
             hideTodayGuide={!showTodayGuide}
             hideBabyFeeding={recordLifeMode === '经期'}
+            hideGapDivider
             onSisterCycleComplete={handleSisterCycleComplete}
             periodFeelGuide={{
               scheme: periodFeelGuideScheme,
@@ -3054,6 +3145,10 @@ function App(){
             onDateSelect={handleTimelineDateSelect}
           />
         ) : null}
+        {feedbackDisplayScheme === '方案三' && (()=>{
+          const FeedbackAnnotationHost = window.FeedbackAnnotationHost;
+          return FeedbackAnnotationHost ? <FeedbackAnnotationHost/> : null;
+        })()}
         </>
         )}
       </div>
@@ -3087,7 +3182,8 @@ function App(){
           active={activeTab}
           onChange={handleTabChange}
           noteUnread={noteTabUnread}
-          noteLabel="点滴"
+          noteLabel={useHeaderAtmosphereScheme4 ? '记录' : '点滴'}
+          calLabel={useHeaderAtmosphereScheme4 ? '日历' : '记录'}
           onNoteVoiceStart={recordLifeMode === '育儿' ? startBabyVoiceHold : undefined}
           onNoteVoiceMove={recordLifeMode === '育儿' ? moveBabyVoiceHold : undefined}
           onNoteVoiceEnd={recordLifeMode === '育儿' ? endBabyVoiceHold : undefined}
@@ -3106,27 +3202,99 @@ function App(){
             description={scene.description}
           />
         )}
-        <div className="demo-scene-dock" role="toolbar" aria-label="经期感受承接引导方案">
-          <div className="demo-scene-dock-label">经期感受引导</div>
-          <div className="demo-scene-dock-options">
-            {['方案一', '方案二', '方案三'].map((opt)=>(
-              <button
-                key={opt}
-                type="button"
-                className={'demo-scene-dock-btn'+(periodFeelGuideScheme === opt ? ' active' : '')}
-                aria-pressed={periodFeelGuideScheme === opt}
-                onClick={()=>setTweak('periodFeelGuideScheme', opt)}
-              >
-                {opt}
-              </button>
-            ))}
+        <div className="demo-scene-dock demo-tweaks-dock" role="toolbar" aria-label="Tweaks">
+          <div className="demo-scene-dock-label">Tweaks</div>
+
+          <div className="demo-tweak-section">
+            <div className="demo-tweak-section-label">头部氛围感</div>
+            <div className="demo-scene-dock-options is-row">
+              {['方案一', '方案二', '方案三', '方案四'].map((opt)=>(
+                <button
+                  key={'atm-'+opt}
+                  type="button"
+                  className={'demo-scene-dock-btn'+(headerAtmosphereScheme === opt ? ' active' : '')}
+                  aria-pressed={headerAtmosphereScheme === opt}
+                  onClick={()=>setTweak('headerAtmosphereScheme', opt)}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+            <p className="demo-scene-dock-hint">
+              {headerAtmosphereScheme === '方案一' && '左侧大标题 + 副标题，上滑收缩为顶栏居中标题'}
+              {headerAtmosphereScheme === '方案二' && '看到「今天」时展开；滑走后收成居中小字'}
+              {headerAtmosphereScheme === '方案三' && '吸顶迷你氛围条，右侧文案轮播'}
+              {headerAtmosphereScheme === '方案四' && '仅居中标题「记录」；Tab 为 日历 / 记录；无副标题'}
+            </p>
           </div>
-          <p className="demo-scene-dock-hint">
-            {periodFeelGuideScheme === '方案一' && '只改输入框文案，无新增元素'}
-            {periodFeelGuideScheme === '方案二' && '反馈卡外灰字提示（不可点），点输入框唤起面板'}
-            {periodFeelGuideScheme === '方案三' && '反馈下方可点文字链，点即唤起面板'}
-            {' · 月经反馈播完后出现'}
-          </p>
+
+          <div className="demo-tweak-section">
+            <div className="demo-tweak-section-label">主题</div>
+            <div className="demo-scene-dock-options is-row">
+              {['默认', '暖白', '柔粉', '暗黑'].map((opt)=>(
+                <button
+                  key={'theme-'+opt}
+                  type="button"
+                  className={'demo-scene-dock-btn'+(demoTheme === opt ? ' active' : '')}
+                  aria-pressed={demoTheme === opt}
+                  onClick={()=>setTweak('demoTheme', opt)}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+            <p className="demo-scene-dock-hint">
+              {demoTheme === '默认' && '原始浅灰 · #F2F2F5'}
+              {demoTheme === '暖白' && '暖白纯色 · #F6F3F2'}
+              {demoTheme === '柔粉' && '柔粉纯色 · #FAF4F5'}
+              {demoTheme === '暗黑' && '深色背景，夜间浏览'}
+            </p>
+          </div>
+
+          <div className="demo-tweak-section">
+            <div className="demo-tweak-section-label">反馈展示</div>
+            <div className="demo-scene-dock-options is-row">
+              {['方案一', '方案二', '方案三'].map((opt)=>(
+                <button
+                  key={'fb-'+opt}
+                  type="button"
+                  className={'demo-scene-dock-btn'+(feedbackDisplayScheme === opt ? ' active' : '')}
+                  aria-pressed={feedbackDisplayScheme === opt}
+                  onClick={()=>setTweak('feedbackDisplayScheme', opt)}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+            <p className="demo-scene-dock-hint">
+              {feedbackDisplayScheme === '方案一' && '小气泡「点滴回应」↔ 点开成大气泡'}
+              {feedbackDisplayScheme === '方案二' && '小气泡直接展示短文案 ↔ 点开成大气泡（含迷你图）'}
+              {feedbackDisplayScheme === '方案三' && '点卡片→记录详情；点角标→浮层；浮层点图表→继续了解'}
+            </p>
+          </div>
+
+          <div className="demo-tweak-section">
+            <div className="demo-tweak-section-label">经期感受引导</div>
+            <div className="demo-scene-dock-options is-row">
+              {['方案一', '方案二', '方案三'].map((opt)=>(
+                <button
+                  key={'feel-'+opt}
+                  type="button"
+                  className={'demo-scene-dock-btn'+(periodFeelGuideScheme === opt ? ' active' : '')}
+                  aria-pressed={periodFeelGuideScheme === opt}
+                  onClick={()=>setTweak('periodFeelGuideScheme', opt)}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+            <p className="demo-scene-dock-hint">
+              {periodFeelGuideScheme === '方案一' && '只改输入框文案，无新增元素'}
+              {periodFeelGuideScheme === '方案二' && '反馈卡外灰字提示（不可点），点输入框唤起面板'}
+              {periodFeelGuideScheme === '方案三' && '反馈下方可点文字链，点即唤起面板'}
+              {' · 月经反馈播完后出现'}
+            </p>
+          </div>
         </div>
       </div>
     </>

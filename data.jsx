@@ -237,7 +237,6 @@ const SCENE_CONTEXT = {
 
 // ---------- 场景时间轴 — V3v2 日章节 Demo（1:1 record-tab-v3plus） ----------
 const TIMELINE_BLOCKS = [
-  { type:'gap', id:'gap-top' },
   {
     type:'day', id:'d-4-28', date:'4/28', weekday:'周一',
     items:[

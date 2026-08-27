@@ -7,8 +7,8 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>美柚 · 记录</title>
-<link rel="stylesheet" href="cloud.css?v=20260826-period-feel-guide-v4">
-<link rel="stylesheet" href="timeline.css?v=20260817-review-entry-collapse-v1">
+<link rel="stylesheet" href="cloud.css?v=20260827-no-sticky-anim-v1">
+<link rel="stylesheet" href="timeline.css?v=20260827-fb-anno-v7">
 <link rel="stylesheet" href="calendar.css?v=20260701-float-notice-no-icon">
 <link rel="stylesheet" href="record-page.css?v=20260710-empty-preview2">
 <link rel="stylesheet" href="record-empty.css?v=20260602-v102">
@@ -97,6 +97,94 @@ html,body{
   overflow:hidden;
 }
 @media(min-width:431px){.phone{box-shadow:0 0 40px rgba(0,0,0,0.25)}}
+
+/* ============ 主题：暖白 / 柔粉（纯色） ============ */
+.phone.is-theme-warm{
+  --my-bg:#F6F3F2;
+  --my-bg-2:#F6F3F2;
+}
+.phone.is-theme-soft-pink{
+  --my-bg:#FAF4F5;
+  --my-bg-2:#FAF4F5;
+}
+
+/* ============ 主题：暗黑 ============ */
+.phone.is-theme-dark{
+  --my-bg:#323232;
+  --my-bg-2:#2a2a2a;
+  --my-surface:#3d3d3d;
+  --my-text-primary:rgba(255,255,255,0.9);
+  --my-text-secondary:rgba(255,255,255,0.6);
+  --my-text-tertiary:rgba(255,255,255,0.45);
+  --my-text-quat:rgba(255,255,255,0.28);
+  --my-line:rgba(255,255,255,0.12);
+  --my-brand-soft:rgba(255,77,136,0.18);
+  --my-brand-soft-2:rgba(255,77,136,0.28);
+  --shadow-1:0 2px 10px rgba(0,0,0,0.28);
+  color:rgba(255,255,255,0.9);
+}
+.phone.is-theme-dark .statusbar{
+  background:linear-gradient(180deg, #4a2440 0%, var(--my-bg) 100%);
+}
+.phone.is-theme-dark .stream-header,
+.phone.is-theme-dark .stream-hero-title,
+.phone.is-theme-dark .stream-hero-title.is-scheme2{
+  background:linear-gradient(180deg, #4a2440 0%, var(--my-bg) 72%);
+}
+.phone.is-theme-dark .stream-header.is-mini-atm{
+  background:linear-gradient(180deg, #4a2440 0%, var(--my-bg) 100%);
+}
+.phone.is-theme-dark .stream-hero-heading,
+.phone.is-theme-dark .stream-mini-title,
+.phone.is-theme-dark .stream-title,
+.phone.is-theme-dark .tl-day-summary-title{
+  color:rgba(255,255,255,0.9);
+}
+.phone.is-theme-dark .stream-hero-sub,
+.phone.is-theme-dark .stream-mini-tagline,
+.phone.is-theme-dark .tl-day-summary-meta{
+  color:rgba(255,255,255,0.5);
+}
+.phone.is-theme-dark .tabbar{
+  background:#2a2a2a;
+  border-top-color:rgba(255,255,255,0.10);
+}
+.phone.is-theme-dark .tab{color:rgba(255,255,255,0.45)}
+.phone.is-theme-dark .tab-ico{color:rgba(255,255,255,0.45)}
+.phone.is-theme-dark .dock-panel{
+  background:rgba(45,45,48,0.96);
+  border-top-color:rgba(255,255,255,0.10);
+}
+.phone.is-theme-dark .dock-bar,
+.phone.is-theme-dark .dock-input,
+.phone.is-theme-dark .dock-hold{
+  background:rgba(255,255,255,0.08);
+  color:rgba(255,255,255,0.85);
+}
+.phone.is-theme-dark .tl-rail-break::before{
+  background:var(--my-bg);
+}
+.phone.is-theme-dark .tl-day-section-head::after{
+  box-shadow:0 0 0 4px rgba(255,77,136,.22);
+}
+.phone.is-theme-dark .tl-t5-card,
+.phone.is-theme-dark .tl-baby-feeding-card,
+.phone.is-theme-dark .tl-ai-card,
+.phone.is-theme-dark .tl-sister-ai-panel,
+.phone.is-theme-dark .weekly-card,
+.phone.is-theme-dark .cycle-sum{
+  background:var(--my-surface);
+  color:var(--my-text-primary);
+  box-shadow:none;
+}
+.phone.is-theme-dark .tl-t5-body,
+.phone.is-theme-dark .tl-rec-card-time{
+  color:var(--my-text-primary);
+}
+.phone.is-theme-dark .quick-card-fab,
+.phone.is-theme-dark .dock-wrap .dock-panel{
+  border-color:rgba(255,255,255,0.10);
+}
 
 /* ============ STATUS BAR ============ */
 .statusbar{
@@ -820,6 +908,40 @@ html,body{
   line-height:1.35;
   color:rgba(255,255,255,0.38);
 }
+.demo-tweaks-dock{
+  width:260px;
+  max-height:min(70vh, 520px);
+  overflow-y:auto;
+}
+.demo-tweak-section{
+  margin-top:12px;
+  padding-top:12px;
+  border-top:0.5px solid rgba(255,255,255,0.10);
+}
+.demo-scene-dock-label + .demo-tweak-section{
+  margin-top:0;
+  padding-top:0;
+  border-top:none;
+}
+.demo-tweak-section-label{
+  font-size:11px;
+  font-weight:500;
+  letter-spacing:0.04em;
+  color:rgba(255,255,255,0.45);
+  margin-bottom:8px;
+}
+.demo-scene-dock-options.is-row{
+  flex-direction:row;
+  flex-wrap:wrap;
+  max-height:none;
+  overflow:visible;
+}
+.demo-scene-dock-options.is-row .demo-scene-dock-btn{
+  flex:1 1 auto;
+  min-width:0;
+  text-align:center;
+  padding:7px 8px;
+}
 
 /* ============ TAB BAR ============ */
 .tabbar{
@@ -1166,9 +1288,13 @@ html,body{
 <script>
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "demoScene": "note-quick-record",
-  "periodFeelGuideScheme": "方案一"
+  "periodFeelGuideScheme": "方案一",
+  "headerAtmosphereScheme": "方案一",
+  "demoTheme": "默认",
+  "feedbackDisplayScheme": "方案一"
 }/*EDITMODE-END*/;
 window.__TWEAK_DEFAULTS = TWEAK_DEFAULTS;
+window.__FEEDBACK_DISPLAY_SCHEME = TWEAK_DEFAULTS.feedbackDisplayScheme || '方案一';
 window.__BUILD__ = '20260522-v101-dev';
 </script>
 
@@ -1177,17 +1303,17 @@ window.__BUILD__ = '20260522-v101-dev';
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 
 <script type="text/babel" src="icons.jsx?v=20260624-tab-review"></script>
-<script type="text/babel" src="data.jsx?v=20260827-remove-ellipsis-note"></script>
+<script type="text/babel" src="data.jsx?v=20260827-no-gap-rail"></script>
 <script src="tabbar-icons.js?v=20260811-tab-review-brand-v1"></script>
-<script type="text/babel" src="components.jsx?v=20260811-tab-review-brand-v1"></script>
+<script type="text/babel" src="components.jsx?v=20260827-scheme4-only-rename-v1"></script>
 <script type="text/babel" src="calendar-page.jsx?v=20260701-float-notice-copy-2"></script>
 <script type="text/babel" src="record-page.jsx?v=20260710-empty-preview2"></script>
-<script type="text/babel" src="timeline-sister-cards.jsx?v=20260827-scheme1-breath-after-stream"></script>
-<script type="text/babel" src="timeline-v3v2-cards.jsx?v=20260820-empty-note-gap-v3"></script>
+<script type="text/babel" src="timeline-sister-cards.jsx?v=20260827-fb-anno-v7"></script>
+<script type="text/babel" src="timeline-v3v2-cards.jsx?v=20260827-fb-anno-v7"></script>
 <script type="text/babel" src="mood-picker.jsx?v=20260629-mood-band"></script>
 <script type="text/babel" src="quick-pickers.jsx?v=20260629-analysis-title-unify"></script>
-<script type="text/babel" src="timeline-modules.jsx?v=20260826-period-feel-guide-v1"></script>
-<script type="text/babel" src="timeline.jsx?v=20260826-period-feel-guide-v2"></script>
+<script type="text/babel" src="timeline-modules.jsx?v=20260827-fb-anno-v7"></script>
+<script type="text/babel" src="timeline.jsx?v=20260827-sticky-node-v1"></script>
 <script type="text/babel" src="record-empty.jsx?v=20260602-v102"></script>
 <script type="text/babel" src="record-blank.jsx?v=20260714-plan-carousel"></script>
 <script type="text/babel" src="record-blank-scheme3.jsx?v=20260602-v102"></script>
@@ -1206,11 +1332,12 @@ window.__BUILD__ = '20260522-v101-dev';
 <script type="text/babel" src="IOSFrame.jsx?v=20260611"></script>
 <script type="text/babel" src="camera-transition.jsx?v=20260810-diet-food-photo-v1"></script>
 <script type="text/babel" src="diet-feedback-card.jsx?v=20260810-meal-insight-below-chart-v1"></script>
-<script type="text/babel" src="diet-feedback.jsx?v=20260820-empty-note-gap-v3"></script>
+<script type="text/babel" src="diet-feedback.jsx?v=20260827-fb-anno-v1"></script>
+<script type="text/babel" src="feedback-annotation.jsx?v=20260827-fb-anno-v7"></script>
 <script type="text/babel" src="path-flyout.jsx?v=20260611"></script>
 <script type="text/babel" src="demo-scenes.jsx?v=20260703-baby-default"></script>
 <script type="text/babel" src="tweaks-panel.jsx?v=20260602-v102"></script>
-<script type="text/babel" src="app.jsx?v=20260827-period-feel-tweaks-always"></script>
+<script type="text/babel" src="app.jsx?v=20260827-fb-anno-v2"></script>
 
 <!-- ====== 隐藏重置按钮（?dev=1 时显示）====== -->
 <button id="resetDemo" style="

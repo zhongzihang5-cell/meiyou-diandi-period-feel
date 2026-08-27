@@ -971,16 +971,37 @@ function ChartSymptomDots({data}){
 
 function TLChart({type, compact = false, data, weightUnit, note}){
   if(type === 'moodWeek') return <ChartMoodWeek compact={compact}/>;
-  if(type === 'weightTrend') return <ChartWeightTrend compact={compact} data={data} unit={weightUnit}/>;
-  if(type === 'caloriePanel') return (
-    <ChartCaloriePanel
-      compact={compact}
-      consumed={data?.consumed}
-      target={data?.target}
-      note={note != null ? note : data?.note}
-      hideNote={!!data?.hideNote}
-    />
-  );
+  if(type === 'weightTrend'){
+    if(['方案一','方案二'].includes(window.__FEEDBACK_DISPLAY_SCHEME) && window.FeedbackBubbleSparkline){
+      const Spark = window.FeedbackBubbleSparkline;
+      const series = Array.isArray(data)
+        ? data
+        : (data?.points || data?.values || data?.series || []);
+      const values = series.map((p)=> Number(p?.v ?? p?.w ?? p?.weight ?? p)).filter((n)=> Number.isFinite(n));
+      return <Spark values={values.length ? values : [52.8, 52.0, 52.2, 52.5, 53.4, 52.8, 52.3]}/>;
+    }
+    return <ChartWeightTrend compact={compact} data={data} unit={weightUnit}/>;
+  }
+  if(type === 'caloriePanel'){
+    if(['方案一','方案二'].includes(window.__FEEDBACK_DISPLAY_SCHEME) && window.FeedbackBubbleSparkline){
+      const Spark = window.FeedbackBubbleSparkline;
+      return (
+        <Spark
+          values={data?.week || data?.values || data?.days}
+          latest={data?.consumed}
+        />
+      );
+    }
+    return (
+      <ChartCaloriePanel
+        compact={compact}
+        consumed={data?.consumed}
+        target={data?.target}
+        note={note != null ? note : data?.note}
+        hideNote={!!data?.hideNote}
+      />
+    );
+  }
   if(type === 'symptomDots') return <ChartSymptomDots data={data}/>;
   if(type === 'todayMoodWave') return <ChartTodayMoodWave data={data} compact={compact}/>;
   if(type === 'beverageWeek') return <ChartBeverageWeek data={data}/>;
@@ -1020,28 +1041,35 @@ function V3v2Header({time, title, isNew, entryId, entryKind, editPayload}){
   );
 }
 
-function V3EditableRecordArea({entryId, entryKind, editPayload, children}){
+function V3EditableRecordArea({entryId, entryKind, editPayload, onActivate, children}){
   const canEdit = !!(entryId && editPayload && window.openEditModal);
   const handleClick = React.useCallback((event)=>{
     event.stopPropagation();
-    if(canEdit) window.openEditModal(entryId, entryKind, editPayload);
-  }, [canEdit, entryId, entryKind, editPayload]);
-  const handleKeyDown = React.useCallback((event)=>{
-    if(!canEdit) return;
-    if(event.key === 'Enter' || event.key === ' '){
-      event.preventDefault();
-      window.openEditModal(entryId, entryKind, editPayload);
+    if(typeof onActivate === 'function'){
+      onActivate();
+      return;
     }
-  }, [canEdit, entryId, entryKind, editPayload]);
+    if(canEdit) window.openEditModal(entryId, entryKind, editPayload);
+  }, [canEdit, entryId, entryKind, editPayload, onActivate]);
+  const handleKeyDown = React.useCallback((event)=>{
+    if(event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    if(typeof onActivate === 'function'){
+      onActivate();
+      return;
+    }
+    if(canEdit) window.openEditModal(entryId, entryKind, editPayload);
+  }, [canEdit, entryId, entryKind, editPayload, onActivate]);
 
+  const interactive = !!(onActivate || canEdit);
   return (
     <div
-      className={canEdit ? 'tl-edit-hit-area' : undefined}
-      role={canEdit ? 'button' : undefined}
-      tabIndex={canEdit ? 0 : undefined}
-      aria-label={canEdit ? '编辑记录' : undefined}
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
+      className={interactive ? 'tl-edit-hit-area' : undefined}
+      role={interactive ? 'button' : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      aria-label={onActivate ? '查看记录详情' : (canEdit ? '编辑记录' : undefined)}
+      onClick={interactive ? handleClick : undefined}
+      onKeyDown={interactive ? handleKeyDown : undefined}
     >
       {children}
     </div>
@@ -1702,8 +1730,12 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
     : undefined;
   const showTags = revealStep >= 1;
   const showAi = revealStep >= 2;
+  const useScheme3Fold = window.__FEEDBACK_DISPLAY_SCHEME === '方案三' && !!a && showAi;
+  const foldPayload = useScheme3Fold && window.buildAnnotationPayloadFromGroup
+    ? window.buildAnnotationPayloadFromGroup({ primary: p, ai: a, entryId: derivedId })
+    : null;
 
-  return (
+  const cardNode = (
     <div
       ref={cardRef}
       className={shellClass}
@@ -1711,11 +1743,40 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
       style={{
         background:'#fff', borderRadius:14, border:`0.5px solid ${TL_LINE}`,
         padding:'11px 12px 4px', overflow:'visible',
+        position:'relative',
+        paddingRight: (window.__FEEDBACK_DISPLAY_SCHEME === '方案三' && a) ? 52 : 12,
+        cursor: (window.__FEEDBACK_DISPLAY_SCHEME === '方案三' && a) ? 'pointer' : undefined,
+      }}
+      onClick={(event)=>{
+        if(window.__FEEDBACK_DISPLAY_SCHEME !== '方案三' || !a) return;
+        if(event.target.closest('.fb-anno-marker,button,a,input,textarea,.fb-anno-fold-panel')) return;
+        const buildPayload = window.buildAnnotationPayloadFromGroup;
+        const openDetail = window.openFeedbackRecordDetail;
+        if(!buildPayload || !openDetail) return;
+        openDetail(buildPayload({ primary: p, ai: a, entryId: derivedId }));
       }}
     >
       <V3v2Header time={p.time} isNew={isNew} entryId={derivedId} entryKind={derivedKind} editPayload={editPayload}/>
-      <div style={{marginTop:8, paddingBottom:(a && showAi) ? 10 : (p.sourceFrom ? 0 : 8)}}>
-        <V3EditableRecordArea entryId={derivedId} entryKind={derivedKind} editPayload={editPayload}>
+      <div style={{
+        marginTop:8,
+        paddingBottom:(a && showAi)
+          ? (['方案一','方案二'].includes(window.__FEEDBACK_DISPLAY_SCHEME)
+            ? 2
+            : (window.__FEEDBACK_DISPLAY_SCHEME === '方案三' ? 8 : 10))
+          : (p.sourceFrom ? 0 : 8),
+      }}>
+        <V3EditableRecordArea
+          entryId={derivedId}
+          entryKind={derivedKind}
+          editPayload={editPayload}
+          onActivate={
+            (window.__FEEDBACK_DISPLAY_SCHEME === '方案三' && a && window.buildAnnotationPayloadFromGroup && window.openFeedbackRecordDetail)
+              ? ()=> window.openFeedbackRecordDetail(
+                  window.buildAnnotationPayloadFromGroup({ primary: p, ai: a, entryId: derivedId })
+                )
+              : undefined
+          }
+        >
         <V3v2PrimaryBody
           entry={p}
           showTags={showTags}
@@ -1733,7 +1794,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
           borderTop:'0.5px dashed '+TL_HAIR,
         }}>{p.sourceFrom}</div>
       )}
-      {a && showAi && (() => {
+      {a && showAi && window.__FEEDBACK_DISPLAY_SCHEME !== '方案三' && (() => {
         const DietAiCollapsibleSection = window.DietAiCollapsibleSection;
         const TypewriterText = window.TypewriterText;
         const streamNote = isNew && a.chartType === 'symptomDots' && a.note && TypewriterText;
@@ -1742,11 +1803,16 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
             <div ref={aiPanelRef}>
               <DietAiCollapsibleSection
                 title={a.title || 'AI 分析'}
-                defaultOpen={aiDefaultOpen}
+                defaultOpen={
+                  ['方案一','方案二'].includes(window.__FEEDBACK_DISPLAY_SCHEME)
+                    ? !!isNew
+                    : aiDefaultOpen
+                }
                 embedded
                 compact={!a.chartType}
                 animateIn={isNew}
                 footer={
+                  ['方案一','方案二'].includes(window.__FEEDBACK_DISPLAY_SCHEME) ? null :
                   a.chartType === 'weightTrend' ? <WeightTrendReviewEntry/> :
                   a.chartType === 'caloriePanel' ? <DietCalorieReviewEntry/> :
                   null
@@ -1760,7 +1826,9 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
                     note={a.note}
                   />
                 )}
-                {a.chartType !== 'caloriePanel' && (a.noteParts || a.note) && (
+                {!['方案一','方案二'].includes(window.__FEEDBACK_DISPLAY_SCHEME)
+                  && a.chartType !== 'caloriePanel'
+                  && (a.noteParts || a.note) && (
                   streamNote ? (
                     <div className="v3-weight-curve-note">
                       <TypewriterText text={a.note} active followScroll/>
@@ -1820,6 +1888,11 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
       })()}
     </div>
   );
+
+  if(useScheme3Fold && foldPayload && typeof window.FeedbackChartFoldIn === 'function'){
+    return React.createElement(window.FeedbackChartFoldIn, { isNew: !!isNew, payload: foldPayload }, cardNode);
+  }
+  return cardNode;
 }
 
 function V3RecordGroupCard({group, isNew}){

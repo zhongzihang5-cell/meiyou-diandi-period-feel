@@ -89,19 +89,26 @@ function CycleDayHeader({day, items, dayBlocks}){
   );
 }
 
-function TimelineRailNode({phaseKind, railDot, isFeedLast, nodeKind, children, dropAnim, onDropLand, onDropComplete}){
-  const dotCls = railDot === 'ai'
-    ? ' ai'
-    : (railDot ? ' '+railDot : (phaseKind ? ' '+phaseKind : ''));
+function TimelineRailNode({phaseKind, railDot, isFeedLast, nodeKind, children, dropAnim, onDropLand, onDropComplete, spawnAnim, lightAnim}){
   const RecordBlankAxisDropAnim = window.RecordBlankAxisDropAnim;
   const isDrop = !!dropAnim;
   return (
-    <div className={'tl-rail-node'+(isFeedLast?' is-feed-last':'')+(nodeKind==='guide'?' is-guide':'')+(isDrop?' is-axis-drop':'')}>
+    <div className={
+      'tl-rail-node'
+      +(isFeedLast?' is-feed-last':'')
+      +(nodeKind==='guide'?' is-guide':'')
+      +(isDrop?' is-axis-drop':'')
+      +(spawnAnim?' is-spawn':'')
+      +(lightAnim?' is-light':'')
+    }>
       <div className="tl-rail-marker" aria-hidden="true">
         {isDrop && RecordBlankAxisDropAnim ? (
           <RecordBlankAxisDropAnim onLand={onDropLand} onComplete={onDropComplete}/>
         ) : (
-          <span className={'tl-rail-dot'+dotCls}/>
+          <>
+            <span className="tl-rail-dot"/>
+            <span className="tl-rail-ripple"/>
+          </>
         )}
       </div>
       <div className="tl-rail-body">{children}</div>
@@ -131,25 +138,57 @@ function buildDietEditPayload(item){
   };
 }
 
-function EditableTimelineBody({item, editPayload, children}){
+function EditableTimelineBody({item, editPayload, onActivate, children}){
   const canEdit = !!(editPayload && item?.id && typeof window.openEditModal === 'function');
+  const interactive = !!(onActivate || canEdit);
   const open = React.useCallback((event)=>{
-    if(!canEdit) return;
-    if(event.target.closest('button,a,input,textarea,select')) return;
+    if(!interactive) return;
+    if(event.target.closest('button,a,input,textarea,select,.fb-anno-marker')) return;
     event.stopPropagation();
+    if(typeof onActivate === 'function'){
+      onActivate();
+      return;
+    }
     window.openEditModal(item.id, editPayload.kind || item.kind, editPayload);
-  }, [canEdit, item?.id, item?.kind, editPayload]);
+  }, [interactive, onActivate, canEdit, item?.id, item?.kind, editPayload]);
   const keyOpen = React.useCallback((event)=>{
-    if(!canEdit || (event.key !== 'Enter' && event.key !== ' ')) return;
+    if(!interactive || (event.key !== 'Enter' && event.key !== ' ')) return;
     event.preventDefault();
-    window.openEditModal(item.id, editPayload.kind || item.kind, editPayload);
-  }, [canEdit, item?.id, item?.kind, editPayload]);
-  if(!canEdit) return children;
+    if(typeof onActivate === 'function'){
+      onActivate();
+      return;
+    }
+    if(canEdit) window.openEditModal(item.id, editPayload.kind || item.kind, editPayload);
+  }, [interactive, onActivate, canEdit, item?.id, item?.kind, editPayload]);
+  if(!interactive) return children;
   return (
-    <div className="tl-edit-hit-area" role="button" tabIndex={0} onClick={open} onKeyDown={keyOpen}>
+    <div
+      className="tl-edit-hit-area"
+      role="button"
+      tabIndex={0}
+      aria-label={onActivate ? '查看记录详情' : '编辑记录'}
+      onClick={open}
+      onKeyDown={keyOpen}
+    >
       {children}
     </div>
   );
+}
+
+function DietFeedbackAnnoShell({item, isNew, children}){
+  const scheme3 = window.__FEEDBACK_DISPLAY_SCHEME === '方案三';
+  const FoldIn = window.FeedbackChartFoldIn;
+  const buildPayload = window.buildAnnotationPayloadFromDietItem;
+  if(!scheme3 || !buildPayload) return children;
+  const host = (
+    <div className="tl-diet-fb-anno-wrap has-fb-anno-marker">
+      {children}
+    </div>
+  );
+  if(typeof FoldIn === 'function'){
+    return React.createElement(FoldIn, { isNew: !!isNew, payload: buildPayload(item) }, host);
+  }
+  return host;
 }
 
 function ModulePlaceholder({mod, cycleDay}){
@@ -990,10 +1029,17 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
             displayScenario={item.displayScenario}
           />
       : null;
+    const openDietDetail = (window.__FEEDBACK_DISPLAY_SCHEME === '方案三'
+      && window.buildAnnotationPayloadFromDietItem
+      && window.openFeedbackRecordDetail)
+      ? ()=> window.openFeedbackRecordDetail(window.buildAnnotationPayloadFromDietItem(item))
+      : undefined;
     body = item.pendingDrop ? null : (
-      <EditableTimelineBody item={item} editPayload={buildDietEditPayload(item)}>
-        {card}
-      </EditableTimelineBody>
+      <DietFeedbackAnnoShell item={item} isNew={isNew}>
+        <EditableTimelineBody item={item} editPayload={buildDietEditPayload(item)} onActivate={openDietDetail}>
+          {card}
+        </EditableTimelineBody>
+      </DietFeedbackAnnoShell>
     );
   } else if(item.kind === 'diet-text-feedback'){
     const DietTextFeedbackCard = window.DietTextFeedbackCard;
@@ -1009,10 +1055,17 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
             leadingLabel={item.leadingLabel}
           />
       : null;
+    const openDietDetail = (window.__FEEDBACK_DISPLAY_SCHEME === '方案三'
+      && window.buildAnnotationPayloadFromDietItem
+      && window.openFeedbackRecordDetail)
+      ? ()=> window.openFeedbackRecordDetail(window.buildAnnotationPayloadFromDietItem(item))
+      : undefined;
     body = item.pendingDrop ? null : (
-      <EditableTimelineBody item={item} editPayload={buildDietEditPayload(item)}>
-        {card}
-      </EditableTimelineBody>
+      <DietFeedbackAnnoShell item={item} isNew={isNew}>
+        <EditableTimelineBody item={item} editPayload={buildDietEditPayload(item)} onActivate={openDietDetail}>
+          {card}
+        </EditableTimelineBody>
+      </DietFeedbackAnnoShell>
     );
   } else if(item.kind === 'record-group'){
     body = item.pendingDrop ? null : <V3RecordGroupCard group={item} isNew={isNew}/>;
@@ -1067,6 +1120,34 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
   }
 
   const isDropTarget = firstDropAnim?.entryId === item.id;
+  const [spawnAnim, setSpawnAnim] = React.useState(false);
+  const [lightAnim, setLightAnim] = React.useState(false);
+  const wasDropRef = React.useRef(false);
+  const playedKeyRef = React.useRef(null);
+
+  React.useEffect(()=>{
+    if(isDropTarget){
+      wasDropRef.current = true;
+      return;
+    }
+    if(!isNew) return;
+    const playKey = item.id + (wasDropRef.current ? '-after-drop' : '-new');
+    if(playedKeyRef.current === playKey) return;
+    playedKeyRef.current = playKey;
+
+    const afterDrop = wasDropRef.current;
+    wasDropRef.current = false;
+    const timers = [];
+    if(!afterDrop){
+      setSpawnAnim(true);
+      timers.push(setTimeout(()=>setSpawnAnim(false), 450));
+      timers.push(setTimeout(()=>setLightAnim(true), 120));
+    } else {
+      setLightAnim(true);
+    }
+    timers.push(setTimeout(()=>setLightAnim(false), afterDrop ? 800 : 920));
+    return ()=>timers.forEach(clearTimeout);
+  }, [isDropTarget, isNew, item.id]);
 
   return (
     <TimelineRailNode
@@ -1077,6 +1158,8 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
       dropAnim={isDropTarget}
       onDropLand={isDropTarget ? onFirstDropLand : undefined}
       onDropComplete={isDropTarget ? onFirstDropComplete : undefined}
+      spawnAnim={spawnAnim}
+      lightAnim={lightAnim}
     >
       <TimelineItemWrap item={item}>{body}</TimelineItemWrap>
     </TimelineRailNode>

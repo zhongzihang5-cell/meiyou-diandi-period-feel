@@ -92,7 +92,10 @@ function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDo
     && periodFeelGuide?.scheme === '方案二'
     && !periodFeelGuide?.hintDismissed;
   return (
-    <>
+    <div
+      className={'tl-day-section'+(day.isToday?' is-today':'')+(phaseCls?' phase-'+phaseCls:'')}
+      data-day-section={day.id}
+    >
       {hideDayHeader ? null : (
         <div
           className={'tl-day-section-head tl-rail-break'+(day.isToday?' is-today':'')+(phaseCls?' phase-'+phaseCls:'')}
@@ -126,6 +129,7 @@ function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDo
           <div className="tl-rail-node is-period-feel-guide" aria-hidden="true">
             <div className="tl-rail-marker">
               <span className="tl-rail-dot"/>
+              <span className="tl-rail-ripple"/>
             </div>
             <div className="tl-rail-body">
               <p className="tl-period-feel-guide-hint">
@@ -137,7 +141,7 @@ function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDo
         </React.Fragment>
         );
       })}
-    </>
+    </div>
   );
 }
 

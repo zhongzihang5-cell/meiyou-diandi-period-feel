@@ -128,27 +128,39 @@ function TlRecCardHead({time}){
   );
 }
 
-function EditableRecordArea({entryId, entryKind, editPayload, children, className}){
+function EditableRecordArea({entryId, entryKind, editPayload, onActivate, children, className}){
   const canEdit = !!(entryId && window.openEditModal);
-  const handleClick = React.useCallback(()=>{
+  const interactive = !!(onActivate || canEdit);
+  const handleClick = React.useCallback((event)=>{
+    if(!interactive) return;
+    if(event.target.closest('.fb-anno-marker,button,a,input,textarea')) return;
+    event.stopPropagation();
+    if(typeof onActivate === 'function'){
+      onActivate();
+      return;
+    }
     if(canEdit) window.openEditModal(entryId, entryKind, editPayload);
-  }, [canEdit, entryId, entryKind, editPayload]);
+  }, [interactive, onActivate, canEdit, entryId, entryKind, editPayload]);
   const handleKeyDown = React.useCallback((event)=>{
-    if(!canEdit) return;
+    if(!interactive) return;
     if(event.key === 'Enter' || event.key === ' '){
       event.preventDefault();
-      window.openEditModal(entryId, entryKind, editPayload);
+      if(typeof onActivate === 'function'){
+        onActivate();
+        return;
+      }
+      if(canEdit) window.openEditModal(entryId, entryKind, editPayload);
     }
-  }, [canEdit, entryId, entryKind, editPayload]);
+  }, [interactive, onActivate, canEdit, entryId, entryKind, editPayload]);
 
   return (
     <div
-      className={(className || '')+(canEdit ? ' tl-edit-hit-area' : '')}
-      role={canEdit ? 'button' : undefined}
-      tabIndex={canEdit ? 0 : undefined}
-      aria-label={canEdit ? '编辑记录' : undefined}
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
+      className={(className || '')+(interactive ? ' tl-edit-hit-area' : '')}
+      role={interactive ? 'button' : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      aria-label={onActivate ? '查看记录详情' : (canEdit ? '编辑记录' : undefined)}
+      onClick={interactive ? handleClick : undefined}
+      onKeyDown={interactive ? handleKeyDown : undefined}
     >
       {children}
     </div>
@@ -391,6 +403,29 @@ function RecordedTags({tags, layout}){
         );
       })}
     </div>
+  );
+}
+
+function FeedbackBubbleWrap({defaultOpen = false, children, shortLine}){
+  const FeedbackBubble = window.FeedbackBubble;
+  if(!FeedbackBubble) return children;
+  const scheme = window.__FEEDBACK_DISPLAY_SCHEME;
+  const line = shortLine || '点滴回应';
+  if(scheme === '方案三'){
+    return null;
+  }
+  if(scheme === '方案二'){
+    return (
+      <FeedbackBubble variant="bubble" tone="s2" defaultOpen={defaultOpen} teaser={line} line={line}>
+        {null}
+      </FeedbackBubble>
+    );
+  }
+  // 方案一：小气泡「点滴回应」展开
+  return (
+    <FeedbackBubble variant="bubble" tone="s1" defaultOpen={defaultOpen} teaser="点滴回应" line={line}>
+      {null}
+    </FeedbackBubble>
   );
 }
 
@@ -667,15 +702,49 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, t
     icon: 'symptom',
   } : null;
 
-  return (
-    <div className={'tl-card tl-t5-card'+(isNew?' fade-in':'')+(hasAnalysis?' has-sister-analysis':'')+(isVtLive?' is-vt-live':'')+(isPeriodSync?' has-period-summary':'')} data-entry-id={entry.id}>
+  const useScheme3Fold = window.__FEEDBACK_DISPLAY_SCHEME === '方案三' && hasAiNote;
+  const foldPayload = useScheme3Fold && window.buildAnnotationPayloadFromAiNote
+    ? window.buildAnnotationPayloadFromAiNote(entry)
+    : null;
+
+  const cardNode = (
+    <div
+      className={'tl-card tl-t5-card'+(isNew?' fade-in':'')+(hasAnalysis?' has-sister-analysis':'')+(isVtLive?' is-vt-live':'')+(isPeriodSync?' has-period-summary':'')+(useScheme3Fold ? ' has-fb-anno-marker' : '')}
+      data-entry-id={entry.id}
+      onClick={(event)=>{
+        if(!useScheme3Fold) return;
+        if(event.target.closest('.fb-anno-marker,button,a,input,textarea,.fb-anno-fold-panel')) return;
+        const buildPayload = window.buildAnnotationPayloadFromAiNote;
+        const openDetail = window.openFeedbackRecordDetail;
+        if(!buildPayload || !openDetail) return;
+        openDetail(buildPayload(entry));
+      }}
+    >
       <TlRecCardHead time={entry.time}/>
       {isPeriodSync ? (
-        <EditableRecordArea entryId={entry.id} entryKind={entryKind} editPayload={editPayload}>
+        <EditableRecordArea
+          entryId={entry.id}
+          entryKind={entryKind}
+          editPayload={editPayload}
+          onActivate={
+            (window.__FEEDBACK_DISPLAY_SCHEME === '方案三' && hasAiNote && window.buildAnnotationPayloadFromAiNote && window.openFeedbackRecordDetail)
+              ? ()=> window.openFeedbackRecordDetail(window.buildAnnotationPayloadFromAiNote(entry))
+              : undefined
+          }
+        >
           <PeriodRecordSummary entry={entry}/>
         </EditableRecordArea>
       ) : (
-        <EditableRecordArea entryId={entry.id} entryKind={entryKind} className="tl-t5-main">
+        <EditableRecordArea
+          entryId={entry.id}
+          entryKind={entryKind}
+          className="tl-t5-main"
+          onActivate={
+            (window.__FEEDBACK_DISPLAY_SCHEME === '方案三' && hasAiNote && window.buildAnnotationPayloadFromAiNote && window.openFeedbackRecordDetail)
+              ? ()=> window.openFeedbackRecordDetail(window.buildAnnotationPayloadFromAiNote(entry))
+              : undefined
+          }
+        >
           {isVtLive ? (
             <div className="tl-voice-block tl-vt-live-body">
               {text ? (
@@ -706,7 +775,21 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, t
         </EditableRecordArea>
       )}
 
-      {hasAiNote && (
+      {hasAiNote && window.__FEEDBACK_DISPLAY_SCHEME !== '方案三' && (['方案一', '方案二'].includes(window.__FEEDBACK_DISPLAY_SCHEME) ? (
+        <FeedbackBubbleWrap
+          defaultOpen={!!isNew}
+          shortLine={(()=>{
+            const raw = String(entry.aiNote?.text || '').trim();
+            if(!raw) return '点滴回应';
+            if(/情绪|心情/.test(raw)) return '近7天情绪有变化';
+            if(/体重/.test(raw)) return '本周体重较平稳';
+            if(/热量|卡路里|饮食/.test(raw)) return '近7天热量有变化';
+            const cut = raw.replace(/[。！？].*$/, '');
+            const line = cut || raw;
+            return line.length > 14 ? line.slice(0, 14) + '…' : line;
+          })()}
+        />
+      ) : (
         <>
           <div className="tl-t5-divider" role="separator"/>
           <section className="tl-t5-insight">
@@ -717,7 +800,7 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, t
             />
           </section>
         </>
-      )}
+      ))}
 
       {hasAnalysis && (
         <SisterAnalysisCollapsible
@@ -729,6 +812,11 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, t
       )}
     </div>
   );
+
+  if(useScheme3Fold && foldPayload && typeof window.FeedbackChartFoldIn === 'function'){
+    return React.createElement(window.FeedbackChartFoldIn, { isNew: !!isNew, payload: foldPayload }, cardNode);
+  }
+  return cardNode;
 }
 
 function VoiceRecordCard(props){

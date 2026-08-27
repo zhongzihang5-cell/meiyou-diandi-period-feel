@@ -222,12 +222,13 @@ function CycleReport({item}){
 }
 
 // ============ Tab bar ============
-// Order: 美柚 / 记录 / 点滴(center) / 回顾 / 我
+// Order: 美柚 / 日历|记录 / 记录|点滴(center) / 回顾 / 我
 function TabBar({
   active='note',
   onChange,
   noteUnread=false,
   noteLabel='点滴',
+  calLabel='记录',
   onNoteVoiceStart,
   onNoteVoiceMove,
   onNoteVoiceEnd,
@@ -277,7 +278,7 @@ function TabBar({
     : tabIcons.review;
   const tabs = [
     {id:'home', label:'美柚', custom:icon('home')},
-    {id:'cal', label:'记录', custom:icon('cal')},
+    {id:'cal', label:calLabel, custom:icon('cal')},
     {id:'note', label:noteLabel, custom:(
       <img className="tab-icon-img tab-icon-img--native" src={noteSrc} alt="" aria-hidden="true" />
     ), notif: noteUnread},

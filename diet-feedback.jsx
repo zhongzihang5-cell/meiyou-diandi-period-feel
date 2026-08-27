@@ -38,8 +38,13 @@ function formatDietLeadingLabel(leadingLabel = '', mealTypeLabel = ''){
   return `${base}（${mealTypeLabel}）：`;
 }
 
-// ===== 卡路里环形图（复用点滴 ChartCaloriePanel） =====
+// ===== 卡路里环形图（复用点滴 ChartCaloriePanel）；方案一气泡内改为迷你折线 =====
 function DietTrendChart({ data, todayKcal }){
+  if (useFeedbackBubbleScheme()) {
+    return (
+      <FeedbackBubbleSparkline values={data} latest={todayKcal}/>
+    );
+  }
   const ChartCaloriePanel = window.ChartCaloriePanel;
   if (!ChartCaloriePanel) return null;
   return (
@@ -391,6 +396,11 @@ function DietCalorieAiBody({
   mealInterpretation = null,
   mealCalorieInsight = null,
 }){
+  // 方案一气泡：只保留迷你折线，去掉长文案与明细
+  if (useFeedbackBubbleScheme()) {
+    return <DietTrendChart data={weekData} todayKcal={todayKcal ?? dayTotalKcal ?? mealKcal}/>;
+  }
+
   const getConfig = window.getDietFeedbackDisplayConfig;
   const cfg = displayScenario && getConfig
     ? getConfig(displayScenario)
@@ -508,7 +518,8 @@ function DietAiInsightsShell({ displayScenario, isNew, children }){
   const getConfig = window.getDietFeedbackDisplayConfig;
   const plainShell = displayScenario && getConfig?.(displayScenario)?.plainShell;
   const DietCalorieReviewEntry = window.DietCalorieReviewEntry;
-  const reviewEntry = DietCalorieReviewEntry ? <DietCalorieReviewEntry/> : null;
+  const useBubble = useFeedbackBubbleScheme();
+  const reviewEntry = (!useBubble && DietCalorieReviewEntry) ? <DietCalorieReviewEntry/> : null;
 
   if (plainShell) {
     return (
@@ -523,10 +534,226 @@ function DietAiInsightsShell({ displayScenario, isNew, children }){
   }
 
   return (
-    <DietAiCollapsibleSection defaultOpen animateIn={isNew} footer={reviewEntry}>
+    <DietAiCollapsibleSection
+      defaultOpen={useFeedbackBubbleScheme() ? !!isNew : true}
+      animateIn={isNew}
+      footer={reviewEntry}
+    >
       {children}
     </DietAiCollapsibleSection>
   );
+}
+
+function getFeedbackDisplayScheme(){
+  const s = window.__FEEDBACK_DISPLAY_SCHEME;
+  if(s === '方案一' || s === '方案二' || s === '方案三') return s;
+  return '方案一';
+}
+
+function useFeedbackBubbleScheme(){
+  // 方案一/二：气泡展开；方案三走图表批注，不走气泡
+  return ['方案一', '方案二'].includes(getFeedbackDisplayScheme());
+}
+
+function useFeedbackAnnotationScheme(){
+  return getFeedbackDisplayScheme() === '方案三';
+}
+
+function FeedbackBubble({
+  defaultOpen = false,
+  teaser = '点滴回应',
+  line = '',
+  variant = 'bubble', // bubble=方案一/二 · bar=方案三
+  tone = 's1', // s1 | s2 气泡外观区分
+  children,
+  className = '',
+}){
+  const [open, setOpen] = React.useState(!!defaultOpen);
+  React.useEffect(()=>{ setOpen(!!defaultOpen); }, [defaultOpen]);
+  const isBar = variant === 'bar';
+  const hasBody = children != null && children !== false;
+  const toggle = React.useCallback((event)=>{
+    if(!hasBody && isBar) return;
+    if(event.target.closest('a,button,.tl-card-review-entry,.tl-fb-bub-more')) return;
+    setOpen(v => !v);
+  }, [hasBody, isBar]);
+
+  if(isBar){
+    return (
+      <div
+        className={
+          'tl-fb-bub is-bar'
+          + (open ? ' is-open' : '')
+          + (hasBody ? '' : ' is-static')
+          + (className ? ' ' + className : '')
+        }
+        role={hasBody ? 'button' : 'note'}
+        tabIndex={hasBody ? 0 : undefined}
+        aria-expanded={hasBody ? open : undefined}
+        onClick={hasBody ? toggle : undefined}
+        onKeyDown={hasBody ? (event)=>{
+          if(event.key === 'Enter' || event.key === ' '){
+            event.preventDefault();
+            setOpen(v => !v);
+          }
+        } : undefined}
+      >
+        <div className="tl-fb-bub-row">
+          <span className="tl-fb-bub-spark" aria-hidden="true">
+            <span className="tl-period-analysis-spark"/>
+          </span>
+          <span className="tl-fb-bub-line">{teaser}</span>
+          {hasBody ? (
+            <span className="tl-fb-bub-chev" aria-hidden="true">{open ? '⌄' : '›'}</span>
+          ) : null}
+        </div>
+        {hasBody ? (
+          <div className="tl-fb-bub-full" aria-hidden={!open}>
+            <div className="tl-fb-bub-inner">
+              <div className="tl-fb-bub-content">{children}</div>
+            </div>
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
+  // 方案一/二：小气泡 ↔ 大气泡（内容替换 teaser）
+  const useSpark = tone === 's2';
+  return (
+    <div
+      className={
+        'tl-fb-bub is-bubble'
+        + (tone === 's2' ? ' is-bubble-s2' : '')
+        + (open ? ' is-open' : '')
+        + (className ? ' ' + className : '')
+      }
+      role="button"
+      tabIndex={0}
+      aria-expanded={open}
+      onClick={toggle}
+      onKeyDown={(event)=>{
+        if(event.key === 'Enter' || event.key === ' '){
+          event.preventDefault();
+          setOpen(v => !v);
+        }
+      }}
+    >
+      <div className="tl-fb-bub-teaser" aria-hidden={open}>
+        {useSpark ? (
+          <span className="tl-fb-bub-spark" aria-hidden="true">
+            <span className="tl-period-analysis-spark"/>
+          </span>
+        ) : (
+          <span className="tl-fb-bub-sp">✦</span>
+        )}
+        {teaser || '点滴回应'}
+        <span className="tl-fb-bub-cv">⌄</span>
+      </div>
+      <div className="tl-fb-bub-full" aria-hidden={!open}>
+        <div className="tl-fb-bub-inner">
+          <div className="tl-fb-bub-cline">
+            {useSpark ? (
+              <span className="tl-fb-bub-spark" aria-hidden="true">
+                <span className="tl-period-analysis-spark"/>
+              </span>
+            ) : (
+              <span className="tl-fb-bub-sp">✦</span>
+            )}
+            {line || teaser || '点滴回应'}
+          </div>
+          <div className="tl-fb-bub-content">
+            {children}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** 迷你折线：7 个点，最新点略强调 */
+function FeedbackBubbleSparkline({ values, latest, width = 200, height = 36 }){
+  const pts = React.useMemo(()=>{
+    let list = Array.isArray(values)
+      ? values.map((v)=> (v && typeof v === 'object' ? Number(v.kcal ?? v.v ?? v.value ?? v.weight) : Number(v)))
+          .filter((n)=> Number.isFinite(n))
+      : [];
+    if(list.length < 2){
+      const end = Number.isFinite(Number(latest))
+        ? Number(latest)
+        : (list[0] || 52.3);
+      list = Number(latest) > 200
+        ? [920, 1050, 980, 1180, 1080, 1240, Math.round(Number(latest))]
+        : [52.8, 52.0, 52.2, 52.5, 53.4, 52.8, end];
+    } else if(Number.isFinite(Number(latest))){
+      list = list.slice(0, -1).concat(Number(latest));
+    }
+    if(list.length > 7) list = list.slice(-7);
+    while(list.length < 7){
+      list = [list[0], ...list];
+    }
+    return list.slice(0, 7);
+  }, [values, latest]);
+
+  const w = width;
+  const h = height;
+  const padX = 8;
+  const padY = 7;
+  const min = Math.min(...pts);
+  const max = Math.max(...pts);
+  const range = Math.max(0.01, max - min);
+  const xy = pts.map((v, i)=>{
+    const x = padX + (i / 6) * (w - padX * 2);
+    const y = h - padY - ((v - min) / range) * (h - padY * 2);
+    return [x, y];
+  });
+  const path = xy.map(([x, y], i)=> `${i === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' ');
+
+  return (
+    <svg
+      className="tl-fb-bub-mini"
+      viewBox={`0 0 ${w} ${h}`}
+      width="100%"
+      height={h}
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
+      <path
+        d={path}
+        fill="none"
+        stroke="#ff4d88"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {xy.map(([x, y], i)=>{
+        const isLast = i === xy.length - 1;
+        return (
+          <circle
+            key={i}
+            cx={x}
+            cy={y}
+            r={isLast ? 3.2 : 2.6}
+            fill="#ff4d88"
+            stroke="#fff"
+            strokeWidth="1.4"
+          />
+        );
+      })}
+    </svg>
+  );
+}
+
+function bubbleFeedbackLine(title){
+  const t = String(title || '').trim();
+  if(/体重/.test(t)) return '本周体重较平稳';
+  if(/卡路里|热量|饮食/.test(t)) return '近7天热量有变化';
+  if(/心情|情绪/.test(t)) return '近7天情绪有变化';
+  if(/症状/.test(t)) return '近7天症状有记录';
+  if(/体温/.test(t)) return '体温正常';
+  if(/白带|分泌/.test(t)) return '分泌物已记下';
+  if(!t) return '点滴回应';
+  return t.length > 12 ? t.slice(0, 12) : t;
 }
 
 function DietAiCollapsibleSection({
@@ -538,7 +765,30 @@ function DietAiCollapsibleSection({
   footer = null,
   children,
 }){
+  const scheme = getFeedbackDisplayScheme();
   const [open, setOpen] = React.useState(defaultOpen);
+
+  if(scheme === '方案一' || scheme === '方案二'){
+    const bubbleOpen = !!animateIn || !!defaultOpen;
+    const shortLine = bubbleFeedbackLine(title);
+    return (
+      <FeedbackBubble
+        variant="bubble"
+        tone={scheme === '方案二' ? 's2' : 's1'}
+        defaultOpen={bubbleOpen}
+        teaser={scheme === '方案一' ? '点滴回应' : shortLine}
+        line={shortLine}
+        className={(embedded ? 'is-embedded' : '') + (animateIn ? ' is-animate-in' : '')}
+      >
+        {children}
+      </FeedbackBubble>
+    );
+  }
+
+  // 方案三：不在卡内展示反馈（由角标批注浮层承接）
+  if(scheme === '方案三'){
+    return null;
+  }
 
   return (
     <>
@@ -1785,6 +2035,9 @@ Object.assign(window, {
   resolveMealTypeFromTime,
   DietAiInsightsShell,
   DietAiCollapsibleSection,
+  FeedbackBubble,
+  FeedbackBubbleSparkline,
+  useFeedbackAnnotationScheme,
   DietCalorieAiBody,
   DietAiChevron,
   DietTrendChart,

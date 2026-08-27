@@ -350,7 +350,10 @@ ${extraCss}
 <script>
 const TWEAK_DEFAULTS = {
   "demoScene": "${demoScene}",
-  "periodFeelGuideScheme": "方案一"
+  "periodFeelGuideScheme": "方案一",
+  "headerAtmosphereScheme": "方案一",
+  "demoTheme": "默认",
+  "feedbackDisplayScheme": "方案一"
 };
 window.__TWEAK_DEFAULTS = TWEAK_DEFAULTS;
 ${lockedScript}
