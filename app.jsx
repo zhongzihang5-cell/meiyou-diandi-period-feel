@@ -3098,37 +3098,37 @@ function App(){
       )}
       </div>
 
-      {!window.__STANDALONE_LOCKED_SCENE && (
-        <div className="demo-controls-stack">
+      <div className="demo-controls-stack">
+        {!window.__STANDALONE_LOCKED_SCENE && (
           <DemoSceneBar
             value={t.demoScene}
             onChange={(v)=>setTweak('demoScene', v)}
             description={scene.description}
           />
-          <div className="demo-scene-dock" role="toolbar" aria-label="经期感受承接引导方案">
-            <div className="demo-scene-dock-label">经期感受引导</div>
-            <div className="demo-scene-dock-options">
-              {['方案一', '方案二', '方案三'].map((opt)=>(
-                <button
-                  key={opt}
-                  type="button"
-                  className={'demo-scene-dock-btn'+(periodFeelGuideScheme === opt ? ' active' : '')}
-                  aria-pressed={periodFeelGuideScheme === opt}
-                  onClick={()=>setTweak('periodFeelGuideScheme', opt)}
-                >
-                  {opt}
-                </button>
-              ))}
-            </div>
-            <p className="demo-scene-dock-hint">
-              {periodFeelGuideScheme === '方案一' && '只改输入框文案，无新增元素'}
-              {periodFeelGuideScheme === '方案二' && '反馈卡外灰字提示（不可点），点输入框唤起面板'}
-              {periodFeelGuideScheme === '方案三' && '反馈下方可点文字链，点即唤起面板'}
-              {' · 月经反馈播完后出现'}
-            </p>
+        )}
+        <div className="demo-scene-dock" role="toolbar" aria-label="经期感受承接引导方案">
+          <div className="demo-scene-dock-label">经期感受引导</div>
+          <div className="demo-scene-dock-options">
+            {['方案一', '方案二', '方案三'].map((opt)=>(
+              <button
+                key={opt}
+                type="button"
+                className={'demo-scene-dock-btn'+(periodFeelGuideScheme === opt ? ' active' : '')}
+                aria-pressed={periodFeelGuideScheme === opt}
+                onClick={()=>setTweak('periodFeelGuideScheme', opt)}
+              >
+                {opt}
+              </button>
+            ))}
           </div>
+          <p className="demo-scene-dock-hint">
+            {periodFeelGuideScheme === '方案一' && '只改输入框文案，无新增元素'}
+            {periodFeelGuideScheme === '方案二' && '反馈卡外灰字提示（不可点），点输入框唤起面板'}
+            {periodFeelGuideScheme === '方案三' && '反馈下方可点文字链，点即唤起面板'}
+            {' · 月经反馈播完后出现'}
+          </p>
         </div>
-      )}
+      </div>
     </>
   );
 }

@@ -349,7 +349,8 @@ ${extraCss}
 
 <script>
 const TWEAK_DEFAULTS = {
-  "demoScene": "${demoScene}"
+  "demoScene": "${demoScene}",
+  "periodFeelGuideScheme": "方案一"
 };
 window.__TWEAK_DEFAULTS = TWEAK_DEFAULTS;
 ${lockedScript}
@@ -388,9 +389,11 @@ BUILDS.forEach((cfg) => {
   }
 
   if (cfg.alsoWriteIndex) {
+    // Pages 首页保留方案切换器，方便对比经期感受承接引导
     const indexHtml = buildHtml({
       ...cfg,
       title: cfg.indexTitle || cfg.title,
+      locked: false,
       builtAt,
     });
     const indexPath = path.join(DOCS, 'index.html');
