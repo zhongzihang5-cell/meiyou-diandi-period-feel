@@ -967,7 +967,7 @@ function BabyFeedingTimelineCard({item, isNew}){
   );
 }
 
-function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPlayAnimation, onSisterCycleComplete, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
+function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPlayAnimation, onSisterCycleComplete, firstDropAnim, onFirstDropLand, onFirstDropComplete, periodFeelGuide}){
   const cycleDay = item.cycleDay;
   const guideAnimate = item.kind === 'guide' && !item.noAnimate && (
     isNew || item.hiddenUntilSisterDone
@@ -1035,6 +1035,7 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
           onCycleComplete: onSisterCycleComplete,
           analysisKind: sisterItem.analysisKind || item.analysisKind,
           showPeriodFeelPrompt: sisterItem.periodFeelPrompt !== false,
+          periodFeelGuide,
         } : null}
       />
     );

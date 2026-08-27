@@ -85,9 +85,12 @@ function resolveTimelineLastItemId(blocks, sisterCycleDone, hideTodayGuide){
   return ids[ids.length - 1];
 }
 
-function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, lastItemId, hideDayHeader, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
+function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, lastItemId, hideDayHeader, firstDropAnim, onFirstDropLand, onFirstDropComplete, periodFeelGuide}){
   const items = sortDayItemsByTime(filterDayItems(day.items || day.entries, sisterCycleDone, hideTodayGuide));
   const phaseCls = day.phaseKind || '';
+  const showScheme2Hint = periodFeelGuide?.active
+    && periodFeelGuide?.scheme === '方案二'
+    && !periodFeelGuide?.hintDismissed;
   return (
     <>
       {hideDayHeader ? null : (
@@ -103,9 +106,10 @@ function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDo
         const sisterItem = (it.kind === 'voice-card' || it.kind === 'sync-card') && items[idx + 1]?.kind === 'sister-card'
           ? items[idx + 1]
           : null;
+        const isPeriodStartSister = sisterItem && sisterItem.analysisKind !== 'period-end';
         return (
+        <React.Fragment key={it.id}>
         <TimelineItem
-          key={it.id}
           item={it}
           sisterItem={sisterItem}
           isNew={it.isNew || (it.hiddenUntilSisterDone && sisterCycleDone && sisterPlayAnimation > 0)}
@@ -113,10 +117,24 @@ function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDo
           isFeedLast={it.id === lastItemId || sisterItem?.id === lastItemId}
           sisterPlayAnimation={sisterPlayAnimation}
           onSisterCycleComplete={onSisterCycleComplete}
+          periodFeelGuide={isPeriodStartSister ? periodFeelGuide : null}
           firstDropAnim={firstDropAnim}
           onFirstDropLand={onFirstDropLand}
           onFirstDropComplete={onFirstDropComplete}
         />
+        {showScheme2Hint && isPeriodStartSister ? (
+          <div className="tl-rail-node is-period-feel-guide" aria-hidden="true">
+            <div className="tl-rail-marker">
+              <span className="tl-rail-dot"/>
+            </div>
+            <div className="tl-rail-body">
+              <p className="tl-period-feel-guide-hint">
+                {periodFeelGuide?.hintText || '记录下本次血量变化、经期症状吧'}
+              </p>
+            </div>
+          </div>
+        ) : null}
+        </React.Fragment>
         );
       })}
     </>
@@ -138,7 +156,7 @@ function CycleStartMarker({block}){
   );
 }
 
-function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, hideGapDivider, hideDayHeader, hideBabyFeeding, firstDropAnim, onFirstDropLand, onFirstDropComplete}){
+function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, hideGapDivider, hideDayHeader, hideBabyFeeding, firstDropAnim, onFirstDropLand, onFirstDropComplete, periodFeelGuide}){
   const visibleBlocks = hideBabyFeeding
     ? (blocks || []).map(block=>{
         if(block.type !== 'day') return block;
@@ -171,6 +189,7 @@ function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, h
                 firstDropAnim={firstDropAnim}
                 onFirstDropLand={onFirstDropLand}
                 onFirstDropComplete={onFirstDropComplete}
+                periodFeelGuide={periodFeelGuide}
               />
             );
           }

@@ -94,7 +94,7 @@ const DEMO_VOICE_LINE = '昨天下午来了姨妈，来之前，上午就开始�
 
 const DOCK_PLACEHOLDER = '记录生活点滴';
 
-function DockWavePlaceholder({show, focused}){
+function DockWavePlaceholder({show, focused, text}){
   if(!show) return null;
 
   return (
@@ -102,7 +102,7 @@ function DockWavePlaceholder({show, focused}){
       className={'dock-float-ph'+(focused ? ' is-focused' : '')}
       aria-hidden="true"
     >
-      <span className="dock-float-ph-char is-idle">{DOCK_PLACEHOLDER}</span>
+      <span className="dock-float-ph-char is-idle">{text || DOCK_PLACEHOLDER}</span>
     </span>
   );
 }
@@ -373,12 +373,10 @@ function DockPublisher({
   draft, onDraft, onSend, onQuickMark, onMoodConfirm, onSymptomConfirm, onWeightConfirm,
   onFoodConfirm, onDietCapture, onCameraRecord,
   onVoiceDone, onPhoto, onDockExpandedChange, onCameraActiveChange, activeTab, showScheme3Bubble,
-  highlightScheme3Input, dockPlaceholder, defaultInputMode = 'voice',
+  highlightScheme3Input, dockPlaceholder, voiceHoldLabel, highlightPeriodFeelInput = false, defaultInputMode = 'voice',
   demoPhase, isDemoRunning, hideQuickFan = false, hideQuickFab = false,
-  feedingQuickItems = null, feedingQuickLabel = '快捷记录', onFeedingQuickSelect,
-  onPeriodFeelSelect, onVoiceStart,
-  periodFeelLabel = '经期感受', periodFeelGuide = false,
-  periodFeelGuideText = '这次经期有什么特别的感受么？试试把它记录下来',
+  feedingQuickItems = null, feedingQuickCollapsedCount = 6, feedingQuickLabel = '快捷记录', onFeedingQuickSelect,
+  onPeriodFeelSelect, onVoiceStart, onPeriodFeelInputEngage,
   emptyPreviewGuideStep = 0, onEmptyPreviewGuideAdvance, onEmptyPreviewGuideDismiss, fabGuidePulse = false,
 }){
   const I = window.Icon;
@@ -605,8 +603,9 @@ function DockPublisher({
   const isQuickActive = quickOpen || !!quickSelected;
   const inputPlaceholder = dockPlaceholder || DOCK_PLACEHOLDER;
   const showFeedingQuick = Array.isArray(feedingQuickItems) && feedingQuickItems.length > 0;
+  const feedingCollapsedCount = Math.max(1, feedingQuickCollapsedCount || 6);
   const feedingVisibleItems = showFeedingQuick && !feedingExpanded
-    ? feedingQuickItems.slice(0, 6)
+    ? feedingQuickItems.slice(0, feedingCollapsedCount)
     : (feedingQuickItems || []);
   const MoodOverlay = window.MoodQuickOverlay || (()=>null);
   const SymptomOverlay = window.SymptomQuickOverlay || (()=>null);
@@ -755,12 +754,6 @@ function DockPublisher({
           <div className={'dock-bar is-path-dock'+(showFeedingQuick ? ' has-feeding-quick' : '')}>
             {showFeedingQuick ? (
               <div className="dock-feeding-quick" aria-label={feedingQuickLabel}>
-                {periodFeelGuide && (
-                  <div className="period-feel-guide-bubble" role="status">
-                    {periodFeelGuideText}
-                    <span className="period-feel-guide-arrow" aria-hidden="true" />
-                  </div>
-                )}
                 <button
                   type="button"
                   className="dock-feeding-handle"
@@ -770,24 +763,27 @@ function DockPublisher({
                 >
                   <span/>
                 </button>
-                <div className="dock-feeding-quick-scroll">
+                <div
+                  className="dock-feeding-quick-scroll"
+                  data-cols={feedingExpanded ? undefined : feedingCollapsedCount}
+                >
                   {feedingVisibleItems.map((item)=>(
                     <button
                       key={item.id}
                       type="button"
-                      className={'dock-feeding-quick-item'+(item.id === 'period-feel' ? ' is-period-feel-enter' : '')+(item.drop ? ' is-period-feel-drop' : '')+(item.plan3Shift ? ' is-period-feel-plan3-shift' : '')+(item.pulse ? ' is-period-feel-pulse' : '')}
+                      className="dock-feeding-quick-item"
                       onClick={(event)=>handleDockQuickItemSelect(item, event.currentTarget)}
                     >
                       <span className="dock-feeding-quick-icon" aria-hidden="true">
                         {item.iconNode || item.icon || '🍼'}
                       </span>
-                      <span className="dock-feeding-quick-label">{item.id === 'period-feel' ? periodFeelLabel : item.label}</span>
+                      <span className="dock-feeding-quick-label">{item.label}</span>
                     </button>
                   ))}
                 </div>
               </div>
             ) : null}
-            <div className="dock-input-row dock-input-pill">
+            <div className={'dock-input-row dock-input-pill'+(highlightPeriodFeelInput ? ' is-period-feel-breath' : '')}>
               <button
                 type="button"
                 className="dock-mode-btn"
@@ -814,6 +810,7 @@ function DockPublisher({
                   <DockWavePlaceholder
                     show={inputMode === 'text' && !draft.trim() && !showScheme3Bubble}
                     focused={inputFocused}
+                    text={inputPlaceholder}
                   />
                   <textarea
                     rows="1"
@@ -827,6 +824,7 @@ function DockPublisher({
                     }}
                     onFocus={()=>{
                       notifyGuideDockInteract();
+                      onPeriodFeelInputEngage?.();
                       setInputFocused(true);
                     }}
                     onBlur={()=>setInputFocused(false)}
@@ -857,7 +855,13 @@ function DockPublisher({
                   <button
                     type="button"
                     className={'dock-voice-btn'+(recording?' recording':'')}
-                    onPointerDown={(e)=>{ e.preventDefault(); if(isDemoRunning) return; dismissGuideForVoice(); startRec(); }}
+                    onPointerDown={(e)=>{
+                      e.preventDefault();
+                      if(isDemoRunning) return;
+                      dismissGuideForVoice();
+                      if(onPeriodFeelInputEngage?.()) return;
+                      startRec();
+                    }}
                     onPointerUp={stopRec}
                     onPointerLeave={recording ? stopRec : undefined}
                   >
@@ -869,7 +873,7 @@ function DockPublisher({
                         <span>松开 结束{recSec > 0 ? ' '+recSec+'s' : ''}</span>
                       </>
                     ) : (
-                      <span className="dock-voice-label">按住 说话</span>
+                      <span className="dock-voice-label">{voiceHoldLabel || '按住 说话'}</span>
                     )}
                   </button>
                 </div>

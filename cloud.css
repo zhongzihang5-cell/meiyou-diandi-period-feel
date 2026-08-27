@@ -1578,6 +1578,9 @@
   overflow:visible;
   padding:0 2px 2px;
 }
+.dock-feeding-quick-scroll[data-cols="5"]{
+  grid-template-columns:repeat(5, minmax(0, 1fr));
+}
 .dock-feeding-quick-item{
   min-width:0;
   border:0;
@@ -1768,6 +1771,47 @@
   0%,100%{opacity:.2;transform:scale(1)}
   50%{opacity:.58;transform:scale(1.045)}
 }
+
+/* 方案一：主输入框粉色呼吸高亮 */
+.dock-input-pill.is-period-feel-breath{
+  position:relative;
+  isolation:isolate;
+  background:linear-gradient(180deg,#fff 0%,#fff7fa 100%);
+  border:1px solid rgba(255,77,136,.22);
+  box-shadow:0 0 0 1.5px rgba(255,77,136,.16), 0 3px 14px rgba(255,77,136,.12);
+  animation:dockPeriodFeelBreath 2.4s ease-in-out infinite;
+}
+.dock-input-pill.is-period-feel-breath::before{
+  content:"";
+  position:absolute;
+  inset:-6px;
+  border:1.5px solid rgba(255,77,136,.32);
+  border-radius:999px;
+  pointer-events:none;
+  z-index:0;
+  animation:dockPeriodFeelRing 2.4s ease-in-out infinite;
+}
+.dock-input-pill.is-period-feel-breath > *{
+  position:relative;
+  z-index:1;
+}
+@keyframes dockPeriodFeelBreath{
+  0%,100%{
+    transform:scale(1);
+    box-shadow:0 0 0 1.5px rgba(255,77,136,.14), 0 3px 12px rgba(255,77,136,.1);
+    border-color:rgba(255,77,136,.18);
+  }
+  50%{
+    transform:scale(1.01);
+    box-shadow:0 0 0 2px rgba(255,77,136,.28), 0 6px 20px rgba(255,77,136,.22);
+    border-color:rgba(255,77,136,.38);
+  }
+}
+@keyframes dockPeriodFeelRing{
+  0%,100%{opacity:.22;transform:scale(1)}
+  50%{opacity:.55;transform:scale(1.03)}
+}
+
 .period-feel-bars i{width:3px;height:8px;border-radius:3px;background:var(--my-brand-red);animation:periodFeelBar .7s ease-in-out infinite alternate}
 @keyframes periodFeelBar{to{height:48px}}
 .period-feel-input-row{width:100%;height:58px;display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:30px;background:#fff;box-shadow:0 3px 14px rgba(0,0,0,.08)}
@@ -1794,6 +1838,40 @@
 .period-feel-result-card .v3-tag[data-cat="症状"]{color:#3f8fd8;background:transparent}
 .period-feel-result-tip{margin:14px 0;padding:14px;border-radius:10px;background:var(--my-brand-soft);font-size:12px;line-height:1.7;color:var(--my-text-secondary)}
 .period-feel-result-actions{display:flex;gap:10px;margin-top:22px;position:relative;z-index:1}.period-feel-result-actions button{width:100%;height:48px;border:0;border-radius:24px;background:var(--my-brand-red);color:#fff;font:15px inherit;font-weight:600}
+
+/* 经期感受承接 · 方案二灰字（带时间轴打点） / 方案三文字链 */
+.tl-rail-node.is-period-feel-guide{
+  padding-top:4px;
+  padding-bottom:20px;
+  align-items:center;
+}
+.tl-rail-node.is-period-feel-guide .tl-rail-marker{
+  padding-top:0;
+  align-self:center;
+}
+.tl-period-feel-guide-hint{
+  margin:0;
+  padding:0;
+  font-size:14px;
+  line-height:1.47;
+  color:rgba(0,0,0,.4);
+  pointer-events:none;
+  user-select:none;
+}
+.tl-period-feel-scheme3-link{
+  display:inline-flex;
+  align-items:center;
+  margin-top:12px;
+  padding:0;
+  border:0;
+  background:transparent;
+  font:inherit;
+  font-size:14px;
+  color:var(--my-link);
+  cursor:pointer;
+}
+.tl-period-feel-scheme3-link:active{opacity:.7}
+
 .dock-feeding-quick-icon{
   width:40px;
   height:40px;

@@ -6,8 +6,6 @@ const COMPACT_WAVE_HEIGHTS = [4, 8, 10, 7, 5];
 
 const CC_ICON = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAfACEDASIAAhEBAxEB/8QAGQAAAwEBAQAAAAAAAAAAAAAAAAUHCAMG/8QAKhAAAgEDAwIDCQAAAAAAAAAAAQIDAAQRBQYhEjEHExQWJTJxgYKhsfH/xAAXAQEBAQEAAAAAAAAAAAAAAAACBQED/8QAHBEAAQUBAQEAAAAAAAAAAAAAAgABAwURBBJh/9oADAMBAAIRAxEAPwDZLEAZP7pdc6vYQTxwSTxiSQ9IGaNyytDod5IrYKwuQftNRGzknvr5LeMl5ZGzk9uaYjqsVlY3YJET4zK2prWnNcrbi5j8xk6wM96YRsrqCpyCM96hOu2t1o18IrnJJxyOx/lVHwyuXudrwNJIXIyAT86RDjJWFSPNCM0Zazr1FFFFclFSjeCO+278Rgl/TyYA7/Caz5oOtPpOqpdeWSUOCpPNaYYBhgjOR9KTy7a0KaVpJNJsXZjkkwAk02LFcqLaPijOOQPTEoVufdDa3cxOYuhIxwM9zmq94Q9fsdbs64LEn8mmw2tt7j3NY8HPEC03t4o4YwkcYjUDAUAACsck7O4h6oBgiDyzfdXSijFFFQF//9k=';
 
-const SC_ICON = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAjACIDASIAAhEBAxEB/8QAGgABAAIDAQAAAAAAAAAAAAAAAAMHAQUIBv/EACkQAAEEAQMCBgIDAAAAAAAAAAEAAgMEEQUGEiExBxMUMmFxIkFRodH/xAAYAQEBAQEBAAAAAAAAAAAAAAAAAgUDBv/EAB8RAAICAwACAwAAAAAAAAAAAAACAREDBAUSkSFBcf/aAAwDAQACEQMRAD8A7JPRRSWYIpmQySsbI/2tJ6n6UGvXDQ0i1cAyYYnPA+gqYGp6nq+pjjLJLYcfxw7t/gVqtmpzuW24rPdLBdzbVd1gwNmYZQMlmeuFMCqihrSwSiVu4GMtAgZAeW5/gv7KzdvzWptKhkt8fOIw4tOQfkfBRko57mjGvESrXHo2PVFhFBnmn3pDNY2tqMUDS6R1d/ED9nCpLbFqRtPVnQkiwyAFo/fHkOf9LoRwBGD2WjG09CbqR1FlFjLByC5pIyD3BCtWo2+Z1E1ML4nW7qfRT9PWq8m3LNF8wZMJRKzI93wPlWl4WTWJ9qQyWORBcfLJ7lueiil8ONsSXvVekeMnkYxIeGfpesqV4q0DIIGNZGwYa0DAASWs79Xp62zi8MKz8zc39fhJ0RMlFB50yiIgGEREAwiIgP/Z';
-
 function TlRecKindIcon({kind}){
   const I = window.Icon;
   const p = { size:12, stroke:1.8 };
@@ -933,79 +931,6 @@ function PeriodForecastCard({animated, onComplete, staticView = false}){
   );
 }
 
-function SisterSignalCard({animated}){
-  const lights = [
-    {color:'green', label:'稳定', range:'21–35天'},
-    {color:'yellow', label:'轻度波动', range:['18–20天','36–45天']},
-    {color:'orange', label:'明显波动', range:['15–17天','46–90天']},
-    {color:'purple', label:'建议关注', range:['<15天','>90天']},
-  ];
-  const done = !animated;
-  const [activeColor, setActiveColor] = React.useState(done ? 'green' : null);
-  const [isFinal, setIsFinal] = React.useState(done);
-
-  React.useEffect(()=>{
-    if(!animated) return;
-    setActiveColor(null);
-    setIsFinal(false);
-    const sequence = ['green', 'yellow', 'orange', 'purple', 'green'];
-    const STEP_MS = 380;
-    let step = 0;
-    let timer = null;
-
-    function tick(){
-      if(step >= sequence.length){
-        setActiveColor('green');
-        setIsFinal(true);
-        return;
-      }
-      setActiveColor(sequence[step]);
-      step += 1;
-      timer = setTimeout(tick, STEP_MS);
-    }
-    tick();
-    return ()=>{ if(timer) clearTimeout(timer); };
-  }, [animated]);
-
-  return (
-    <div className="chart-block" style={{background:'transparent', border:'none', padding:0}}>
-      <div className={'signal-card'+(animated && !isFinal?' sc-animating':'')}>
-        <div className="cc-head">
-          <span className="cc-title">
-            <img className="cc-icon" src={SC_ICON} width="16" height="16" alt="" aria-hidden="true"/>
-            月经信号灯
-          </span>
-        </div>
-        <div className="sc-lights">
-          {lights.map((l, i) => (
-            <div
-              key={i}
-              className={'sc-light'+(l.color === 'green' && isFinal ? ' sc-final' : '')}
-              data-light={l.color}
-            >
-              <div
-                className={'sc-bulb'+(activeColor === l.color ? ' sc-on' : '')}
-                data-color={l.color}
-              />
-              <div className="sc-label">{l.label}</div>
-              <div className="sc-range">
-                {Array.isArray(l.range)
-                  ? l.range.map((line, j) => (
-                      <React.Fragment key={j}>
-                        {j > 0 && <br/>}
-                        {line}
-                      </React.Fragment>
-                    ))
-                  : l.range}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 const SISTER_LEAD = '以下是本次月经情况的分析。先看一下你最近3个周期的情况：';
 const PERIOD_END_LEAD = '以下是本次月经情况的分析。先看一下你最近3次经期天数变化：';
 
@@ -1015,12 +940,6 @@ const SISTER_PARA1 = [
   { text:'，整体波动幅度很小，属于' },
   { text:'非常规律', bold:true },
   { text:'的状态。' },
-];
-
-const SISTER_CLOSING = [
-  { text:'这次周期天数落在' },
-  { text:'21–35天的理想范围', bold:true },
-  { text:'内。很棒哦，继续保持现在的健康生活节奏就可以。' },
 ];
 
 // 经期感受引导文案
@@ -1056,7 +975,7 @@ function TlAiChartIcon({size = 10, color = '#FF4D88'}){
   );
 }
 
-function SisterAnalysisCollapsible({playAnimation, onCycleComplete, animateText, periodStyle = false, analysisKind = 'period-start', showPeriodFeelPrompt = true, periodFeelGuideCopy = PERIOD_FEEL_GUIDE_COPY}){
+function SisterAnalysisCollapsible({playAnimation, onCycleComplete, animateText, periodStyle = false, analysisKind = 'period-start', showPeriodFeelPrompt = true, periodFeelGuideCopy = PERIOD_FEEL_GUIDE_COPY, periodFeelGuide = null}){
   const [open, setOpen] = React.useState(true);
   const [canCollapse, setCanCollapse] = React.useState(!animateText);
   const [hasSeenAnimation, setHasSeenAnimation] = React.useState(!animateText);
@@ -1102,7 +1021,7 @@ function SisterAnalysisCollapsible({playAnimation, onCycleComplete, animateText,
             {periodStyle ? <span className="tl-period-analysis-spark" aria-hidden="true"/> : <TlAiChartIcon size={10}/>}
           </span>
           {!periodStyle ? <span className="tl-ai-label">AI</span> : null}
-          <span className="tl-ai-title">本次月经分析</span>
+          <span className="tl-ai-title">{periodStyle ? '本次周期分析' : '本次月经分析'}</span>
           <span className={'tl-ai-chevron'+(open ? ' is-open' : '')} aria-hidden="true">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
               <path d="M6 9l6 6 6-6" stroke="#8E8E93" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -1122,40 +1041,27 @@ function SisterAnalysisCollapsible({playAnimation, onCycleComplete, animateText,
               analysisKind={analysisKind}
               showPeriodFeelPrompt={showPeriodFeelPrompt}
               periodFeelGuideCopy={periodFeelGuideCopy}
+              periodFeelGuide={periodFeelGuide}
             />
           </div>
         )}
-        {periodStyle && analysisKind === 'period-start' ? (
-          <button
-            type="button"
-            className="tl-period-review-entry"
-            onClick={()=>window.dispatchEvent(new CustomEvent('openReviewCycleDetail'))}
-            aria-label="查看月经周期变化趋势"
-          >
-            <span>查看月经周期变化趋势</span>
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M9 6l6 6-6 6"/>
-            </svg>
-          </button>
-        ) : null}
       </section>
     </>
   );
 }
 
-function SisterAnalysisContent({playAnimation, onCycleComplete, animateText, analysisKind = 'period-start', showPeriodFeelPrompt = true, periodFeelGuideCopy = PERIOD_FEEL_GUIDE_COPY}){
+function SisterAnalysisContent({playAnimation, onCycleComplete, animateText, analysisKind = 'period-start', showPeriodFeelPrompt = true, periodFeelGuideCopy = PERIOD_FEEL_GUIDE_COPY, periodFeelGuide = null}){
   const [animated, setAnimated] = React.useState(false);
   const [leadDone, setLeadDone] = React.useState(!animateText);
   const [chartDone, setChartDone] = React.useState(!animateText);
   const [para1Done, setPara1Done] = React.useState(!animateText);
   const [showForecast, setShowForecast] = React.useState(!animateText);
   const [forecastDone, setForecastDone] = React.useState(!animateText);
-  const [showSignal, setShowSignal] = React.useState(!animateText);
   const [showClosing, setShowClosing] = React.useState(!animateText);
   const [closingDone, setClosingDone] = React.useState(!animateText);
-  const [promptDone, setPromptDone] = React.useState(!animateText || !showPeriodFeelPrompt);
   const prevPlayRef = React.useRef(playAnimation);
   const onCycleCompleteRef = React.useRef(onCycleComplete);
+  const cycleCompletedRef = React.useRef(false);
   const bodyRef = React.useRef(null);
   onCycleCompleteRef.current = onCycleComplete;
   const isPeriodEnd = analysisKind === 'period-end';
@@ -1165,7 +1071,7 @@ function SisterAnalysisContent({playAnimation, onCycleComplete, animateText, ana
   React.useLayoutEffect(()=>{
     if(!animateText || !bodyRef.current) return;
     requestAnimationFrame(()=>scrollFeedContentIntoView(bodyRef.current));
-  }, [animateText, leadDone, chartDone, para1Done, showSignal, showClosing]);
+  }, [animateText, leadDone, chartDone, para1Done, showClosing]);
 
   React.useEffect(()=>{
     if(!animateText){
@@ -1176,21 +1082,18 @@ function SisterAnalysisContent({playAnimation, onCycleComplete, animateText, ana
       setShowForecast(true);
       setForecastDone(true);
       setClosingDone(true);
-      setShowSignal(true);
       setShowClosing(true);
-      setPromptDone(true);
       return;
     }
     if(playAnimation > prevPlayRef.current){
+      cycleCompletedRef.current = false;
       setLeadDone(false);
       setChartDone(false);
       setPara1Done(false);
       setShowForecast(false);
       setForecastDone(false);
       setClosingDone(false);
-      setShowSignal(false);
       setShowClosing(false);
-      setPromptDone(false);
       setAnimated(false);
     }
     prevPlayRef.current = playAnimation;
@@ -1201,21 +1104,15 @@ function SisterAnalysisContent({playAnimation, onCycleComplete, animateText, ana
     if(animateText){
       setChartDone(false);
       setAnimated(true);
-      setShowSignal(false);
       setShowClosing(false);
     }
   }, [animateText]);
 
   React.useEffect(()=>{
-    if(isPeriodEnd){
-      if(!animateText || !para1Done) return;
-      const delay = playAnimation ? 360 : 220;
-      const t = setTimeout(()=>setShowForecast(true), delay);
-      return ()=>clearTimeout(t);
-    }
+    if(!isPeriodEnd) return;
     if(!animateText || !para1Done) return;
-    const delay = playAnimation ? 480 : 320;
-    const t = setTimeout(()=>setShowSignal(true), delay);
+    const delay = playAnimation ? 360 : 220;
+    const t = setTimeout(()=>setShowForecast(true), delay);
     return ()=>clearTimeout(t);
   }, [animateText, isPeriodEnd, para1Done, playAnimation]);
 
@@ -1228,22 +1125,21 @@ function SisterAnalysisContent({playAnimation, onCycleComplete, animateText, ana
   }, [animateText, forecastDone, isPeriodEnd, playAnimation]);
 
   React.useEffect(()=>{
-    if(isPeriodEnd) return;
-    if(!animateText || !showSignal) return;
-    const delay = playAnimation ? 2400 : 880;
-    const t = setTimeout(()=>setShowClosing(true), delay);
-    return ()=>clearTimeout(t);
-  }, [animateText, isPeriodEnd, showSignal, playAnimation]);
-
-  React.useEffect(()=>{
     if(isPeriodEnd){
       if(!animateText || !showClosing || !closingDone) return;
+      if(cycleCompletedRef.current) return;
+      cycleCompletedRef.current = true;
       onCycleCompleteRef.current?.();
       return;
     }
-    if(!animateText || !showClosing || !closingDone || (showPeriodFeelPrompt && !promptDone)) return;
+    // 月经来了：必须等引导语、图表、总结文案全部完成后再回调
+    if(animateText){
+      if(!leadDone || !chartDone || !para1Done) return;
+    }
+    if(cycleCompletedRef.current) return;
+    cycleCompletedRef.current = true;
     onCycleCompleteRef.current?.();
-  }, [animateText, isPeriodEnd, para1Done, showClosing, closingDone, promptDone, showPeriodFeelPrompt]);
+  }, [animateText, isPeriodEnd, leadDone, chartDone, para1Done, showClosing, closingDone]);
 
   const showChart = !animateText || (leadDone && animated);
   const showPara1 = !animateText || (leadDone && chartDone);
@@ -1284,49 +1180,21 @@ function SisterAnalysisContent({playAnimation, onCycleComplete, animateText, ana
           )}
         </p>
       )}
+      {!isPeriodEnd && periodFeelGuide?.active && periodFeelGuide?.scheme === '方案三' && showPara1 && (!animateText || para1Done) ? (
+        <button
+          type="button"
+          className="tl-period-feel-scheme3-link"
+          onClick={()=>periodFeelGuide.onOpenSheet?.()}
+        >
+          {periodFeelGuide.linkText || '记录本次血量变化、经期症状'}
+        </button>
+      ) : null}
       {isPeriodEnd && showForecast && (!animateText || para1Done) && (
         <PeriodForecastCard
           animated={animated}
           staticView={!animateText}
           onComplete={()=>setForecastDone(true)}
         />
-      )}
-      {!isPeriodEnd && showSignal && (!animateText || para1Done) && (
-        <>
-          <div className="tl-t5-chart-divider" role="separator"/>
-          <SisterSignalCard animated={animated}/>
-        </>
-      )}
-      {!isPeriodEnd && showClosing && (!animateText || para1Done) && (
-        <p className="tl-t5-analysis-text">
-          {animateText && !closingDone ? (
-            <TypewriterText
-              segments={SISTER_CLOSING}
-              active
-              followScroll
-              onComplete={()=>setClosingDone(true)}
-            />
-          ) : (
-            renderTypedSegments(SISTER_CLOSING, segmentsFullText(SISTER_CLOSING).length)
-          )}
-        </p>
-      )}
-      {!isPeriodEnd && showPeriodFeelPrompt && showClosing && closingDone && (
-        <>
-        <div className="tl-t5-chart-divider" role="separator"/>
-        <p className="tl-t5-analysis-prompt">
-          {animateText && !promptDone ? (
-            <TypewriterText
-              segments={periodFeelGuideCopy}
-              active
-              followScroll
-              onComplete={()=>setPromptDone(true)}
-            />
-          ) : (
-            renderTypedSegments(periodFeelGuideCopy, segmentsFullText(periodFeelGuideCopy).length)
-          )}
-        </p>
-        </>
       )}
       {isPeriodEnd && showClosing && (!animateText || forecastDone) && (
         <p className="tl-t5-analysis-text">
