@@ -1872,6 +1872,46 @@
 }
 .tl-period-feel-scheme3-link:active{opacity:.7}
 
+/* 头部氛围感 · 方案三：今天下方灰点 + 轮播文案 */
+.tl-rail-node.is-header-atm-phrase{
+  padding-top:2px;
+  padding-bottom:14px;
+  align-items:center;
+}
+.tl-rail-node.is-header-atm-phrase .tl-rail-marker{
+  padding-top:0;
+  align-self:center;
+}
+.tl-rail-dot.is-muted{
+  background:#c8c8cc;
+  box-shadow:none;
+}
+.tl-header-atm-phrase{
+  margin:0;
+  padding:0;
+  font-size:14px;
+  line-height:1.47;
+  color:rgba(0,0,0,.4);
+  pointer-events:none;
+  user-select:none;
+  transition:opacity .28s ease, transform .28s ease;
+}
+.tl-header-atm-phrase.is-out{
+  opacity:0;
+  transform:translateY(3px);
+}
+.tl-header-atm-phrase.is-in{
+  opacity:1;
+  transform:translateY(0);
+}
+.phone.is-theme-dark .tl-header-atm-phrase,
+.phone.is-theme-dark .tl-period-feel-guide-hint{
+  color:rgba(255,255,255,.45);
+}
+.phone.is-theme-dark .tl-rail-dot.is-muted{
+  background:rgba(255,255,255,.28);
+}
+
 .dock-feeding-quick-icon{
   width:40px;
   height:40px;

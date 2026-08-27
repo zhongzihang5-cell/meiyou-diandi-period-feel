@@ -85,12 +85,13 @@ function resolveTimelineLastItemId(blocks, sisterCycleDone, hideTodayGuide){
   return ids[ids.length - 1];
 }
 
-function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, lastItemId, hideDayHeader, firstDropAnim, onFirstDropLand, onFirstDropComplete, periodFeelGuide}){
+function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, lastItemId, hideDayHeader, firstDropAnim, onFirstDropLand, onFirstDropComplete, periodFeelGuide, headerAtmPhrase}){
   const items = sortDayItemsByTime(filterDayItems(day.items || day.entries, sisterCycleDone, hideTodayGuide));
   const phaseCls = day.phaseKind || '';
   const showScheme2Hint = periodFeelGuide?.active
     && periodFeelGuide?.scheme === '方案二'
     && !periodFeelGuide?.hintDismissed;
+  const showAtmPhrase = !!(day.isToday && headerAtmPhrase?.active && headerAtmPhrase?.text);
   return (
     <div
       className={'tl-day-section'+(day.isToday?' is-today':'')+(phaseCls?' phase-'+phaseCls:'')}
@@ -104,6 +105,22 @@ function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDo
           <CycleDayHeader day={day} items={items} dayBlocks={dayBlocks}/>
         </div>
       )}
+      {showAtmPhrase ? (
+        <div className="tl-rail-node is-header-atm-phrase">
+          <div className="tl-rail-marker">
+            <span className="tl-rail-dot is-muted"/>
+          </div>
+          <div className="tl-rail-body">
+            <p
+              key={headerAtmPhrase.text}
+              className={'tl-header-atm-phrase'+(headerAtmPhrase.visible === false ? ' is-out' : ' is-in')}
+              aria-live="polite"
+            >
+              {headerAtmPhrase.text}
+            </p>
+          </div>
+        </div>
+      ) : null}
       {items.map((it, idx)=>{
         if(it.kind === 'sister-card' && (items[idx - 1]?.kind === 'voice-card' || items[idx - 1]?.kind === 'sync-card')) return null;
         const sisterItem = (it.kind === 'voice-card' || it.kind === 'sync-card') && items[idx + 1]?.kind === 'sister-card'
@@ -160,7 +177,7 @@ function CycleStartMarker({block}){
   );
 }
 
-function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, hideGapDivider, hideDayHeader, hideBabyFeeding, firstDropAnim, onFirstDropLand, onFirstDropComplete, periodFeelGuide}){
+function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, hideGapDivider, hideDayHeader, hideBabyFeeding, firstDropAnim, onFirstDropLand, onFirstDropComplete, periodFeelGuide, headerAtmPhrase}){
   const visibleBlocks = hideBabyFeeding
     ? (blocks || []).map(block=>{
         if(block.type !== 'day') return block;
@@ -194,6 +211,7 @@ function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, h
                 onFirstDropLand={onFirstDropLand}
                 onFirstDropComplete={onFirstDropComplete}
                 periodFeelGuide={periodFeelGuide}
+                headerAtmPhrase={headerAtmPhrase}
               />
             );
           }

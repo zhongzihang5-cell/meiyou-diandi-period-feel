@@ -2883,7 +2883,7 @@ function App(){
       )}
 
       <div
-        className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordBlank ? ' suiji-shell--blank' : '')+(voiceTranscribe ? ' suiji-shell--voice' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')+(showSearchPage && !showBabyFeedingHeader ? ' is-search-open':'')+(babyFeedingPanelMode === 'all' ? ' is-filter-panel-open':'')+(babyFeedingPanelMode === 'search' ? ' is-xhs-search-open':'')+(isSearchActive?' is-search-filtered':'')+(useHeaderAtmosphereScheme2?' is-atm-scheme2':'')+(useHeaderAtmosphereScheme3?' is-atm-scheme3':'')}
+        className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordBlank ? ' suiji-shell--blank' : '')+(voiceTranscribe ? ' suiji-shell--voice' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')+(showSearchPage && !showBabyFeedingHeader ? ' is-search-open':'')+(babyFeedingPanelMode === 'all' ? ' is-filter-panel-open':'')+(babyFeedingPanelMode === 'search' ? ' is-xhs-search-open':'')+(isSearchActive?' is-search-filtered':'')+(useHeaderAtmosphereScheme2?' is-atm-scheme2':'')}
         aria-hidden={!showRecordShell}
       >
         {showRecordEmpty ? (
@@ -2946,7 +2946,7 @@ function App(){
         ) : (
         <>
         {showStreamHeader ? (
-        <div className={'stream-header' + (showBabyFeedingHeader ? ' is-baby-feeding-header' : '') + (useHeaderAtmosphereScheme2 && headerCollapseProgress > 0.45 ? ' is-atm-collapsed' : '') + (useHeaderAtmosphereScheme3 ? ' is-mini-atm' : '')}>
+        <div className={'stream-header' + (showBabyFeedingHeader ? ' is-baby-feeding-header' : '') + (useHeaderAtmosphereScheme2 && headerCollapseProgress > 0.45 ? ' is-atm-collapsed' : '')}>
           {showBabyFeedingHeader ? (
             <>
               <div className="stream-actions">
@@ -2972,16 +2972,6 @@ function App(){
                 </svg>
               </button>
               <div className="stream-header-side"/>
-            </>
-          ) : useHeaderAtmosphereScheme3 ? (
-            <>
-              <h1 className="stream-mini-title">点滴</h1>
-              <p
-                className={'stream-mini-tagline'+(scheme3PhraseVisible ? ' is-in' : ' is-out')}
-                key={scheme3PhraseIndex}
-              >
-                {HEADER_ATM_SCHEME3_PHRASES[scheme3PhraseIndex]}
-              </p>
             </>
           ) : (
             <>
@@ -3078,6 +3068,11 @@ function App(){
             hideBabyFeeding={recordLifeMode === '经期'}
             hideGapDivider
             onSisterCycleComplete={handleSisterCycleComplete}
+            headerAtmPhrase={useHeaderAtmosphereScheme3 ? {
+              active: true,
+              text: HEADER_ATM_SCHEME3_PHRASES[scheme3PhraseIndex],
+              visible: scheme3PhraseVisible,
+            } : null}
             periodFeelGuide={{
               scheme: periodFeelGuideScheme,
               active: periodFeelGuideActive && !periodFeelRecorded,
@@ -3223,7 +3218,7 @@ function App(){
             <p className="demo-scene-dock-hint">
               {headerAtmosphereScheme === '方案一' && '左侧大标题 + 副标题，上滑收缩为顶栏居中标题'}
               {headerAtmosphereScheme === '方案二' && '看到「今天」时展开；滑走后收成居中小字'}
-              {headerAtmosphereScheme === '方案三' && '吸顶迷你氛围条，右侧文案轮播'}
+              {headerAtmosphereScheme === '方案三' && '顶栏居中「点滴」；「今天」下灰点轮播氛围文案'}
               {headerAtmosphereScheme === '方案四' && '仅居中标题「记录」；Tab 为 日历 / 记录；无副标题'}
             </p>
           </div>
