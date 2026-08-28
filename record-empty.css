@@ -62,7 +62,37 @@
   font-size:inherit;
 }
 .ep-onboard-s3-demo{
-  padding-bottom:148px;
+  padding-bottom:196px;
+}
+.ep-onboard-dock-bottom{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:var(--my-tabbar-h, 58px);
+  z-index:99;
+  padding:0 11px 10px;
+  background:linear-gradient(180deg, rgba(242,242,245,0) 0%, rgba(242,242,245,0.92) 24%, #F2F2F5 100%);
+  pointer-events:none;
+}
+.ep-onboard-dock-bottom .ep-onboard-dock-panel,
+.ep-onboard-dock-bottom .dock-bar,
+.ep-onboard-dock-bottom .dock-feeding-quick-item,
+.ep-onboard-dock-bottom .dock-mode-btn{
+  pointer-events:auto;
+}
+.ep-onboard-dock-bottom .dock-feeding-handle{
+  display:none;
+}
+.ep-onboard-dock-bottom .dock-bar.has-feeding-quick{
+  gap:9px;
+  padding:10px 10px 12px;
+}
+.ep-onboard-dock-ph{
+  position:static;
+  transform:none;
+  font-size:15px;
+  color:rgba(0,0,0,0.28);
+  line-height:38px;
 }
 .ep-onboard-s3-voice-wrap .record-empty-mic{
   width:80px;
@@ -136,7 +166,7 @@
   align-items:center;
   justify-content:flex-start;
   overflow:hidden;
-  padding:20px 16px 0;
+  padding:20px 16px 196px;
 }
 .ep-onboard-s4-frame{
   flex:0 0 auto;

@@ -368,25 +368,27 @@ function tagLabel(t){
   return r.emoji ? (r.emoji + ' ' + r.label) : r.label;
 }
 
-function RecordedTags({tags, layout}){
+function RecordedTags({tags, layout, leadTag}){
   const isV3 = layout === 'v3' || ((tags || []).length > 0 && (tags || []).every(t => t.cat && t.icon && t.val !== undefined));
   if(isV3){
     const visible = (tags || []).filter(t => t.cat !== 'care');
-    if(visible.length === 0) return null;
+    if(visible.length === 0 && !leadTag) return null;
     const TLTag = window.TLTag;
-    if(!TLTag) return null;
+    if(!TLTag && !leadTag) return null;
     return (
       <div className="tl-tags tl-tags-v3">
+        {leadTag}
         {visible.map((t, i)=><TLTag key={i} tag={t}/>)}
       </div>
     );
   }
   const visible = (tags || []).filter(t => resolveTag(t).cat !== 'care');
-  if(visible.length === 0) return null;
+  if(visible.length === 0 && !leadTag) return null;
   const isRows = layout === 'rows';
   const isT5 = layout === 't5';
   return (
     <div className={'tl-tags'+(isRows ? ' tl-tags-rows' : '')+(isT5 ? ' tl-tags-t5' : '')}>
+      {leadTag}
       {visible.map((t, i) => {
         const r = resolveTag(t);
         return (
@@ -404,6 +406,17 @@ function RecordedTags({tags, layout}){
       })}
     </div>
   );
+}
+
+function resolveAiNoteShortLine(aiNote){
+  const raw = String(aiNote?.text || '').trim();
+  if(!raw) return '点滴回应';
+  if(/情绪|心情/.test(raw)) return '近7天情绪有变化';
+  if(/体重/.test(raw)) return '本周体重较平稳';
+  if(/热量|卡路里|饮食/.test(raw)) return '近7天热量有变化';
+  const cut = raw.replace(/[。！？].*$/, '');
+  const line = cut || raw;
+  return line.length > 14 ? line.slice(0, 14) + '…' : line;
 }
 
 function FeedbackBubbleWrap({defaultOpen = false, children, shortLine}){
@@ -672,8 +685,13 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, t
   if(entry._demoTypewriter) return <DemoVoiceCard entry={entry} isNew={isNew}/>;
 
   const tags = entry.tags || []
-  const hasTags = tags.some(t => resolveTag(t).cat !== 'care');
   const hasAiNote = !!entry.aiNote;
+  const isScheme2Fb = window.__FEEDBACK_DISPLAY_SCHEME === '方案二';
+  const showScheme2Fb = isScheme2Fb && hasAiNote;
+  const [fbOpen, setFbOpen] = React.useState(!!isNew);
+  const FeedbackStarTag = window.FeedbackStarTag;
+  const FeedbackBubblePanel = window.FeedbackBubblePanel;
+  const hasTags = tags.some(t => resolveTag(t).cat !== 'care') || showScheme2Fb;
   const hasAnalysis = !!analysisProps;
   const hasVoice = !!entry.voice;
   const isVtLive = !!entry.vtLive;
@@ -769,27 +787,44 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, t
           <RecordPhoto photo={entry.photo}/>
           {hasTags && (
             <div className="tl-t5-tags">
-              <RecordedTags tags={tags} layout={tagLayout}/>
+              <RecordedTags
+                tags={tags}
+                layout={tagLayout}
+                leadTag={
+                  showScheme2Fb && FeedbackStarTag ? (
+                    <FeedbackStarTag open={fbOpen} onClick={()=> setFbOpen(v=>!v)}/>
+                  ) : null
+                }
+              />
             </div>
           )}
         </EditableRecordArea>
       )}
 
-      {hasAiNote && window.__FEEDBACK_DISPLAY_SCHEME !== '方案三' && (['方案一', '方案二'].includes(window.__FEEDBACK_DISPLAY_SCHEME) ? (
+      {hasAiNote && window.__FEEDBACK_DISPLAY_SCHEME !== '方案三' && showScheme2Fb && FeedbackBubblePanel ? (
+        <FeedbackBubblePanel
+          open={fbOpen}
+          line={resolveAiNoteShortLine(entry.aiNote)}
+          animateIn={!!isNew}
+        >
+          <AiNoteSection
+            aiNote={entry.aiNote}
+            embedded
+            typewriter={aiNoteTypewriter}
+          />
+        </FeedbackBubblePanel>
+      ) : hasAiNote && window.__FEEDBACK_DISPLAY_SCHEME !== '方案三' && ['方案一'].includes(window.__FEEDBACK_DISPLAY_SCHEME) ? (
         <FeedbackBubbleWrap
           defaultOpen={!!isNew}
-          shortLine={(()=>{
-            const raw = String(entry.aiNote?.text || '').trim();
-            if(!raw) return '点滴回应';
-            if(/情绪|心情/.test(raw)) return '近7天情绪有变化';
-            if(/体重/.test(raw)) return '本周体重较平稳';
-            if(/热量|卡路里|饮食/.test(raw)) return '近7天热量有变化';
-            const cut = raw.replace(/[。！？].*$/, '');
-            const line = cut || raw;
-            return line.length > 14 ? line.slice(0, 14) + '…' : line;
-          })()}
-        />
-      ) : (
+          shortLine={resolveAiNoteShortLine(entry.aiNote)}
+        >
+          <AiNoteSection
+            aiNote={entry.aiNote}
+            embedded
+            typewriter={aiNoteTypewriter}
+          />
+        </FeedbackBubbleWrap>
+      ) : hasAiNote && window.__FEEDBACK_DISPLAY_SCHEME !== '方案三' ? (
         <>
           <div className="tl-t5-divider" role="separator"/>
           <section className="tl-t5-insight">
@@ -800,7 +835,7 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, t
             />
           </section>
         </>
-      ))}
+      ) : null}
 
       {hasAnalysis && (
         <SisterAnalysisCollapsible

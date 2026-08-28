@@ -5281,28 +5281,30 @@ html,body{
   position:relative;
   z-index:15;
   flex:0 0 auto;
-  padding:52px 20px 0;
+  padding:12px 20px 8px;
   margin:0;
   background:var(--my-bg);
   overflow:hidden;
-  box-sizing:content-box;
-  will-change:opacity, max-height, transform, padding-bottom;
+  box-sizing:border-box;
+  will-change:opacity, max-height, transform, padding;
 }
 .suiji-shell.is-atm-scheme2 .suiji-stream.has-hero-title-scheme2{
   flex:1 1 auto;
   min-height:0;
   max-height:none;
-  padding-top:8px;
+  padding-top:4px;
 }
 .suiji-shell.is-atm-scheme2 .stream-header{
   background:transparent;
   backdrop-filter:none;
   -webkit-backdrop-filter:none;
+  padding:6px 18px 8px;
 }
 .suiji-shell.is-atm-scheme2 .stream-header.is-atm-collapsed{
   background:var(--my-bg);
   backdrop-filter:blur(12px);
   -webkit-backdrop-filter:blur(12px);
+  padding:4px 18px 6px;
 }
 .stream-header.is-mini-atm{
   display:flex;
@@ -8623,6 +8625,101 @@ html,body{
 .v3-tag[data-cat="运动"]{color:#00cc99}
 .v3-tag[data-cat="睡眠"]{color:#2d5cad}
 .v3-tag[data-cat="喝水"]{color:#5ab8ff}
+.v3-tag.is-fb-star{
+  padding:2px 7px;
+  color:#ff4d88;
+  border:0.5px solid #ff4d88;
+  background:transparent;
+  cursor:pointer;
+  font-family:inherit;
+  line-height:1;
+  -webkit-tap-highlight-color:transparent;
+}
+.v3-tag.is-fb-star.is-open{
+  background:rgba(255,77,136,0.08);
+}
+.v3-tag.is-fb-star .tl-period-analysis-spark{
+  display:block;
+  width:14px;
+  height:14px;
+  transform:scale(0.72);
+  transform-origin:center;
+}
+.tl-fb-s2-block{margin-top:6px}
+.tl-fb-s2-tag-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.tl-fb-bub.is-panel{
+  display:block;
+  width:100%;
+  max-width:100%;
+  margin-top:6px;
+  margin-bottom:4px;
+  background:transparent;
+  border-radius:4px 12px 12px 12px;
+  padding:0;
+  overflow:hidden;
+  box-sizing:border-box;
+}
+.tl-fb-bub.is-panel.is-open{
+  background:#f2f2f5;
+  padding:8px 12px;
+}
+.tl-fb-bub.is-panel .tl-fb-bub-full{
+  display:grid;
+  grid-template-rows:0fr;
+  opacity:0;
+  transition:grid-template-rows .3s cubic-bezier(.2,.7,.3,1), opacity .25s;
+}
+.tl-fb-bub.is-panel.is-open .tl-fb-bub-full{
+  grid-template-rows:1fr;
+  opacity:1;
+}
+.tl-fb-bub.is-panel .tl-fb-bub-inner{overflow:hidden}
+.tl-fb-bub.is-panel .tl-fb-bub-cline{
+  font-size:11px;
+  color:#8b9199;
+  line-height:1.3;
+  font-weight:400;
+  display:flex;
+  align-items:center;
+  gap:4px;
+  margin-bottom:6px;
+}
+.tl-fb-bub.is-panel .tl-fb-bub-spark{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:14px;
+  height:14px;
+  flex-shrink:0;
+}
+.tl-fb-bub.is-panel .tl-fb-bub-spark .tl-period-analysis-spark{
+  width:14px;
+  height:14px;
+  transform:scale(0.72);
+  transform-origin:center;
+}
+.tl-fb-bub.is-panel .tl-fb-bub-content{
+  font-size:12px;
+  color:rgba(0,0,0,0.8);
+  line-height:1.47;
+}
+.tl-fb-bub.is-panel .tl-fb-bub-mini{
+  display:block;
+  width:100%;
+  margin-top:2px;
+}
+.tl-t5-card .tl-fb-bub.is-panel{
+  margin-top:4px;
+  margin-bottom:0;
+}
+.v3-card-enter .tl-fb-bub.is-panel.is-embedded,
+.fade-in .tl-fb-bub.is-panel.is-embedded{
+  animation:v3AiStaggerIn .36s cubic-bezier(.2,0,0,1) both;
+}
 .v3-card-enter{
   animation:v3CardEnter 0.32s cubic-bezier(0.2,0,0,1) both;
 }
@@ -14215,7 +14312,37 @@ html,body{
   font-size:inherit;
 }
 .ep-onboard-s3-demo{
-  padding-bottom:148px;
+  padding-bottom:196px;
+}
+.ep-onboard-dock-bottom{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:var(--my-tabbar-h, 58px);
+  z-index:99;
+  padding:0 11px 10px;
+  background:linear-gradient(180deg, rgba(242,242,245,0) 0%, rgba(242,242,245,0.92) 24%, #F2F2F5 100%);
+  pointer-events:none;
+}
+.ep-onboard-dock-bottom .ep-onboard-dock-panel,
+.ep-onboard-dock-bottom .dock-bar,
+.ep-onboard-dock-bottom .dock-feeding-quick-item,
+.ep-onboard-dock-bottom .dock-mode-btn{
+  pointer-events:auto;
+}
+.ep-onboard-dock-bottom .dock-feeding-handle{
+  display:none;
+}
+.ep-onboard-dock-bottom .dock-bar.has-feeding-quick{
+  gap:9px;
+  padding:10px 10px 12px;
+}
+.ep-onboard-dock-ph{
+  position:static;
+  transform:none;
+  font-size:15px;
+  color:rgba(0,0,0,0.28);
+  line-height:38px;
 }
 .ep-onboard-s3-voice-wrap .record-empty-mic{
   width:80px;
@@ -14289,7 +14416,7 @@ html,body{
   align-items:center;
   justify-content:flex-start;
   overflow:hidden;
-  padding:20px 16px 0;
+  padding:20px 16px 196px;
 }
 .ep-onboard-s4-frame{
   flex:0 0 auto;
@@ -16595,6 +16722,55 @@ html,body{
   );
 }
 
+.ep-onboard-gradient-mask.is-scheme2{
+  background:linear-gradient(
+    to top,
+    var(--my-bg) 0%,
+    var(--my-bg) 24%,
+    color-mix(in srgb, var(--my-bg) 96%, transparent) 36%,
+    color-mix(in srgb, var(--my-bg) 82%, transparent) 52%,
+    color-mix(in srgb, var(--my-bg) 58%, transparent) 68%,
+    color-mix(in srgb, var(--my-bg) 28%, transparent) 84%,
+    transparent 100%
+  );
+}
+
+.ep-onboard-s2-fab-cover{
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:390px;
+  bottom:calc(var(--my-tabbar-h) + 56px);
+  height:88px;
+  z-index:93;
+  pointer-events:none;
+  background:linear-gradient(to top, var(--my-bg) 72%, transparent 100%);
+}
+.ep-onboard-s2-fab-cover::before{
+  content:"";
+  position:absolute;
+  right:8px;
+  bottom:10px;
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  background:var(--my-bg);
+  box-shadow:0 0 0 10px var(--my-bg);
+}
+
+.suiji-shell--onboard-s2.is-onboard-masked .quick-card-fab{
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+}
+
+.suiji-shell--onboard-s2 .ep-onboard-dock-layer{
+  /* 引导区贴近底部输入框，蒙层盖住 + 号 */
+  bottom:calc(var(--my-tabbar-h) + var(--my-dock-path-h, 76px) - 2px);
+  z-index:94;
+}
+
 .ep-onboard-gradient-mask-hit{
   position:fixed;
   left:50%;
@@ -16696,11 +16872,6 @@ html,body{
   text-align:center;
 }
 
-.suiji-shell--onboard-s2 .ep-onboard-dock-layer{
-  /* 引导区底边在 + 号上方，贴近参考图 */
-  bottom:calc(var(--my-tabbar-h) + 67px + 56px + 8px);
-}
-
 .suiji-shell--onboard-s2 .ep-onboard-dock-layer .ep-onboard-stage.is-guide-s2{
   padding:0 22px;
 }
@@ -16727,7 +16898,7 @@ html,body{
   width:100%;
   max-width:100%;
   margin:0;
-  padding:0 72px 0 0;
+  padding:0 56px 0 0;
   box-sizing:border-box;
 }
 
@@ -16742,8 +16913,8 @@ html,body{
 }
 
 .suiji-shell--onboard-s2 .ep-s1-fab-arrow.is-editable:not([style*="left"]){
-  right:70px;
-  bottom:calc(var(--my-tabbar-h) + 67px + 56px + 88px);
+  right:66px;
+  bottom:calc(var(--my-tabbar-h) + 67px + 56px + 20px);
 }
 
 .ep-s1-center{
@@ -32784,13 +32955,12 @@ body.standalone-demo .phone .suiji-shell--scene::before{
 <script>
 const TWEAK_DEFAULTS = {
   "demoScene": "voice-transcribe-5",
+  "headerAtmosphereScheme": "方案二",
   "periodFeelGuideScheme": "方案一",
-  "headerAtmosphereScheme": "方案一",
-  "demoTheme": "默认",
-  "feedbackDisplayScheme": "方案一",
   "onboardGuideScheme": "方案一"
 };
 window.__TWEAK_DEFAULTS = TWEAK_DEFAULTS;
+window.__FEEDBACK_DISPLAY_SCHEME = '方案二';
 window.__BUILD__ = "2026-08-28-nomask";
 window.__STANDALONE_LOCKED_SCENE = true;
 </script>
@@ -33363,6 +33533,12 @@ const TIMELINE_BLOCKS = [
             { cat:'饮食', icon:'food' },
             { cat:'喝水', icon:'water' },
           ],
+        },
+        ai:{
+          id:'y1-ai', time:'21:11', kind:'chart', chartType:'caloriePanel',
+          title:'卡路里摄入量',
+          chartData:{ consumed:680, target:1800, week:[920,1050,980,1180,1080,1240,680] },
+          note:'沙拉比较清淡，约320千卡，注意营养要均衡哦',
         },
       },
       {
@@ -38288,25 +38464,27 @@ function tagLabel(t){
   return r.emoji ? (r.emoji + ' ' + r.label) : r.label;
 }
 
-function RecordedTags({tags, layout}){
+function RecordedTags({tags, layout, leadTag}){
   const isV3 = layout === 'v3' || ((tags || []).length > 0 && (tags || []).every(t => t.cat && t.icon && t.val !== undefined));
   if(isV3){
     const visible = (tags || []).filter(t => t.cat !== 'care');
-    if(visible.length === 0) return null;
+    if(visible.length === 0 && !leadTag) return null;
     const TLTag = window.TLTag;
-    if(!TLTag) return null;
+    if(!TLTag && !leadTag) return null;
     return (
       <div className="tl-tags tl-tags-v3">
+        {leadTag}
         {visible.map((t, i)=><TLTag key={i} tag={t}/>)}
       </div>
     );
   }
   const visible = (tags || []).filter(t => resolveTag(t).cat !== 'care');
-  if(visible.length === 0) return null;
+  if(visible.length === 0 && !leadTag) return null;
   const isRows = layout === 'rows';
   const isT5 = layout === 't5';
   return (
     <div className={'tl-tags'+(isRows ? ' tl-tags-rows' : '')+(isT5 ? ' tl-tags-t5' : '')}>
+      {leadTag}
       {visible.map((t, i) => {
         const r = resolveTag(t);
         return (
@@ -38324,6 +38502,17 @@ function RecordedTags({tags, layout}){
       })}
     </div>
   );
+}
+
+function resolveAiNoteShortLine(aiNote){
+  const raw = String(aiNote?.text || '').trim();
+  if(!raw) return '点滴回应';
+  if(/情绪|心情/.test(raw)) return '近7天情绪有变化';
+  if(/体重/.test(raw)) return '本周体重较平稳';
+  if(/热量|卡路里|饮食/.test(raw)) return '近7天热量有变化';
+  const cut = raw.replace(/[。！？].*$/, '');
+  const line = cut || raw;
+  return line.length > 14 ? line.slice(0, 14) + '…' : line;
 }
 
 function FeedbackBubbleWrap({defaultOpen = false, children, shortLine}){
@@ -38592,8 +38781,13 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, t
   if(entry._demoTypewriter) return <DemoVoiceCard entry={entry} isNew={isNew}/>;
 
   const tags = entry.tags || []
-  const hasTags = tags.some(t => resolveTag(t).cat !== 'care');
   const hasAiNote = !!entry.aiNote;
+  const isScheme2Fb = window.__FEEDBACK_DISPLAY_SCHEME === '方案二';
+  const showScheme2Fb = isScheme2Fb && hasAiNote;
+  const [fbOpen, setFbOpen] = React.useState(!!isNew);
+  const FeedbackStarTag = window.FeedbackStarTag;
+  const FeedbackBubblePanel = window.FeedbackBubblePanel;
+  const hasTags = tags.some(t => resolveTag(t).cat !== 'care') || showScheme2Fb;
   const hasAnalysis = !!analysisProps;
   const hasVoice = !!entry.voice;
   const isVtLive = !!entry.vtLive;
@@ -38689,27 +38883,44 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, t
           <RecordPhoto photo={entry.photo}/>
           {hasTags && (
             <div className="tl-t5-tags">
-              <RecordedTags tags={tags} layout={tagLayout}/>
+              <RecordedTags
+                tags={tags}
+                layout={tagLayout}
+                leadTag={
+                  showScheme2Fb && FeedbackStarTag ? (
+                    <FeedbackStarTag open={fbOpen} onClick={()=> setFbOpen(v=>!v)}/>
+                  ) : null
+                }
+              />
             </div>
           )}
         </EditableRecordArea>
       )}
 
-      {hasAiNote && window.__FEEDBACK_DISPLAY_SCHEME !== '方案三' && (['方案一', '方案二'].includes(window.__FEEDBACK_DISPLAY_SCHEME) ? (
+      {hasAiNote && window.__FEEDBACK_DISPLAY_SCHEME !== '方案三' && showScheme2Fb && FeedbackBubblePanel ? (
+        <FeedbackBubblePanel
+          open={fbOpen}
+          line={resolveAiNoteShortLine(entry.aiNote)}
+          animateIn={!!isNew}
+        >
+          <AiNoteSection
+            aiNote={entry.aiNote}
+            embedded
+            typewriter={aiNoteTypewriter}
+          />
+        </FeedbackBubblePanel>
+      ) : hasAiNote && window.__FEEDBACK_DISPLAY_SCHEME !== '方案三' && ['方案一'].includes(window.__FEEDBACK_DISPLAY_SCHEME) ? (
         <FeedbackBubbleWrap
           defaultOpen={!!isNew}
-          shortLine={(()=>{
-            const raw = String(entry.aiNote?.text || '').trim();
-            if(!raw) return '点滴回应';
-            if(/情绪|心情/.test(raw)) return '近7天情绪有变化';
-            if(/体重/.test(raw)) return '本周体重较平稳';
-            if(/热量|卡路里|饮食/.test(raw)) return '近7天热量有变化';
-            const cut = raw.replace(/[。！？].*$/, '');
-            const line = cut || raw;
-            return line.length > 14 ? line.slice(0, 14) + '…' : line;
-          })()}
-        />
-      ) : (
+          shortLine={resolveAiNoteShortLine(entry.aiNote)}
+        >
+          <AiNoteSection
+            aiNote={entry.aiNote}
+            embedded
+            typewriter={aiNoteTypewriter}
+          />
+        </FeedbackBubbleWrap>
+      ) : hasAiNote && window.__FEEDBACK_DISPLAY_SCHEME !== '方案三' ? (
         <>
           <div className="tl-t5-divider" role="separator"/>
           <section className="tl-t5-insight">
@@ -38720,7 +38931,7 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, t
             />
           </section>
         </>
-      ))}
+      ) : null}
 
       {hasAnalysis && (
         <SisterAnalysisCollapsible
@@ -40503,44 +40714,71 @@ function V3PhotoFoodAnalysis({
   );
 }
 
-function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnalysis = false, isNew = false, onPhotoAnalysisComplete}){
+function V3TagRow({ tags, showTags = true, tagsAnimate = false, feedbackStarTag, style }){
+  const tagRowStyle = style || { display: 'flex', gap: 6, flexWrap: 'wrap' };
+  const hasTags = showTags && (tags || []).length > 0;
+  if(!feedbackStarTag && !hasTags) return null;
+  return (
+    <div style={tagRowStyle}>
+      {feedbackStarTag ? (
+        <span
+          className={tagsAnimate ? 'tl-tags-reveal' : undefined}
+          style={tagsAnimate ? { animationDelay: '0ms' } : undefined}
+        >
+          {feedbackStarTag}
+        </span>
+      ) : null}
+      {hasTags ? (tags || []).map((t, i)=>(
+        <span
+          key={i}
+          className={tagsAnimate ? 'tl-tags-reveal' : undefined}
+          style={tagsAnimate ? { animationDelay: `${(feedbackStarTag ? 1 : 0) + i * 90}ms` } : undefined}
+        >
+          <TLTag tag={t}/>
+        </span>
+      )) : null}
+    </div>
+  );
+}
+
+function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnalysis = false, isNew = false, onPhotoAnalysisComplete, feedbackStarTag}){
   const tagRowStyle = { display: 'flex', gap: 6, flexWrap: 'wrap' };
   if(entry.kind === 'weight-text'){
     return (
       <div className="v3-weight-text-record">
         <div className="v3-weight-text-body">{entry.text}</div>
-        {showTags && (entry.tags || []).length > 0 && (
-          <div style={tagRowStyle}>
-            {(entry.tags || []).map((t, i)=>(
-              <span key={i}><TLTag tag={t}/></span>
-            ))}
-          </div>
-        )}
+        <V3TagRow tags={entry.tags} showTags={showTags} tagsAnimate={tagsAnimate} feedbackStarTag={feedbackStarTag} style={tagRowStyle}/>
       </div>
     );
   }
   if(entry.kind === 'weight'){
     return (
-      <div className="v3-weight-record">
-        <span className="v3-weight-record-icon" aria-hidden="true">
-          <img src={recordIconSrc('weight')} alt="" width={28} height={28} draggable={false}/>
-        </span>
-        <span className="v3-weight-record-text">
-          {entry.weightLabel || '体重'}：{entry.weightValue}
-        </span>
-      </div>
+      <>
+        <div className="v3-weight-record">
+          <span className="v3-weight-record-icon" aria-hidden="true">
+            <img src={recordIconSrc('weight')} alt="" width={28} height={28} draggable={false}/>
+          </span>
+          <span className="v3-weight-record-text">
+            {entry.weightLabel || '体重'}：{entry.weightValue}
+          </span>
+        </div>
+        <V3TagRow tags={entry.tags} showTags={showTags} tagsAnimate={tagsAnimate} feedbackStarTag={feedbackStarTag} style={tagRowStyle}/>
+      </>
     );
   }
   if(entry.kind === 'symptom'){
     return (
-      <div className="v3-weight-record">
-        <span className="v3-weight-record-icon" aria-hidden="true">
-          <img src={recordIconSrc('symptom')} alt="" width={28} height={28} draggable={false}/>
-        </span>
-        <span className="v3-weight-record-text">
-          {entry.symptomLabel || '症状'}：{entry.symptomValue}
-        </span>
-      </div>
+      <>
+        <div className="v3-weight-record">
+          <span className="v3-weight-record-icon" aria-hidden="true">
+            <img src={recordIconSrc('symptom')} alt="" width={28} height={28} draggable={false}/>
+          </span>
+          <span className="v3-weight-record-text">
+            {entry.symptomLabel || '症状'}：{entry.symptomValue}
+          </span>
+        </div>
+        <V3TagRow tags={entry.tags} showTags={showTags} tagsAnimate={tagsAnimate} feedbackStarTag={feedbackStarTag} style={tagRowStyle}/>
+      </>
     );
   }
   if(entry.kind === 'daily-record'){
@@ -40606,14 +40844,17 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
       );
     }
     return (
-      <div className="v3-weight-record">
-        <span className="v3-weight-record-icon" aria-hidden="true">
-          <img src={recordIconSrc(iconKey)} alt="" width={28} height={28} draggable={false}/>
-        </span>
-        <span className="v3-weight-record-text">
-          {entry.recordLabel || '记录'}：{entry.recordDetail || entry.recordValue || entry.text}
-        </span>
-      </div>
+      <>
+        <div className="v3-weight-record">
+          <span className="v3-weight-record-icon" aria-hidden="true">
+            <img src={recordIconSrc(iconKey)} alt="" width={28} height={28} draggable={false}/>
+          </span>
+          <span className="v3-weight-record-text">
+            {entry.recordLabel || '记录'}：{entry.recordDetail || entry.recordValue || entry.text}
+          </span>
+        </div>
+        <V3TagRow tags={entry.tags} showTags={showTags} tagsAnimate={tagsAnimate} feedbackStarTag={feedbackStarTag} style={tagRowStyle}/>
+      </>
     );
   }
   if(entry.kind === 'period-detail'){
@@ -40643,27 +40884,33 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
   if(entry.kind === 'period'){
     const isEnd = (entry.periodLabel || '').indexOf('走') >= 0;
     return (
-      <div className="v3-weight-record">
-        <span className="v3-weight-record-icon" aria-hidden="true">
-          <img src={recordIconSrc(isEnd ? 'period-end' : 'period')} alt="" width={28} height={28} draggable={false}/>
-        </span>
-        <span className="v3-weight-record-text">
-          {entry.periodLabel || '月经来了'}
-        </span>
-      </div>
+      <>
+        <div className="v3-weight-record">
+          <span className="v3-weight-record-icon" aria-hidden="true">
+            <img src={recordIconSrc(isEnd ? 'period-end' : 'period')} alt="" width={28} height={28} draggable={false}/>
+          </span>
+          <span className="v3-weight-record-text">
+            {entry.periodLabel || '月经来了'}
+          </span>
+        </div>
+        <V3TagRow tags={entry.tags} showTags={showTags} tagsAnimate={tagsAnimate} feedbackStarTag={feedbackStarTag} style={tagRowStyle}/>
+      </>
     );
   }
   if(entry.kind === 'mood-face'){
     const label = entry.primaryMood?.label || entry.text || '';
     return (
-      <div className="v3-weight-record">
-        <span className="v3-weight-record-icon" aria-hidden="true">
-          <img src={recordIconSrc('mood')} alt="" width={28} height={28} draggable={false}/>
-        </span>
-        <span className="v3-weight-record-text">
-          心情：{label}
-        </span>
-      </div>
+      <>
+        <div className="v3-weight-record">
+          <span className="v3-weight-record-icon" aria-hidden="true">
+            <img src={recordIconSrc('mood')} alt="" width={28} height={28} draggable={false}/>
+          </span>
+          <span className="v3-weight-record-text">
+            心情：{label}
+          </span>
+        </div>
+        <V3TagRow tags={entry.tags} showTags={showTags} tagsAnimate={tagsAnimate} feedbackStarTag={feedbackStarTag} style={tagRowStyle}/>
+      </>
     );
   }
   if(entry.kind === 'voice'){
@@ -40673,19 +40920,7 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
     return (
       <div style={{display:'flex', flexDirection:'column', gap:8}}>
         {TlVoiceInline ? <TlVoiceInline voice={voice} text={text}/> : null}
-        {showTags && (entry.tags || []).length > 0 && (
-          <div style={tagRowStyle}>
-            {(entry.tags || []).map((t, i)=>(
-              <span
-                key={i}
-                className={tagsAnimate ? 'tl-tags-reveal' : undefined}
-                style={tagsAnimate ? { animationDelay: `${i * 90}ms` } : undefined}
-              >
-                <TLTag tag={t}/>
-              </span>
-            ))}
-          </div>
-        )}
+        <V3TagRow tags={entry.tags} showTags={showTags} tagsAnimate={tagsAnimate} feedbackStarTag={feedbackStarTag} style={tagRowStyle}/>
       </div>
     );
   }
@@ -40700,16 +40935,19 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
 
     if (stackedLayout && !photoAnalysis) {
       return (
-        <DietFoodResultSummary
-          items={items}
-          totalKcal={entry.totalKcal}
-          revealStep={3}
-          leadingIconSrc={dietIcon}
-          leadingLabel={dietLabel}
-          leadingHeadlineOnly
-          photoAboveTotalUrl={imgSrc}
-          time={entry.time}
-        />
+        <>
+          <DietFoodResultSummary
+            items={items}
+            totalKcal={entry.totalKcal}
+            revealStep={3}
+            leadingIconSrc={dietIcon}
+            leadingLabel={dietLabel}
+            leadingHeadlineOnly
+            photoAboveTotalUrl={imgSrc}
+            time={entry.time}
+          />
+          <V3TagRow tags={entry.tags} showTags={showTags} tagsAnimate={tagsAnimate} feedbackStarTag={feedbackStarTag} style={tagRowStyle}/>
+        </>
       );
     }
 
@@ -40730,6 +40968,7 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
             photoAboveTotalUrl={imgSrc}
             time={entry.time}
           />
+          <V3TagRow tags={entry.tags} showTags={showTags} tagsAnimate={tagsAnimate} feedbackStarTag={feedbackStarTag} style={tagRowStyle}/>
         </div>
       );
     }
@@ -40753,6 +40992,7 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
         ) : (
           <V3FoodListStatic items={items} totalKcal={entry.totalKcal} time={entry.time}/>
         )}
+        <V3TagRow tags={entry.tags} showTags={showTags} tagsAnimate={tagsAnimate} feedbackStarTag={feedbackStarTag} style={tagRowStyle}/>
       </div>
     );
   }
@@ -40761,19 +41001,7 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
       {(entry.text || entry.body) ? (
         <div style={{fontSize:16, color:'#323232', lineHeight:1.6}}>{entry.text || entry.body}</div>
       ) : null}
-      {showTags && (entry.tags || []).length > 0 && (
-        <div style={tagRowStyle}>
-          {(entry.tags || []).map((t, i)=>(
-            <span
-              key={i}
-              className={tagsAnimate ? 'tl-tags-reveal' : undefined}
-              style={tagsAnimate ? { animationDelay: `${i * 90}ms` } : undefined}
-            >
-              <TLTag tag={t}/>
-            </span>
-          ))}
-        </div>
-      )}
+      <V3TagRow tags={entry.tags} showTags={showTags} tagsAnimate={tagsAnimate} feedbackStarTag={feedbackStarTag} style={tagRowStyle}/>
     </div>
   );
 }
@@ -40806,8 +41034,10 @@ function normalizeV3Entry(raw){
 function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = false, entryId, forceInlineAi = false}){
   const cardRef = React.useRef(null);
   const aiPanelRef = React.useRef(null);
+  const isScheme2Fb = window.__FEEDBACK_DISPLAY_SCHEME === '方案二';
   const [revealStep, setRevealStep] = React.useState(() => (staggerReveal && isNew ? 0 : 2));
   const [open, setOpen] = React.useState(() => (!staggerReveal || !isNew) && aiDefaultOpen);
+  const [fbOpen, setFbOpen] = React.useState(() => (isScheme2Fb ? !!isNew : false) || aiDefaultOpen);
   const p = normalizeV3Entry(primary);
   const a = normalizeV3Entry(ai);
   const isPeriodQuick = p?.kind === 'period';
@@ -40938,7 +41168,10 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
   React.useEffect(() => {
     if(!staggerReveal || !isNew){
       setRevealStep(2);
-      if(aiDefaultOpen) setOpen(true);
+      if(aiDefaultOpen){
+        setOpen(true);
+        if(isScheme2Fb) setFbOpen(true);
+      }
       return;
     }
     setRevealStep(0);
@@ -40947,13 +41180,14 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
     const tAi = setTimeout(() => {
       setRevealStep(2);
       setOpen(true);
+      if(isScheme2Fb) setFbOpen(true);
       setTimeout(scrollAfterAiChartReveal, 400);
     }, 980);
     return () => {
       clearTimeout(tTags);
       clearTimeout(tAi);
     };
-  }, [staggerReveal, isNew, aiDefaultOpen, primary?.id, scrollAfterAiChartReveal]);
+  }, [staggerReveal, isNew, aiDefaultOpen, primary?.id, scrollAfterAiChartReveal, isScheme2Fb]);
 
   if(!p && a){
     return (
@@ -40977,6 +41211,14 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
     : undefined;
   const showTags = revealStep >= 1;
   const showAi = revealStep >= 2;
+  const showScheme2Fb = isScheme2Fb && !!a && showAi;
+  const FeedbackStarTag = window.FeedbackStarTag;
+  const FeedbackBubblePanel = window.FeedbackBubblePanel;
+  const bubbleFeedbackLine = window.bubbleFeedbackLine;
+  const fbShortLine = a && bubbleFeedbackLine ? bubbleFeedbackLine(a.title || 'AI 分析') : '点滴回应';
+  const feedbackStarTag = showScheme2Fb && FeedbackStarTag ? (
+    <FeedbackStarTag open={fbOpen} onClick={()=> setFbOpen(v=>!v)}/>
+  ) : null;
   const useScheme3Fold = window.__FEEDBACK_DISPLAY_SCHEME === '方案三' && !!a && showAi;
   const foldPayload = useScheme3Fold && window.buildAnnotationPayloadFromGroup
     ? window.buildAnnotationPayloadFromGroup({ primary: p, ai: a, entryId: derivedId })
@@ -41031,7 +41273,38 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
           photoAnalysis={photoAnalysis}
           isNew={isNew}
           onPhotoAnalysisComplete={handlePhotoAnalysisComplete}
+          feedbackStarTag={feedbackStarTag}
         />
+        {showScheme2Fb && FeedbackBubblePanel ? (
+          <div ref={aiPanelRef}>
+            <FeedbackBubblePanel
+              open={fbOpen}
+              line={fbShortLine}
+              className="is-embedded"
+              animateIn={!!isNew}
+            >
+              {a.chartType && (
+                <TLChart
+                  type={a.chartType}
+                  data={a.chartData}
+                  weightUnit={a.weightUnit}
+                  note={a.note}
+                />
+              )}
+              {a.chartType !== 'caloriePanel' && (a.noteParts || a.note) && (() => {
+                const TypewriterText = window.TypewriterText;
+                const streamNote = isNew && a.chartType === 'symptomDots' && a.note && TypewriterText;
+                return streamNote ? (
+                  <div className="v3-weight-curve-note">
+                    <TypewriterText text={a.note} active followScroll/>
+                  </div>
+                ) : (
+                  <WeightAnalysisNote noteParts={a.noteParts} note={a.note}/>
+                );
+              })()}
+            </FeedbackBubblePanel>
+          </div>
+        ) : null}
         </V3EditableRecordArea>
       </div>
       {p.sourceFrom && (
@@ -41041,7 +41314,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
           borderTop:'0.5px dashed '+TL_HAIR,
         }}>{p.sourceFrom}</div>
       )}
-      {a && showAi && window.__FEEDBACK_DISPLAY_SCHEME !== '方案三' && (() => {
+      {a && showAi && window.__FEEDBACK_DISPLAY_SCHEME !== '方案三' && !showScheme2Fb && (() => {
         const DietAiCollapsibleSection = window.DietAiCollapsibleSection;
         const TypewriterText = window.TypewriterText;
         const streamNote = isNew && a.chartType === 'symptomDots' && a.note && TypewriterText;
@@ -44109,6 +44382,67 @@ function RecordEmptyTagIcon({ name, color }) {
   );
 }
 
+const ONBOARD_DOCK_QUICK_ITEMS = [
+  { id: 'weight', label: '体重' },
+  { id: 'symptom', label: '症状' },
+  { id: 'mood', label: '心情' },
+  { id: 'diet', label: '饮食' },
+  { id: 'beverage', label: '喝水' },
+];
+
+function OnboardDockVoiceIco({ size = 26 }) {
+  const sw = 3.2;
+  return (
+    <svg viewBox="0 0 48 48" fill="none" width={size} height={size} aria-hidden="true">
+      <circle cx="24" cy="24" r="21" stroke="currentColor" strokeWidth="2.8"/>
+      <path d="M21.5 19.5 A6 6 0 0 1 21.5 28.5" stroke="currentColor" strokeWidth={sw} strokeLinecap="round" fill="none"/>
+      <path d="M24 15.5 A10 10 0 0 1 24 32.5" stroke="currentColor" strokeWidth={sw} strokeLinecap="round" fill="none"/>
+      <path d="M26.5 12 A14 14 0 0 1 26.5 36" stroke="currentColor" strokeWidth={sw} strokeLinecap="round" fill="none"/>
+    </svg>
+  );
+}
+
+/** 方案三/四新手引导底部：快捷入口 + 记录生活点滴输入栏（与主 Dock 一致） */
+function OnboardGuideDockBottom({ className = '' }) {
+  const UnifiedQuickIcon = window.UnifiedQuickIcon;
+  return (
+    <div className={'ep-onboard-dock-bottom' + (className ? ' ' + className : '')} aria-label="记录入口">
+      <div className="dock-panel is-feeding-dock is-path-dock ep-onboard-dock-panel">
+        <div className="dock-bar is-path-dock has-feeding-quick">
+          <div className="dock-feeding-quick" aria-label="快捷记录">
+            <div className="dock-feeding-quick-scroll" data-cols="5">
+              {ONBOARD_DOCK_QUICK_ITEMS.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  className="dock-feeding-quick-item"
+                  tabIndex={-1}
+                  aria-hidden="true"
+                >
+                  <span className="dock-feeding-quick-icon" aria-hidden="true">
+                    {UnifiedQuickIcon ? (
+                      <UnifiedQuickIcon type={item.id === 'beverage' ? 'water' : item.id}/>
+                    ) : null}
+                  </span>
+                  <span className="dock-feeding-quick-label">{item.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="dock-input-row dock-input-pill">
+            <button type="button" className="dock-mode-btn" tabIndex={-1} aria-hidden="true">
+              <OnboardDockVoiceIco size={26}/>
+            </button>
+            <div className="dock-text-field">
+              <span className="dock-float-ph ep-onboard-dock-ph">记录生活点滴</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function OnboardGuideScheme3DemoCard({ t, P }) {
   const pCard = easeOut(range(t, 0, ONBOARD_S3_CARD_END));
   const pVoice = easeOut(range(t, ONBOARD_S3_VOICE_BEGIN, ONBOARD_S3_VOICE_IN_END));
@@ -44158,7 +44492,6 @@ function OnboardGuideScheme3Screen({ onClose }) {
   const P = EMPTY_PALETTE;
   const loopT = useLoopTime(ONBOARD_S3_LOOP_SEC, 1);
   const t = Math.min(loopT, ONBOARD_S3_ANIM_END);
-  const [pressed, setPressed] = useState(false);
   const [closing, setClosing] = useState(false);
 
   const handleClose = () => {
@@ -44210,17 +44543,7 @@ function OnboardGuideScheme3Screen({ onClose }) {
         <OnboardGuideScheme3DemoCard t={t} P={P}/>
       </div>
 
-      <div className="record-empty-voice-wrap ep-onboard-s3-voice-wrap">
-        <RecordEmptyVoiceButton
-          P={P}
-          pressed={pressed}
-          onPress={()=>setPressed(true)}
-          onRelease={()=>setPressed(false)}
-        />
-        <p className="record-empty-voice-hint">
-          {pressed ? '松开发送' : '按住说话'}
-        </p>
-      </div>
+      <OnboardGuideDockBottom className="ep-onboard-s3-dock"/>
     </div>
   );
 }
@@ -44511,6 +44834,7 @@ function RecordEmptyVoiceButton({ P, pressed, onPress, onRelease }) {
 Object.assign(window, {
   RecordEmptyScreen,
   OnboardGuideScheme3Screen,
+  OnboardGuideDockBottom,
   RecordEmptyVoiceBubble,
   RecordEmptyTagsRow,
   RecordEmptyVoiceButton,
@@ -44625,7 +44949,7 @@ function OnboardGuideScheme4CardText({
 
 function OnboardGuideScheme4Screen({ onClose }) {
   const TimelineStream = window.TimelineStream;
-  const RecordEmptyVoiceButton = window.RecordEmptyVoiceButton;
+  const OnboardGuideDockBottom = window.OnboardGuideDockBottom;
   const [cycle, setCycle] = useState(0);
   const [closing, setClosing] = useState(false);
   const [inputPhase, setInputPhase] = useState('typing');
@@ -44777,17 +45101,9 @@ function OnboardGuideScheme4Screen({ onClose }) {
         ) : null}
       </div>
 
-      <div className="record-empty-voice-wrap ep-onboard-s4-voice-wrap">
-        {RecordEmptyVoiceButton ? (
-          <RecordEmptyVoiceButton
-            P={ONBOARD_S4_PALETTE}
-            pressed={false}
-            onPress={()=>{}}
-            onRelease={()=>{}}
-          />
-        ) : null}
-        <p className="record-empty-voice-hint">按住说话</p>
-      </div>
+      {OnboardGuideDockBottom ? (
+        <OnboardGuideDockBottom className="ep-onboard-s4-dock"/>
+      ) : null}
     </div>
   );
 }
@@ -66926,6 +67242,65 @@ function bubbleFeedbackLine(title){
   return t.length > 12 ? t.slice(0, 12) : t;
 }
 
+/** 方案二：实心星星标签，描边 pill 样式 */
+function FeedbackStarTag({ open = false, onClick, className = '', size = 'sm' }){
+  return (
+    <button
+      type="button"
+      className={
+        'v3-tag is-fb-star'
+        + (open ? ' is-open' : '')
+        + (size === 'xs' ? ' is-xs' : '')
+        + (className ? ' ' + className : '')
+      }
+      data-cat="反馈"
+      aria-expanded={open}
+      aria-label={open ? '收起反馈' : '展开反馈'}
+      onClick={(event)=>{
+        event.stopPropagation();
+        onClick?.();
+      }}
+    >
+      <span className="tl-period-analysis-spark" aria-hidden="true"/>
+    </button>
+  );
+}
+
+/** 方案二：由星星标签控制的下方气泡面板 */
+function FeedbackBubblePanel({
+  open = false,
+  line = '',
+  children,
+  className = '',
+  animateIn = false,
+}){
+  return (
+    <div
+      className={
+        'tl-fb-bub is-panel'
+        + (open ? ' is-open' : '')
+        + (className ? ' ' + className : '')
+        + (animateIn ? ' is-animate-in' : '')
+      }
+      aria-hidden={!open && !children}
+    >
+      <div className="tl-fb-bub-full" aria-hidden={!open}>
+        <div className="tl-fb-bub-inner">
+          {line ? (
+            <div className="tl-fb-bub-cline">
+              <span className="tl-fb-bub-spark" aria-hidden="true">
+                <span className="tl-period-analysis-spark"/>
+              </span>
+              {line}
+            </div>
+          ) : null}
+          <div className="tl-fb-bub-content">{children}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function DietAiCollapsibleSection({
   title = '卡路里摄入量',
   defaultOpen = true,
@@ -66933,25 +67308,68 @@ function DietAiCollapsibleSection({
   embedded = false,
   compact = false,
   footer = null,
+  open: controlledOpen,
+  onOpenChange,
+  tagOnly = false,
+  panelOnly = false,
   children,
 }){
   const scheme = getFeedbackDisplayScheme();
-  const [open, setOpen] = React.useState(defaultOpen);
+  const [internalOpen, setInternalOpen] = React.useState(defaultOpen);
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = onOpenChange || setInternalOpen;
 
-  if(scheme === '方案一' || scheme === '方案二'){
+  if(scheme === '方案一'){
     const bubbleOpen = !!animateIn || !!defaultOpen;
     const shortLine = bubbleFeedbackLine(title);
     return (
       <FeedbackBubble
         variant="bubble"
-        tone={scheme === '方案二' ? 's2' : 's1'}
+        tone="s1"
         defaultOpen={bubbleOpen}
-        teaser={scheme === '方案一' ? '点滴回应' : shortLine}
+        teaser="点滴回应"
         line={shortLine}
         className={(embedded ? 'is-embedded' : '') + (animateIn ? ' is-animate-in' : '')}
       >
         {children}
       </FeedbackBubble>
+    );
+  }
+
+  if(scheme === '方案二'){
+    const shortLine = bubbleFeedbackLine(title);
+    const panelClass = (embedded ? 'is-embedded' : '') + (animateIn ? ' is-animate-in' : '');
+    if(tagOnly){
+      return (
+        <FeedbackStarTag
+          open={open}
+          onClick={()=> setOpen(!open)}
+        />
+      );
+    }
+    if(panelOnly){
+      return (
+        <FeedbackBubblePanel
+          open={open}
+          line={shortLine}
+          className={panelClass}
+          animateIn={animateIn}
+        >
+          {children}
+          {footer}
+        </FeedbackBubblePanel>
+      );
+    }
+    return (
+      <div className="tl-fb-s2-block">
+        <div className="tl-fb-s2-tag-row">
+          <FeedbackStarTag open={open} onClick={()=> setOpen(!open)}/>
+        </div>
+        <FeedbackBubblePanel open={open} line={shortLine} className={panelClass} animateIn={animateIn}>
+          {children}
+          {footer}
+        </FeedbackBubblePanel>
+      </div>
     );
   }
 
@@ -68206,7 +68624,10 @@ Object.assign(window, {
   DietAiInsightsShell,
   DietAiCollapsibleSection,
   FeedbackBubble,
+  FeedbackStarTag,
+  FeedbackBubblePanel,
   FeedbackBubbleSparkline,
+  bubbleFeedbackLine,
   useFeedbackAnnotationScheme,
   DietCalorieAiBody,
   DietAiChevron,
@@ -68226,6 +68647,721 @@ Object.assign(window, {
   getMealCalorieInsight,
   getCycleDietTipDisplay,
   getCycleInsight,
+});
+
+</script>
+
+<!-- feedback-annotation.jsx -->
+<script type="text/babel">
+// ===== 反馈展示 · 方案三：图表批注浮层（对齐 demo v2）=====
+// 点卡片 → 记录详情；点角标 → 浮层批注；浮层点图表 → 继续了解
+
+function feedbackAnnotationIsActive(){
+  return window.__FEEDBACK_DISPLAY_SCHEME === '方案三';
+}
+
+function FeedbackMiniChart({ values = [], width = 280, height = 122, big = false }){
+  const pts = React.useMemo(()=>{
+    let list = (values || []).map((v)=> Number(v)).filter((n)=> Number.isFinite(n));
+    if(list.length < 2) list = [52.8, 52.0, 52.2, 52.5, 53.4, 52.8, 52.3];
+    if(list.length > 7) list = list.slice(-7);
+    while(list.length < 7) list = [list[0], ...list];
+    return list.slice(0, 7);
+  }, [values]);
+  const w = big ? 300 : width;
+  const h = big ? 180 : height;
+  const pad = big ? 18 : 12;
+  const min = Math.min(...pts);
+  const max = Math.max(...pts);
+  const range = Math.max(0.01, max - min);
+  const x = (i)=> pad + i * (w - pad * 2) / 6;
+  const y = (v)=> h - pad - ((v - min) / range) * (h - pad * 2);
+  const poly = pts.map((v, i)=> `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+  const grid = [0.25, 0.5, 0.75].map((r, i)=>{
+    const gy = (pad + (h - pad * 2) * r).toFixed(1);
+    return <line key={i} x1={pad} y1={gy} x2={w - pad} y2={gy} stroke="#e6e1e4" strokeWidth="1"/>;
+  });
+  return (
+    <svg
+      className={big ? 'fb-anno-chart-svg is-big' : 'fb-anno-chart-svg'}
+      viewBox={`0 0 ${w} ${h}`}
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
+      {grid}
+      <polyline
+        points={poly}
+        fill="none"
+        stroke="#aaa6ac"
+        strokeWidth={big ? 2 : 1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {pts.map((v, i)=>{
+        const isLast = i === pts.length - 1;
+        return (
+          <circle
+            key={i}
+            cx={x(i)}
+            cy={y(v)}
+            r={isLast ? 3.8 : 2.7}
+            fill={isLast ? '#ff4d88' : '#b8b4ba'}
+          />
+        );
+      })}
+    </svg>
+  );
+}
+
+function enrichAnnotationMeta(payload){
+  const kind = payload.kind || 'text';
+  const values = payload.values || [];
+  const base = { ...payload };
+  if(kind === 'weight'){
+    const nums = values.length ? values : [53.2, 53.5, 53.3, 53.6, 53.2, 53.5, 53.4];
+    const min = Math.min(...nums);
+    const max = Math.max(...nums);
+    return {
+      ...base,
+      values: nums,
+      title: base.title || '近7天体重',
+      summary: base.summary || `记录在${min.toFixed(1)}—${max.toFixed(1)}kg之间，波动${(max - min).toFixed(1)}kg。`,
+      source: base.source || '基于近7天的7条体重记录',
+      kicker: base.kicker || '今天的体重处于近7天记录范围内。',
+      rangeLabel: '记录范围',
+      changeLabel: '整体波动',
+      rangeMetric: `${min.toFixed(1)}—${max.toFixed(1)}kg`,
+      changeMetric: `${(max - min).toFixed(1)}kg`,
+      detailRange: '近7天 · 7条记录',
+      detail: base.response?.text || base.summary || '近7天体重记录较为平稳。以上仅根据你的原始记录整理。',
+      context: `体重趋势 · ${min.toFixed(1)}—${max.toFixed(1)}kg`,
+      suggestions: base.suggestions || ['这周的波动幅度算大吗？', '帮我回顾影响体重的生活记录', '以后应该关注哪些变化？'],
+    };
+  }
+  if(kind === 'calorie'){
+    return {
+      ...base,
+      title: base.title || '近7天热量',
+      summary: base.summary || '近7天热量有变化。',
+      source: base.source || '基于近7天的饮食记录',
+      kicker: base.kicker || '今天的热量记录已纳入近7天趋势。',
+      rangeLabel: '今日摄入',
+      changeLabel: '近7天',
+      rangeMetric: values.length ? `${Math.round(values[values.length - 1])} kcal` : '—',
+      changeMetric: '有波动',
+      detailRange: '近7天饮食记录',
+      detail: base.response?.text || base.summary || '近7天热量有变化。',
+      context: '热量趋势 · 近7天',
+      suggestions: base.suggestions || ['这周热量偏高吗？', '帮我看看哪几餐影响最大', '经期饮食要注意什么？'],
+    };
+  }
+  if(kind === 'mood'){
+    return {
+      ...base,
+      values: values.length ? values : [1.8, 2.5, 2.1, 3.0, 2.0, 2.4, 1.4],
+      title: base.title || '近7天情绪',
+      summary: base.summary || '记录有起伏，今天处于较低位置。',
+      source: base.source || '基于近7天的5条情绪记录',
+      kicker: base.kicker || '今天的情绪记录处于近7天较低位置。',
+      rangeLabel: '记录数量',
+      changeLabel: '变化情况',
+      rangeMetric: '5条记录',
+      changeMetric: '3次变化',
+      detailRange: '近7天 · 5条记录',
+      detail: base.response?.text || base.summary || '近7天情绪记录有起伏。这里只呈现记录变化，不对原因作自动推断。',
+      context: '情绪趋势 · 近7天有起伏',
+      suggestions: base.suggestions || ['帮我回顾这几天发生了什么', '只看与睡眠有关的记录', '我想继续记一段感受'],
+    };
+  }
+  return {
+    ...base,
+    title: base.title || '点滴回应',
+    summary: base.summary || '已记下你的这条记录。',
+    source: base.source || '基于你的原始记录',
+    kicker: base.kicker || '这条记录已收好。',
+    rangeLabel: '记录',
+    changeLabel: '状态',
+    rangeMetric: '1条',
+    changeMetric: '已记下',
+    detailRange: '本次记录',
+    detail: base.response?.text || base.summary || '收好了。想说的，我都听着。',
+    context: '点滴回应',
+    suggestions: base.suggestions || ['我想继续说一点感受', '帮我回顾相关记录', '这条要不要同步到日历？'],
+  };
+}
+
+function buildAnnotationPayloadFromGroup({ primary, ai, entryId }){
+  const p = primary || {};
+  const a = ai || {};
+  const chartType = a.chartType || '';
+  const text = p.text || p.body || p.voiceText || '';
+  const tags = (p.tags || []).map((t)=>{
+    if(typeof t === 'string') return t;
+    return t.cat || t.label || t.name || '';
+  }).filter(Boolean);
+  let kind = 'text';
+  let title = a.title || '点滴回应';
+  let values = [];
+  let summary = a.note || '已根据你的记录整理反馈。';
+  if(chartType === 'weightTrend'){
+    kind = 'weight';
+    title = a.title || '近7天体重';
+    values = (a.chartData || []).map((d)=> Number(d?.v ?? d)).filter(Number.isFinite);
+    if(!values.length) values = [53.2, 53.5, 53.3, 53.6, 53.2, 53.5, 53.4];
+    summary = a.note || '本周体重较平稳。';
+  } else if(chartType === 'caloriePanel'){
+    kind = 'calorie';
+    title = a.title || '近7天热量';
+    const consumed = Number(a.chartData?.consumed);
+    values = [920, 1050, 980, 1180, 1080, 1240, Number.isFinite(consumed) ? consumed : 1120];
+    summary = a.note || '近7天热量有变化。';
+  } else if(chartType === 'todayMoodWave' || chartType === 'moodWeek' || /心情|情绪/.test(title)){
+    kind = 'mood';
+    title = a.title || '近7天情绪';
+    values = [1.8, 2.5, 2.1, 3.0, 2.0, 2.4, 1.4];
+    summary = a.note || '近7天情绪有变化。';
+  }
+  return enrichAnnotationMeta({
+    id: entryId || p.id || a.id || ('anno-' + Date.now()),
+    kind,
+    title,
+    summary: String(summary).slice(0, 72),
+    values,
+    record: {
+      time: p.time || a.time || '',
+      dateLabel: '今天',
+      text,
+      tags: tags.length ? tags : (kind === 'weight' ? ['体重'] : kind === 'calorie' ? ['饮食'] : ['记录']),
+    },
+    response: {
+      text: a.note || summary,
+      chartType: a.chartType || null,
+      title,
+      values,
+    },
+  });
+}
+
+function buildAnnotationPayloadFromAiNote(entry){
+  const text = entry?.voiceText || entry?.body || entry?.text || '';
+  const tags = (entry?.tags || []).map((t)=>{
+    if(typeof t === 'string') return t;
+    return t.cat || t.label || t.name || '';
+  }).filter(Boolean);
+  const note = entry?.aiNote?.text || '';
+  const isMood = /心情|情绪|提不起劲|不好/.test(text + note);
+  return enrichAnnotationMeta({
+    id: entry?.id || ('anno-' + Date.now()),
+    kind: isMood ? 'mood' : 'text',
+    title: isMood ? '近7天情绪' : '点滴回应',
+    summary: note ? String(note).slice(0, 36) : '已记下你的这条记录。',
+    values: isMood ? [1.8, 2.5, 2.1, 3.0, 2.0, 2.4, 1.4] : [2, 2.2, 2.1, 2.4, 2.3, 2.5, 2.2],
+    record: {
+      time: entry?.time || '',
+      dateLabel: '今天',
+      text,
+      tags: tags.length ? tags : (isMood ? ['心情', '日记'] : ['记录']),
+    },
+    response: {
+      text: note || '收好了。想说的，我都听着。',
+      chartType: isMood ? 'mood' : null,
+      title: isMood ? '近7天情绪' : '点滴回应',
+      values: isMood ? [1.8, 2.5, 2.1, 3.0, 2.0, 2.4, 1.4] : [],
+    },
+  });
+}
+
+function buildAnnotationPayloadFromDietItem(item){
+  const data = item?.dietData || {};
+  const list = Array.isArray(data.items) ? data.items : [];
+  const foods = (data.foods || list.map((food)=> (typeof food === 'string' ? food : (food?.name || food?.label || '')))).filter(Boolean);
+  const names = foods.length ? foods.join('、') : (item?.sourceText || '饮食记录');
+  const totalKcal = Number(data.totalKcal) || 0;
+  const weekVals = (item?.userContext?.weekData || [])
+    .map((d)=> Number(d?.kcal ?? d?.v ?? d))
+    .filter(Number.isFinite);
+  const fallback = [920, 1050, 980, 1180, 1080, 1240, totalKcal || 1120];
+  let values = (weekVals.length >= 2 ? weekVals : fallback).slice(-7);
+  while(values.length < 7) values = [values[0] || 1000, ...values];
+  values = values.slice(-7);
+  return enrichAnnotationMeta({
+    id: item?.id || ('anno-' + Date.now()),
+    kind: 'calorie',
+    title: '近7天热量',
+    summary: '近7天热量有变化。',
+    values,
+    record: {
+      time: data.time || item?.time || '',
+      dateLabel: '今天',
+      text: names,
+      tags: ['饮食'],
+    },
+    response: {
+      text: '近7天热量有变化。',
+      chartType: 'caloriePanel',
+      title: '近7天热量',
+      values,
+    },
+  });
+}
+
+function openFeedbackAnnotation(payload, anchorEl){
+  if(!feedbackAnnotationIsActive() || !payload) return;
+  let anchorRect = null;
+  if(anchorEl && anchorEl.getBoundingClientRect){
+    const rect = anchorEl.getBoundingClientRect();
+    anchorRect = {
+      left: rect.left, top: rect.top, width: rect.width, height: rect.height,
+      right: rect.right, bottom: rect.bottom,
+    };
+  }
+  window.dispatchEvent(new CustomEvent('openFeedbackAnnotation', {
+    detail: { ...enrichAnnotationMeta(payload), anchorRect },
+  }));
+}
+
+function openFeedbackRecordDetail(payload){
+  if(!feedbackAnnotationIsActive() || !payload) return;
+  window.dispatchEvent(new CustomEvent('openFeedbackRecordDetail', {
+    detail: enrichAnnotationMeta(payload),
+  }));
+}
+
+function FeedbackChartMarker({ payload, isNew = false, className = '', markerRef = null }){
+  const [fresh, setFresh] = React.useState(!!isNew);
+  React.useEffect(()=>{
+    if(isNew) setFresh(true);
+  }, [isNew]);
+  if(!feedbackAnnotationIsActive() || !payload) return null;
+  return (
+    <button
+      ref={markerRef}
+      type="button"
+      className={'fb-anno-marker' + (className ? ' ' + className : '')}
+      data-new={fresh ? 'true' : 'false'}
+      aria-label={'查看' + (payload.title || '反馈') + '批注'}
+      onClick={(event)=>{
+        event.preventDefault();
+        event.stopPropagation();
+        setFresh(false);
+        openFeedbackAnnotation(payload, event.currentTarget);
+      }}
+    >
+      <svg viewBox="0 0 20 20" aria-hidden="true">
+        <polyline
+          points="2,13 6,9 10,12 14,6 18,10"
+          fill="none"
+          stroke="#8f8b91"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <circle cx="18" cy="10" r="2" fill="#ff4d88"/>
+      </svg>
+    </button>
+  );
+}
+
+/** 方案三：图表在卡片外展示，再飞入卡内右上角标 */
+function FeedbackChartFoldIn({ payload, isNew = false, children = null }){
+  const enriched = React.useMemo(
+    ()=> (payload ? enrichAnnotationMeta(payload) : null),
+    [payload]
+  );
+  const [phase, setPhase] = React.useState(()=> (
+    (isNew && feedbackAnnotationIsActive()) ? 'preview' : 'settled'
+  ));
+  const panelRef = React.useRef(null);
+  const markerRef = React.useRef(null);
+
+  React.useEffect(()=>{
+    if(!isNew || !feedbackAnnotationIsActive()){
+      setPhase('settled');
+      return undefined;
+    }
+    setPhase('preview');
+    const holdId = window.setTimeout(()=> setPhase('folding'), 1300);
+    return ()=> window.clearTimeout(holdId);
+  }, [isNew, enriched?.id]);
+
+  React.useEffect(()=>{
+    if(phase !== 'preview') return undefined;
+    const run = ()=>{
+      if(typeof window.scrollTimelineToBottom === 'function'){
+        window.scrollTimelineToBottom('smooth');
+      } else {
+        window.scrollFeedContentIntoView?.(panelRef.current);
+      }
+    };
+    const id = window.setTimeout(run, 80);
+    return ()=> window.clearTimeout(id);
+  }, [phase]);
+
+  React.useEffect(()=>{
+    if(phase !== 'folding') return undefined;
+    const panel = panelRef.current;
+    const marker = markerRef.current;
+    if(!panel || !marker){
+      setPhase('settled');
+      return undefined;
+    }
+    const pr = panel.getBoundingClientRect();
+    const mr = marker.getBoundingClientRect();
+    const dx = (mr.left + mr.width / 2) - (pr.left + pr.width / 2);
+    const dy = (mr.top + mr.height / 2) - (pr.top + pr.height / 2);
+    const s = Math.max(0.08, Math.min(mr.width / Math.max(pr.width, 1), mr.height / Math.max(pr.height, 1)));
+    panel.classList.add('is-folding');
+    const anim = panel.animate(
+      [
+        { opacity: 1, transform: 'translate(0,0) scale(1)' },
+        { opacity: 0.2, transform: `translate(${dx}px, ${dy}px) scale(${s})` },
+      ],
+      { duration: 560, easing: 'cubic-bezier(.45,.02,.25,1)', fill: 'forwards' }
+    );
+    let done = false;
+    const finish = ()=>{
+      if(done) return;
+      done = true;
+      setPhase('settled');
+      marker.animate(
+        [
+          { transform: 'scale(.55)', opacity: 0.4 },
+          { transform: 'scale(1.1)', opacity: 1 },
+          { transform: 'scale(1)', opacity: 1 },
+        ],
+        { duration: 320, easing: 'cubic-bezier(.22,1,.36,1)' }
+      );
+    };
+    anim.onfinish = finish;
+    const fallback = window.setTimeout(finish, 620);
+    return ()=>{
+      window.clearTimeout(fallback);
+      try{ anim.cancel(); }catch(_e){ /* ignore */ }
+    };
+  }, [phase]);
+
+  if(!feedbackAnnotationIsActive() || !enriched) return children || null;
+  const showPanel = phase === 'preview' || phase === 'folding';
+  const marker = (
+    <FeedbackChartMarker
+      payload={enriched}
+      isNew={isNew && phase === 'settled'}
+      markerRef={markerRef}
+      className={phase === 'settled' ? 'is-ready' : 'is-waiting'}
+    />
+  );
+
+  // 有 children：卡片外包一层，图表在卡外；无 children：兼容旧用法（仅角标）
+  if(!children){
+    return (
+      <>
+        {showPanel ? (
+          <div
+            ref={panelRef}
+            className={'fb-anno-fold-panel is-outside' + (phase === 'preview' ? ' is-in' : '')}
+            aria-hidden="true"
+          >
+            <div className="fb-anno-fold-head">
+              <span className="fb-anno-fold-spark" aria-hidden="true">✦</span>
+              <span className="fb-anno-fold-title">{enriched.title}</span>
+            </div>
+            <div className="fb-anno-fold-chart">
+              <FeedbackMiniChart values={enriched.values}/>
+              <div className="fb-anno-axis"><span>近7天</span><span>今天</span></div>
+            </div>
+            <div className="fb-anno-fold-summary">{enriched.summary}</div>
+          </div>
+        ) : null}
+        {marker}
+      </>
+    );
+  }
+
+  return (
+    <div className={'fb-anno-fold-shell' + (showPanel ? ' is-previewing' : '')}>
+      <div className="fb-anno-fold-card-host">
+        {children}
+        {marker}
+      </div>
+      {showPanel ? (
+        <div
+          ref={panelRef}
+          className={'fb-anno-fold-panel is-outside' + (phase === 'preview' ? ' is-in' : '')}
+          aria-hidden="true"
+        >
+          <div className="fb-anno-fold-head">
+            <span className="fb-anno-fold-spark" aria-hidden="true">✦</span>
+            <span className="fb-anno-fold-title">{enriched.title}</span>
+          </div>
+          <div className="fb-anno-fold-chart">
+            <FeedbackMiniChart values={enriched.values}/>
+            <div className="fb-anno-axis"><span>近7天</span><span>今天</span></div>
+          </div>
+          <div className="fb-anno-fold-summary">{enriched.summary}</div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function FeedbackAnnotationPopover({ open, payload, onClose, onOpenChat }){
+  const popRef = React.useRef(null);
+  React.useEffect(()=>{
+    if(!open || !payload || !popRef.current) return;
+    const el = popRef.current;
+    const a = payload.anchorRect;
+    if(!a){
+      el.animate(
+        [{ opacity: 0, transform: 'translateX(-50%) scale(.92)' }, { opacity: 1, transform: 'translateX(-50%) scale(1)' }],
+        { duration: 280, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'both' }
+      );
+      return;
+    }
+    const b = el.getBoundingClientRect();
+    const dx = (a.left + a.width / 2) - (b.left + b.width * 0.88);
+    const dy = (a.top + a.height / 2) - (b.top + b.height * 0.08);
+    el.animate(
+      [
+        { opacity: 0, transform: `translateX(-50%) translate(${dx}px,${dy}px) scale(.12)` },
+        { opacity: 1, transform: 'translateX(-50%) translate(0,0) scale(1)' },
+      ],
+      { duration: 360, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'both' }
+    );
+  }, [open, payload]);
+
+  if(!payload) return null;
+  return (
+    <div className={'fb-anno-overlay' + (open ? ' is-open' : '')} aria-hidden={!open}>
+      <button type="button" className="fb-anno-scrim" aria-label="关闭图表批注" onClick={onClose}/>
+      <section
+        ref={popRef}
+        className={'fb-anno-popover' + (open ? ' is-visible' : '')}
+        role="dialog"
+        aria-modal="true"
+        aria-label="记录批注"
+      >
+        <div className="fb-anno-pop-head">
+          <div>
+            <div className="fb-anno-eyebrow">记录批注</div>
+            <div className="fb-anno-pop-title">{payload.title}</div>
+          </div>
+          <button type="button" className="fb-anno-close" aria-label="关闭" onClick={onClose}>×</button>
+        </div>
+        <button type="button" className="fb-anno-chart-btn" onClick={onOpenChat} aria-label="进入继续了解">
+          <div className="fb-anno-chart-wrap">
+            <FeedbackMiniChart values={payload.values}/>
+            <div className="fb-anno-axis"><span>近7天</span><span>今天</span></div>
+          </div>
+          <div className="fb-anno-summary">{payload.summary}</div>
+          <div className="fb-anno-source">{payload.source}</div>
+          <div className="fb-anno-open-detail"><span>进入继续了解</span><span>›</span></div>
+        </button>
+      </section>
+    </div>
+  );
+}
+
+function FeedbackRecordDetailPage({ open, payload, onClose }){
+  if(!payload) return null;
+  const record = payload.record || {};
+  const tags = record.tags || [];
+  const showChart = (payload.values && payload.values.length > 1) || payload.kind !== 'text';
+  return (
+    <div className={'fb-anno-detail' + (open ? ' is-open' : '')} role="dialog" aria-modal="true" aria-label="记录详情">
+      <div className="fb-anno-detail-nav is-title">
+        <button type="button" className="fb-anno-back-txt" onClick={onClose}>‹ 返回</button>
+        <div className="fb-anno-detail-title">记录详情</div>
+        <div className="fb-anno-detail-actions" aria-hidden="true">✎　···</div>
+      </div>
+
+      <div className="fb-anno-detail-scroll">
+        <section className="fb-anno-section">
+          <div className="fb-anno-section-label">原始记录</div>
+          <div className="fb-anno-record-card">
+            <div className="fb-anno-record-time">{[record.dateLabel, record.time].filter(Boolean).join(' ')}</div>
+            <div className="fb-anno-record-text">{record.text || '（无文字）'}</div>
+          </div>
+        </section>
+
+        {tags.length > 0 && (
+          <section className="fb-anno-section">
+            <div className="fb-anno-section-label">识别标签</div>
+            <div className="fb-anno-tags">
+              {tags.map((tag)=> <span key={tag} className="fb-anno-tag">{tag}</span>)}
+            </div>
+          </section>
+        )}
+
+        <section className="fb-anno-section">
+          <div className="fb-anno-section-label">点滴回响</div>
+          <div className="fb-anno-feedback-card">
+            <h2 className="fb-anno-feedback-title">{payload.title}</h2>
+            <div className="fb-anno-feedback-range">{payload.detailRange}</div>
+            {showChart ? (
+              <div className="fb-anno-response-chart is-in-card">
+                <FeedbackMiniChart values={payload.values} big/>
+              </div>
+            ) : null}
+            <div className="fb-anno-metric-row">
+              <div className="fb-anno-metric">
+                <span>{payload.rangeLabel}</span>
+                <strong>{payload.rangeMetric}</strong>
+              </div>
+              <div className="fb-anno-metric">
+                <span>{payload.changeLabel}</span>
+                <strong>{payload.changeMetric}</strong>
+              </div>
+            </div>
+            <p className="fb-anno-feedback-summary">{payload.detail}</p>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function FeedbackChatPage({ open, payload, onClose }){
+  if(!payload) return null;
+  const suggestions = payload.suggestions || [];
+  return (
+    <div className={'fb-anno-chat' + (open ? ' is-open' : '')} role="dialog" aria-modal="true" aria-label="继续了解">
+      <div className="fb-anno-detail-nav is-title">
+        <button type="button" className="fb-anno-back-txt" onClick={onClose}>‹ 返回</button>
+        <div className="fb-anno-detail-title">继续了解</div>
+        <span/>
+      </div>
+      <div className="fb-anno-chat-scroll">
+        <div className="fb-anno-chat-context">
+          <div className="fb-anno-chat-context-top">
+            <span>引用记录</span>
+            <span>近7天</span>
+          </div>
+          <strong>{payload.context || payload.title}</strong>
+        </div>
+        <p className="fb-anno-chat-guide">你可以围绕这段记录继续提问。原始记录不会被改写，回答与记录事实会保持区分。</p>
+        <div className="fb-anno-suggestions">
+          {suggestions.map((item)=> (
+            <button type="button" key={item} className="fb-anno-suggestion">{item}</button>
+          ))}
+        </div>
+      </div>
+      <div className="fb-anno-chat-input">
+        <div className="fb-anno-chat-input-inner">基于这段记录提问…</div>
+      </div>
+    </div>
+  );
+}
+
+function FeedbackAnnotationHost(){
+  const [popoverOpen, setPopoverOpen] = React.useState(false);
+  const [detailOpen, setDetailOpen] = React.useState(false);
+  const [chatOpen, setChatOpen] = React.useState(false);
+  const [chatOrigin, setChatOrigin] = React.useState('detail');
+  const [payload, setPayload] = React.useState(null);
+
+  React.useEffect(()=>{
+    const phone = document.querySelector('.phone');
+    if(!phone) return undefined;
+    const cover = detailOpen || chatOpen;
+    phone.classList.toggle('is-fb-anno-cover', cover);
+    return ()=> phone.classList.remove('is-fb-anno-cover');
+  }, [detailOpen, chatOpen]);
+
+  React.useEffect(()=>{
+    const onOpenAnno = (event)=>{
+      if(!feedbackAnnotationIsActive()) return;
+      setPayload(enrichAnnotationMeta(event.detail || {}));
+      setDetailOpen(false);
+      setChatOpen(false);
+      setPopoverOpen(true);
+    };
+    const onOpenDetail = (event)=>{
+      if(!feedbackAnnotationIsActive()) return;
+      setPayload(enrichAnnotationMeta(event.detail || {}));
+      setPopoverOpen(false);
+      setChatOpen(false);
+      setDetailOpen(true);
+    };
+    const onCloseAll = ()=>{
+      setPopoverOpen(false);
+      setDetailOpen(false);
+      setChatOpen(false);
+    };
+    window.addEventListener('openFeedbackAnnotation', onOpenAnno);
+    window.addEventListener('openFeedbackRecordDetail', onOpenDetail);
+    window.addEventListener('closeFeedbackAnnotation', onCloseAll);
+    return ()=>{
+      window.removeEventListener('openFeedbackAnnotation', onOpenAnno);
+      window.removeEventListener('openFeedbackRecordDetail', onOpenDetail);
+      window.removeEventListener('closeFeedbackAnnotation', onCloseAll);
+    };
+  }, []);
+
+  React.useEffect(()=>{
+    if(!popoverOpen && !detailOpen && !chatOpen) return undefined;
+    const onKey = (event)=>{
+      if(event.key !== 'Escape') return;
+      if(chatOpen){
+        setChatOpen(false);
+        if(chatOrigin === 'detail') setDetailOpen(true);
+      } else if(detailOpen){
+        setDetailOpen(false);
+      } else {
+        setPopoverOpen(false);
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return ()=> document.removeEventListener('keydown', onKey);
+  }, [popoverOpen, detailOpen, chatOpen, chatOrigin]);
+
+  const openChat = (origin)=>{
+    setChatOrigin(origin);
+    setPopoverOpen(false);
+    if(origin === 'timeline') setDetailOpen(false);
+    setTimeout(()=> setChatOpen(true), 80);
+  };
+
+  const portalTarget = document.querySelector('.phone') || document.body;
+  const node = (
+    <>
+      <FeedbackAnnotationPopover
+        open={popoverOpen && !detailOpen && !chatOpen}
+        payload={payload}
+        onClose={()=> setPopoverOpen(false)}
+        onOpenChat={()=> openChat('timeline')}
+      />
+      <FeedbackRecordDetailPage
+        open={detailOpen && !chatOpen}
+        payload={payload}
+        onClose={()=> setDetailOpen(false)}
+      />
+      <FeedbackChatPage
+        open={chatOpen}
+        payload={payload}
+        onClose={()=>{
+          setChatOpen(false);
+          if(chatOrigin === 'detail') setDetailOpen(true);
+        }}
+      />
+    </>
+  );
+  if(window.ReactDOM?.createPortal){
+    return window.ReactDOM.createPortal(node, portalTarget);
+  }
+  return node;
+}
+
+Object.assign(window, {
+  feedbackAnnotationIsActive,
+  FeedbackChartMarker,
+  FeedbackChartFoldIn,
+  FeedbackAnnotationHost,
+  FeedbackMiniChart,
+  buildAnnotationPayloadFromGroup,
+  buildAnnotationPayloadFromAiNote,
+  buildAnnotationPayloadFromDietItem,
+  openFeedbackAnnotation,
+  openFeedbackRecordDetail,
 });
 
 </script>
@@ -69412,7 +70548,7 @@ function App(){
   const [emptyPreviewGuideStep, setEmptyPreviewGuideStep] = useState(0);
   const [onboardGuideDismissed, setOnboardGuideDismissed] = useState(false);
   const scene = window.getDemoScene(t.demoScene);
-  const onboardGuideScheme = ['方案一', '方案二', '方案三', '方案四'].includes(t.onboardGuideScheme)
+  const onboardGuideScheme = ['关闭', '方案一', '方案二', '方案三', '方案四'].includes(t.onboardGuideScheme)
     ? t.onboardGuideScheme
     : '方案一';
   const noteScene = React.useMemo(() => {
@@ -69535,14 +70671,13 @@ function App(){
   const [periodFeelGuideHintDismissed, setPeriodFeelGuideHintDismissed] = useState(false);
   const [periodFeelScheme1Breath, setPeriodFeelScheme1Breath] = useState(false);
   const periodFeelScheme1BreathTimerRef = useRef(null);
-  const periodFeelGuideScheme = t.periodFeelGuideScheme || '方案一';
-  const headerAtmosphereScheme = ['方案一', '方案二', '方案三', '方案四'].includes(t.headerAtmosphereScheme)
+  const periodFeelGuideScheme = ['方案一', '方案二'].includes(t.periodFeelGuideScheme)
+    ? t.periodFeelGuideScheme
+    : '方案一';
+  const headerAtmosphereScheme = ['方案二', '方案三', '方案四'].includes(t.headerAtmosphereScheme)
     ? t.headerAtmosphereScheme
-    : '方案一';
-  const demoTheme = ['默认', '暖白', '柔粉', '暗黑'].includes(t.demoTheme) ? t.demoTheme : '默认';
-  const feedbackDisplayScheme = ['方案一', '方案二', '方案三'].includes(t.feedbackDisplayScheme)
-    ? t.feedbackDisplayScheme
-    : '方案一';
+    : '方案二';
+  const feedbackDisplayScheme = '方案二';
   // 同步写入，保证子组件同一次渲染就能读到（勿放 useEffect，否则会晚一拍）
   window.__FEEDBACK_DISPLAY_SCHEME = feedbackDisplayScheme;
   const [headerCollapseProgress, setHeaderCollapseProgress] = useState(0);
@@ -71881,9 +73016,6 @@ function App(){
         'phone'
         + (homeDetailOpen ? ' is-home-detail-open' : '')
         + (showDockQuickStrip ? ' is-dock-quick-entry' : '')
-        + (demoTheme === '暗黑' ? ' is-theme-dark' : '')
-        + (demoTheme === '暖白' ? ' is-theme-warm' : '')
-        + (demoTheme === '柔粉' ? ' is-theme-soft-pink' : '')
       }>
         <StatusBar isMember={isMember} onMemberChange={setIsMember} showMemberSwitch={showReview}/>
 
@@ -72147,9 +73279,10 @@ function App(){
             className="stream-hero-title is-scheme2"
             style={{
               opacity: Math.max(0, 1 - headerCollapseProgress * 1.25),
-              maxHeight: `${Math.max(0, (1 - headerCollapseProgress) * 78)}px`,
-              paddingBottom: `${Math.max(0, (1 - headerCollapseProgress) * 12)}px`,
-              transform: `translateY(${-headerCollapseProgress * 8}px)`,
+              maxHeight: `${Math.max(0, (1 - headerCollapseProgress) * 68)}px`,
+              paddingTop: `${Math.max(0, (1 - headerCollapseProgress) * 12)}px`,
+              paddingBottom: `${Math.max(0, (1 - headerCollapseProgress) * 8)}px`,
+              transform: `translateY(${-headerCollapseProgress * 6}px)`,
             }}
             aria-hidden={headerCollapseProgress > 0.85}
           >
@@ -72231,7 +73364,13 @@ function App(){
           />
           {showOnboardGuideMask ? (
             <>
-              <div className="ep-onboard-gradient-mask" aria-hidden="true"/>
+              <div
+                className={'ep-onboard-gradient-mask' + (showOnboardGuideScheme2 ? ' is-scheme2' : '')}
+                aria-hidden="true"
+              />
+              {showOnboardGuideScheme2 ? (
+                <div className="ep-onboard-s2-fab-cover" aria-hidden="true"/>
+              ) : null}
               <button
                 type="button"
                 className="ep-onboard-gradient-mask-hit"
@@ -72372,7 +73511,7 @@ function App(){
           <div className="demo-tweak-section">
             <div className="demo-tweak-section-label">头部氛围感</div>
             <div className="demo-scene-dock-options is-row">
-              {['方案一', '方案二', '方案三', '方案四'].map((opt)=>(
+              {['方案二', '方案三', '方案四'].map((opt)=>(
                 <button
                   key={'atm-'+opt}
                   type="button"
@@ -72385,7 +73524,6 @@ function App(){
               ))}
             </div>
             <p className="demo-scene-dock-hint">
-              {headerAtmosphereScheme === '方案一' && '左侧大标题 + 副标题，上滑收缩为顶栏居中标题'}
               {headerAtmosphereScheme === '方案二' && '看到「今天」时展开；滑走后收成居中小字'}
               {headerAtmosphereScheme === '方案三' && '顶栏居中「点滴」；「今天」下灰点轮播氛围文案'}
               {headerAtmosphereScheme === '方案四' && '仅居中标题「记录」；Tab 为 日历 / 记录；无副标题'}
@@ -72393,54 +73531,9 @@ function App(){
           </div>
 
           <div className="demo-tweak-section">
-            <div className="demo-tweak-section-label">主题</div>
-            <div className="demo-scene-dock-options is-row">
-              {['默认', '暖白', '柔粉', '暗黑'].map((opt)=>(
-                <button
-                  key={'theme-'+opt}
-                  type="button"
-                  className={'demo-scene-dock-btn'+(demoTheme === opt ? ' active' : '')}
-                  aria-pressed={demoTheme === opt}
-                  onClick={()=>setTweak('demoTheme', opt)}
-                >
-                  {opt}
-                </button>
-              ))}
-            </div>
-            <p className="demo-scene-dock-hint">
-              {demoTheme === '默认' && '原始浅灰 · #F2F2F5'}
-              {demoTheme === '暖白' && '暖白纯色 · #F6F3F2'}
-              {demoTheme === '柔粉' && '柔粉纯色 · #FAF4F5'}
-              {demoTheme === '暗黑' && '深色背景，夜间浏览'}
-            </p>
-          </div>
-
-          <div className="demo-tweak-section">
-            <div className="demo-tweak-section-label">反馈展示</div>
-            <div className="demo-scene-dock-options is-row">
-              {['方案一', '方案二', '方案三'].map((opt)=>(
-                <button
-                  key={'fb-'+opt}
-                  type="button"
-                  className={'demo-scene-dock-btn'+(feedbackDisplayScheme === opt ? ' active' : '')}
-                  aria-pressed={feedbackDisplayScheme === opt}
-                  onClick={()=>setTweak('feedbackDisplayScheme', opt)}
-                >
-                  {opt}
-                </button>
-              ))}
-            </div>
-            <p className="demo-scene-dock-hint">
-              {feedbackDisplayScheme === '方案一' && '小气泡「点滴回应」↔ 点开成大气泡'}
-              {feedbackDisplayScheme === '方案二' && '小气泡直接展示短文案 ↔ 点开成大气泡（含迷你图）'}
-              {feedbackDisplayScheme === '方案三' && '点卡片→记录详情；点角标→浮层；浮层点图表→继续了解'}
-            </p>
-          </div>
-
-          <div className="demo-tweak-section">
             <div className="demo-tweak-section-label">新手引导</div>
             <div className="demo-scene-dock-options is-row">
-              {['方案一', '方案二', '方案三', '方案四'].map((opt)=>(
+              {['关闭', '方案一', '方案二', '方案三', '方案四'].map((opt)=>(
                 <button
                   key={'onboard-'+opt}
                   type="button"
@@ -72453,6 +73546,7 @@ function App(){
               ))}
             </div>
             <p className="demo-scene-dock-hint">
+              {onboardGuideScheme === '关闭' && '不展示新手引导，进入完整时间轴'}
               {onboardGuideScheme === '方案一' && '背景示例时间轴 + 底部引导；点击蒙层进入完整时间轴'}
               {onboardGuideScheme === '方案二' && '居中引导 + 示例气泡 + 文字输入框 + + 号箭头'}
               {onboardGuideScheme === '方案三' && '进入点滴先展示空值页动画；关闭后收起到右上角灯泡，可再次打开'}
@@ -72463,7 +73557,7 @@ function App(){
           <div className="demo-tweak-section">
             <div className="demo-tweak-section-label">经期感受引导</div>
             <div className="demo-scene-dock-options is-row">
-              {['方案一', '方案二', '方案三'].map((opt)=>(
+              {['方案一', '方案二'].map((opt)=>(
                 <button
                   key={'feel-'+opt}
                   type="button"
@@ -72478,10 +73572,10 @@ function App(){
             <p className="demo-scene-dock-hint">
               {periodFeelGuideScheme === '方案一' && '只改输入框文案，无新增元素'}
               {periodFeelGuideScheme === '方案二' && '反馈卡外灰字提示（不可点），点输入框唤起面板'}
-              {periodFeelGuideScheme === '方案三' && '反馈下方可点文字链，点即唤起面板'}
               {' · 月经反馈播完后出现'}
             </p>
           </div>
+
         </div>
       </div>
     </>

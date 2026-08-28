@@ -756,6 +756,65 @@ function bubbleFeedbackLine(title){
   return t.length > 12 ? t.slice(0, 12) : t;
 }
 
+/** 方案二：实心星星标签，描边 pill 样式 */
+function FeedbackStarTag({ open = false, onClick, className = '', size = 'sm' }){
+  return (
+    <button
+      type="button"
+      className={
+        'v3-tag is-fb-star'
+        + (open ? ' is-open' : '')
+        + (size === 'xs' ? ' is-xs' : '')
+        + (className ? ' ' + className : '')
+      }
+      data-cat="反馈"
+      aria-expanded={open}
+      aria-label={open ? '收起反馈' : '展开反馈'}
+      onClick={(event)=>{
+        event.stopPropagation();
+        onClick?.();
+      }}
+    >
+      <span className="tl-period-analysis-spark" aria-hidden="true"/>
+    </button>
+  );
+}
+
+/** 方案二：由星星标签控制的下方气泡面板 */
+function FeedbackBubblePanel({
+  open = false,
+  line = '',
+  children,
+  className = '',
+  animateIn = false,
+}){
+  return (
+    <div
+      className={
+        'tl-fb-bub is-panel'
+        + (open ? ' is-open' : '')
+        + (className ? ' ' + className : '')
+        + (animateIn ? ' is-animate-in' : '')
+      }
+      aria-hidden={!open && !children}
+    >
+      <div className="tl-fb-bub-full" aria-hidden={!open}>
+        <div className="tl-fb-bub-inner">
+          {line ? (
+            <div className="tl-fb-bub-cline">
+              <span className="tl-fb-bub-spark" aria-hidden="true">
+                <span className="tl-period-analysis-spark"/>
+              </span>
+              {line}
+            </div>
+          ) : null}
+          <div className="tl-fb-bub-content">{children}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function DietAiCollapsibleSection({
   title = '卡路里摄入量',
   defaultOpen = true,
@@ -763,25 +822,68 @@ function DietAiCollapsibleSection({
   embedded = false,
   compact = false,
   footer = null,
+  open: controlledOpen,
+  onOpenChange,
+  tagOnly = false,
+  panelOnly = false,
   children,
 }){
   const scheme = getFeedbackDisplayScheme();
-  const [open, setOpen] = React.useState(defaultOpen);
+  const [internalOpen, setInternalOpen] = React.useState(defaultOpen);
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = onOpenChange || setInternalOpen;
 
-  if(scheme === '方案一' || scheme === '方案二'){
+  if(scheme === '方案一'){
     const bubbleOpen = !!animateIn || !!defaultOpen;
     const shortLine = bubbleFeedbackLine(title);
     return (
       <FeedbackBubble
         variant="bubble"
-        tone={scheme === '方案二' ? 's2' : 's1'}
+        tone="s1"
         defaultOpen={bubbleOpen}
-        teaser={scheme === '方案一' ? '点滴回应' : shortLine}
+        teaser="点滴回应"
         line={shortLine}
         className={(embedded ? 'is-embedded' : '') + (animateIn ? ' is-animate-in' : '')}
       >
         {children}
       </FeedbackBubble>
+    );
+  }
+
+  if(scheme === '方案二'){
+    const shortLine = bubbleFeedbackLine(title);
+    const panelClass = (embedded ? 'is-embedded' : '') + (animateIn ? ' is-animate-in' : '');
+    if(tagOnly){
+      return (
+        <FeedbackStarTag
+          open={open}
+          onClick={()=> setOpen(!open)}
+        />
+      );
+    }
+    if(panelOnly){
+      return (
+        <FeedbackBubblePanel
+          open={open}
+          line={shortLine}
+          className={panelClass}
+          animateIn={animateIn}
+        >
+          {children}
+          {footer}
+        </FeedbackBubblePanel>
+      );
+    }
+    return (
+      <div className="tl-fb-s2-block">
+        <div className="tl-fb-s2-tag-row">
+          <FeedbackStarTag open={open} onClick={()=> setOpen(!open)}/>
+        </div>
+        <FeedbackBubblePanel open={open} line={shortLine} className={panelClass} animateIn={animateIn}>
+          {children}
+          {footer}
+        </FeedbackBubblePanel>
+      </div>
     );
   }
 
@@ -2036,7 +2138,10 @@ Object.assign(window, {
   DietAiInsightsShell,
   DietAiCollapsibleSection,
   FeedbackBubble,
+  FeedbackStarTag,
+  FeedbackBubblePanel,
   FeedbackBubbleSparkline,
+  bubbleFeedbackLine,
   useFeedbackAnnotationScheme,
   DietCalorieAiBody,
   DietAiChevron,

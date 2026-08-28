@@ -118,6 +118,67 @@ function RecordEmptyTagIcon({ name, color }) {
   );
 }
 
+const ONBOARD_DOCK_QUICK_ITEMS = [
+  { id: 'weight', label: '体重' },
+  { id: 'symptom', label: '症状' },
+  { id: 'mood', label: '心情' },
+  { id: 'diet', label: '饮食' },
+  { id: 'beverage', label: '喝水' },
+];
+
+function OnboardDockVoiceIco({ size = 26 }) {
+  const sw = 3.2;
+  return (
+    <svg viewBox="0 0 48 48" fill="none" width={size} height={size} aria-hidden="true">
+      <circle cx="24" cy="24" r="21" stroke="currentColor" strokeWidth="2.8"/>
+      <path d="M21.5 19.5 A6 6 0 0 1 21.5 28.5" stroke="currentColor" strokeWidth={sw} strokeLinecap="round" fill="none"/>
+      <path d="M24 15.5 A10 10 0 0 1 24 32.5" stroke="currentColor" strokeWidth={sw} strokeLinecap="round" fill="none"/>
+      <path d="M26.5 12 A14 14 0 0 1 26.5 36" stroke="currentColor" strokeWidth={sw} strokeLinecap="round" fill="none"/>
+    </svg>
+  );
+}
+
+/** 方案三/四新手引导底部：快捷入口 + 记录生活点滴输入栏（与主 Dock 一致） */
+function OnboardGuideDockBottom({ className = '' }) {
+  const UnifiedQuickIcon = window.UnifiedQuickIcon;
+  return (
+    <div className={'ep-onboard-dock-bottom' + (className ? ' ' + className : '')} aria-label="记录入口">
+      <div className="dock-panel is-feeding-dock is-path-dock ep-onboard-dock-panel">
+        <div className="dock-bar is-path-dock has-feeding-quick">
+          <div className="dock-feeding-quick" aria-label="快捷记录">
+            <div className="dock-feeding-quick-scroll" data-cols="5">
+              {ONBOARD_DOCK_QUICK_ITEMS.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  className="dock-feeding-quick-item"
+                  tabIndex={-1}
+                  aria-hidden="true"
+                >
+                  <span className="dock-feeding-quick-icon" aria-hidden="true">
+                    {UnifiedQuickIcon ? (
+                      <UnifiedQuickIcon type={item.id === 'beverage' ? 'water' : item.id}/>
+                    ) : null}
+                  </span>
+                  <span className="dock-feeding-quick-label">{item.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="dock-input-row dock-input-pill">
+            <button type="button" className="dock-mode-btn" tabIndex={-1} aria-hidden="true">
+              <OnboardDockVoiceIco size={26}/>
+            </button>
+            <div className="dock-text-field">
+              <span className="dock-float-ph ep-onboard-dock-ph">记录生活点滴</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function OnboardGuideScheme3DemoCard({ t, P }) {
   const pCard = easeOut(range(t, 0, ONBOARD_S3_CARD_END));
   const pVoice = easeOut(range(t, ONBOARD_S3_VOICE_BEGIN, ONBOARD_S3_VOICE_IN_END));
@@ -167,7 +228,6 @@ function OnboardGuideScheme3Screen({ onClose }) {
   const P = EMPTY_PALETTE;
   const loopT = useLoopTime(ONBOARD_S3_LOOP_SEC, 1);
   const t = Math.min(loopT, ONBOARD_S3_ANIM_END);
-  const [pressed, setPressed] = useState(false);
   const [closing, setClosing] = useState(false);
 
   const handleClose = () => {
@@ -219,17 +279,7 @@ function OnboardGuideScheme3Screen({ onClose }) {
         <OnboardGuideScheme3DemoCard t={t} P={P}/>
       </div>
 
-      <div className="record-empty-voice-wrap ep-onboard-s3-voice-wrap">
-        <RecordEmptyVoiceButton
-          P={P}
-          pressed={pressed}
-          onPress={()=>setPressed(true)}
-          onRelease={()=>setPressed(false)}
-        />
-        <p className="record-empty-voice-hint">
-          {pressed ? '松开发送' : '按住说话'}
-        </p>
-      </div>
+      <OnboardGuideDockBottom className="ep-onboard-s3-dock"/>
     </div>
   );
 }
@@ -520,6 +570,7 @@ function RecordEmptyVoiceButton({ P, pressed, onPress, onRelease }) {
 Object.assign(window, {
   RecordEmptyScreen,
   OnboardGuideScheme3Screen,
+  OnboardGuideDockBottom,
   RecordEmptyVoiceBubble,
   RecordEmptyTagsRow,
   RecordEmptyVoiceButton,

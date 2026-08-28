@@ -1276,28 +1276,30 @@
   position:relative;
   z-index:15;
   flex:0 0 auto;
-  padding:52px 20px 0;
+  padding:12px 20px 8px;
   margin:0;
   background:var(--my-bg);
   overflow:hidden;
-  box-sizing:content-box;
-  will-change:opacity, max-height, transform, padding-bottom;
+  box-sizing:border-box;
+  will-change:opacity, max-height, transform, padding;
 }
 .suiji-shell.is-atm-scheme2 .suiji-stream.has-hero-title-scheme2{
   flex:1 1 auto;
   min-height:0;
   max-height:none;
-  padding-top:8px;
+  padding-top:4px;
 }
 .suiji-shell.is-atm-scheme2 .stream-header{
   background:transparent;
   backdrop-filter:none;
   -webkit-backdrop-filter:none;
+  padding:6px 18px 8px;
 }
 .suiji-shell.is-atm-scheme2 .stream-header.is-atm-collapsed{
   background:var(--my-bg);
   backdrop-filter:blur(12px);
   -webkit-backdrop-filter:blur(12px);
+  padding:4px 18px 6px;
 }
 .stream-header.is-mini-atm{
   display:flex;
@@ -4618,6 +4620,101 @@
 .v3-tag[data-cat="运动"]{color:#00cc99}
 .v3-tag[data-cat="睡眠"]{color:#2d5cad}
 .v3-tag[data-cat="喝水"]{color:#5ab8ff}
+.v3-tag.is-fb-star{
+  padding:2px 7px;
+  color:#ff4d88;
+  border:0.5px solid #ff4d88;
+  background:transparent;
+  cursor:pointer;
+  font-family:inherit;
+  line-height:1;
+  -webkit-tap-highlight-color:transparent;
+}
+.v3-tag.is-fb-star.is-open{
+  background:rgba(255,77,136,0.08);
+}
+.v3-tag.is-fb-star .tl-period-analysis-spark{
+  display:block;
+  width:14px;
+  height:14px;
+  transform:scale(0.72);
+  transform-origin:center;
+}
+.tl-fb-s2-block{margin-top:6px}
+.tl-fb-s2-tag-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.tl-fb-bub.is-panel{
+  display:block;
+  width:100%;
+  max-width:100%;
+  margin-top:6px;
+  margin-bottom:4px;
+  background:transparent;
+  border-radius:4px 12px 12px 12px;
+  padding:0;
+  overflow:hidden;
+  box-sizing:border-box;
+}
+.tl-fb-bub.is-panel.is-open{
+  background:#f2f2f5;
+  padding:8px 12px;
+}
+.tl-fb-bub.is-panel .tl-fb-bub-full{
+  display:grid;
+  grid-template-rows:0fr;
+  opacity:0;
+  transition:grid-template-rows .3s cubic-bezier(.2,.7,.3,1), opacity .25s;
+}
+.tl-fb-bub.is-panel.is-open .tl-fb-bub-full{
+  grid-template-rows:1fr;
+  opacity:1;
+}
+.tl-fb-bub.is-panel .tl-fb-bub-inner{overflow:hidden}
+.tl-fb-bub.is-panel .tl-fb-bub-cline{
+  font-size:11px;
+  color:#8b9199;
+  line-height:1.3;
+  font-weight:400;
+  display:flex;
+  align-items:center;
+  gap:4px;
+  margin-bottom:6px;
+}
+.tl-fb-bub.is-panel .tl-fb-bub-spark{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:14px;
+  height:14px;
+  flex-shrink:0;
+}
+.tl-fb-bub.is-panel .tl-fb-bub-spark .tl-period-analysis-spark{
+  width:14px;
+  height:14px;
+  transform:scale(0.72);
+  transform-origin:center;
+}
+.tl-fb-bub.is-panel .tl-fb-bub-content{
+  font-size:12px;
+  color:rgba(0,0,0,0.8);
+  line-height:1.47;
+}
+.tl-fb-bub.is-panel .tl-fb-bub-mini{
+  display:block;
+  width:100%;
+  margin-top:2px;
+}
+.tl-t5-card .tl-fb-bub.is-panel{
+  margin-top:4px;
+  margin-bottom:0;
+}
+.v3-card-enter .tl-fb-bub.is-panel.is-embedded,
+.fade-in .tl-fb-bub.is-panel.is-embedded{
+  animation:v3AiStaggerIn .36s cubic-bezier(.2,0,0,1) both;
+}
 .v3-card-enter{
   animation:v3CardEnter 0.32s cubic-bezier(0.2,0,0,1) both;
 }

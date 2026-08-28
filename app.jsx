@@ -387,7 +387,7 @@ function App(){
   const [emptyPreviewGuideStep, setEmptyPreviewGuideStep] = useState(0);
   const [onboardGuideDismissed, setOnboardGuideDismissed] = useState(false);
   const scene = window.getDemoScene(t.demoScene);
-  const onboardGuideScheme = ['方案一', '方案二', '方案三', '方案四'].includes(t.onboardGuideScheme)
+  const onboardGuideScheme = ['关闭', '方案一', '方案二', '方案三', '方案四'].includes(t.onboardGuideScheme)
     ? t.onboardGuideScheme
     : '方案一';
   const noteScene = React.useMemo(() => {
@@ -510,14 +510,13 @@ function App(){
   const [periodFeelGuideHintDismissed, setPeriodFeelGuideHintDismissed] = useState(false);
   const [periodFeelScheme1Breath, setPeriodFeelScheme1Breath] = useState(false);
   const periodFeelScheme1BreathTimerRef = useRef(null);
-  const periodFeelGuideScheme = t.periodFeelGuideScheme || '方案一';
-  const headerAtmosphereScheme = ['方案一', '方案二', '方案三', '方案四'].includes(t.headerAtmosphereScheme)
+  const periodFeelGuideScheme = ['方案一', '方案二'].includes(t.periodFeelGuideScheme)
+    ? t.periodFeelGuideScheme
+    : '方案一';
+  const headerAtmosphereScheme = ['方案二', '方案三', '方案四'].includes(t.headerAtmosphereScheme)
     ? t.headerAtmosphereScheme
-    : '方案一';
-  const demoTheme = ['默认', '暖白', '柔粉', '暗黑'].includes(t.demoTheme) ? t.demoTheme : '默认';
-  const feedbackDisplayScheme = ['方案一', '方案二', '方案三'].includes(t.feedbackDisplayScheme)
-    ? t.feedbackDisplayScheme
-    : '方案一';
+    : '方案二';
+  const feedbackDisplayScheme = '方案二';
   // 同步写入，保证子组件同一次渲染就能读到（勿放 useEffect，否则会晚一拍）
   window.__FEEDBACK_DISPLAY_SCHEME = feedbackDisplayScheme;
   const [headerCollapseProgress, setHeaderCollapseProgress] = useState(0);
@@ -2856,9 +2855,6 @@ function App(){
         'phone'
         + (homeDetailOpen ? ' is-home-detail-open' : '')
         + (showDockQuickStrip ? ' is-dock-quick-entry' : '')
-        + (demoTheme === '暗黑' ? ' is-theme-dark' : '')
-        + (demoTheme === '暖白' ? ' is-theme-warm' : '')
-        + (demoTheme === '柔粉' ? ' is-theme-soft-pink' : '')
       }>
         <StatusBar isMember={isMember} onMemberChange={setIsMember} showMemberSwitch={showReview}/>
 
@@ -3122,9 +3118,10 @@ function App(){
             className="stream-hero-title is-scheme2"
             style={{
               opacity: Math.max(0, 1 - headerCollapseProgress * 1.25),
-              maxHeight: `${Math.max(0, (1 - headerCollapseProgress) * 78)}px`,
-              paddingBottom: `${Math.max(0, (1 - headerCollapseProgress) * 12)}px`,
-              transform: `translateY(${-headerCollapseProgress * 8}px)`,
+              maxHeight: `${Math.max(0, (1 - headerCollapseProgress) * 68)}px`,
+              paddingTop: `${Math.max(0, (1 - headerCollapseProgress) * 12)}px`,
+              paddingBottom: `${Math.max(0, (1 - headerCollapseProgress) * 8)}px`,
+              transform: `translateY(${-headerCollapseProgress * 6}px)`,
             }}
             aria-hidden={headerCollapseProgress > 0.85}
           >
@@ -3206,7 +3203,13 @@ function App(){
           />
           {showOnboardGuideMask ? (
             <>
-              <div className="ep-onboard-gradient-mask" aria-hidden="true"/>
+              <div
+                className={'ep-onboard-gradient-mask' + (showOnboardGuideScheme2 ? ' is-scheme2' : '')}
+                aria-hidden="true"
+              />
+              {showOnboardGuideScheme2 ? (
+                <div className="ep-onboard-s2-fab-cover" aria-hidden="true"/>
+              ) : null}
               <button
                 type="button"
                 className="ep-onboard-gradient-mask-hit"
@@ -3347,7 +3350,7 @@ function App(){
           <div className="demo-tweak-section">
             <div className="demo-tweak-section-label">头部氛围感</div>
             <div className="demo-scene-dock-options is-row">
-              {['方案一', '方案二', '方案三', '方案四'].map((opt)=>(
+              {['方案二', '方案三', '方案四'].map((opt)=>(
                 <button
                   key={'atm-'+opt}
                   type="button"
@@ -3360,7 +3363,6 @@ function App(){
               ))}
             </div>
             <p className="demo-scene-dock-hint">
-              {headerAtmosphereScheme === '方案一' && '左侧大标题 + 副标题，上滑收缩为顶栏居中标题'}
               {headerAtmosphereScheme === '方案二' && '看到「今天」时展开；滑走后收成居中小字'}
               {headerAtmosphereScheme === '方案三' && '顶栏居中「点滴」；「今天」下灰点轮播氛围文案'}
               {headerAtmosphereScheme === '方案四' && '仅居中标题「记录」；Tab 为 日历 / 记录；无副标题'}
@@ -3368,54 +3370,9 @@ function App(){
           </div>
 
           <div className="demo-tweak-section">
-            <div className="demo-tweak-section-label">主题</div>
-            <div className="demo-scene-dock-options is-row">
-              {['默认', '暖白', '柔粉', '暗黑'].map((opt)=>(
-                <button
-                  key={'theme-'+opt}
-                  type="button"
-                  className={'demo-scene-dock-btn'+(demoTheme === opt ? ' active' : '')}
-                  aria-pressed={demoTheme === opt}
-                  onClick={()=>setTweak('demoTheme', opt)}
-                >
-                  {opt}
-                </button>
-              ))}
-            </div>
-            <p className="demo-scene-dock-hint">
-              {demoTheme === '默认' && '原始浅灰 · #F2F2F5'}
-              {demoTheme === '暖白' && '暖白纯色 · #F6F3F2'}
-              {demoTheme === '柔粉' && '柔粉纯色 · #FAF4F5'}
-              {demoTheme === '暗黑' && '深色背景，夜间浏览'}
-            </p>
-          </div>
-
-          <div className="demo-tweak-section">
-            <div className="demo-tweak-section-label">反馈展示</div>
-            <div className="demo-scene-dock-options is-row">
-              {['方案一', '方案二', '方案三'].map((opt)=>(
-                <button
-                  key={'fb-'+opt}
-                  type="button"
-                  className={'demo-scene-dock-btn'+(feedbackDisplayScheme === opt ? ' active' : '')}
-                  aria-pressed={feedbackDisplayScheme === opt}
-                  onClick={()=>setTweak('feedbackDisplayScheme', opt)}
-                >
-                  {opt}
-                </button>
-              ))}
-            </div>
-            <p className="demo-scene-dock-hint">
-              {feedbackDisplayScheme === '方案一' && '小气泡「点滴回应」↔ 点开成大气泡'}
-              {feedbackDisplayScheme === '方案二' && '小气泡直接展示短文案 ↔ 点开成大气泡（含迷你图）'}
-              {feedbackDisplayScheme === '方案三' && '点卡片→记录详情；点角标→浮层；浮层点图表→继续了解'}
-            </p>
-          </div>
-
-          <div className="demo-tweak-section">
             <div className="demo-tweak-section-label">新手引导</div>
             <div className="demo-scene-dock-options is-row">
-              {['方案一', '方案二', '方案三', '方案四'].map((opt)=>(
+              {['关闭', '方案一', '方案二', '方案三', '方案四'].map((opt)=>(
                 <button
                   key={'onboard-'+opt}
                   type="button"
@@ -3428,6 +3385,7 @@ function App(){
               ))}
             </div>
             <p className="demo-scene-dock-hint">
+              {onboardGuideScheme === '关闭' && '不展示新手引导，进入完整时间轴'}
               {onboardGuideScheme === '方案一' && '背景示例时间轴 + 底部引导；点击蒙层进入完整时间轴'}
               {onboardGuideScheme === '方案二' && '居中引导 + 示例气泡 + 文字输入框 + + 号箭头'}
               {onboardGuideScheme === '方案三' && '进入点滴先展示空值页动画；关闭后收起到右上角灯泡，可再次打开'}
@@ -3438,7 +3396,7 @@ function App(){
           <div className="demo-tweak-section">
             <div className="demo-tweak-section-label">经期感受引导</div>
             <div className="demo-scene-dock-options is-row">
-              {['方案一', '方案二', '方案三'].map((opt)=>(
+              {['方案一', '方案二'].map((opt)=>(
                 <button
                   key={'feel-'+opt}
                   type="button"
@@ -3453,10 +3411,10 @@ function App(){
             <p className="demo-scene-dock-hint">
               {periodFeelGuideScheme === '方案一' && '只改输入框文案，无新增元素'}
               {periodFeelGuideScheme === '方案二' && '反馈卡外灰字提示（不可点），点输入框唤起面板'}
-              {periodFeelGuideScheme === '方案三' && '反馈下方可点文字链，点即唤起面板'}
               {' · 月经反馈播完后出现'}
             </p>
           </div>
+
         </div>
       </div>
     </>

@@ -1256,44 +1256,71 @@ function V3PhotoFoodAnalysis({
   );
 }
 
-function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnalysis = false, isNew = false, onPhotoAnalysisComplete}){
+function V3TagRow({ tags, showTags = true, tagsAnimate = false, feedbackStarTag, style }){
+  const tagRowStyle = style || { display: 'flex', gap: 6, flexWrap: 'wrap' };
+  const hasTags = showTags && (tags || []).length > 0;
+  if(!feedbackStarTag && !hasTags) return null;
+  return (
+    <div style={tagRowStyle}>
+      {feedbackStarTag ? (
+        <span
+          className={tagsAnimate ? 'tl-tags-reveal' : undefined}
+          style={tagsAnimate ? { animationDelay: '0ms' } : undefined}
+        >
+          {feedbackStarTag}
+        </span>
+      ) : null}
+      {hasTags ? (tags || []).map((t, i)=>(
+        <span
+          key={i}
+          className={tagsAnimate ? 'tl-tags-reveal' : undefined}
+          style={tagsAnimate ? { animationDelay: `${(feedbackStarTag ? 1 : 0) + i * 90}ms` } : undefined}
+        >
+          <TLTag tag={t}/>
+        </span>
+      )) : null}
+    </div>
+  );
+}
+
+function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnalysis = false, isNew = false, onPhotoAnalysisComplete, feedbackStarTag}){
   const tagRowStyle = { display: 'flex', gap: 6, flexWrap: 'wrap' };
   if(entry.kind === 'weight-text'){
     return (
       <div className="v3-weight-text-record">
         <div className="v3-weight-text-body">{entry.text}</div>
-        {showTags && (entry.tags || []).length > 0 && (
-          <div style={tagRowStyle}>
-            {(entry.tags || []).map((t, i)=>(
-              <span key={i}><TLTag tag={t}/></span>
-            ))}
-          </div>
-        )}
+        <V3TagRow tags={entry.tags} showTags={showTags} tagsAnimate={tagsAnimate} feedbackStarTag={feedbackStarTag} style={tagRowStyle}/>
       </div>
     );
   }
   if(entry.kind === 'weight'){
     return (
-      <div className="v3-weight-record">
-        <span className="v3-weight-record-icon" aria-hidden="true">
-          <img src={recordIconSrc('weight')} alt="" width={28} height={28} draggable={false}/>
-        </span>
-        <span className="v3-weight-record-text">
-          {entry.weightLabel || '体重'}：{entry.weightValue}
-        </span>
-      </div>
+      <>
+        <div className="v3-weight-record">
+          <span className="v3-weight-record-icon" aria-hidden="true">
+            <img src={recordIconSrc('weight')} alt="" width={28} height={28} draggable={false}/>
+          </span>
+          <span className="v3-weight-record-text">
+            {entry.weightLabel || '体重'}：{entry.weightValue}
+          </span>
+        </div>
+        <V3TagRow tags={entry.tags} showTags={showTags} tagsAnimate={tagsAnimate} feedbackStarTag={feedbackStarTag} style={tagRowStyle}/>
+      </>
     );
   }
   if(entry.kind === 'symptom'){
     return (
-      <div className="v3-weight-record">
-        <span className="v3-weight-record-icon" aria-hidden="true">
-          <img src={recordIconSrc('symptom')} alt="" width={28} height={28} draggable={false}/>
-        </span>
-        <span className="v3-weight-record-text">
-          {entry.symptomLabel || '症状'}：{entry.symptomValue}
-        </span>
-      </div>
+      <>
+        <div className="v3-weight-record">
+          <span className="v3-weight-record-icon" aria-hidden="true">
+            <img src={recordIconSrc('symptom')} alt="" width={28} height={28} draggable={false}/>
+          </span>
+          <span className="v3-weight-record-text">
+            {entry.symptomLabel || '症状'}：{entry.symptomValue}
+          </span>
+        </div>
+        <V3TagRow tags={entry.tags} showTags={showTags} tagsAnimate={tagsAnimate} feedbackStarTag={feedbackStarTag} style={tagRowStyle}/>
+      </>
     );
   }
   if(entry.kind === 'daily-record'){
@@ -1359,14 +1386,17 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
       );
     }
     return (
-      <div className="v3-weight-record">
-        <span className="v3-weight-record-icon" aria-hidden="true">
-          <img src={recordIconSrc(iconKey)} alt="" width={28} height={28} draggable={false}/>
-        </span>
-        <span className="v3-weight-record-text">
-          {entry.recordLabel || '记录'}：{entry.recordDetail || entry.recordValue || entry.text}
-        </span>
-      </div>
+      <>
+        <div className="v3-weight-record">
+          <span className="v3-weight-record-icon" aria-hidden="true">
+            <img src={recordIconSrc(iconKey)} alt="" width={28} height={28} draggable={false}/>
+          </span>
+          <span className="v3-weight-record-text">
+            {entry.recordLabel || '记录'}：{entry.recordDetail || entry.recordValue || entry.text}
+          </span>
+        </div>
+        <V3TagRow tags={entry.tags} showTags={showTags} tagsAnimate={tagsAnimate} feedbackStarTag={feedbackStarTag} style={tagRowStyle}/>
+      </>
     );
   }
   if(entry.kind === 'period-detail'){
@@ -1396,27 +1426,33 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
   if(entry.kind === 'period'){
     const isEnd = (entry.periodLabel || '').indexOf('走') >= 0;
     return (
-      <div className="v3-weight-record">
-        <span className="v3-weight-record-icon" aria-hidden="true">
-          <img src={recordIconSrc(isEnd ? 'period-end' : 'period')} alt="" width={28} height={28} draggable={false}/>
-        </span>
-        <span className="v3-weight-record-text">
-          {entry.periodLabel || '月经来了'}
-        </span>
-      </div>
+      <>
+        <div className="v3-weight-record">
+          <span className="v3-weight-record-icon" aria-hidden="true">
+            <img src={recordIconSrc(isEnd ? 'period-end' : 'period')} alt="" width={28} height={28} draggable={false}/>
+          </span>
+          <span className="v3-weight-record-text">
+            {entry.periodLabel || '月经来了'}
+          </span>
+        </div>
+        <V3TagRow tags={entry.tags} showTags={showTags} tagsAnimate={tagsAnimate} feedbackStarTag={feedbackStarTag} style={tagRowStyle}/>
+      </>
     );
   }
   if(entry.kind === 'mood-face'){
     const label = entry.primaryMood?.label || entry.text || '';
     return (
-      <div className="v3-weight-record">
-        <span className="v3-weight-record-icon" aria-hidden="true">
-          <img src={recordIconSrc('mood')} alt="" width={28} height={28} draggable={false}/>
-        </span>
-        <span className="v3-weight-record-text">
-          心情：{label}
-        </span>
-      </div>
+      <>
+        <div className="v3-weight-record">
+          <span className="v3-weight-record-icon" aria-hidden="true">
+            <img src={recordIconSrc('mood')} alt="" width={28} height={28} draggable={false}/>
+          </span>
+          <span className="v3-weight-record-text">
+            心情：{label}
+          </span>
+        </div>
+        <V3TagRow tags={entry.tags} showTags={showTags} tagsAnimate={tagsAnimate} feedbackStarTag={feedbackStarTag} style={tagRowStyle}/>
+      </>
     );
   }
   if(entry.kind === 'voice'){
@@ -1426,19 +1462,7 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
     return (
       <div style={{display:'flex', flexDirection:'column', gap:8}}>
         {TlVoiceInline ? <TlVoiceInline voice={voice} text={text}/> : null}
-        {showTags && (entry.tags || []).length > 0 && (
-          <div style={tagRowStyle}>
-            {(entry.tags || []).map((t, i)=>(
-              <span
-                key={i}
-                className={tagsAnimate ? 'tl-tags-reveal' : undefined}
-                style={tagsAnimate ? { animationDelay: `${i * 90}ms` } : undefined}
-              >
-                <TLTag tag={t}/>
-              </span>
-            ))}
-          </div>
-        )}
+        <V3TagRow tags={entry.tags} showTags={showTags} tagsAnimate={tagsAnimate} feedbackStarTag={feedbackStarTag} style={tagRowStyle}/>
       </div>
     );
   }
@@ -1453,16 +1477,19 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
 
     if (stackedLayout && !photoAnalysis) {
       return (
-        <DietFoodResultSummary
-          items={items}
-          totalKcal={entry.totalKcal}
-          revealStep={3}
-          leadingIconSrc={dietIcon}
-          leadingLabel={dietLabel}
-          leadingHeadlineOnly
-          photoAboveTotalUrl={imgSrc}
-          time={entry.time}
-        />
+        <>
+          <DietFoodResultSummary
+            items={items}
+            totalKcal={entry.totalKcal}
+            revealStep={3}
+            leadingIconSrc={dietIcon}
+            leadingLabel={dietLabel}
+            leadingHeadlineOnly
+            photoAboveTotalUrl={imgSrc}
+            time={entry.time}
+          />
+          <V3TagRow tags={entry.tags} showTags={showTags} tagsAnimate={tagsAnimate} feedbackStarTag={feedbackStarTag} style={tagRowStyle}/>
+        </>
       );
     }
 
@@ -1483,6 +1510,7 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
             photoAboveTotalUrl={imgSrc}
             time={entry.time}
           />
+          <V3TagRow tags={entry.tags} showTags={showTags} tagsAnimate={tagsAnimate} feedbackStarTag={feedbackStarTag} style={tagRowStyle}/>
         </div>
       );
     }
@@ -1506,6 +1534,7 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
         ) : (
           <V3FoodListStatic items={items} totalKcal={entry.totalKcal} time={entry.time}/>
         )}
+        <V3TagRow tags={entry.tags} showTags={showTags} tagsAnimate={tagsAnimate} feedbackStarTag={feedbackStarTag} style={tagRowStyle}/>
       </div>
     );
   }
@@ -1514,19 +1543,7 @@ function V3v2PrimaryBody({entry, showTags = true, tagsAnimate = false, photoAnal
       {(entry.text || entry.body) ? (
         <div style={{fontSize:16, color:'#323232', lineHeight:1.6}}>{entry.text || entry.body}</div>
       ) : null}
-      {showTags && (entry.tags || []).length > 0 && (
-        <div style={tagRowStyle}>
-          {(entry.tags || []).map((t, i)=>(
-            <span
-              key={i}
-              className={tagsAnimate ? 'tl-tags-reveal' : undefined}
-              style={tagsAnimate ? { animationDelay: `${i * 90}ms` } : undefined}
-            >
-              <TLTag tag={t}/>
-            </span>
-          ))}
-        </div>
-      )}
+      <V3TagRow tags={entry.tags} showTags={showTags} tagsAnimate={tagsAnimate} feedbackStarTag={feedbackStarTag} style={tagRowStyle}/>
     </div>
   );
 }
@@ -1559,8 +1576,10 @@ function normalizeV3Entry(raw){
 function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = false, entryId, forceInlineAi = false}){
   const cardRef = React.useRef(null);
   const aiPanelRef = React.useRef(null);
+  const isScheme2Fb = window.__FEEDBACK_DISPLAY_SCHEME === '方案二';
   const [revealStep, setRevealStep] = React.useState(() => (staggerReveal && isNew ? 0 : 2));
   const [open, setOpen] = React.useState(() => (!staggerReveal || !isNew) && aiDefaultOpen);
+  const [fbOpen, setFbOpen] = React.useState(() => (isScheme2Fb ? !!isNew : false) || aiDefaultOpen);
   const p = normalizeV3Entry(primary);
   const a = normalizeV3Entry(ai);
   const isPeriodQuick = p?.kind === 'period';
@@ -1691,7 +1710,10 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
   React.useEffect(() => {
     if(!staggerReveal || !isNew){
       setRevealStep(2);
-      if(aiDefaultOpen) setOpen(true);
+      if(aiDefaultOpen){
+        setOpen(true);
+        if(isScheme2Fb) setFbOpen(true);
+      }
       return;
     }
     setRevealStep(0);
@@ -1700,13 +1722,14 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
     const tAi = setTimeout(() => {
       setRevealStep(2);
       setOpen(true);
+      if(isScheme2Fb) setFbOpen(true);
       setTimeout(scrollAfterAiChartReveal, 400);
     }, 980);
     return () => {
       clearTimeout(tTags);
       clearTimeout(tAi);
     };
-  }, [staggerReveal, isNew, aiDefaultOpen, primary?.id, scrollAfterAiChartReveal]);
+  }, [staggerReveal, isNew, aiDefaultOpen, primary?.id, scrollAfterAiChartReveal, isScheme2Fb]);
 
   if(!p && a){
     return (
@@ -1730,6 +1753,14 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
     : undefined;
   const showTags = revealStep >= 1;
   const showAi = revealStep >= 2;
+  const showScheme2Fb = isScheme2Fb && !!a && showAi;
+  const FeedbackStarTag = window.FeedbackStarTag;
+  const FeedbackBubblePanel = window.FeedbackBubblePanel;
+  const bubbleFeedbackLine = window.bubbleFeedbackLine;
+  const fbShortLine = a && bubbleFeedbackLine ? bubbleFeedbackLine(a.title || 'AI 分析') : '点滴回应';
+  const feedbackStarTag = showScheme2Fb && FeedbackStarTag ? (
+    <FeedbackStarTag open={fbOpen} onClick={()=> setFbOpen(v=>!v)}/>
+  ) : null;
   const useScheme3Fold = window.__FEEDBACK_DISPLAY_SCHEME === '方案三' && !!a && showAi;
   const foldPayload = useScheme3Fold && window.buildAnnotationPayloadFromGroup
     ? window.buildAnnotationPayloadFromGroup({ primary: p, ai: a, entryId: derivedId })
@@ -1784,7 +1815,38 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
           photoAnalysis={photoAnalysis}
           isNew={isNew}
           onPhotoAnalysisComplete={handlePhotoAnalysisComplete}
+          feedbackStarTag={feedbackStarTag}
         />
+        {showScheme2Fb && FeedbackBubblePanel ? (
+          <div ref={aiPanelRef}>
+            <FeedbackBubblePanel
+              open={fbOpen}
+              line={fbShortLine}
+              className="is-embedded"
+              animateIn={!!isNew}
+            >
+              {a.chartType && (
+                <TLChart
+                  type={a.chartType}
+                  data={a.chartData}
+                  weightUnit={a.weightUnit}
+                  note={a.note}
+                />
+              )}
+              {a.chartType !== 'caloriePanel' && (a.noteParts || a.note) && (() => {
+                const TypewriterText = window.TypewriterText;
+                const streamNote = isNew && a.chartType === 'symptomDots' && a.note && TypewriterText;
+                return streamNote ? (
+                  <div className="v3-weight-curve-note">
+                    <TypewriterText text={a.note} active followScroll/>
+                  </div>
+                ) : (
+                  <WeightAnalysisNote noteParts={a.noteParts} note={a.note}/>
+                );
+              })()}
+            </FeedbackBubblePanel>
+          </div>
+        ) : null}
         </V3EditableRecordArea>
       </div>
       {p.sourceFrom && (
@@ -1794,7 +1856,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
           borderTop:'0.5px dashed '+TL_HAIR,
         }}>{p.sourceFrom}</div>
       )}
-      {a && showAi && window.__FEEDBACK_DISPLAY_SCHEME !== '方案三' && (() => {
+      {a && showAi && window.__FEEDBACK_DISPLAY_SCHEME !== '方案三' && !showScheme2Fb && (() => {
         const DietAiCollapsibleSection = window.DietAiCollapsibleSection;
         const TypewriterText = window.TypewriterText;
         const streamNote = isNew && a.chartType === 'symptomDots' && a.note && TypewriterText;

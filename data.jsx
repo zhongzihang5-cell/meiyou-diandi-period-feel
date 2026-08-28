@@ -374,6 +374,12 @@ const TIMELINE_BLOCKS = [
             { cat:'喝水', icon:'water' },
           ],
         },
+        ai:{
+          id:'y1-ai', time:'21:11', kind:'chart', chartType:'caloriePanel',
+          title:'卡路里摄入量',
+          chartData:{ consumed:680, target:1800, week:[920,1050,980,1180,1080,1240,680] },
+          note:'沙拉比较清淡，约320千卡，注意营养要均衡哦',
+        },
       },
       {
         kind:'record-group', id:'e-519-podcast-g',

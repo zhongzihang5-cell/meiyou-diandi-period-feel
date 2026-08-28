@@ -100,7 +100,7 @@ function OnboardGuideScheme4CardText({
 
 function OnboardGuideScheme4Screen({ onClose }) {
   const TimelineStream = window.TimelineStream;
-  const RecordEmptyVoiceButton = window.RecordEmptyVoiceButton;
+  const OnboardGuideDockBottom = window.OnboardGuideDockBottom;
   const [cycle, setCycle] = useState(0);
   const [closing, setClosing] = useState(false);
   const [inputPhase, setInputPhase] = useState('typing');
@@ -252,17 +252,9 @@ function OnboardGuideScheme4Screen({ onClose }) {
         ) : null}
       </div>
 
-      <div className="record-empty-voice-wrap ep-onboard-s4-voice-wrap">
-        {RecordEmptyVoiceButton ? (
-          <RecordEmptyVoiceButton
-            P={ONBOARD_S4_PALETTE}
-            pressed={false}
-            onPress={()=>{}}
-            onRelease={()=>{}}
-          />
-        ) : null}
-        <p className="record-empty-voice-hint">按住说话</p>
-      </div>
+      {OnboardGuideDockBottom ? (
+        <OnboardGuideDockBottom className="ep-onboard-s4-dock"/>
+      ) : null}
     </div>
   );
 }
