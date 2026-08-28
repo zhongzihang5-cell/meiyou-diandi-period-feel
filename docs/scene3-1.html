@@ -12,7 +12,7 @@
 <title>美柚 · 场景三 · 方案一 · 空白时间轴</title>
 <!--
   场景三方案一：居中极简空态，从记录此刻开始
-  生成日期: 2026-08-27
+  生成日期: 2026-08-28
 
   手机演示：
   1. 把此 HTML 发到手机（AirDrop / 微信 / iCloud / GitHub Pages）
@@ -96,6 +96,94 @@ html,body{
   overflow:hidden;
 }
 @media(min-width:431px){.phone{box-shadow:0 0 40px rgba(0,0,0,0.25)}}
+
+/* ============ 主题：暖白 / 柔粉（纯色） ============ */
+.phone.is-theme-warm{
+  --my-bg:#F6F3F2;
+  --my-bg-2:#F6F3F2;
+}
+.phone.is-theme-soft-pink{
+  --my-bg:#FAF4F5;
+  --my-bg-2:#FAF4F5;
+}
+
+/* ============ 主题：暗黑 ============ */
+.phone.is-theme-dark{
+  --my-bg:#323232;
+  --my-bg-2:#2a2a2a;
+  --my-surface:#3d3d3d;
+  --my-text-primary:rgba(255,255,255,0.9);
+  --my-text-secondary:rgba(255,255,255,0.6);
+  --my-text-tertiary:rgba(255,255,255,0.45);
+  --my-text-quat:rgba(255,255,255,0.28);
+  --my-line:rgba(255,255,255,0.12);
+  --my-brand-soft:rgba(255,77,136,0.18);
+  --my-brand-soft-2:rgba(255,77,136,0.28);
+  --shadow-1:0 2px 10px rgba(0,0,0,0.28);
+  color:rgba(255,255,255,0.9);
+}
+.phone.is-theme-dark .statusbar{
+  background:linear-gradient(180deg, #4a2440 0%, var(--my-bg) 100%);
+}
+.phone.is-theme-dark .stream-header,
+.phone.is-theme-dark .stream-hero-title,
+.phone.is-theme-dark .stream-hero-title.is-scheme2{
+  background:linear-gradient(180deg, #4a2440 0%, var(--my-bg) 72%);
+}
+.phone.is-theme-dark .stream-header.is-mini-atm{
+  background:linear-gradient(180deg, #4a2440 0%, var(--my-bg) 100%);
+}
+.phone.is-theme-dark .stream-hero-heading,
+.phone.is-theme-dark .stream-mini-title,
+.phone.is-theme-dark .stream-title,
+.phone.is-theme-dark .tl-day-summary-title{
+  color:rgba(255,255,255,0.9);
+}
+.phone.is-theme-dark .stream-hero-sub,
+.phone.is-theme-dark .stream-mini-tagline,
+.phone.is-theme-dark .tl-day-summary-meta{
+  color:rgba(255,255,255,0.5);
+}
+.phone.is-theme-dark .tabbar{
+  background:#2a2a2a;
+  border-top-color:rgba(255,255,255,0.10);
+}
+.phone.is-theme-dark .tab{color:rgba(255,255,255,0.45)}
+.phone.is-theme-dark .tab-ico{color:rgba(255,255,255,0.45)}
+.phone.is-theme-dark .dock-panel{
+  background:rgba(45,45,48,0.96);
+  border-top-color:rgba(255,255,255,0.10);
+}
+.phone.is-theme-dark .dock-bar,
+.phone.is-theme-dark .dock-input,
+.phone.is-theme-dark .dock-hold{
+  background:rgba(255,255,255,0.08);
+  color:rgba(255,255,255,0.85);
+}
+.phone.is-theme-dark .tl-rail-break::before{
+  background:var(--my-bg);
+}
+.phone.is-theme-dark .tl-day-section-head::after{
+  box-shadow:0 0 0 4px rgba(255,77,136,.22);
+}
+.phone.is-theme-dark .tl-t5-card,
+.phone.is-theme-dark .tl-baby-feeding-card,
+.phone.is-theme-dark .tl-ai-card,
+.phone.is-theme-dark .tl-sister-ai-panel,
+.phone.is-theme-dark .weekly-card,
+.phone.is-theme-dark .cycle-sum{
+  background:var(--my-surface);
+  color:var(--my-text-primary);
+  box-shadow:none;
+}
+.phone.is-theme-dark .tl-t5-body,
+.phone.is-theme-dark .tl-rec-card-time{
+  color:var(--my-text-primary);
+}
+.phone.is-theme-dark .quick-card-fab,
+.phone.is-theme-dark .dock-wrap .dock-panel{
+  border-color:rgba(255,255,255,0.10);
+}
 
 /* ============ STATUS BAR ============ */
 .statusbar{
@@ -818,6 +906,40 @@ html,body{
   font-size:11px;
   line-height:1.35;
   color:rgba(255,255,255,0.38);
+}
+.demo-tweaks-dock{
+  width:260px;
+  max-height:min(70vh, 520px);
+  overflow-y:auto;
+}
+.demo-tweak-section{
+  margin-top:12px;
+  padding-top:12px;
+  border-top:0.5px solid rgba(255,255,255,0.10);
+}
+.demo-scene-dock-label + .demo-tweak-section{
+  margin-top:0;
+  padding-top:0;
+  border-top:none;
+}
+.demo-tweak-section-label{
+  font-size:11px;
+  font-weight:500;
+  letter-spacing:0.04em;
+  color:rgba(255,255,255,0.45);
+  margin-bottom:8px;
+}
+.demo-scene-dock-options.is-row{
+  flex-direction:row;
+  flex-wrap:wrap;
+  max-height:none;
+  overflow:visible;
+}
+.demo-scene-dock-options.is-row .demo-scene-dock-btn{
+  flex:1 1 auto;
+  min-width:0;
+  text-align:center;
+  padding:7px 8px;
 }
 
 /* ============ TAB BAR ============ */
@@ -3031,6 +3153,46 @@ html,body{
 }
 .tl-period-feel-scheme3-link:active{opacity:.7}
 
+/* 头部氛围感 · 方案三：今天下方灰点 + 轮播文案 */
+.tl-rail-node.is-header-atm-phrase{
+  padding-top:2px;
+  padding-bottom:14px;
+  align-items:center;
+}
+.tl-rail-node.is-header-atm-phrase .tl-rail-marker{
+  padding-top:0;
+  align-self:center;
+}
+.tl-rail-dot.is-muted{
+  background:#c8c8cc;
+  box-shadow:none;
+}
+.tl-header-atm-phrase{
+  margin:0;
+  padding:0;
+  font-size:14px;
+  line-height:1.47;
+  color:rgba(0,0,0,.4);
+  pointer-events:none;
+  user-select:none;
+  transition:opacity .28s ease, transform .28s ease;
+}
+.tl-header-atm-phrase.is-out{
+  opacity:0;
+  transform:translateY(3px);
+}
+.tl-header-atm-phrase.is-in{
+  opacity:1;
+  transform:translateY(0);
+}
+.phone.is-theme-dark .tl-header-atm-phrase,
+.phone.is-theme-dark .tl-period-feel-guide-hint{
+  color:rgba(255,255,255,.45);
+}
+.phone.is-theme-dark .tl-rail-dot.is-muted{
+  background:rgba(255,255,255,.28);
+}
+
 .dock-feeding-quick-icon{
   width:40px;
   height:40px;
@@ -3885,6 +4047,9 @@ html,body{
 }
 
 /* 日期分区 — 不同天之间加大间距 */
+.tl-day-section{
+  position:relative;
+}
 .tl-day-section-head{
   margin-bottom:12px;
   padding-top:16px;
@@ -3966,7 +4131,7 @@ html,body{
   font-weight:400;
 }
 
-/* 连续时间轴竖线 */
+/* 连续时间轴竖线 — 从首日粉点起，不向上延伸 */
 .tl-rail-continuous{
   position:relative;
 }
@@ -3974,7 +4139,7 @@ html,body{
   content:'';
   position:absolute;
   left:6.5px;
-  top:0;
+  top:14px;
   bottom:0;
   width:1px;
   background:rgba(0,0,0,0.09);
@@ -4006,8 +4171,8 @@ html,body{
   width:11px;
   height:11px;
   border-radius:50%;
-  background:linear-gradient(180deg, #ff77b2 0%, #ff4d88 100%);
-  box-shadow:0 0 0 3px var(--my-bg);
+  background:#FF4D88;
+  box-shadow:0 0 0 4px rgba(255,77,136,.14);
   z-index:4;
   pointer-events:none;
 }
@@ -4115,20 +4280,65 @@ html,body{
 .tl-t5-body--pending{
   min-height:1.47em;
 }
+/* 记录节点：统一灰色，无最新常态强调 */
 .tl-rail-dot{
-  width:6px;
-  height:6px;
+  width:7px;
+  height:7px;
   border-radius:50%;
-  background:#d1d1d6;
+  background:#cfd3d8;
   border:none;
   margin-top:0;
   z-index:1;
   flex-shrink:0;
+  position:relative;
   box-shadow:0 0 0 2px var(--my-bg);
 }
-.tl-rail-dot.baby{
-  background:#ff9f43;
-  box-shadow:0 0 0 2px var(--my-bg), 0 0 0 5px rgba(255,159,67,0.12);
+.tl-rail-dot.baby,
+.tl-rail-dot.ai,
+.tl-rail-node.is-feed-last .tl-rail-dot{
+  width:7px;
+  height:7px;
+  background:#cfd3d8;
+  box-shadow:0 0 0 2px var(--my-bg);
+}
+.tl-rail-ripple{
+  position:absolute;
+  left:50%;
+  top:2px;
+  width:7px;
+  height:7px;
+  margin-left:-3.5px;
+  border-radius:50%;
+  pointer-events:none;
+  z-index:0;
+  box-shadow:0 0 0 0 rgba(255,77,136,0);
+  opacity:0;
+}
+
+/* 保存落位：卡片升起 */
+.tl-rail-node.is-spawn .tl-rail-body{
+  animation:tl-node-rise .42s cubic-bezier(.22,.75,.3,1) both;
+}
+@keyframes tl-node-rise{
+  from{opacity:0;transform:translateY(16px) scale(.98)}
+  to{opacity:1;transform:none}
+}
+
+/* 保存落位：节点高亮 + 涟漪（一次性，结束后回灰） */
+.tl-rail-node.is-light .tl-rail-dot{
+  animation:tl-node-lightdot .5s ease;
+}
+@keyframes tl-node-lightdot{
+  0%{background:#cfd3d8;box-shadow:0 0 0 2px var(--my-bg)}
+  40%{background:#FF4D88;box-shadow:0 0 0 5px rgba(255,77,136,.25)}
+  100%{background:#cfd3d8;box-shadow:0 0 0 2px var(--my-bg)}
+}
+.tl-rail-node.is-light .tl-rail-ripple{
+  animation:tl-node-ripple .6s ease-out;
+}
+@keyframes tl-node-ripple{
+  0%{box-shadow:0 0 0 0 rgba(255,77,136,.5);opacity:1}
+  100%{box-shadow:0 0 0 16px rgba(255,77,136,0);opacity:0}
 }
 .tl-rail-body{
   flex:1;
@@ -5015,6 +5225,140 @@ html,body{
   line-height:1.4;
   letter-spacing:0;
 }
+.stream-title.is-atmosphere-collapse{
+  opacity:0;
+  transform:translateY(4px);
+  pointer-events:none;
+  transition:opacity .18s ease, transform .18s ease;
+}
+.stream-title.is-atmosphere-collapse.is-shown{
+  opacity:1;
+  transform:translateY(0);
+  pointer-events:auto;
+}
+.stream-hero-title{
+  padding:2px 4px 12px;
+  margin:0 0 4px;
+  will-change:opacity, transform;
+}
+.suiji-stream.has-hero-title .tl-rail-continuous > .tl-day-section:first-child .tl-day-section-head{
+  padding-top:12px;
+  margin-bottom:12px;
+}
+.suiji-stream.has-hero-title .tl-rail-continuous > .tl-day-section:first-child .tl-day-section-head::after{
+  top:8.7px;
+}
+.suiji-stream.has-hero-title .tl-rail-continuous > .tl-day-section:first-child .tl-day-summary{
+  transform:translateY(-12px);
+  padding-bottom:8px;
+}
+.suiji-stream.has-hero-title .tl-rail-continuous::before{
+  top:14px;
+}
+.stream-hero-heading{
+  margin:0;
+  font-size:28px;
+  font-weight:500;
+  color:rgba(0,0,0,0.8);
+  line-height:1.2;
+  letter-spacing:0;
+}
+.stream-hero-sub{
+  margin:4px 0 0;
+  font-size:14px;
+  font-weight:400;
+  color:rgba(0,0,0,0.45);
+  line-height:1.29;
+}
+.suiji-shell.is-atm-scheme2{
+  display:flex;
+  flex-direction:column;
+  height:calc(100vh - 44px);
+  max-height:calc(100vh - 44px);
+  min-height:calc(100vh - 44px);
+}
+.stream-hero-title.is-scheme2{
+  position:relative;
+  z-index:15;
+  flex:0 0 auto;
+  padding:52px 20px 0;
+  margin:0;
+  background:var(--my-bg);
+  overflow:hidden;
+  box-sizing:content-box;
+  will-change:opacity, max-height, transform, padding-bottom;
+}
+.suiji-shell.is-atm-scheme2 .suiji-stream.has-hero-title-scheme2{
+  flex:1 1 auto;
+  min-height:0;
+  max-height:none;
+  padding-top:8px;
+}
+.suiji-shell.is-atm-scheme2 .stream-header{
+  background:transparent;
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+}
+.suiji-shell.is-atm-scheme2 .stream-header.is-atm-collapsed{
+  background:var(--my-bg);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+.stream-header.is-mini-atm{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:16px;
+  padding:10px 16px 12px;
+  background:var(--my-bg);
+}
+.stream-mini-title{
+  margin:0;
+  flex:0 0 auto;
+  font-size:21px;
+  font-weight:500;
+  line-height:1.19;
+  color:var(--my-text-primary);
+  letter-spacing:0;
+}
+.stream-mini-tagline{
+  margin:0;
+  flex:1 1 auto;
+  min-width:0;
+  text-align:right;
+  font-size:14px;
+  font-weight:400;
+  line-height:1.29;
+  color:var(--my-text-tertiary);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  transition:opacity .28s ease, transform .28s ease;
+}
+.stream-mini-tagline.is-out{
+  opacity:0;
+  transform:translateY(3px);
+}
+.stream-mini-tagline.is-in{
+  opacity:1;
+  transform:translateY(0);
+}
+.suiji-shell.is-atm-scheme3 .suiji-stream{
+  padding-top:76px;
+}
+.suiji-shell.is-atm-scheme3 .tl-rail-continuous > .tl-day-section:first-child .tl-day-section-head{
+  padding-top:20px;
+  margin-bottom:16px;
+}
+.suiji-shell.is-atm-scheme3 .tl-rail-continuous > .tl-day-section:first-child .tl-day-section-head::after{
+  top:12px;
+}
+.suiji-shell.is-atm-scheme3 .tl-rail-continuous > .tl-day-section:first-child .tl-day-summary{
+  transform:translateY(-8px);
+}
+.suiji-shell.is-atm-scheme3 .tl-rail-continuous::before{
+  top:18px;
+}
 .stream-sub{
   font-size:12px;
   color:var(--my-text-tertiary);
@@ -5671,6 +6015,11 @@ html,body{
 .tl-t5-tags{
   margin-top:12px;
 }
+.tl-t5-card > .tl-fb-bub,
+.tl-t5-main + .tl-fb-bub,
+.tl-t5-tags + .tl-fb-bub{
+  margin-top:4px;
+}
 .tl-t5-main .tl-tags-t5,
 .tl-t5-main .tl-tags:not(.tl-tags-rows){
   gap:6px;
@@ -5703,6 +6052,811 @@ html,body{
 }
 .tl-t5-insight{
   margin:0;
+}
+
+/* ===== 反馈展示 · 方案三：图表角标批注浮层 + 详情页 ===== */
+.fb-anno-marker{
+  position:absolute;
+  right:6px;
+  top:6px;
+  width:44px;
+  height:44px;
+  border:0;
+  background:transparent;
+  padding:0;
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  border-radius:50%;
+  z-index:2;
+  -webkit-tap-highlight-color:transparent;
+}
+.fb-anno-marker::before{
+  content:"";
+  position:absolute;
+  width:30px;
+  height:30px;
+  border-radius:11px;
+  background:#f4f0f2;
+  border:1px solid #e9e3e6;
+  transition:transform .16s cubic-bezier(.22,1,.36,1), background .16s ease;
+}
+.fb-anno-marker svg{
+  position:relative;
+  width:18px;
+  height:18px;
+  overflow:visible;
+}
+.fb-anno-marker:active::before{transform:scale(.92)}
+.fb-anno-marker[data-new="true"]::after{
+  content:"";
+  position:absolute;
+  right:6px;
+  top:6px;
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:#ff4d88;
+  border:2px solid #fff;
+}
+.fb-anno-marker.is-waiting{
+  opacity:0;
+  pointer-events:none;
+  transform:scale(.6);
+}
+.fb-anno-marker.is-ready{
+  opacity:1;
+  transform:scale(1);
+}
+
+/* 方案三：卡外图表预览 → 飞入卡内右上角标 */
+.fb-anno-fold-shell{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  width:100%;
+}
+.fb-anno-fold-card-host{
+  position:relative;
+  width:100%;
+}
+.fb-anno-fold-panel{
+  position:relative;
+  z-index:1;
+  margin:0;
+  padding:12px;
+  background:#fff;
+  border-radius:12px;
+  border:0.5px solid rgba(0,0,0,.06);
+  will-change:transform, opacity;
+  transform-origin:center center;
+  box-sizing:border-box;
+}
+.fb-anno-fold-panel.is-outside{
+  /* 独立于原记录卡之外 */
+  background:#fff;
+}
+.fb-anno-fold-panel.is-in{
+  animation:fb-anno-fold-in .38s cubic-bezier(.22,1,.36,1) both;
+}
+.fb-anno-fold-panel.is-folding{
+  pointer-events:none;
+  z-index:5;
+}
+@keyframes fb-anno-fold-in{
+  from{opacity:0; transform:translateY(10px) scale(.97)}
+  to{opacity:1; transform:translateY(0) scale(1)}
+}
+.fb-anno-fold-head{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin-bottom:8px;
+}
+.fb-anno-fold-spark{
+  color:#ff4d88;
+  font-size:11px;
+  line-height:1;
+}
+.fb-anno-fold-title{
+  font-size:13px;
+  font-weight:500;
+  color:rgba(0,0,0,.8);
+  line-height:1.3;
+}
+.fb-anno-fold-chart{
+  background:#f7f4f6;
+  border-radius:8px;
+  padding:8px 6px 6px;
+}
+.fb-anno-fold-summary{
+  margin-top:8px;
+  font-size:12px;
+  line-height:1.45;
+  color:rgba(0,0,0,.55);
+}
+
+.tl-diet-fb-anno-wrap{
+  position:relative;
+  overflow:visible;
+}
+.tl-diet-fb-anno-wrap.has-fb-anno-marker{
+  padding-right:44px;
+}
+.tl-t5-card.has-fb-anno-marker{
+  position:relative;
+  padding-right:52px;
+}
+
+.fb-anno-overlay{
+  position:absolute;
+  inset:0;
+  z-index:220;
+  pointer-events:none;
+}
+.fb-anno-overlay.is-open{pointer-events:auto}
+.fb-anno-scrim{
+  position:absolute;
+  inset:0;
+  border:0;
+  background:rgba(46,42,46,.10);
+  opacity:0;
+  transition:opacity .18s ease;
+  pointer-events:none;
+}
+.fb-anno-overlay.is-open .fb-anno-scrim{
+  opacity:1;
+  pointer-events:auto;
+}
+.fb-anno-popover{
+  position:absolute;
+  left:50%;
+  top:96px;
+  width:min(326px, calc(100% - 28px));
+  max-height:min(500px, 70%);
+  transform:translateX(-50%);
+  background:#fffdfd;
+  border:1px solid rgba(229,224,227,.95);
+  border-radius:22px;
+  padding:16px;
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  box-shadow:0 18px 42px rgba(32,27,33,.16);
+  transform-origin:88% 8%;
+  overflow:auto;
+  z-index:2;
+}
+.fb-anno-popover.is-visible{
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+}
+.fb-anno-pop-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
+}
+.fb-anno-eyebrow{
+  font-size:11px;
+  color:#a3a0a6;
+  margin-bottom:4px;
+  line-height:1.3;
+}
+.fb-anno-pop-title{
+  font-size:17px;
+  font-weight:500;
+  color:rgba(0,0,0,.8);
+  line-height:1.25;
+}
+.fb-anno-close{
+  width:32px;
+  height:32px;
+  border:0;
+  border-radius:50%;
+  background:#f3f0f2;
+  color:#77747a;
+  font-size:17px;
+  cursor:pointer;
+  flex:0 0 auto;
+}
+.fb-anno-chart-btn{
+  width:100%;
+  border:0;
+  background:transparent;
+  padding:0;
+  text-align:left;
+  cursor:pointer;
+  border-radius:14px;
+  font-family:inherit;
+}
+.fb-anno-chart-wrap{
+  background:#f8f5f6;
+  border-radius:14px;
+  padding:12px 10px 9px;
+}
+.fb-anno-chart-svg{
+  display:block;
+  width:100%;
+  height:122px;
+  overflow:visible;
+}
+.fb-anno-chart-svg.is-big{height:160px}
+.fb-anno-axis{
+  display:flex;
+  justify-content:space-between;
+  margin:2px 2px 0;
+  font-size:10px;
+  color:#aaa6ac;
+}
+.fb-anno-summary{
+  font-size:14px;
+  line-height:1.5;
+  margin:13px 1px 3px;
+  color:#403e43;
+  font-weight:400;
+}
+.fb-anno-source{
+  font-size:10px;
+  color:#aaa6ac;
+  margin-top:6px;
+}
+.fb-anno-open-detail{
+  margin-top:13px;
+  padding-top:12px;
+  border-top:1px solid #ece8ea;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  font-size:13px;
+  color:#ff4d88;
+  font-weight:500;
+}
+
+.fb-anno-detail{
+  position:absolute;
+  inset:0;
+  z-index:230;
+  background:#f2f2f5;
+  display:flex;
+  flex-direction:column;
+  transform:translateX(102%);
+  visibility:hidden;
+  transition:transform .36s cubic-bezier(.22,1,.36,1), visibility 0s linear .36s;
+}
+.fb-anno-detail.is-open,
+.fb-anno-chat.is-open{
+  transform:translateX(0);
+  visibility:visible;
+  transition:transform .36s cubic-bezier(.22,1,.36,1), visibility 0s;
+}
+.fb-anno-chat{
+  position:absolute;
+  inset:0;
+  z-index:240;
+  background:#f2f2f5;
+  display:flex;
+  flex-direction:column;
+  transform:translateX(102%);
+  visibility:hidden;
+  transition:transform .36s cubic-bezier(.22,1,.36,1), visibility 0s linear .36s;
+}
+.fb-anno-detail-nav{
+  flex:0 0 auto;
+  padding: calc(12px + env(safe-area-inset-top, 0px)) 12px 8px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.fb-anno-detail-nav.is-title{
+  padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 12px;
+  border-bottom:none;
+  background:#f2f2f5;
+  display:grid;
+  grid-template-columns:72px 1fr 72px;
+  align-items:center;
+}
+.fb-anno-back-txt{
+  border:0;
+  background:transparent;
+  color:#333139;
+  font-size:15px;
+  text-align:left;
+  padding:8px 0;
+  cursor:pointer;
+  font-family:inherit;
+}
+.fb-anno-detail-title{
+  text-align:center;
+  font-size:17px;
+  font-weight:500;
+  color:rgba(0,0,0,.8);
+}
+.fb-anno-detail-actions{
+  text-align:right;
+  color:#5c5960;
+  font-size:15px;
+  letter-spacing:1px;
+  white-space:nowrap;
+}
+.fb-anno-detail-nav-right{
+  display:flex;
+  gap:8px;
+}
+.fb-anno-detail-icon-btn{
+  width:36px;
+  height:36px;
+  border:0;
+  border-radius:50%;
+  background:rgba(255,255,255,.92);
+  color:rgba(0,0,0,.7);
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  box-shadow:0 0 0 0.5px rgba(0,0,0,.06);
+}
+.fb-anno-detail-scroll,
+.fb-anno-chat-scroll{
+  flex:1 1 auto;
+  min-height:0;
+  overflow:auto;
+  padding:8px 12px calc(24px + env(safe-area-inset-bottom, 0px));
+  -webkit-overflow-scrolling:touch;
+}
+.fb-anno-section{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-bottom:12px;
+}
+.fb-anno-section-label{
+  font-size:12px;
+  color:rgba(0,0,0,.4);
+  padding-left:4px;
+  font-weight:400;
+}
+.fb-anno-record-card{
+  background:#fff;
+  border:none;
+  border-radius:12px;
+  padding:14px 16px;
+}
+.fb-anno-record-time{
+  font-size:12px;
+  color:rgba(0,0,0,.4);
+  margin-bottom:10px;
+}
+.fb-anno-record-text{
+  font-size:16px;
+  line-height:1.47;
+  color:rgba(0,0,0,.8);
+  font-weight:400;
+}
+.fb-anno-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  padding:0 2px;
+}
+.fb-anno-tag{
+  font-size:12px;
+  color:#ff4d88;
+  border:1px solid #ffcede;
+  border-radius:8px;
+  padding:5px 12px;
+  background:#fff;
+  line-height:1.3;
+}
+.fb-anno-feedback-card{
+  background:#fff;
+  border:none;
+  border-radius:12px;
+  padding:14px 16px;
+}
+.fb-anno-kicker{
+  font-size:12px;
+  line-height:1.55;
+  color:rgba(0,0,0,.45);
+  margin-bottom:12px;
+}
+.fb-anno-feedback-title{
+  font-size:17px;
+  margin:0 0 4px;
+  font-weight:500;
+  color:rgba(0,0,0,.8);
+}
+.fb-anno-feedback-range{
+  font-size:12px;
+  color:rgba(0,0,0,.4);
+  margin-bottom:12px;
+}
+.fb-anno-response-chart{
+  background:#f8f8f8;
+  border-radius:8px;
+  padding:12px 8px 9px;
+  margin-bottom:10px;
+}
+.fb-anno-response-chart.is-in-card{margin-bottom:0}
+.fb-anno-metric-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:12px;
+}
+.fb-anno-metric{
+  padding:12px 0;
+  border-top:0.5px solid rgba(0,0,0,.06);
+}
+.fb-anno-metric span{
+  display:block;
+  font-size:11px;
+  color:rgba(0,0,0,.4);
+  margin-bottom:4px;
+}
+.fb-anno-metric strong{
+  font-size:17px;
+  font-weight:500;
+  color:rgba(0,0,0,.8);
+}
+.fb-anno-feedback-summary{
+  margin:12px 0 0;
+  font-size:14px;
+  line-height:1.47;
+  color:rgba(0,0,0,.6);
+  font-weight:400;
+}
+.fb-anno-feedback-source{
+  margin-top:12px;
+  padding-top:12px;
+  border-top:1px solid #ece8ea;
+  font-size:11px;
+  color:#a3a0a6;
+}
+.fb-anno-response-text{
+  margin:0;
+  font-size:15px;
+  line-height:1.55;
+  color:rgba(0,0,0,.55);
+  font-weight:400;
+}
+.fb-anno-detail-dock{
+  flex:0 0 auto;
+  padding:8px 0 0;
+  background:#f2f2f5;
+  position:relative;
+  z-index:2;
+}
+.fb-anno-detail-dock-hint{
+  margin:0 12px 8px;
+  text-align:center;
+  font-size:11px;
+  color:rgba(0,0,0,.35);
+  line-height:1.3;
+}
+.fb-anno-detail-hold{
+  width:100%;
+  height:52px;
+  border-radius:0;
+  border:0;
+  border-top:0.5px solid #ffd0dc;
+  border-bottom:0.5px solid #ffd0dc;
+  background:#fff;
+  color:#d65a6e;
+  font-size:15px;
+  font-weight:500;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  cursor:pointer;
+  font-family:inherit;
+  padding-bottom:env(safe-area-inset-bottom, 0px);
+  min-height:calc(52px + env(safe-area-inset-bottom, 0px));
+}
+.fb-anno-detail-hold:active{background:#fff8fa; transform:none}
+.fb-anno-mic{font-size:14px; line-height:1}
+.fb-anno-chat-context{
+  background:#fff;
+  border:none;
+  border-radius:12px;
+  padding:14px 16px;
+  margin-bottom:12px;
+}
+.fb-anno-chat-context-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  font-size:12px;
+  color:rgba(0,0,0,.4);
+}
+.fb-anno-chat-context strong{
+  display:block;
+  font-size:15px;
+  color:rgba(0,0,0,.8);
+  margin-top:5px;
+  font-weight:500;
+}
+.fb-anno-chat-guide{
+  font-size:14px;
+  line-height:1.47;
+  color:rgba(0,0,0,.6);
+  margin:4px 4px 16px;
+}
+.fb-anno-suggestions{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.fb-anno-suggestion{
+  border:none;
+  background:#fff;
+  border-radius:12px;
+  padding:14px 16px;
+  text-align:left;
+  font-size:14px;
+  color:rgba(0,0,0,.8);
+  cursor:pointer;
+  font-family:inherit;
+}
+.fb-anno-chat-input{
+  margin-top:auto;
+  flex:0 0 auto;
+  padding:10px 12px calc(16px + env(safe-area-inset-bottom, 0px));
+  background:#f2f2f5;
+  border-top:none;
+  position:relative;
+  z-index:2;
+}
+.fb-anno-chat-input-inner{
+  height:48px;
+  border:none;
+  background:#fff;
+  border-radius:80px;
+  display:flex;
+  align-items:center;
+  padding:0 16px;
+  color:rgba(0,0,0,.35);
+  font-size:14px;
+}
+
+/* 全屏详情/继续了解时盖住底部 Tab 与输入栏 */
+.phone.is-fb-anno-cover .tabbar,
+.phone.is-fb-anno-cover .dock-wrap,
+.phone.is-fb-anno-cover .quick-card-fab,
+.phone.is-fb-anno-cover .quick-float-wrap{
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+
+/* 旧方案三灰条样式保留但不作为主路径 */
+
+/* 方案一：小气泡 ↔ 大气泡（内容替换 teaser） */
+.tl-fb-bub.is-bubble{
+  display:inline-block;
+  position:relative;
+  width:max-content;
+  max-width:max-content;
+  margin-top:6px;
+  margin-bottom:4px;
+  background:#f6f2f4;
+  border-radius:4px 12px 12px 12px;
+  padding:5px 9px;
+  cursor:pointer;
+  transition:max-width .3s cubic-bezier(.2,.7,.3,1), background .2s, padding .2s;
+  vertical-align:top;
+  -webkit-tap-highlight-color:transparent;
+  outline:none;
+  box-sizing:border-box;
+  overflow:hidden;
+}
+.tl-fb-bub.is-bubble:active{background:#efe9ec}
+.tl-fb-bub.is-bubble.is-open{
+  display:block;
+  width:auto;
+  max-width:100%;
+  padding:8px 12px;
+}
+/* 收起时隐藏展开层，避免宽内容把小气泡撑开 */
+.tl-fb-bub.is-bubble:not(.is-open) .tl-fb-bub-full{
+  position:absolute;
+  width:1px;
+  height:1px;
+  margin:-1px;
+  padding:0;
+  overflow:hidden;
+  clip:rect(0,0,0,0);
+  border:0;
+  opacity:0;
+  pointer-events:none;
+}
+.tl-fb-bub.is-bubble .tl-fb-bub-teaser{
+  font-size:11px;
+  color:#8b9199;
+  white-space:nowrap;
+  line-height:1.3;
+  font-weight:400;
+  display:inline-flex;
+  align-items:center;
+  gap:2px;
+}
+.tl-fb-bub.is-bubble.is-open .tl-fb-bub-teaser{display:none}
+.tl-fb-bub.is-bubble .tl-fb-bub-sp{
+  color:#ff4d88;
+  opacity:.85;
+  margin-right:3px;
+  font-size:10px;
+}
+.tl-fb-bub.is-bubble .tl-fb-bub-cv{
+  color:#c4c8ce;
+  font-size:9px;
+  margin-left:3px;
+}
+.tl-fb-bub.is-bubble .tl-fb-bub-full{
+  display:grid;
+  grid-template-rows:0fr;
+  opacity:0;
+  transition:grid-template-rows .3s cubic-bezier(.2,.7,.3,1), opacity .25s;
+}
+.tl-fb-bub.is-bubble.is-open .tl-fb-bub-full{
+  position:static;
+  width:auto;
+  height:auto;
+  margin:0;
+  clip:auto;
+  overflow:visible;
+  pointer-events:auto;
+  grid-template-rows:1fr;
+  opacity:1;
+}
+.tl-fb-bub.is-bubble .tl-fb-bub-inner{overflow:hidden}
+.tl-fb-bub.is-bubble .tl-fb-bub-cline{
+  font-size:12px;
+  color:#8b9199;
+  margin-bottom:6px;
+  line-height:1.4;
+  font-weight:400;
+  display:flex;
+  align-items:center;
+  gap:4px;
+}
+/* 方案二：气泡交互同方案一，收起直接露短文案 + 星星 */
+.tl-fb-bub.is-bubble.is-bubble-s2{
+  background:#f2f2f5;
+}
+.tl-fb-bub.is-bubble.is-bubble-s2 .tl-fb-bub-teaser,
+.tl-fb-bub.is-bubble.is-bubble-s2 .tl-fb-bub-cline{
+  color:rgba(0,0,0,0.45);
+}
+.tl-fb-bub.is-bubble .tl-fb-bub-spark{
+  flex:0 0 auto;
+  width:14px;
+  height:14px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  margin-right:2px;
+}
+.tl-fb-bub.is-bubble .tl-fb-bub-spark .tl-period-analysis-spark{
+  width:14px;
+  height:14px;
+  transform:scale(.68);
+  transform-origin:center;
+}
+.tl-fb-bub.is-bubble .tl-fb-bub-content{
+  font-size:12px;
+  line-height:1.4;
+  color:#8b9199;
+}
+.tl-fb-bub.is-bubble .tl-fb-bub-mini{
+  display:block;
+  width:100%;
+  max-width:210px;
+  height:36px;
+}
+
+/* 方案三：全宽灰条 · 向下展开 */
+.tl-fb-bub.is-bar{
+  display:block;
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+  margin-top:8px;
+  margin-bottom:4px;
+  background:#f2f2f5;
+  border-radius:4px 10px 10px 10px;
+  padding:8px 10px;
+  cursor:pointer;
+  transition:background .2s;
+  -webkit-tap-highlight-color:transparent;
+  outline:none;
+}
+.tl-fb-bub.is-bar:active{background:#ebebef}
+.tl-fb-bub.is-bar.is-static{cursor:default}
+.tl-fb-bub.is-bar .tl-fb-bub-row{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  min-height:18px;
+}
+.tl-fb-bub.is-bar .tl-fb-bub-spark{
+  flex:0 0 auto;
+  width:16px;
+  height:16px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+.tl-fb-bub.is-bar .tl-fb-bub-spark .tl-period-analysis-spark{
+  width:16px;
+  height:16px;
+  transform:scale(.72);
+  transform-origin:center;
+}
+.tl-fb-bub.is-bar .tl-fb-bub-line{
+  flex:1 1 auto;
+  min-width:0;
+  font-size:12px;
+  line-height:1.35;
+  color:rgba(0,0,0,0.45);
+  font-weight:400;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.tl-fb-bub.is-bar .tl-fb-bub-chev{
+  flex:0 0 auto;
+  font-size:12px;
+  color:rgba(0,0,0,0.28);
+  line-height:1;
+  margin-left:4px;
+}
+.tl-fb-bub.is-bar .tl-fb-bub-full{
+  display:grid;
+  grid-template-rows:0fr;
+  opacity:0;
+  transition:grid-template-rows .28s cubic-bezier(.2,.7,.3,1), opacity .22s;
+}
+.tl-fb-bub.is-bar.is-open .tl-fb-bub-full{
+  grid-template-rows:1fr;
+  opacity:1;
+  margin-top:6px;
+}
+.tl-fb-bub.is-bar .tl-fb-bub-inner{overflow:hidden}
+.tl-fb-bub.is-bar .tl-fb-bub-content{
+  font-size:12px;
+  line-height:1.4;
+  color:rgba(0,0,0,0.45);
+}
+.tl-fb-bub.is-bar .tl-fb-bub-mini{
+  display:block;
+  width:100%;
+  max-width:100%;
+  height:36px;
+}
+
+.tl-fb-bub-content .tl-combo-ai{
+  background:transparent;
+  padding:0;
+  margin:0;
+}
+.tl-fb-bub-content .tl-combo-ai-icon{display:none}
+.tl-fb-bub.is-animate-in{
+  animation:fadeUp .35s ease both;
+}
+.tl-t5-card .tl-fb-bub,
+.v3-card-enter .tl-fb-bub,
+.fade-in .tl-fb-bub{
+  margin-left:0;
+}
+.v3-card-enter .tl-fb-bub.is-bubble.is-embedded,
+.fade-in .tl-fb-bub.is-bubble.is-embedded{
+  margin-top:4px;
+}
+.v3-card-enter .tl-fb-bub.is-bar.is-embedded,
+.fade-in .tl-fb-bub.is-bar.is-embedded{
+  margin-top:6px;
 }
 .tl-sister-ai-wrap{
   margin:0;
@@ -13009,6 +14163,298 @@ html,body{
 }
 .suiji-shell--empty::before{display:none}
 
+.suiji-shell--onboard-s3{
+  background:linear-gradient(180deg, #FFFFFF 0%, #F2F2F5 100%);
+}
+
+.ep-onboard-s3-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px 16px 8px;
+  position:relative;
+  z-index:3;
+}
+.ep-onboard-s3-title{
+  margin:0;
+  font-size:22px;
+  font-weight:500;
+  line-height:1.19;
+  letter-spacing:-0.01em;
+  color:rgba(0,0,0,0.8);
+}
+.ep-onboard-s3-close{
+  width:32px;
+  height:32px;
+  border:none;
+  border-radius:8px;
+  background:rgba(0,0,0,0.05);
+  color:rgba(0,0,0,0.6);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  padding:0;
+  flex-shrink:0;
+}
+.ep-onboard-s3-close:active{
+  background:rgba(0,0,0,0.08);
+}
+.ep-onboard-s3-hero{
+  padding-top:14px;
+}
+.ep-onboard-s3-hero-title{
+  margin:0;
+  font-size:32px;
+  font-weight:500;
+  line-height:1.18;
+  letter-spacing:-0.02em;
+  color:rgba(0,0,0,0.8);
+}
+.ep-onboard-s3-hero-title .record-empty-accent{
+  font-size:inherit;
+}
+.ep-onboard-s3-demo{
+  padding-bottom:148px;
+}
+.ep-onboard-s3-voice-wrap .record-empty-mic{
+  width:80px;
+  height:80px;
+}
+.ep-onboard-s3-voice-wrap .record-empty-mic-core{
+  width:70px;
+  height:70px;
+}
+.ep-onboard-s3-voice-wrap .record-empty-mic-core svg{
+  width:30px;
+  height:30px;
+}
+.ep-onboard-s3.is-collapsing{
+  transform-origin:calc(100% - 52px) 36px;
+  animation:epOnboardS3Collapse .42s cubic-bezier(.4,0,.2,1) forwards;
+  pointer-events:none;
+}
+@keyframes epOnboardS3Collapse{
+  to{
+    opacity:0;
+    transform:scale(.08) translate(6%, -8%);
+    border-radius:12px;
+  }
+}
+.ep-onboard-s3-entry{
+  width:28px;
+  height:28px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:none;
+  background:transparent;
+  border-radius:8px;
+  cursor:pointer;
+  flex-shrink:0;
+  padding:0;
+}
+.ep-onboard-s3-entry-icon{
+  width:20px;
+  height:20px;
+  display:block;
+  object-fit:contain;
+}
+.ep-onboard-s3-entry:active{
+  opacity:0.72;
+}
+
+.ep-onboard-fullscreen{
+  position:absolute;
+  inset:0;
+  z-index:120;
+  background:linear-gradient(180deg, #FFFFFF 0%, #F2F2F5 100%);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+.ep-onboard-fullscreen .record-empty-root{
+  flex:1;
+  min-height:0;
+  height:100%;
+}
+.ep-onboard-s4{
+  background:var(--my-bg, #f2f2f5);
+}
+.ep-onboard-s4-body{
+  flex:1;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  overflow:hidden;
+  padding:20px 16px 0;
+}
+.ep-onboard-s4-frame{
+  flex:0 0 auto;
+  width:100%;
+  height:440px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  overflow:hidden;
+}
+.ep-onboard-s4-inner{
+  flex:1;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  overflow:hidden;
+}
+.ep-onboard-s4-frame.has-input:not(.has-card) .ep-onboard-s4-inner{
+  justify-content:center;
+}
+.ep-onboard-s4-frame.has-card{
+  gap:12px;
+}
+.ep-onboard-s4-frame .record-empty-card-hd{
+  flex-shrink:0;
+}
+.ep-onboard-s4-stream{
+  flex:1;
+  min-height:0;
+  overflow:hidden;
+  margin:0 -4px;
+  padding:6px 4px 0;
+}
+.ep-onboard-s4-stream .tl-rail-body{
+  margin-top:0;
+}
+.ep-onboard-s4-stream .tl-day-section > .tl-rail-node:first-of-type{
+  margin-top:0;
+  padding-top:2px;
+}
+.ep-onboard-s4-stream .tl-feed{
+  padding-bottom:8px;
+}
+.ep-onboard-s4-stream .tl-rail-continuous{
+  padding-left:0;
+}
+.ep-onboard-s4-voice-wrap{
+  position:relative;
+  flex-shrink:0;
+  bottom:auto;
+  padding:4px 22px calc(var(--my-safe-bottom, 0px) + 16px);
+  background:linear-gradient(180deg, rgba(242,242,245,0) 0%, rgba(242,242,245,0.92) 28%, #F2F2F5 100%);
+  pointer-events:none;
+}
+.ep-onboard-s4-voice-wrap .record-empty-mic,
+.ep-onboard-s4-voice-wrap .record-empty-voice-hint{
+  pointer-events:auto;
+}
+.ep-onboard-s4-frame .ep-s4-dock-demo{
+  box-shadow:none;
+}
+.ep-s4-dock-demo{
+  position:relative;
+  flex-shrink:0;
+  min-height:50px;
+  min-width:min(100%, 280px);
+  padding:6px 8px 6px 18px;
+  border-radius:999px;
+  background:#fff;
+  border:1px solid rgba(255,77,136,0.58);
+  color:#323238;
+  box-shadow:0 10px 28px rgba(255,77,136,0.16);
+  font-size:15px;
+  line-height:1.4;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  pointer-events:none;
+  animation:epS4DockIn .36s cubic-bezier(.16,1,.3,1) .18s both;
+}
+.ep-s4-dock-demo.is-sent{
+  animation:epS4DockSend .52s cubic-bezier(.22,1,.36,1) both;
+}
+.ep-s4-dock-mic{
+  width:18px;
+  height:18px;
+  display:grid;
+  place-items:center;
+  color:#ff4d88;
+  flex-shrink:0;
+}
+.ep-s4-dock-mic svg{
+  width:18px;
+  height:18px;
+  display:block;
+}
+.ep-s4-dock-text{
+  flex:1;
+  min-width:0;
+  white-space:nowrap;
+  overflow:hidden;
+  color:#25252a;
+}
+.ep-s4-dock-send{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:#ff4d88;
+  color:#fff;
+  font-size:21px;
+  flex-shrink:0;
+}
+@keyframes epS4DockIn{
+  from{opacity:0;transform:translateY(14px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes epS4DockSend{
+  0%{opacity:1;transform:translateY(0) scale(1)}
+  55%{opacity:.35;transform:translateY(-18px) scale(.94)}
+  100%{opacity:0;transform:translateY(-28px) scale(.9)}
+}
+.ep-s4-inline-cursor{
+  display:inline-block;
+  width:2px;
+  height:18px;
+  margin-left:2px;
+  vertical-align:-3px;
+  background:#ff4d88;
+  animation:epS4Blink .8s step-end infinite;
+}
+.ep-s4-card-hi{
+  display:inline-block;
+  border-radius:8px;
+  padding:0 2px;
+  margin:0;
+  font-weight:inherit;
+  transform-origin:center;
+  background:transparent;
+  color:inherit;
+}
+.ep-s4-card-hi.is-on{
+  padding:0 5px;
+  margin:0 1px;
+  font-weight:500;
+  animation:epS4CardMark .38s cubic-bezier(.16,1,.3,1) both;
+}
+.ep-s4-card-hi.is-weight.is-on{
+  color:#7a45ff;
+  background:#efe4ff;
+}
+.ep-s4-card-hi.is-mood.is-on{
+  color:#c47b00;
+  background:#fff0c8;
+}
+@keyframes epS4Blink{
+  50%{opacity:0}
+}
+@keyframes epS4CardMark{
+  0%{transform:scale(.92);opacity:.2}
+  100%{transform:scale(1);opacity:1}
+}
+
 .record-empty-root{
   position:relative;
   z-index:1;
@@ -13111,6 +14557,9 @@ html,body{
   align-items:flex-end;
   gap:6px;
 }
+.record-empty-bubble-wrap.is-left{
+  align-items:flex-start;
+}
 .record-empty-bubble{
   border-radius:18px 18px 4px 18px;
   padding:10px 14px;
@@ -13118,6 +14567,9 @@ html,body{
   align-items:center;
   gap:8px;
   max-width:85%;
+}
+.record-empty-bubble-wrap.is-left .record-empty-bubble{
+  border-radius:18px 18px 18px 4px;
 }
 .record-empty-wave{
   display:flex;
@@ -13144,6 +14596,9 @@ html,body{
   border-radius:10px;
   max-width:90%;
   line-height:1.45;
+}
+.record-empty-bubble-wrap.is-left .record-empty-transcript{
+  align-self:flex-start;
 }
 .record-empty-cursor{
   display:inline-block;
@@ -15072,6 +16527,386 @@ html,body{
 
 .record-blank-stream.is-post-ceremony .tl-day-section-head{
   padding-top:0;
+}
+
+/* ============ 新手引导 · 方案一（嵌入正常时间轴骨架） ============ */
+
+.suiji-shell--onboard-s1 .stream-hero-title,
+.suiji-shell--onboard-s1 .stream-hero-title.is-scheme2{
+  display:none;
+}
+
+.suiji-shell--onboard-s1 .suiji-stream{
+  position:relative;
+  display:block;
+  min-height:0;
+  max-height:calc(100dvh - 44px);
+  padding-bottom:calc(200px + var(--my-safe-bottom));
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+
+.suiji-stream.has-onboard-timeline{
+  position:relative;
+  padding-bottom:calc(var(--my-dock-float-b, 180px) + 24px);
+}
+
+.suiji-stream.has-onboard-timeline.is-onboard-masked{
+  overflow-y:auto;
+  touch-action:auto;
+  -webkit-overflow-scrolling:touch;
+}
+
+.suiji-stream.has-onboard-timeline:not(.is-onboard-masked){
+  overflow-y:auto;
+  touch-action:auto;
+  -webkit-overflow-scrolling:touch;
+}
+
+.suiji-shell.is-onboard-revealed .suiji-stream.has-onboard-timeline{
+  overflow-y:auto;
+  touch-action:auto;
+  -webkit-overflow-scrolling:touch;
+  max-height:calc(100dvh - 44px);
+  min-height:0;
+}
+
+.ep-onboard-gradient-mask{
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:390px;
+  top:44px;
+  bottom:var(--my-tabbar-h);
+  z-index:12;
+  margin:0;
+  padding:0;
+  pointer-events:none;
+  background:linear-gradient(
+    to top,
+    var(--my-bg) 0%,
+    var(--my-bg) 14%,
+    color-mix(in srgb, var(--my-bg) 92%, transparent) 28%,
+    color-mix(in srgb, var(--my-bg) 70%, transparent) 46%,
+    color-mix(in srgb, var(--my-bg) 40%, transparent) 64%,
+    color-mix(in srgb, var(--my-bg) 14%, transparent) 82%,
+    transparent 100%
+  );
+}
+
+.ep-onboard-gradient-mask-hit{
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:390px;
+  top:auto;
+  bottom:var(--my-tabbar-h);
+  height:min(320px, 52vh);
+  z-index:13;
+  border:0;
+  margin:0;
+  padding:0;
+  cursor:pointer;
+  appearance:none;
+  -webkit-appearance:none;
+  background:transparent;
+}
+
+.ep-onboard-dock-layer{
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:390px;
+  z-index:20;
+  pointer-events:none;
+}
+
+.suiji-shell--onboard-s1:not(.suiji-shell--onboard-s2) .ep-onboard-dock-layer{
+  /* 灰色 dock 卡片内、快捷按钮行上方 */
+  bottom:calc(var(--my-tabbar-h) + var(--my-dock-path-h, 76px) + 68px + 32px);
+  z-index:92;
+}
+
+.suiji-shell--onboard-s1:not(.suiji-shell--onboard-s2) .ep-onboard-dock-layer .ep-onboard-stage.is-guide-s1{
+  position:relative;
+  bottom:auto;
+  padding:0 22px;
+}
+
+.ep-onboard-dock-layer .ep-onboard-stage{
+  position:relative;
+  bottom:auto;
+  left:auto;
+  right:auto;
+  padding:0 22px;
+}
+
+.ep-onboard-dock-layer .ep-s1-fab-arrow.is-editable{
+  pointer-events:auto;
+}
+
+.record-blank-stream.is-onboard-scheme1{
+  min-height:calc(100dvh - 44px - var(--my-dock-float-b, 180px));
+}
+
+.ep-onboard-stage{
+  position:absolute;
+  left:0;
+  right:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  padding:0 22px;
+  overflow:visible;
+  pointer-events:none;
+}
+
+.suiji-shell--onboard-s1:not(.suiji-shell--onboard-s2) .ep-onboard-dock-layer .ep-onboard-stage.is-guide-s1 .ep-s1-center{
+  margin-bottom:8px;
+}
+
+.suiji-shell--onboard-s1:not(.suiji-shell--onboard-s2) .ep-onboard-dock-layer .ep-onboard-stage.is-guide-s1 .ep-s1-voice-title{
+  margin-bottom:0;
+}
+
+.ep-onboard-stage.is-guide-s1 .ep-s1-center{
+  margin-bottom:12px;
+}
+
+.ep-onboard-stage.is-guide-s1 .ep-s1-voice-title{
+  margin-bottom:0;
+}
+
+.suiji-shell--onboard-s1:not(.suiji-shell--onboard-s2) .ep-s1-guide-stack{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+}
+
+.suiji-shell--onboard-s1:not(.suiji-shell--onboard-s2) .ep-s1-guide-stack .ep-s1-center{
+  margin:0 0 8px;
+}
+
+.suiji-shell--onboard-s1:not(.suiji-shell--onboard-s2) .ep-s1-guide-stack .ep-s1-voice-title{
+  margin:0;
+  text-align:center;
+}
+
+.suiji-shell--onboard-s2 .ep-onboard-dock-layer{
+  /* 引导区底边在 + 号上方，贴近参考图 */
+  bottom:calc(var(--my-tabbar-h) + 67px + 56px + 8px);
+}
+
+.suiji-shell--onboard-s2 .ep-onboard-dock-layer .ep-onboard-stage.is-guide-s2{
+  padding:0 22px;
+}
+
+.suiji-shell--onboard-s2 .ep-s2-guide-stack{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+}
+
+.suiji-shell--onboard-s2 .ep-s2-voice-title{
+  margin:0 0 12px;
+  padding:0;
+  color:#9a9aa3;
+  font-size:15px;
+  line-height:1.35;
+  font-weight:500;
+  text-align:center;
+  width:100%;
+}
+
+.suiji-shell--onboard-s2 .ep-s1-voice-hints.ep-s2-voice-hints{
+  width:100%;
+  max-width:100%;
+  margin:0;
+  padding:0 72px 0 0;
+  box-sizing:border-box;
+}
+
+.suiji-shell--onboard-s2 .ep-s2-voice-hints .ep-s1-voice-chip{
+  max-width:calc(100% - 4px);
+}
+
+.suiji-shell--onboard-s2 .ep-s2-voice-hints .ep-s1-voice-chip.is-right{
+  margin-left:auto;
+  margin-right:0;
+  max-width:min(100%, calc(100% - 8px));
+}
+
+.suiji-shell--onboard-s2 .ep-s1-fab-arrow.is-editable:not([style*="left"]){
+  right:70px;
+  bottom:calc(var(--my-tabbar-h) + 67px + 56px + 88px);
+}
+
+.ep-s1-center{
+  position:relative;
+  left:auto;
+  right:auto;
+  top:auto;
+  margin:0 0 16px;
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  text-align:center;
+  opacity:0;
+  transform:translateY(8px);
+  animation:epFadeUp .3s cubic-bezier(0,0,.2,1) .3s both;
+}
+
+.ep-s1-spark{
+  display:none;
+}
+
+.ep-s1-prefix{
+  color:#111;
+  font-size:20px;
+  line-height:32px;
+  font-weight:500;
+  white-space:nowrap;
+}
+
+.ep-s1-keyword-window{
+  height:32px;
+  overflow:hidden;
+  color:#ff4d88;
+  font-size:20px;
+  line-height:32px;
+  font-weight:500;
+  width:auto;
+  flex:0 0 auto;
+}
+
+.ep-s1-keyword{
+  display:inline-block;
+  white-space:nowrap;
+  animation:epKeywordSingle .34s cubic-bezier(0,0,.2,1) both;
+}
+
+.ep-s1-voice-hints{
+  position:relative;
+  left:auto;
+  bottom:auto;
+  transform:none;
+  width:100%;
+  max-width:360px;
+  margin:0 auto;
+  z-index:1;
+  pointer-events:none;
+}
+
+.ep-s1-voice-title{
+  margin:0 0 12px;
+  color:#9a9aa3;
+  font-size:15px;
+  line-height:1.35;
+  font-weight:500;
+  text-align:center;
+}
+
+.ep-s1-voice-chip{
+  width:max-content;
+  max-width:86%;
+  padding:11px 15px;
+  border-radius:16px;
+  border:1px solid rgba(255,77,136,.22);
+  background:rgba(255,255,255,.94);
+  color:#2f3034;
+  font-size:15px;
+  line-height:1.35;
+  font-weight:500;
+  box-shadow:0 12px 28px rgba(255,77,136,.08);
+}
+
+.ep-s1-voice-chip + .ep-s1-voice-chip{
+  margin-top:14px;
+}
+
+.ep-s1-voice-chip.is-right{
+  margin-left:auto;
+}
+
+@keyframes epFadeUp{
+  to{opacity:1;transform:translateY(0)}
+}
+
+@keyframes epKeywordSingle{
+  from{opacity:0;transform:translateY(18px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+@media (prefers-reduced-motion: reduce){
+  .ep-onboard-stage *{
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition:none;
+  }
+}
+
+/* 方案二 · 曲线箭头指向 + 号 */
+.ep-s1-fab-arrow{
+  position:absolute;
+  right:68px;
+  bottom:198px;
+  width:96px;
+  height:96px;
+  color:#4b4b50;
+  opacity:0;
+  transform:translateY(6px);
+  animation:epFadeUp .34s ease-out .9s both;
+  z-index:21;
+  pointer-events:none;
+}
+
+.ep-s1-fab-arrow.is-hidden{
+  animation:epS1ArrowOut .24s cubic-bezier(.4,0,1,1) both;
+}
+
+.ep-s1-fab-arrow.is-editable{
+  position:fixed;
+  left:auto;
+  top:auto;
+  pointer-events:auto;
+  cursor:grab;
+  touch-action:none;
+  z-index:98;
+}
+
+.ep-s1-fab-arrow.is-editable:active{
+  cursor:grabbing;
+}
+
+.ep-s1-fab-arrow .ep-curve-arrow-svg{
+  width:100%;
+  height:100%;
+  overflow:visible;
+  transform:rotate(24deg) scaleX(-1);
+  transform-origin:50% 50%;
+}
+
+.ep-s1-fab-arrow .ep-curve-arrow-svg path{
+  fill:currentColor;
+}
+
+.suiji-shell--onboard-s2 .dock-feeding-quick{
+  display:none;
+}
+
+.suiji-shell--onboard-s2 .dock-camera-btn{
+  display:none;
+}
+
+@keyframes epS1ArrowOut{
+  to{opacity:0;transform:translateY(-8px)}
 }
 
 
@@ -30948,10 +32783,15 @@ body.standalone-demo .phone .suiji-shell--scene::before{
 
 <script>
 const TWEAK_DEFAULTS = {
-  "demoScene": "record-blank-1"
+  "demoScene": "record-blank-1",
+  "periodFeelGuideScheme": "方案一",
+  "headerAtmosphereScheme": "方案一",
+  "demoTheme": "默认",
+  "feedbackDisplayScheme": "方案一",
+  "onboardGuideScheme": "方案一"
 };
 window.__TWEAK_DEFAULTS = TWEAK_DEFAULTS;
-window.__BUILD__ = "2026-08-27-nomask";
+window.__BUILD__ = "2026-08-28-nomask";
 window.__STANDALONE_LOCKED_SCENE = true;
 </script>
 
@@ -31129,6 +32969,13 @@ const Icon = ({name, size=20, stroke=1.6, ...p}) => {
     case 'heart': return (
       <svg {...common}>
         <path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/>
+      </svg>
+    );
+    case 'alert-circle': return (
+      <svg {...common}>
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M12 8v5"/>
+        <circle cx="12" cy="16.2" r="0.9" fill="currentColor" stroke="none"/>
       </svg>
     );
     default: return null;
@@ -31342,6 +33189,34 @@ function getTimelineEmpty(ctx){
   return [buildTodayDayBlock(ctx || SCENE_CONTEXT.period)];
 }
 
+function getTimelineOnboardGuide(ctx){
+  const today = buildTodayDayBlock(ctx || SCENE_CONTEXT.period);
+  return [{
+    ...today,
+    items: [
+      {
+        kind:'record-group', id:'onboard-fit-g',
+        primary:{
+          id:'onboard-fit', time:'18:10', kind:'text',
+          text:'去健身房练了四十分钟，出了一身汗。',
+          tags:[{ cat:'运动', icon:'run' }],
+        },
+      },
+      {
+        kind:'record-group', id:'onboard-baby-sleep-g',
+        primary:{
+          id:'onboard-baby-sleep', time:'19:32', kind:'text',
+          text:'宝宝傍晚闹觉哭了快二十分钟，抱着走了两圈才睡着。',
+          tags:[
+            { cat:'睡眠', icon:'sleep' },
+            { cat:'心情', icon:'mood' },
+          ],
+        },
+      },
+    ],
+  }];
+}
+
 // ---------- Scene context ----------
 const SCENE_CONTEXT = {
   period: {
@@ -31380,7 +33255,6 @@ const SCENE_CONTEXT = {
 
 // ---------- 场景时间轴 — V3v2 日章节 Demo（1:1 record-tab-v3plus） ----------
 const TIMELINE_BLOCKS = [
-  { type:'gap', id:'gap-top' },
   {
     type:'day', id:'d-4-28', date:'4/28', weekday:'周一',
     items:[
@@ -31623,22 +33497,7 @@ const TIMELINE_BLOCKS = [
   },
   {
     ...buildTodayDayBlock(SCENE_CONTEXT.period),
-    items:[
-      {
-        kind:'record-group', id:'e-today-ellipsis-g',
-        primary:{
-          id:'e-today-ellipsis', time:'12:08', kind:'text',
-          text:'。。',
-          tags:[],
-        },
-        ai:{
-          id:'e-today-ellipsis-ai', time:'12:08', kind:'note-feedback',
-          title:'关于这条点滴',
-          note:'看来暂时没有想记录的内容，没关系，等你有心事、想法或者想记下的小事，随时告诉我就可以✨',
-        },
-        aiDefaultOpen:true,
-      },
-    ],
+    items:[],
   },
 ];
 
@@ -31711,6 +33570,7 @@ window.buildSyncDisplayLabel = buildSyncDisplayLabel;
 window.buildT5TagsFromText = buildT5TagsFromText;
 window.buildTodayDayBlock = buildTodayDayBlock;
 window.getTimelineEmpty = getTimelineEmpty;
+window.getTimelineOnboardGuide = getTimelineOnboardGuide;
 window.formatTodayDateLabel = formatTodayDateLabel;
 window.pickFollowUp = pickFollowUp;
 window.SCENE_CONTEXT = SCENE_CONTEXT;
@@ -31947,12 +33807,13 @@ function CycleReport({item}){
 }
 
 // ============ Tab bar ============
-// Order: 美柚 / 记录 / 点滴(center) / 回顾 / 我
+// Order: 美柚 / 日历|记录 / 记录|点滴(center) / 回顾 / 我
 function TabBar({
   active='note',
   onChange,
   noteUnread=false,
   noteLabel='点滴',
+  calLabel='记录',
   onNoteVoiceStart,
   onNoteVoiceMove,
   onNoteVoiceEnd,
@@ -32002,7 +33863,7 @@ function TabBar({
     : tabIcons.review;
   const tabs = [
     {id:'home', label:'美柚', custom:icon('home')},
-    {id:'cal', label:'记录', custom:icon('cal')},
+    {id:'cal', label:calLabel, custom:icon('cal')},
     {id:'note', label:noteLabel, custom:(
       <img className="tab-icon-img tab-icon-img--native" src={noteSrc} alt="" aria-hidden="true" />
     ), notif: noteUnread},
@@ -36187,27 +38048,39 @@ function TlRecCardHead({time}){
   );
 }
 
-function EditableRecordArea({entryId, entryKind, editPayload, children, className}){
+function EditableRecordArea({entryId, entryKind, editPayload, onActivate, children, className}){
   const canEdit = !!(entryId && window.openEditModal);
-  const handleClick = React.useCallback(()=>{
+  const interactive = !!(onActivate || canEdit);
+  const handleClick = React.useCallback((event)=>{
+    if(!interactive) return;
+    if(event.target.closest('.fb-anno-marker,button,a,input,textarea')) return;
+    event.stopPropagation();
+    if(typeof onActivate === 'function'){
+      onActivate();
+      return;
+    }
     if(canEdit) window.openEditModal(entryId, entryKind, editPayload);
-  }, [canEdit, entryId, entryKind, editPayload]);
+  }, [interactive, onActivate, canEdit, entryId, entryKind, editPayload]);
   const handleKeyDown = React.useCallback((event)=>{
-    if(!canEdit) return;
+    if(!interactive) return;
     if(event.key === 'Enter' || event.key === ' '){
       event.preventDefault();
-      window.openEditModal(entryId, entryKind, editPayload);
+      if(typeof onActivate === 'function'){
+        onActivate();
+        return;
+      }
+      if(canEdit) window.openEditModal(entryId, entryKind, editPayload);
     }
-  }, [canEdit, entryId, entryKind, editPayload]);
+  }, [interactive, onActivate, canEdit, entryId, entryKind, editPayload]);
 
   return (
     <div
-      className={(className || '')+(canEdit ? ' tl-edit-hit-area' : '')}
-      role={canEdit ? 'button' : undefined}
-      tabIndex={canEdit ? 0 : undefined}
-      aria-label={canEdit ? '编辑记录' : undefined}
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
+      className={(className || '')+(interactive ? ' tl-edit-hit-area' : '')}
+      role={interactive ? 'button' : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      aria-label={onActivate ? '查看记录详情' : (canEdit ? '编辑记录' : undefined)}
+      onClick={interactive ? handleClick : undefined}
+      onKeyDown={interactive ? handleKeyDown : undefined}
     >
       {children}
     </div>
@@ -36450,6 +38323,29 @@ function RecordedTags({tags, layout}){
         );
       })}
     </div>
+  );
+}
+
+function FeedbackBubbleWrap({defaultOpen = false, children, shortLine}){
+  const FeedbackBubble = window.FeedbackBubble;
+  if(!FeedbackBubble) return children;
+  const scheme = window.__FEEDBACK_DISPLAY_SCHEME;
+  const line = shortLine || '点滴回应';
+  if(scheme === '方案三'){
+    return null;
+  }
+  if(scheme === '方案二'){
+    return (
+      <FeedbackBubble variant="bubble" tone="s2" defaultOpen={defaultOpen} teaser={line} line={line}>
+        {null}
+      </FeedbackBubble>
+    );
+  }
+  // 方案一：小气泡「点滴回应」展开
+  return (
+    <FeedbackBubble variant="bubble" tone="s1" defaultOpen={defaultOpen} teaser="点滴回应" line={line}>
+      {null}
+    </FeedbackBubble>
   );
 }
 
@@ -36726,15 +38622,49 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, t
     icon: 'symptom',
   } : null;
 
-  return (
-    <div className={'tl-card tl-t5-card'+(isNew?' fade-in':'')+(hasAnalysis?' has-sister-analysis':'')+(isVtLive?' is-vt-live':'')+(isPeriodSync?' has-period-summary':'')} data-entry-id={entry.id}>
+  const useScheme3Fold = window.__FEEDBACK_DISPLAY_SCHEME === '方案三' && hasAiNote;
+  const foldPayload = useScheme3Fold && window.buildAnnotationPayloadFromAiNote
+    ? window.buildAnnotationPayloadFromAiNote(entry)
+    : null;
+
+  const cardNode = (
+    <div
+      className={'tl-card tl-t5-card'+(isNew?' fade-in':'')+(hasAnalysis?' has-sister-analysis':'')+(isVtLive?' is-vt-live':'')+(isPeriodSync?' has-period-summary':'')+(useScheme3Fold ? ' has-fb-anno-marker' : '')}
+      data-entry-id={entry.id}
+      onClick={(event)=>{
+        if(!useScheme3Fold) return;
+        if(event.target.closest('.fb-anno-marker,button,a,input,textarea,.fb-anno-fold-panel')) return;
+        const buildPayload = window.buildAnnotationPayloadFromAiNote;
+        const openDetail = window.openFeedbackRecordDetail;
+        if(!buildPayload || !openDetail) return;
+        openDetail(buildPayload(entry));
+      }}
+    >
       <TlRecCardHead time={entry.time}/>
       {isPeriodSync ? (
-        <EditableRecordArea entryId={entry.id} entryKind={entryKind} editPayload={editPayload}>
+        <EditableRecordArea
+          entryId={entry.id}
+          entryKind={entryKind}
+          editPayload={editPayload}
+          onActivate={
+            (window.__FEEDBACK_DISPLAY_SCHEME === '方案三' && hasAiNote && window.buildAnnotationPayloadFromAiNote && window.openFeedbackRecordDetail)
+              ? ()=> window.openFeedbackRecordDetail(window.buildAnnotationPayloadFromAiNote(entry))
+              : undefined
+          }
+        >
           <PeriodRecordSummary entry={entry}/>
         </EditableRecordArea>
       ) : (
-        <EditableRecordArea entryId={entry.id} entryKind={entryKind} className="tl-t5-main">
+        <EditableRecordArea
+          entryId={entry.id}
+          entryKind={entryKind}
+          className="tl-t5-main"
+          onActivate={
+            (window.__FEEDBACK_DISPLAY_SCHEME === '方案三' && hasAiNote && window.buildAnnotationPayloadFromAiNote && window.openFeedbackRecordDetail)
+              ? ()=> window.openFeedbackRecordDetail(window.buildAnnotationPayloadFromAiNote(entry))
+              : undefined
+          }
+        >
           {isVtLive ? (
             <div className="tl-voice-block tl-vt-live-body">
               {text ? (
@@ -36765,7 +38695,21 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, t
         </EditableRecordArea>
       )}
 
-      {hasAiNote && (
+      {hasAiNote && window.__FEEDBACK_DISPLAY_SCHEME !== '方案三' && (['方案一', '方案二'].includes(window.__FEEDBACK_DISPLAY_SCHEME) ? (
+        <FeedbackBubbleWrap
+          defaultOpen={!!isNew}
+          shortLine={(()=>{
+            const raw = String(entry.aiNote?.text || '').trim();
+            if(!raw) return '点滴回应';
+            if(/情绪|心情/.test(raw)) return '近7天情绪有变化';
+            if(/体重/.test(raw)) return '本周体重较平稳';
+            if(/热量|卡路里|饮食/.test(raw)) return '近7天热量有变化';
+            const cut = raw.replace(/[。！？].*$/, '');
+            const line = cut || raw;
+            return line.length > 14 ? line.slice(0, 14) + '…' : line;
+          })()}
+        />
+      ) : (
         <>
           <div className="tl-t5-divider" role="separator"/>
           <section className="tl-t5-insight">
@@ -36776,7 +38720,7 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, t
             />
           </section>
         </>
-      )}
+      ))}
 
       {hasAnalysis && (
         <SisterAnalysisCollapsible
@@ -36788,6 +38732,11 @@ function SegmentedRecordCard({entry, isNew, animateAnalysis, typewriterAiNote, t
       )}
     </div>
   );
+
+  if(useScheme3Fold && foldPayload && typeof window.FeedbackChartFoldIn === 'function'){
+    return React.createElement(window.FeedbackChartFoldIn, { isNew: !!isNew, payload: foldPayload }, cardNode);
+  }
+  return cardNode;
 }
 
 function VoiceRecordCard(props){
@@ -38269,16 +40218,37 @@ function ChartSymptomDots({data}){
 
 function TLChart({type, compact = false, data, weightUnit, note}){
   if(type === 'moodWeek') return <ChartMoodWeek compact={compact}/>;
-  if(type === 'weightTrend') return <ChartWeightTrend compact={compact} data={data} unit={weightUnit}/>;
-  if(type === 'caloriePanel') return (
-    <ChartCaloriePanel
-      compact={compact}
-      consumed={data?.consumed}
-      target={data?.target}
-      note={note != null ? note : data?.note}
-      hideNote={!!data?.hideNote}
-    />
-  );
+  if(type === 'weightTrend'){
+    if(['方案一','方案二'].includes(window.__FEEDBACK_DISPLAY_SCHEME) && window.FeedbackBubbleSparkline){
+      const Spark = window.FeedbackBubbleSparkline;
+      const series = Array.isArray(data)
+        ? data
+        : (data?.points || data?.values || data?.series || []);
+      const values = series.map((p)=> Number(p?.v ?? p?.w ?? p?.weight ?? p)).filter((n)=> Number.isFinite(n));
+      return <Spark values={values.length ? values : [52.8, 52.0, 52.2, 52.5, 53.4, 52.8, 52.3]}/>;
+    }
+    return <ChartWeightTrend compact={compact} data={data} unit={weightUnit}/>;
+  }
+  if(type === 'caloriePanel'){
+    if(['方案一','方案二'].includes(window.__FEEDBACK_DISPLAY_SCHEME) && window.FeedbackBubbleSparkline){
+      const Spark = window.FeedbackBubbleSparkline;
+      return (
+        <Spark
+          values={data?.week || data?.values || data?.days}
+          latest={data?.consumed}
+        />
+      );
+    }
+    return (
+      <ChartCaloriePanel
+        compact={compact}
+        consumed={data?.consumed}
+        target={data?.target}
+        note={note != null ? note : data?.note}
+        hideNote={!!data?.hideNote}
+      />
+    );
+  }
   if(type === 'symptomDots') return <ChartSymptomDots data={data}/>;
   if(type === 'todayMoodWave') return <ChartTodayMoodWave data={data} compact={compact}/>;
   if(type === 'beverageWeek') return <ChartBeverageWeek data={data}/>;
@@ -38318,28 +40288,35 @@ function V3v2Header({time, title, isNew, entryId, entryKind, editPayload}){
   );
 }
 
-function V3EditableRecordArea({entryId, entryKind, editPayload, children}){
+function V3EditableRecordArea({entryId, entryKind, editPayload, onActivate, children}){
   const canEdit = !!(entryId && editPayload && window.openEditModal);
   const handleClick = React.useCallback((event)=>{
     event.stopPropagation();
-    if(canEdit) window.openEditModal(entryId, entryKind, editPayload);
-  }, [canEdit, entryId, entryKind, editPayload]);
-  const handleKeyDown = React.useCallback((event)=>{
-    if(!canEdit) return;
-    if(event.key === 'Enter' || event.key === ' '){
-      event.preventDefault();
-      window.openEditModal(entryId, entryKind, editPayload);
+    if(typeof onActivate === 'function'){
+      onActivate();
+      return;
     }
-  }, [canEdit, entryId, entryKind, editPayload]);
+    if(canEdit) window.openEditModal(entryId, entryKind, editPayload);
+  }, [canEdit, entryId, entryKind, editPayload, onActivate]);
+  const handleKeyDown = React.useCallback((event)=>{
+    if(event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    if(typeof onActivate === 'function'){
+      onActivate();
+      return;
+    }
+    if(canEdit) window.openEditModal(entryId, entryKind, editPayload);
+  }, [canEdit, entryId, entryKind, editPayload, onActivate]);
 
+  const interactive = !!(onActivate || canEdit);
   return (
     <div
-      className={canEdit ? 'tl-edit-hit-area' : undefined}
-      role={canEdit ? 'button' : undefined}
-      tabIndex={canEdit ? 0 : undefined}
-      aria-label={canEdit ? '编辑记录' : undefined}
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
+      className={interactive ? 'tl-edit-hit-area' : undefined}
+      role={interactive ? 'button' : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      aria-label={onActivate ? '查看记录详情' : (canEdit ? '编辑记录' : undefined)}
+      onClick={interactive ? handleClick : undefined}
+      onKeyDown={interactive ? handleKeyDown : undefined}
     >
       {children}
     </div>
@@ -38826,7 +40803,7 @@ function normalizeV3Entry(raw){
   };
 }
 
-function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = false, entryId}){
+function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = false, entryId, forceInlineAi = false}){
   const cardRef = React.useRef(null);
   const aiPanelRef = React.useRef(null);
   const [revealStep, setRevealStep] = React.useState(() => (staggerReveal && isNew ? 0 : 2));
@@ -39000,8 +40977,12 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
     : undefined;
   const showTags = revealStep >= 1;
   const showAi = revealStep >= 2;
+  const useScheme3Fold = window.__FEEDBACK_DISPLAY_SCHEME === '方案三' && !!a && showAi;
+  const foldPayload = useScheme3Fold && window.buildAnnotationPayloadFromGroup
+    ? window.buildAnnotationPayloadFromGroup({ primary: p, ai: a, entryId: derivedId })
+    : null;
 
-  return (
+  const cardNode = (
     <div
       ref={cardRef}
       className={shellClass}
@@ -39009,11 +40990,40 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
       style={{
         background:'#fff', borderRadius:14, border:`0.5px solid ${TL_LINE}`,
         padding:'11px 12px 4px', overflow:'visible',
+        position:'relative',
+        paddingRight: (window.__FEEDBACK_DISPLAY_SCHEME === '方案三' && a) ? 52 : 12,
+        cursor: (window.__FEEDBACK_DISPLAY_SCHEME === '方案三' && a) ? 'pointer' : undefined,
+      }}
+      onClick={(event)=>{
+        if(window.__FEEDBACK_DISPLAY_SCHEME !== '方案三' || !a) return;
+        if(event.target.closest('.fb-anno-marker,button,a,input,textarea,.fb-anno-fold-panel')) return;
+        const buildPayload = window.buildAnnotationPayloadFromGroup;
+        const openDetail = window.openFeedbackRecordDetail;
+        if(!buildPayload || !openDetail) return;
+        openDetail(buildPayload({ primary: p, ai: a, entryId: derivedId }));
       }}
     >
       <V3v2Header time={p.time} isNew={isNew} entryId={derivedId} entryKind={derivedKind} editPayload={editPayload}/>
-      <div style={{marginTop:8, paddingBottom:(a && showAi) ? 10 : (p.sourceFrom ? 0 : 8)}}>
-        <V3EditableRecordArea entryId={derivedId} entryKind={derivedKind} editPayload={editPayload}>
+      <div style={{
+        marginTop:8,
+        paddingBottom:(a && showAi)
+          ? (['方案一','方案二'].includes(window.__FEEDBACK_DISPLAY_SCHEME)
+            ? 2
+            : (window.__FEEDBACK_DISPLAY_SCHEME === '方案三' ? 8 : 10))
+          : (p.sourceFrom ? 0 : 8),
+      }}>
+        <V3EditableRecordArea
+          entryId={derivedId}
+          entryKind={derivedKind}
+          editPayload={editPayload}
+          onActivate={
+            (window.__FEEDBACK_DISPLAY_SCHEME === '方案三' && a && window.buildAnnotationPayloadFromGroup && window.openFeedbackRecordDetail)
+              ? ()=> window.openFeedbackRecordDetail(
+                  window.buildAnnotationPayloadFromGroup({ primary: p, ai: a, entryId: derivedId })
+                )
+              : undefined
+          }
+        >
         <V3v2PrimaryBody
           entry={p}
           showTags={showTags}
@@ -39031,47 +41041,11 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
           borderTop:'0.5px dashed '+TL_HAIR,
         }}>{p.sourceFrom}</div>
       )}
-      {a && showAi && (() => {
+      {a && showAi && window.__FEEDBACK_DISPLAY_SCHEME !== '方案三' && (() => {
         const DietAiCollapsibleSection = window.DietAiCollapsibleSection;
         const TypewriterText = window.TypewriterText;
         const streamNote = isNew && a.chartType === 'symptomDots' && a.note && TypewriterText;
-        if (DietAiCollapsibleSection) {
-          return (
-            <div ref={aiPanelRef}>
-              <DietAiCollapsibleSection
-                title={a.title || 'AI 分析'}
-                defaultOpen={aiDefaultOpen}
-                embedded
-                compact={!a.chartType}
-                animateIn={isNew}
-                footer={
-                  a.chartType === 'weightTrend' ? <WeightTrendReviewEntry/> :
-                  a.chartType === 'caloriePanel' ? <DietCalorieReviewEntry/> :
-                  null
-                }
-              >
-                {a.chartType && (
-                  <TLChart
-                    type={a.chartType}
-                    data={a.chartData}
-                    weightUnit={a.weightUnit}
-                    note={a.note}
-                  />
-                )}
-                {a.chartType !== 'caloriePanel' && (a.noteParts || a.note) && (
-                  streamNote ? (
-                    <div className="v3-weight-curve-note">
-                      <TypewriterText text={a.note} active followScroll/>
-                    </div>
-                  ) : (
-                    <WeightAnalysisNote noteParts={a.noteParts} note={a.note}/>
-                  )
-                )}
-              </DietAiCollapsibleSection>
-            </div>
-          );
-        }
-        return (
+        const renderInlineAiPanel = () => (
           <div className="v3-ai-stagger-in">
             <div style={{borderTop:`0.5px dashed ${TL_HAIR}`, marginInline:-12}}/>
             <button
@@ -39109,15 +41083,67 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
                     <WeightAnalysisNote noteParts={a.noteParts} note={a.note}/>
                   )
                 )}
-                {a.chartType === 'weightTrend' ? <WeightTrendReviewEntry/> : null}
-                {a.chartType === 'caloriePanel' ? <DietCalorieReviewEntry/> : null}
+                {!forceInlineAi && a.chartType === 'weightTrend' ? <WeightTrendReviewEntry/> : null}
+                {!forceInlineAi && a.chartType === 'caloriePanel' ? <DietCalorieReviewEntry/> : null}
               </div>
             )}
           </div>
         );
+        if (forceInlineAi) {
+          return <div ref={aiPanelRef}>{renderInlineAiPanel()}</div>;
+        }
+        if (DietAiCollapsibleSection) {
+          return (
+            <div ref={aiPanelRef}>
+              <DietAiCollapsibleSection
+                title={a.title || 'AI 分析'}
+                defaultOpen={
+                  ['方案一','方案二'].includes(window.__FEEDBACK_DISPLAY_SCHEME)
+                    ? !!isNew
+                    : aiDefaultOpen
+                }
+                embedded
+                compact={!a.chartType}
+                animateIn={isNew}
+                footer={
+                  ['方案一','方案二'].includes(window.__FEEDBACK_DISPLAY_SCHEME) ? null :
+                  a.chartType === 'weightTrend' ? <WeightTrendReviewEntry/> :
+                  a.chartType === 'caloriePanel' ? <DietCalorieReviewEntry/> :
+                  null
+                }
+              >
+                {a.chartType && (
+                  <TLChart
+                    type={a.chartType}
+                    data={a.chartData}
+                    weightUnit={a.weightUnit}
+                    note={a.note}
+                  />
+                )}
+                {!['方案一','方案二'].includes(window.__FEEDBACK_DISPLAY_SCHEME)
+                  && a.chartType !== 'caloriePanel'
+                  && (a.noteParts || a.note) && (
+                  streamNote ? (
+                    <div className="v3-weight-curve-note">
+                      <TypewriterText text={a.note} active followScroll/>
+                    </div>
+                  ) : (
+                    <WeightAnalysisNote noteParts={a.noteParts} note={a.note}/>
+                  )
+                )}
+              </DietAiCollapsibleSection>
+            </div>
+          );
+        }
+        return renderInlineAiPanel();
       })()}
     </div>
   );
+
+  if(useScheme3Fold && foldPayload && typeof window.FeedbackChartFoldIn === 'function'){
+    return React.createElement(window.FeedbackChartFoldIn, { isNew: !!isNew, payload: foldPayload }, cardNode);
+  }
+  return cardNode;
 }
 
 function V3RecordGroupCard({group, isNew}){
@@ -39131,6 +41157,7 @@ function V3RecordGroupCard({group, isNew}){
       aiDefaultOpen={group.aiDefaultOpen}
       isNew={isNew}
       staggerReveal={!!group.staggerReveal}
+      forceInlineAi={!!group.onboardInlineAi}
       entryId={group.primary?.id || group.id}
     />
   );
@@ -40539,19 +42566,26 @@ function CycleDayHeader({day, items, dayBlocks}){
   );
 }
 
-function TimelineRailNode({phaseKind, railDot, isFeedLast, nodeKind, children, dropAnim, onDropLand, onDropComplete}){
-  const dotCls = railDot === 'ai'
-    ? ' ai'
-    : (railDot ? ' '+railDot : (phaseKind ? ' '+phaseKind : ''));
+function TimelineRailNode({phaseKind, railDot, isFeedLast, nodeKind, children, dropAnim, onDropLand, onDropComplete, spawnAnim, lightAnim}){
   const RecordBlankAxisDropAnim = window.RecordBlankAxisDropAnim;
   const isDrop = !!dropAnim;
   return (
-    <div className={'tl-rail-node'+(isFeedLast?' is-feed-last':'')+(nodeKind==='guide'?' is-guide':'')+(isDrop?' is-axis-drop':'')}>
+    <div className={
+      'tl-rail-node'
+      +(isFeedLast?' is-feed-last':'')
+      +(nodeKind==='guide'?' is-guide':'')
+      +(isDrop?' is-axis-drop':'')
+      +(spawnAnim?' is-spawn':'')
+      +(lightAnim?' is-light':'')
+    }>
       <div className="tl-rail-marker" aria-hidden="true">
         {isDrop && RecordBlankAxisDropAnim ? (
           <RecordBlankAxisDropAnim onLand={onDropLand} onComplete={onDropComplete}/>
         ) : (
-          <span className={'tl-rail-dot'+dotCls}/>
+          <>
+            <span className="tl-rail-dot"/>
+            <span className="tl-rail-ripple"/>
+          </>
         )}
       </div>
       <div className="tl-rail-body">{children}</div>
@@ -40581,25 +42615,57 @@ function buildDietEditPayload(item){
   };
 }
 
-function EditableTimelineBody({item, editPayload, children}){
+function EditableTimelineBody({item, editPayload, onActivate, children}){
   const canEdit = !!(editPayload && item?.id && typeof window.openEditModal === 'function');
+  const interactive = !!(onActivate || canEdit);
   const open = React.useCallback((event)=>{
-    if(!canEdit) return;
-    if(event.target.closest('button,a,input,textarea,select')) return;
+    if(!interactive) return;
+    if(event.target.closest('button,a,input,textarea,select,.fb-anno-marker')) return;
     event.stopPropagation();
+    if(typeof onActivate === 'function'){
+      onActivate();
+      return;
+    }
     window.openEditModal(item.id, editPayload.kind || item.kind, editPayload);
-  }, [canEdit, item?.id, item?.kind, editPayload]);
+  }, [interactive, onActivate, canEdit, item?.id, item?.kind, editPayload]);
   const keyOpen = React.useCallback((event)=>{
-    if(!canEdit || (event.key !== 'Enter' && event.key !== ' ')) return;
+    if(!interactive || (event.key !== 'Enter' && event.key !== ' ')) return;
     event.preventDefault();
-    window.openEditModal(item.id, editPayload.kind || item.kind, editPayload);
-  }, [canEdit, item?.id, item?.kind, editPayload]);
-  if(!canEdit) return children;
+    if(typeof onActivate === 'function'){
+      onActivate();
+      return;
+    }
+    if(canEdit) window.openEditModal(item.id, editPayload.kind || item.kind, editPayload);
+  }, [interactive, onActivate, canEdit, item?.id, item?.kind, editPayload]);
+  if(!interactive) return children;
   return (
-    <div className="tl-edit-hit-area" role="button" tabIndex={0} onClick={open} onKeyDown={keyOpen}>
+    <div
+      className="tl-edit-hit-area"
+      role="button"
+      tabIndex={0}
+      aria-label={onActivate ? '查看记录详情' : '编辑记录'}
+      onClick={open}
+      onKeyDown={keyOpen}
+    >
       {children}
     </div>
   );
+}
+
+function DietFeedbackAnnoShell({item, isNew, children}){
+  const scheme3 = window.__FEEDBACK_DISPLAY_SCHEME === '方案三';
+  const FoldIn = window.FeedbackChartFoldIn;
+  const buildPayload = window.buildAnnotationPayloadFromDietItem;
+  if(!scheme3 || !buildPayload) return children;
+  const host = (
+    <div className="tl-diet-fb-anno-wrap has-fb-anno-marker">
+      {children}
+    </div>
+  );
+  if(typeof FoldIn === 'function'){
+    return React.createElement(FoldIn, { isNew: !!isNew, payload: buildPayload(item) }, host);
+  }
+  return host;
 }
 
 function ModulePlaceholder({mod, cycleDay}){
@@ -41440,10 +43506,17 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
             displayScenario={item.displayScenario}
           />
       : null;
+    const openDietDetail = (window.__FEEDBACK_DISPLAY_SCHEME === '方案三'
+      && window.buildAnnotationPayloadFromDietItem
+      && window.openFeedbackRecordDetail)
+      ? ()=> window.openFeedbackRecordDetail(window.buildAnnotationPayloadFromDietItem(item))
+      : undefined;
     body = item.pendingDrop ? null : (
-      <EditableTimelineBody item={item} editPayload={buildDietEditPayload(item)}>
-        {card}
-      </EditableTimelineBody>
+      <DietFeedbackAnnoShell item={item} isNew={isNew}>
+        <EditableTimelineBody item={item} editPayload={buildDietEditPayload(item)} onActivate={openDietDetail}>
+          {card}
+        </EditableTimelineBody>
+      </DietFeedbackAnnoShell>
     );
   } else if(item.kind === 'diet-text-feedback'){
     const DietTextFeedbackCard = window.DietTextFeedbackCard;
@@ -41459,10 +43532,17 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
             leadingLabel={item.leadingLabel}
           />
       : null;
+    const openDietDetail = (window.__FEEDBACK_DISPLAY_SCHEME === '方案三'
+      && window.buildAnnotationPayloadFromDietItem
+      && window.openFeedbackRecordDetail)
+      ? ()=> window.openFeedbackRecordDetail(window.buildAnnotationPayloadFromDietItem(item))
+      : undefined;
     body = item.pendingDrop ? null : (
-      <EditableTimelineBody item={item} editPayload={buildDietEditPayload(item)}>
-        {card}
-      </EditableTimelineBody>
+      <DietFeedbackAnnoShell item={item} isNew={isNew}>
+        <EditableTimelineBody item={item} editPayload={buildDietEditPayload(item)} onActivate={openDietDetail}>
+          {card}
+        </EditableTimelineBody>
+      </DietFeedbackAnnoShell>
     );
   } else if(item.kind === 'record-group'){
     body = item.pendingDrop ? null : <V3RecordGroupCard group={item} isNew={isNew}/>;
@@ -41517,6 +43597,34 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
   }
 
   const isDropTarget = firstDropAnim?.entryId === item.id;
+  const [spawnAnim, setSpawnAnim] = React.useState(false);
+  const [lightAnim, setLightAnim] = React.useState(false);
+  const wasDropRef = React.useRef(false);
+  const playedKeyRef = React.useRef(null);
+
+  React.useEffect(()=>{
+    if(isDropTarget){
+      wasDropRef.current = true;
+      return;
+    }
+    if(!isNew) return;
+    const playKey = item.id + (wasDropRef.current ? '-after-drop' : '-new');
+    if(playedKeyRef.current === playKey) return;
+    playedKeyRef.current = playKey;
+
+    const afterDrop = wasDropRef.current;
+    wasDropRef.current = false;
+    const timers = [];
+    if(!afterDrop){
+      setSpawnAnim(true);
+      timers.push(setTimeout(()=>setSpawnAnim(false), 450));
+      timers.push(setTimeout(()=>setLightAnim(true), 120));
+    } else {
+      setLightAnim(true);
+    }
+    timers.push(setTimeout(()=>setLightAnim(false), afterDrop ? 800 : 920));
+    return ()=>timers.forEach(clearTimeout);
+  }, [isDropTarget, isNew, item.id]);
 
   return (
     <TimelineRailNode
@@ -41527,6 +43635,8 @@ function TimelineItem({item, sisterItem, isNew, phaseKind, isFeedLast, sisterPla
       dropAnim={isDropTarget}
       onDropLand={isDropTarget ? onFirstDropLand : undefined}
       onDropComplete={isDropTarget ? onFirstDropComplete : undefined}
+      spawnAnim={spawnAnim}
+      lightAnim={lightAnim}
     >
       <TimelineItemWrap item={item}>{body}</TimelineItemWrap>
     </TimelineRailNode>
@@ -41631,14 +43741,18 @@ function resolveTimelineLastItemId(blocks, sisterCycleDone, hideTodayGuide){
   return ids[ids.length - 1];
 }
 
-function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, lastItemId, hideDayHeader, firstDropAnim, onFirstDropLand, onFirstDropComplete, periodFeelGuide}){
+function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, lastItemId, hideDayHeader, firstDropAnim, onFirstDropLand, onFirstDropComplete, periodFeelGuide, headerAtmPhrase}){
   const items = sortDayItemsByTime(filterDayItems(day.items || day.entries, sisterCycleDone, hideTodayGuide));
   const phaseCls = day.phaseKind || '';
   const showScheme2Hint = periodFeelGuide?.active
     && periodFeelGuide?.scheme === '方案二'
     && !periodFeelGuide?.hintDismissed;
+  const showAtmPhrase = !!(day.isToday && headerAtmPhrase?.active && headerAtmPhrase?.text);
   return (
-    <>
+    <div
+      className={'tl-day-section'+(day.isToday?' is-today':'')+(phaseCls?' phase-'+phaseCls:'')}
+      data-day-section={day.id}
+    >
       {hideDayHeader ? null : (
         <div
           className={'tl-day-section-head tl-rail-break'+(day.isToday?' is-today':'')+(phaseCls?' phase-'+phaseCls:'')}
@@ -41647,6 +43761,22 @@ function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDo
           <CycleDayHeader day={day} items={items} dayBlocks={dayBlocks}/>
         </div>
       )}
+      {showAtmPhrase ? (
+        <div className="tl-rail-node is-header-atm-phrase">
+          <div className="tl-rail-marker">
+            <span className="tl-rail-dot is-muted"/>
+          </div>
+          <div className="tl-rail-body">
+            <p
+              key={headerAtmPhrase.text}
+              className={'tl-header-atm-phrase'+(headerAtmPhrase.visible === false ? ' is-out' : ' is-in')}
+              aria-live="polite"
+            >
+              {headerAtmPhrase.text}
+            </p>
+          </div>
+        </div>
+      ) : null}
       {items.map((it, idx)=>{
         if(it.kind === 'sister-card' && (items[idx - 1]?.kind === 'voice-card' || items[idx - 1]?.kind === 'sync-card')) return null;
         const sisterItem = (it.kind === 'voice-card' || it.kind === 'sync-card') && items[idx + 1]?.kind === 'sister-card'
@@ -41672,6 +43802,7 @@ function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDo
           <div className="tl-rail-node is-period-feel-guide" aria-hidden="true">
             <div className="tl-rail-marker">
               <span className="tl-rail-dot"/>
+              <span className="tl-rail-ripple"/>
             </div>
             <div className="tl-rail-body">
               <p className="tl-period-feel-guide-hint">
@@ -41683,7 +43814,7 @@ function TimelineDateSection({day, dayBlocks, sisterPlayAnimation, sisterCycleDo
         </React.Fragment>
         );
       })}
-    </>
+    </div>
   );
 }
 
@@ -41702,7 +43833,7 @@ function CycleStartMarker({block}){
   );
 }
 
-function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, hideGapDivider, hideDayHeader, hideBabyFeeding, firstDropAnim, onFirstDropLand, onFirstDropComplete, periodFeelGuide}){
+function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, hideTodayGuide, onSisterCycleComplete, hideGapDivider, hideDayHeader, hideBabyFeeding, firstDropAnim, onFirstDropLand, onFirstDropComplete, periodFeelGuide, headerAtmPhrase}){
   const visibleBlocks = hideBabyFeeding
     ? (blocks || []).map(block=>{
         if(block.type !== 'day') return block;
@@ -41736,6 +43867,7 @@ function TimelineStream({blocks, endRef, sisterPlayAnimation, sisterCycleDone, h
                 onFirstDropLand={onFirstDropLand}
                 onFirstDropComplete={onFirstDropComplete}
                 periodFeelGuide={periodFeelGuide}
+                headerAtmPhrase={headerAtmPhrase}
               />
             );
           }
@@ -41863,6 +43995,29 @@ const { useState, useEffect, useRef } = React;
 
 const EMPTY_LOOP_SEC = 4.6;
 const EMPTY_DEMO_ACTIVE_SEC = 3.6;
+const ONBOARD_S3_CARD_END = 0.25;
+const ONBOARD_S3_VOICE_BEGIN = 0.3;
+const ONBOARD_S3_VOICE_IN_END = 0.5;
+const ONBOARD_S3_TEXT_BEGIN = 0.55;
+const ONBOARD_S3_TEXT_END = 1.25;
+const ONBOARD_S3_TAGS_DELAY = 0.5;
+const ONBOARD_S3_TAGS_BEGIN = ONBOARD_S3_TEXT_END + ONBOARD_S3_TAGS_DELAY;
+const ONBOARD_S3_TAG_DURATION = 0.25;
+const ONBOARD_S3_TAG_STAGGER = 0.12;
+const ONBOARD_S3_TAGS_END = ONBOARD_S3_TAGS_BEGIN + ONBOARD_S3_TAG_STAGGER + ONBOARD_S3_TAG_DURATION;
+const ONBOARD_S3_CHART_DELAY = 0.5;
+const ONBOARD_S3_CHART_BEGIN = ONBOARD_S3_TAGS_END + ONBOARD_S3_CHART_DELAY;
+const ONBOARD_S3_CHART_END = ONBOARD_S3_CHART_BEGIN + 0.45;
+const ONBOARD_S3_ANIM_END = ONBOARD_S3_CHART_END;
+const ONBOARD_S3_HOLD_SEC = 3;
+const ONBOARD_S3_LOOP_SEC = ONBOARD_S3_ANIM_END + ONBOARD_S3_HOLD_SEC;
+
+const ONBOARD_S3_DEMO_TRANSCRIPT = '今天有点累，来之前两三天肚子特别胀';
+
+const ONBOARD_S3_TAGS = [
+  { cat: '情绪', val: '疲惫', icon: 'mood' },
+  { cat: '症状', val: '腹胀', icon: 'sym' },
+];
 
 function useLoopTime(duration = EMPTY_LOOP_SEC, speed = 1) {
   const [t, setT] = useState(0);
@@ -41938,11 +44093,135 @@ function RecordEmptyTagIcon({ name, color }) {
       </svg>
     );
   }
+  if(name === 'weight'){
+    return (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="3" y="15" width="18" height="4" rx="1" stroke={color} strokeWidth="1.6"/>
+        <path d="M12 4v11M8.5 8.5 12 5l3.5 3.5" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    );
+  }
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path d="M4 8h16l-2 11a2 2 0 01-2 2H8a2 2 0 01-2-2L4 8z" stroke={color} strokeWidth="1.6"/>
       <path d="M8 8V5a4 4 0 018 0v3" stroke={color} strokeWidth="1.6"/>
     </svg>
+  );
+}
+
+function OnboardGuideScheme3DemoCard({ t, P }) {
+  const pCard = easeOut(range(t, 0, ONBOARD_S3_CARD_END));
+  const pVoice = easeOut(range(t, ONBOARD_S3_VOICE_BEGIN, ONBOARD_S3_VOICE_IN_END));
+  const pText = range(t, ONBOARD_S3_TEXT_BEGIN, ONBOARD_S3_TEXT_END);
+  const pTags = [
+    range(t, ONBOARD_S3_TAGS_BEGIN, ONBOARD_S3_TAGS_BEGIN + ONBOARD_S3_TAG_DURATION),
+    range(t, ONBOARD_S3_TAGS_BEGIN + ONBOARD_S3_TAG_STAGGER, ONBOARD_S3_TAGS_BEGIN + ONBOARD_S3_TAG_STAGGER + ONBOARD_S3_TAG_DURATION),
+  ];
+  const pChart = easeOut(range(t, ONBOARD_S3_CHART_BEGIN, ONBOARD_S3_CHART_END));
+  const shown = ONBOARD_S3_DEMO_TRANSCRIPT.slice(0, Math.floor(pText * ONBOARD_S3_DEMO_TRANSCRIPT.length));
+
+  return (
+    <div
+      className="record-empty-card"
+      style={{
+        opacity: pCard,
+        transform: `translateY(${(1 - pCard) * 8}px)`,
+      }}
+    >
+      <div className="record-empty-card-hd">
+        <div className="record-empty-card-label">
+          <span
+            className="record-empty-card-dot"
+            style={{ opacity: 0.6 + 0.4 * Math.sin(t * 6) }}
+          />
+          示例
+        </div>
+      </div>
+
+      <RecordEmptyVoiceBubble
+        pIn={pVoice}
+        pText={pText}
+        text={shown}
+        P={P}
+        t={t}
+        variant="left"
+        voiceFreezeAt={ONBOARD_S3_TEXT_END}
+        voiceBeginAt={ONBOARD_S3_VOICE_BEGIN}
+      />
+      <RecordEmptyTagsRow progress={pTags} P={P} items={ONBOARD_S3_TAGS}/>
+      <RecordEmptyMiniChart progress={pChart} P={P}/>
+    </div>
+  );
+}
+
+function OnboardGuideScheme3Screen({ onClose }) {
+  const P = EMPTY_PALETTE;
+  const loopT = useLoopTime(ONBOARD_S3_LOOP_SEC, 1);
+  const t = Math.min(loopT, ONBOARD_S3_ANIM_END);
+  const [pressed, setPressed] = useState(false);
+  const [closing, setClosing] = useState(false);
+
+  const handleClose = () => {
+    if (closing) return;
+    setClosing(true);
+  };
+
+  useEffect(() => {
+    if (!closing) return undefined;
+    const tm = setTimeout(() => onClose?.(), 420);
+    return () => clearTimeout(tm);
+  }, [closing, onClose]);
+
+  return (
+    <div className={'record-empty-root ep-onboard-s3' + (closing ? ' is-collapsing' : '')}>
+      <div
+        className="record-empty-blob record-empty-blob--tr"
+        style={{ background: `radial-gradient(circle, ${P.primarySoft} 0%, transparent 70%)` }}
+        aria-hidden="true"
+      />
+      <div
+        className="record-empty-blob record-empty-blob--bl"
+        style={{ background: `radial-gradient(circle, ${P.primarySoft} 0%, transparent 70%)` }}
+        aria-hidden="true"
+      />
+
+      <div className="ep-onboard-s3-header">
+        <h1 className="ep-onboard-s3-title">点滴</h1>
+        <button
+          type="button"
+          className="ep-onboard-s3-close"
+          aria-label="关闭"
+          onClick={handleClose}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <div className="record-empty-hero ep-onboard-s3-hero">
+        <h2 className="ep-onboard-s3-hero-title">
+          在美柚，<span className="record-empty-accent">记一切</span>
+        </h2>
+        <p className="record-empty-hero-sub">说一句话，情绪 · 症状 · 饮食 自动整理</p>
+      </div>
+
+      <div className="record-empty-demo ep-onboard-s3-demo">
+        <OnboardGuideScheme3DemoCard t={t} P={P}/>
+      </div>
+
+      <div className="record-empty-voice-wrap ep-onboard-s3-voice-wrap">
+        <RecordEmptyVoiceButton
+          P={P}
+          pressed={pressed}
+          onPress={()=>setPressed(true)}
+          onRelease={()=>setPressed(false)}
+        />
+        <p className="record-empty-voice-hint">
+          {pressed ? '松开发送' : '按住说话'}
+        </p>
+      </div>
+    </div>
   );
 }
 
@@ -42044,14 +44323,30 @@ function RecordEmptyDemoCard({ t, P }) {
   );
 }
 
-function RecordEmptyVoiceBubble({ pIn, pText, text, P, t }) {
+function RecordEmptyVoiceBubble({ pIn, pText, text, P, t, variant, capDurationSec, voiceBeginAt = 0.5, voiceFreezeAt }) {
+  const isLeft = variant === 'left';
   const bars = 22;
+  const capped = capDurationSec != null;
+  const recSec = capped ? Math.min(capDurationSec, Math.max(0, t - voiceBeginAt)) : Math.max(0, t - voiceBeginAt);
+  const frozenByCap = capped && recSec >= capDurationSec;
+  const frozenByTextEnd = voiceFreezeAt != null && (t >= voiceFreezeAt || pText >= 1);
+  const voiceDone = frozenByCap || frozenByTextEnd;
+  const freezeT = voiceFreezeAt != null
+    ? Math.min(t, voiceFreezeAt)
+    : (capped ? voiceBeginAt + capDurationSec : t);
+  const animT = voiceDone ? freezeT : t;
+  const displaySec = voiceDone
+    ? Math.max(0, freezeT - voiceBeginAt)
+    : recSec;
+  const durLabel = (capped || voiceFreezeAt != null)
+    ? `0:${String(Math.floor(displaySec)).padStart(2, '0')}`
+    : `0:0${Math.floor(t * 2) % 10}`;
   return (
     <div
-      className="record-empty-bubble-wrap"
+      className={'record-empty-bubble-wrap' + (isLeft ? ' is-left' : '')}
       style={{
         opacity: pIn,
-        transform: `translateY(${(1 - pIn) * 6}px)`,
+        transform: `translateY(${(1 - pIn) * 6}px)${isLeft ? ` translateX(${(1 - pIn) * -10}px)` : ''}`,
       }}
     >
       <div
@@ -42068,13 +44363,13 @@ function RecordEmptyVoiceBubble({ pIn, pText, text, P, t }) {
         <div className="record-empty-wave">
           {Array.from({ length: bars }).map((_, i) => {
             const phase = i * 0.45;
-            const a = Math.sin(t * 8 + phase) * 0.45 + Math.sin(t * 14 + phase * 1.7) * 0.3;
-            const env = pText < 1 ? 1 : 0.35;
+            const a = Math.sin(animT * 8 + phase) * 0.45 + Math.sin(animT * 14 + phase * 1.7) * 0.3;
+            const env = voiceDone ? 0.35 : (pText < 1 ? 1 : 0.35);
             const h = 3 + (Math.abs(a) * 12 + 2) * env;
             return <span key={i} style={{ height: h + 'px' }}/>;
           })}
         </div>
-        <span className="record-empty-bubble-dur">0:0{Math.floor(t * 2) % 10}</span>
+        <span className="record-empty-bubble-dur">{durLabel}</span>
       </div>
       {pText > 0 && (
         <div className="record-empty-transcript">
@@ -42091,15 +44386,15 @@ function RecordEmptyVoiceBubble({ pIn, pText, text, P, t }) {
   );
 }
 
-function RecordEmptyTagsRow({ progress, P }) {
-  const items = [
+function RecordEmptyTagsRow({ progress, P, items }) {
+  const tagItems = items || [
     { cat: '情绪', val: '疲惫', icon: 'mood' },
     { cat: '症状', val: '腹胀', icon: 'sym' },
     { cat: '饮食', val: '三明治', icon: 'food' },
   ];
   return (
     <div className="record-empty-tags">
-      {items.map((it, i) => {
+      {tagItems.map((it, i) => {
         const p = easeOut(progress[i]);
         return (
           <div
@@ -42215,9 +44510,290 @@ function RecordEmptyVoiceButton({ P, pressed, onPress, onRelease }) {
 
 Object.assign(window, {
   RecordEmptyScreen,
+  OnboardGuideScheme3Screen,
+  RecordEmptyVoiceBubble,
+  RecordEmptyTagsRow,
+  RecordEmptyVoiceButton,
   EMPTY_DEMO_TRANSCRIPT,
   SCENE2_VOICE_TAGS,
   buildScene2VoiceEntry,
+});
+
+</script>
+
+<!-- record-empty-onboard-scheme4.jsx -->
+<script type="text/babel">
+// 新手引导 · 方案四 — 实验台 scheme=5（时间轴动画 + 白框包裹，循环播放）
+
+const { useState, useEffect } = React;
+
+const ONBOARD_S4_INPUT_TEXT = '今天体重52公斤，心情不错';
+const ONBOARD_S4_WEIGHT_DATA = [
+  { d:'周一', v:52.8 },
+  { d:'周二', v:52.5 },
+  { d:'周三', v:52.6 },
+  { d:'周四', v:52.4 },
+  { d:'周五', v:52.3 },
+  { d:'周六', v:52.1 },
+  { d:'今天', v:52.0, isToday:true },
+];
+const ONBOARD_S4_AI_NOTE = '近 7 天体重在 52 公斤附近小幅波动，整体比较平稳。今天同时记录到心情很好。';
+const ONBOARD_S4_TYPE_MS = 66;
+const ONBOARD_S4_START_DELAY = 280;
+const ONBOARD_S4_INPUT_SENT = 2500;
+const ONBOARD_S4_INPUT_HIDDEN = 3100;
+const ONBOARD_S4_CARD_VISIBLE = 3100;
+const ONBOARD_S4_CARD_TYPE_START = 3300;
+const ONBOARD_S4_MARK_STEP_1 = 4700;
+const ONBOARD_S4_MARK_STEP_2 = 5100;
+const ONBOARD_S4_TAGS_VISIBLE = 5600;
+const ONBOARD_S4_AI_VISIBLE = 6800;
+const ONBOARD_S4_LOOP_MS = 9000;
+const ONBOARD_S4_PALETTE = {
+  primary: '#FF4D88',
+  primarySoft: '#FFE0EC',
+  accent: '#FF7AA8',
+  ring: 'rgba(255,77,136,0.18)',
+};
+
+function buildOnboardS4DayBlock({
+  cardText,
+  tags,
+  aiVisible,
+}) {
+  const now = new Date();
+  const weekday = ['周日','周一','周二','周三','周四','周五','周六'][now.getDay()];
+  return {
+    type:'day',
+    id:'onboard-s4-day',
+    date:`${now.getMonth() + 1}/${now.getDate()}`,
+    weekday,
+    isToday:true,
+    items:[{
+      kind:'record-group',
+      id:'onboard-s4-record',
+      isNew:true,
+      staggerReveal:false,
+      aiDefaultOpen:true,
+      onboardInlineAi:true,
+      primary:{
+        id:'onboard-s4-primary',
+        time:'09:41',
+        kind:'voice',
+        duration:'0:04',
+        text:cardText,
+        tags,
+      },
+      ai: aiVisible ? {
+        id:'onboard-s4-ai',
+        time:'09:41',
+        kind:'chart',
+        title:'近7日体重趋势',
+        chartType:'weightTrend',
+        chartData:ONBOARD_S4_WEIGHT_DATA,
+        weightUnit:'kg',
+        note:ONBOARD_S4_AI_NOTE,
+      } : null,
+    }],
+  };
+}
+
+function OnboardGuideScheme4CardText({
+  cardTyped,
+  cardDone,
+  markStep,
+  tagsVisible,
+}) {
+  if (!cardDone) {
+    return (
+      <>
+        {cardTyped}
+        <span className="ep-s4-inline-cursor" aria-hidden="true"/>
+      </>
+    );
+  }
+  const highlightActive = !tagsVisible;
+  return (
+    <>
+      今天
+      <span className={'ep-s4-card-hi is-weight' + (markStep >= 1 && highlightActive ? ' is-on' : '')}>体重52公斤</span>
+      ，
+      <span className={'ep-s4-card-hi is-mood' + (markStep >= 2 && highlightActive ? ' is-on' : '')}>心情不错</span>
+    </>
+  );
+}
+
+function OnboardGuideScheme4Screen({ onClose }) {
+  const TimelineStream = window.TimelineStream;
+  const RecordEmptyVoiceButton = window.RecordEmptyVoiceButton;
+  const [cycle, setCycle] = useState(0);
+  const [closing, setClosing] = useState(false);
+  const [inputPhase, setInputPhase] = useState('typing');
+  const [inputTypedCount, setInputTypedCount] = useState(0);
+  const [cardVisible, setCardVisible] = useState(false);
+  const [cardTypedCount, setCardTypedCount] = useState(0);
+  const [markStep, setMarkStep] = useState(0);
+  const [tagsVisible, setTagsVisible] = useState(false);
+  const [aiVisible, setAiVisible] = useState(false);
+
+  useEffect(() => {
+    if (closing) return undefined;
+    setInputPhase('typing');
+    setInputTypedCount(0);
+    setCardVisible(false);
+    setCardTypedCount(0);
+    setMarkStep(0);
+    setTagsVisible(false);
+    setAiVisible(false);
+
+    let inputTimer = null;
+    let cardTimer = null;
+    const typeInput = setTimeout(() => {
+      let i = 0;
+      inputTimer = setInterval(() => {
+        i += 1;
+        setInputTypedCount(Math.min(i, ONBOARD_S4_INPUT_TEXT.length));
+        if (i >= ONBOARD_S4_INPUT_TEXT.length) clearInterval(inputTimer);
+      }, ONBOARD_S4_TYPE_MS);
+    }, ONBOARD_S4_START_DELAY);
+    const typeCard = setTimeout(() => {
+      let i = 0;
+      cardTimer = setInterval(() => {
+        i += 1;
+        setCardTypedCount(Math.min(i, ONBOARD_S4_INPUT_TEXT.length));
+        if (i >= ONBOARD_S4_INPUT_TEXT.length) clearInterval(cardTimer);
+      }, ONBOARD_S4_TYPE_MS);
+    }, ONBOARD_S4_CARD_TYPE_START);
+    const timers = [
+      typeInput,
+      setTimeout(() => setInputPhase('sent'), ONBOARD_S4_INPUT_SENT),
+      setTimeout(() => setInputPhase('hidden'), ONBOARD_S4_INPUT_HIDDEN),
+      setTimeout(() => setCardVisible(true), ONBOARD_S4_CARD_VISIBLE),
+      typeCard,
+      setTimeout(() => setMarkStep(1), ONBOARD_S4_MARK_STEP_1),
+      setTimeout(() => setMarkStep(2), ONBOARD_S4_MARK_STEP_2),
+      setTimeout(() => setTagsVisible(true), ONBOARD_S4_TAGS_VISIBLE),
+      setTimeout(() => setAiVisible(true), ONBOARD_S4_AI_VISIBLE),
+      setTimeout(() => setCycle((c) => c + 1), ONBOARD_S4_LOOP_MS),
+    ];
+    return () => {
+      timers.forEach(clearTimeout);
+      clearInterval(inputTimer);
+      clearInterval(cardTimer);
+    };
+  }, [cycle, closing]);
+
+  const handleClose = () => {
+    if (closing) return;
+    setClosing(true);
+  };
+
+  useEffect(() => {
+    if (!closing) return undefined;
+    const tm = setTimeout(() => onClose?.(), 420);
+    return () => clearTimeout(tm);
+  }, [closing, onClose]);
+
+  const inputTyped = ONBOARD_S4_INPUT_TEXT.slice(0, inputTypedCount);
+  const cardTyped = ONBOARD_S4_INPUT_TEXT.slice(0, cardTypedCount);
+  const cardDone = cardTypedCount >= ONBOARD_S4_INPUT_TEXT.length;
+  const tags = tagsVisible ? [
+    { cat:'体重', icon:'weight' },
+    { cat:'心情', icon:'mood' },
+  ] : [];
+
+  const cardText = (
+    <OnboardGuideScheme4CardText
+      cardTyped={cardTyped}
+      cardDone={cardDone}
+      markStep={markStep}
+      tagsVisible={tagsVisible}
+    />
+  );
+
+  const blocks = cardVisible
+    ? [buildOnboardS4DayBlock({ cardText, tags, aiVisible })]
+    : [];
+
+  return (
+    <div className={'record-empty-root ep-onboard-s3 ep-onboard-s4' + (closing ? ' is-collapsing' : '')}>
+      <div className="ep-onboard-s3-header">
+        <h1 className="ep-onboard-s3-title">点滴</h1>
+        <button
+          type="button"
+          className="ep-onboard-s3-close"
+          aria-label="关闭"
+          onClick={handleClose}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <div className="ep-onboard-s4-body">
+        {(inputPhase !== 'hidden' || cardVisible) ? (
+          <div className={'ep-onboard-s4-frame record-empty-card'
+            + (inputPhase !== 'hidden' ? ' has-input' : '')
+            + (cardVisible ? ' has-card' : '')}>
+            <div className="record-empty-card-hd">
+              <div className="record-empty-card-label">
+                <span className="record-empty-card-dot" aria-hidden="true"/>
+                示例
+              </div>
+            </div>
+            <div className="ep-onboard-s4-inner">
+              {cardVisible ? (
+                <div className="ep-onboard-s4-stream" key={'onboard-s4-stream-' + cycle}>
+                  {TimelineStream ? (
+                    <TimelineStream
+                      blocks={blocks}
+                      sisterPlayAnimation={0}
+                      sisterCycleDone
+                      hideTodayGuide
+                      hideGapDivider
+                      hideDayHeader
+                    />
+                  ) : null}
+                </div>
+              ) : null}
+              {inputPhase !== 'hidden' ? (
+                <div className={'ep-s4-dock-demo' + (inputPhase === 'sent' ? ' is-sent' : '')}>
+                  <span className="ep-s4-dock-mic" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <rect x="9" y="3" width="6" height="12" rx="3" stroke="currentColor" strokeWidth="1.6"/>
+                      <path d="M5 11a7 7 0 0014 0M12 18v3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+                    </svg>
+                  </span>
+                  <span className="ep-s4-dock-text">
+                    {inputPhase === 'sent' ? ONBOARD_S4_INPUT_TEXT : inputTyped}
+                    {inputPhase === 'typing' ? <span className="ep-s4-inline-cursor" aria-hidden="true"/> : null}
+                  </span>
+                  <span className="ep-s4-dock-send" aria-hidden="true">→</span>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+      </div>
+
+      <div className="record-empty-voice-wrap ep-onboard-s4-voice-wrap">
+        {RecordEmptyVoiceButton ? (
+          <RecordEmptyVoiceButton
+            P={ONBOARD_S4_PALETTE}
+            pressed={false}
+            onPress={()=>{}}
+            onRelease={()=>{}}
+          />
+        ) : null}
+        <p className="record-empty-voice-hint">按住说话</p>
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, {
+  OnboardGuideScheme4Screen,
 });
 
 </script>
@@ -43096,6 +45672,194 @@ Object.assign(window, {
   EmptyPreviewDiscoverCard,
   getBlankScheme2PreviewTimeline,
   getEmptyPreviewWithDataTimeline,
+});
+
+</script>
+
+<!-- record-blank-onboard-scheme1.jsx -->
+<script type="text/babel">
+// 新手引导 · 方案一/方案二 — 中间引导区 + 方案二 FAB 箭头
+
+const { useState, useEffect, useRef, useCallback } = React;
+
+function OnboardKeywordCarousel(){
+  const keywords = ['记生活点滴', '记体重', '记饮食', '记心情', '记经期'];
+  const [keywordIndex, setKeywordIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setKeywordIndex((i) => (i + 1) % keywords.length);
+    }, 2000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div className="ep-s1-center">
+      <div className="ep-s1-prefix">在美柚</div>
+      <div className="ep-s1-keyword-window">
+        <span key={keywordIndex} className="ep-s1-keyword">{keywords[keywordIndex]}</span>
+      </div>
+    </div>
+  );
+}
+
+function OnboardGuideMiddleScheme2(){
+  return (
+    <div className="ep-s2-guide-stack" aria-hidden="true">
+      <p className="ep-s2-voice-title">不知道记什么？试试这样记👇</p>
+      <div className="ep-s1-voice-hints ep-s2-voice-hints">
+        <div className="ep-s1-voice-chip">"今天有点腰酸，睡得不太好"</div>
+        <div className="ep-s1-voice-chip is-right">"早上称了体重，53公斤"</div>
+      </div>
+    </div>
+  );
+}
+
+function OnboardCurveArrowSvg(){
+  return (
+    <svg className="ep-curve-arrow-svg" viewBox="0 0 1024 1024" aria-hidden="true">
+      <path d="M464.86661522 963.17630813c-51.76140291-113.5965955-81.29413835-201.87073763-89.88179606-277.62036756-4.29889315-37.88494215-3.40012579-72.64824969 2.52667567-106.08999022 5.93186434-33.44174053 16.8993571-65.58976131 32.89235249-98.20615408 4.01786912-8.23574693 12.02576008-19.19058176 22.795777-29.93528143 17.39304632-17.42849076 42.01927176-34.45443552 68.71899096-41.65470094 13.35998643-3.61785528 27.20606705-4.83562114 41.13063157-2.64313616 13.92962812 2.20261287 27.99343752 7.78003358 41.96357296 18.11965653a73.463049 73.463049 0 0 1 8.25346914 7.10912288c9.4813629 9.48642578 15.91704223 21.13748856 19.64123152 34.10758692 5.59008003 19.43362851 4.94195444 41.83445455-1.00003778 63.10865726-5.91920571 21.27673486-17.10442867 41.35342395-31.9859901 56.21979531-12.98782128 12.9776941-28.65928533 21.99068431-46.28271977 24.97560548-11.74220531 2.01020134-25.59081737-0.38482377-39.7229842-6.64328306-14.12204036-6.23314133-28.43649225-16.26389084-41.02936186-28.86688764-12.73717809-12.7321152-23.71986233-28.07445357-31.21127825-44.6396221-7.49901096-16.57276357-11.50422145-34.32025353-10.55228743-52.02723546 3.78241812-70.5342472 12.87136079-139.00259638 39.47234172-213.81295092 26.60604452-74.80529095 70.78742183-156.06145343 145.11674648-251.81435285l-11.31434136-8.7826021c-75.04327481 96.65926182-120.10569656 179.33319814-147.2991057 255.79930969-27.20100346 76.45851721-36.46716831 146.60287634-40.27996656 217.84601081-1.08864746 20.38556182 3.52164916 40.38883201 11.80549844 58.69836792 8.29144502 18.31713165 20.25137982 34.98103774 34.13037343 48.86509424 13.74227947 13.73215228 29.35804471 24.75534384 45.36876234 31.83914947 16.00059044 7.05848838 32.48980651 10.25101115 47.90303303 7.66357309 20.98811579-3.54949785 39.33056469-14.26634883 54.01718244-28.96815664 22.47171491-22.52741371 36.78110392-54.32605516 40.24199068-86.319641 1.7114558-16.00059044 0.68356932-32.08219622-3.61532313-47.08528102-4.29382885-14.99295832-11.91183174-28.92005358-23.28187119-40.28503015-3.02289634-3.02289634-6.30909379-5.86350762-9.85605949-8.48892085-15.69424986-11.63840415-32.07460048-18.21586194-48.26254097-20.75772767-24.30722552-3.82545759-47.94100962 1.35194857-68.83798218 10.84597009-20.91975907 9.51174374-39.23689072 23.34769647-53.3665254 37.46720397-11.66372141 11.68903866-20.46910931 23.48694206-25.52752425 33.75567614-16.49427896 33.62908847-27.9529302 67.12905853-34.13796776 102.01389015-9.28895066 52.33863963-6.67113175 107.67738979 8.00789026 171.17846656 14.67902271 63.51626755 41.37620976 135.27334491 80.41562464 220.9727083l13.04351867-5.94452296z"/>
+      <path d="M466.93757824 857.67874541l-13.96000825 95.70479636-69.91650386-50.85757195a7.160839 7.160839 0 0 0-8.42562702 11.5801732l79.5016665 57.82998211a7.139357 7.139357 0 0 0 6.99013167 0.80762413 7.142937 7.142937 0 0 0 4.30648818-5.56729352l15.67399549-107.43434305a7.160839 7.160839 0 1 0-14.17014271-2.06336728z"/>
+    </svg>
+  );
+}
+
+function OnboardFabArrow({ hidden = false, storageKey = 'ep-s2-arrow-position-v1' }){
+  const arrowRef = useRef(null);
+  const dragRef = useRef(null);
+
+  const clampPos = useCallback((next) => {
+    if(!next || typeof window === 'undefined') return next;
+    const width = arrowRef.current?.offsetWidth || 96;
+    const height = arrowRef.current?.offsetHeight || 96;
+    const pad = 8;
+    return {
+      left: Math.min(window.innerWidth - width - pad, Math.max(pad, next.left)),
+      top: Math.min(window.innerHeight - height - pad, Math.max(pad, next.top)),
+    };
+  }, []);
+
+  const [pos, setPos] = useState(() => {
+    try{
+      const saved = localStorage.getItem(storageKey);
+      if(!saved) return null;
+      const parsed = JSON.parse(saved);
+      if(
+        typeof window === 'undefined' ||
+        parsed.left < 0 ||
+        parsed.top < 0 ||
+        parsed.left > window.innerWidth - 24 ||
+        parsed.top > window.innerHeight - 24
+      ){
+        localStorage.removeItem(storageKey);
+        return null;
+      }
+      return parsed;
+    }catch(e){
+      return null;
+    }
+  });
+
+  const handlePointerDown = useCallback((event) => {
+    if(!arrowRef.current) return;
+    event.preventDefault();
+    const rect = arrowRef.current.getBoundingClientRect();
+    dragRef.current = {
+      x: event.clientX,
+      y: event.clientY,
+      left: rect.left,
+      top: rect.top,
+    };
+    arrowRef.current.setPointerCapture?.(event.pointerId);
+  }, []);
+
+  const handlePointerMove = useCallback((event) => {
+    if(!dragRef.current) return;
+    const start = dragRef.current;
+    setPos(clampPos({
+      left: start.left + event.clientX - start.x,
+      top: start.top + event.clientY - start.y,
+    }));
+  }, [clampPos]);
+
+  const handlePointerUp = useCallback(() => {
+    if(!dragRef.current) return;
+    dragRef.current = null;
+    setPos((current) => {
+      if(current){
+        try{ localStorage.setItem(storageKey, JSON.stringify(current)); }catch(e){}
+      }
+      return current;
+    });
+  }, [storageKey]);
+
+  const handleDoubleClick = useCallback(() => {
+    try{ localStorage.removeItem(storageKey); }catch(e){}
+    setPos(null);
+  }, [storageKey]);
+
+  const style = pos ? {
+    left: `${pos.left}px`,
+    top: `${pos.top}px`,
+    right: 'auto',
+    bottom: 'auto',
+    marginLeft: 0,
+  } : null;
+
+  return (
+    <div
+      ref={arrowRef}
+      className={'ep-s1-fab-arrow is-editable' + (hidden ? ' is-hidden' : '')}
+      style={style}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      onDoubleClick={handleDoubleClick}
+      aria-hidden="true"
+    >
+      <OnboardCurveArrowSvg/>
+    </div>
+  );
+}
+
+function EmptyOnboardScheme1Body(){
+  return (
+    <div className="ep-onboard-stage ep-s1 is-guide-s1" aria-label="新手引导方案一 · 关键词轮播">
+      <div className="ep-s1-guide-stack" aria-hidden="true">
+        <OnboardKeywordCarousel/>
+        <p className="ep-s1-voice-title">不知道记什么？从点击按钮开始 👇</p>
+      </div>
+    </div>
+  );
+}
+
+function EmptyOnboardScheme2Body(){
+  const [arrowVisible, setArrowVisible] = useState(true);
+
+  useEffect(() => {
+    const handlePointerDown = (event) => {
+      const target = event.target;
+      if(!(target instanceof Element)) return;
+      if(target.closest('.quick-card-fab, .path-flyout-btn')){
+        setArrowVisible(false);
+      }
+    };
+    document.addEventListener('pointerdown', handlePointerDown, true);
+    return () => document.removeEventListener('pointerdown', handlePointerDown, true);
+  }, []);
+
+  return (
+    <div className="ep-onboard-stage ep-s1 ep-s2 is-guide-s2" aria-label="新手引导方案二 · 语音示例 + 引导箭头">
+      <OnboardGuideMiddleScheme2/>
+      <OnboardFabArrow hidden={!arrowVisible}/>
+    </div>
+  );
+}
+
+Object.assign(window, {
+  EmptyOnboardScheme1Body,
+  EmptyOnboardScheme2Body,
 });
 
 </script>
@@ -63444,8 +66208,13 @@ function formatDietLeadingLabel(leadingLabel = '', mealTypeLabel = ''){
   return `${base}（${mealTypeLabel}）：`;
 }
 
-// ===== 卡路里环形图（复用点滴 ChartCaloriePanel） =====
+// ===== 卡路里环形图（复用点滴 ChartCaloriePanel）；方案一气泡内改为迷你折线 =====
 function DietTrendChart({ data, todayKcal }){
+  if (useFeedbackBubbleScheme()) {
+    return (
+      <FeedbackBubbleSparkline values={data} latest={todayKcal}/>
+    );
+  }
   const ChartCaloriePanel = window.ChartCaloriePanel;
   if (!ChartCaloriePanel) return null;
   return (
@@ -63797,6 +66566,11 @@ function DietCalorieAiBody({
   mealInterpretation = null,
   mealCalorieInsight = null,
 }){
+  // 方案一气泡：只保留迷你折线，去掉长文案与明细
+  if (useFeedbackBubbleScheme()) {
+    return <DietTrendChart data={weekData} todayKcal={todayKcal ?? dayTotalKcal ?? mealKcal}/>;
+  }
+
   const getConfig = window.getDietFeedbackDisplayConfig;
   const cfg = displayScenario && getConfig
     ? getConfig(displayScenario)
@@ -63914,7 +66688,8 @@ function DietAiInsightsShell({ displayScenario, isNew, children }){
   const getConfig = window.getDietFeedbackDisplayConfig;
   const plainShell = displayScenario && getConfig?.(displayScenario)?.plainShell;
   const DietCalorieReviewEntry = window.DietCalorieReviewEntry;
-  const reviewEntry = DietCalorieReviewEntry ? <DietCalorieReviewEntry/> : null;
+  const useBubble = useFeedbackBubbleScheme();
+  const reviewEntry = (!useBubble && DietCalorieReviewEntry) ? <DietCalorieReviewEntry/> : null;
 
   if (plainShell) {
     return (
@@ -63929,10 +66704,226 @@ function DietAiInsightsShell({ displayScenario, isNew, children }){
   }
 
   return (
-    <DietAiCollapsibleSection defaultOpen animateIn={isNew} footer={reviewEntry}>
+    <DietAiCollapsibleSection
+      defaultOpen={useFeedbackBubbleScheme() ? !!isNew : true}
+      animateIn={isNew}
+      footer={reviewEntry}
+    >
       {children}
     </DietAiCollapsibleSection>
   );
+}
+
+function getFeedbackDisplayScheme(){
+  const s = window.__FEEDBACK_DISPLAY_SCHEME;
+  if(s === '方案一' || s === '方案二' || s === '方案三') return s;
+  return '方案一';
+}
+
+function useFeedbackBubbleScheme(){
+  // 方案一/二：气泡展开；方案三走图表批注，不走气泡
+  return ['方案一', '方案二'].includes(getFeedbackDisplayScheme());
+}
+
+function useFeedbackAnnotationScheme(){
+  return getFeedbackDisplayScheme() === '方案三';
+}
+
+function FeedbackBubble({
+  defaultOpen = false,
+  teaser = '点滴回应',
+  line = '',
+  variant = 'bubble', // bubble=方案一/二 · bar=方案三
+  tone = 's1', // s1 | s2 气泡外观区分
+  children,
+  className = '',
+}){
+  const [open, setOpen] = React.useState(!!defaultOpen);
+  React.useEffect(()=>{ setOpen(!!defaultOpen); }, [defaultOpen]);
+  const isBar = variant === 'bar';
+  const hasBody = children != null && children !== false;
+  const toggle = React.useCallback((event)=>{
+    if(!hasBody && isBar) return;
+    if(event.target.closest('a,button,.tl-card-review-entry,.tl-fb-bub-more')) return;
+    setOpen(v => !v);
+  }, [hasBody, isBar]);
+
+  if(isBar){
+    return (
+      <div
+        className={
+          'tl-fb-bub is-bar'
+          + (open ? ' is-open' : '')
+          + (hasBody ? '' : ' is-static')
+          + (className ? ' ' + className : '')
+        }
+        role={hasBody ? 'button' : 'note'}
+        tabIndex={hasBody ? 0 : undefined}
+        aria-expanded={hasBody ? open : undefined}
+        onClick={hasBody ? toggle : undefined}
+        onKeyDown={hasBody ? (event)=>{
+          if(event.key === 'Enter' || event.key === ' '){
+            event.preventDefault();
+            setOpen(v => !v);
+          }
+        } : undefined}
+      >
+        <div className="tl-fb-bub-row">
+          <span className="tl-fb-bub-spark" aria-hidden="true">
+            <span className="tl-period-analysis-spark"/>
+          </span>
+          <span className="tl-fb-bub-line">{teaser}</span>
+          {hasBody ? (
+            <span className="tl-fb-bub-chev" aria-hidden="true">{open ? '⌄' : '›'}</span>
+          ) : null}
+        </div>
+        {hasBody ? (
+          <div className="tl-fb-bub-full" aria-hidden={!open}>
+            <div className="tl-fb-bub-inner">
+              <div className="tl-fb-bub-content">{children}</div>
+            </div>
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
+  // 方案一/二：小气泡 ↔ 大气泡（内容替换 teaser）
+  const useSpark = tone === 's2';
+  return (
+    <div
+      className={
+        'tl-fb-bub is-bubble'
+        + (tone === 's2' ? ' is-bubble-s2' : '')
+        + (open ? ' is-open' : '')
+        + (className ? ' ' + className : '')
+      }
+      role="button"
+      tabIndex={0}
+      aria-expanded={open}
+      onClick={toggle}
+      onKeyDown={(event)=>{
+        if(event.key === 'Enter' || event.key === ' '){
+          event.preventDefault();
+          setOpen(v => !v);
+        }
+      }}
+    >
+      <div className="tl-fb-bub-teaser" aria-hidden={open}>
+        {useSpark ? (
+          <span className="tl-fb-bub-spark" aria-hidden="true">
+            <span className="tl-period-analysis-spark"/>
+          </span>
+        ) : (
+          <span className="tl-fb-bub-sp">✦</span>
+        )}
+        {teaser || '点滴回应'}
+        <span className="tl-fb-bub-cv">⌄</span>
+      </div>
+      <div className="tl-fb-bub-full" aria-hidden={!open}>
+        <div className="tl-fb-bub-inner">
+          <div className="tl-fb-bub-cline">
+            {useSpark ? (
+              <span className="tl-fb-bub-spark" aria-hidden="true">
+                <span className="tl-period-analysis-spark"/>
+              </span>
+            ) : (
+              <span className="tl-fb-bub-sp">✦</span>
+            )}
+            {line || teaser || '点滴回应'}
+          </div>
+          <div className="tl-fb-bub-content">
+            {children}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** 迷你折线：7 个点，最新点略强调 */
+function FeedbackBubbleSparkline({ values, latest, width = 200, height = 36 }){
+  const pts = React.useMemo(()=>{
+    let list = Array.isArray(values)
+      ? values.map((v)=> (v && typeof v === 'object' ? Number(v.kcal ?? v.v ?? v.value ?? v.weight) : Number(v)))
+          .filter((n)=> Number.isFinite(n))
+      : [];
+    if(list.length < 2){
+      const end = Number.isFinite(Number(latest))
+        ? Number(latest)
+        : (list[0] || 52.3);
+      list = Number(latest) > 200
+        ? [920, 1050, 980, 1180, 1080, 1240, Math.round(Number(latest))]
+        : [52.8, 52.0, 52.2, 52.5, 53.4, 52.8, end];
+    } else if(Number.isFinite(Number(latest))){
+      list = list.slice(0, -1).concat(Number(latest));
+    }
+    if(list.length > 7) list = list.slice(-7);
+    while(list.length < 7){
+      list = [list[0], ...list];
+    }
+    return list.slice(0, 7);
+  }, [values, latest]);
+
+  const w = width;
+  const h = height;
+  const padX = 8;
+  const padY = 7;
+  const min = Math.min(...pts);
+  const max = Math.max(...pts);
+  const range = Math.max(0.01, max - min);
+  const xy = pts.map((v, i)=>{
+    const x = padX + (i / 6) * (w - padX * 2);
+    const y = h - padY - ((v - min) / range) * (h - padY * 2);
+    return [x, y];
+  });
+  const path = xy.map(([x, y], i)=> `${i === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' ');
+
+  return (
+    <svg
+      className="tl-fb-bub-mini"
+      viewBox={`0 0 ${w} ${h}`}
+      width="100%"
+      height={h}
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
+      <path
+        d={path}
+        fill="none"
+        stroke="#ff4d88"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {xy.map(([x, y], i)=>{
+        const isLast = i === xy.length - 1;
+        return (
+          <circle
+            key={i}
+            cx={x}
+            cy={y}
+            r={isLast ? 3.2 : 2.6}
+            fill="#ff4d88"
+            stroke="#fff"
+            strokeWidth="1.4"
+          />
+        );
+      })}
+    </svg>
+  );
+}
+
+function bubbleFeedbackLine(title){
+  const t = String(title || '').trim();
+  if(/体重/.test(t)) return '本周体重较平稳';
+  if(/卡路里|热量|饮食/.test(t)) return '近7天热量有变化';
+  if(/心情|情绪/.test(t)) return '近7天情绪有变化';
+  if(/症状/.test(t)) return '近7天症状有记录';
+  if(/体温/.test(t)) return '体温正常';
+  if(/白带|分泌/.test(t)) return '分泌物已记下';
+  if(!t) return '点滴回应';
+  return t.length > 12 ? t.slice(0, 12) : t;
 }
 
 function DietAiCollapsibleSection({
@@ -63944,7 +66935,30 @@ function DietAiCollapsibleSection({
   footer = null,
   children,
 }){
+  const scheme = getFeedbackDisplayScheme();
   const [open, setOpen] = React.useState(defaultOpen);
+
+  if(scheme === '方案一' || scheme === '方案二'){
+    const bubbleOpen = !!animateIn || !!defaultOpen;
+    const shortLine = bubbleFeedbackLine(title);
+    return (
+      <FeedbackBubble
+        variant="bubble"
+        tone={scheme === '方案二' ? 's2' : 's1'}
+        defaultOpen={bubbleOpen}
+        teaser={scheme === '方案一' ? '点滴回应' : shortLine}
+        line={shortLine}
+        className={(embedded ? 'is-embedded' : '') + (animateIn ? ' is-animate-in' : '')}
+      >
+        {children}
+      </FeedbackBubble>
+    );
+  }
+
+  // 方案三：不在卡内展示反馈（由角标批注浮层承接）
+  if(scheme === '方案三'){
+    return null;
+  }
 
   return (
     <>
@@ -65191,6 +68205,9 @@ Object.assign(window, {
   resolveMealTypeFromTime,
   DietAiInsightsShell,
   DietAiCollapsibleSection,
+  FeedbackBubble,
+  FeedbackBubbleSparkline,
+  useFeedbackAnnotationScheme,
   DietCalorieAiBody,
   DietAiChevron,
   DietTrendChart,
@@ -66024,6 +69041,12 @@ const PERIOD_FEEL_GUIDE_COPY = {
   scheme3Link: '记录本次血量变化、经期症状',
 };
 
+const HEADER_ATM_SCHEME3_PHRASES = [
+  '在美柚，记一切',
+  '一句话，记下生活点滴',
+  '今天想记点什么？',
+];
+
 function PeriodFeelOverlay({open, onClose, onComplete, label='记录经期感受'}){
   const [state, setState] = React.useState('ready');
   const [text, setText] = React.useState('');
@@ -66387,8 +69410,34 @@ function App(){
   const [t, setTweak] = window.useTweaks({...window.__TWEAK_DEFAULTS});
   const [emptyPreviewMode, setEmptyPreviewMode] = useState(null);
   const [emptyPreviewGuideStep, setEmptyPreviewGuideStep] = useState(0);
+  const [onboardGuideDismissed, setOnboardGuideDismissed] = useState(false);
   const scene = window.getDemoScene(t.demoScene);
+  const onboardGuideScheme = ['方案一', '方案二', '方案三', '方案四'].includes(t.onboardGuideScheme)
+    ? t.onboardGuideScheme
+    : '方案一';
   const noteScene = React.useMemo(() => {
+    if (onboardGuideScheme === '方案一' || onboardGuideScheme === '方案二' || onboardGuideScheme === '方案三' || onboardGuideScheme === '方案四') {
+      return {
+        ...scene,
+        record: {
+          ...scene.record,
+          blankState: false,
+          emptyState: false,
+          onboardGuideScheme1: onboardGuideScheme === '方案一',
+          onboardGuideScheme2: onboardGuideScheme === '方案二',
+          onboardGuideScheme3: onboardGuideScheme === '方案三',
+          onboardGuideScheme4: onboardGuideScheme === '方案四',
+          todayGuide: false,
+          recordFeedback: false,
+          showHealthCard: false,
+          sisterAnalysis: {
+            ...(scene.record.sisterAnalysis || {}),
+            trigger: 'none',
+            initialDone: true,
+          },
+        },
+      };
+    }
     if (!emptyPreviewMode) return scene;
     return {
       ...scene,
@@ -66403,7 +69452,7 @@ function App(){
         todayGuide: false,
       },
     };
-  }, [scene, emptyPreviewMode]);
+  }, [scene, emptyPreviewMode, onboardGuideScheme]);
 
   React.useEffect(() => {
     if (!emptyPreviewMode) {
@@ -66487,6 +69536,18 @@ function App(){
   const [periodFeelScheme1Breath, setPeriodFeelScheme1Breath] = useState(false);
   const periodFeelScheme1BreathTimerRef = useRef(null);
   const periodFeelGuideScheme = t.periodFeelGuideScheme || '方案一';
+  const headerAtmosphereScheme = ['方案一', '方案二', '方案三', '方案四'].includes(t.headerAtmosphereScheme)
+    ? t.headerAtmosphereScheme
+    : '方案一';
+  const demoTheme = ['默认', '暖白', '柔粉', '暗黑'].includes(t.demoTheme) ? t.demoTheme : '默认';
+  const feedbackDisplayScheme = ['方案一', '方案二', '方案三'].includes(t.feedbackDisplayScheme)
+    ? t.feedbackDisplayScheme
+    : '方案一';
+  // 同步写入，保证子组件同一次渲染就能读到（勿放 useEffect，否则会晚一拍）
+  window.__FEEDBACK_DISPLAY_SCHEME = feedbackDisplayScheme;
+  const [headerCollapseProgress, setHeaderCollapseProgress] = useState(0);
+  const [scheme3PhraseIndex, setScheme3PhraseIndex] = useState(0);
+  const [scheme3PhraseVisible, setScheme3PhraseVisible] = useState(true);
 
   const clearPeriodFeelScheme1Breath = React.useCallback(()=>{
     if(periodFeelScheme1BreathTimerRef.current){
@@ -66686,6 +69747,27 @@ function App(){
   useEffect(()=>{
     resetSceneState(t.demoScene);
   }, [t.demoScene]);
+
+  useEffect(() => {
+    if (onboardGuideScheme === '方案一' || onboardGuideScheme === '方案二' || onboardGuideScheme === '方案三' || onboardGuideScheme === '方案四') {
+      setEmptyPreviewMode(null);
+      setEmptyPreviewGuideStep(0);
+      setOnboardGuideDismissed(false);
+      const initial = window.getSceneInitialState(t.demoScene);
+      setTimeline(initial.timeline);
+      setDraft('');
+      setHideTodayGuide(true);
+      setActiveTab('note');
+      setDockExpanded(false);
+      setShowSearchPage(false);
+      setSearchCriteria(null);
+      recordEnterModeRef.current = 'manual';
+      return;
+    }
+    const initial = window.getSceneInitialState(t.demoScene);
+    setTimeline(initial.timeline);
+    setHideTodayGuide(initial.hideTodayGuide);
+  }, [onboardGuideScheme, t.demoScene, ctx]);
 
   const scrollToSisterAnalysis = ()=>{
     const tryScroll = (attempt)=>{
@@ -67740,7 +70822,7 @@ function App(){
 
   const isScheme3 = noteScene.record.blankScheme === 3;
   const isScheme1 = noteScene.record.blankScheme === 1;
-  const showScheme1Hints = isScheme1 && showBlankEmpty && !emptyPreviewMode;
+  const showScheme1Hints = isScheme1 && showBlankEmpty && !emptyPreviewMode && false;
   if(isScheme3 && scheme3FirstVisitRef.current === null){
     scheme3FirstVisitRef.current = !!window.shouldShowScheme3Bubble?.();
   }
@@ -67748,6 +70830,9 @@ function App(){
   const pushToTimeline = (entry, text)=>{
     const dayId = window.resolveEntryDayId(text || entry.body || '', timeline);
     setTimeline(blocks=>window.appendTimelineEntry(blocks, entry, { dayId }));
+    requestAnimationFrame(()=>{
+      setTimeout(()=>scrollTimelineToLastItem('smooth'), 80);
+    });
   };
 
   const revealFirstDropEntry = React.useCallback(()=>{
@@ -67856,101 +70941,7 @@ function App(){
     }, 220);
   };
 
-  // ====== 6 阶段演示流程 ======
-  const runDemoFlow = ()=>{
-    setIsDemoRunning(true);
-    setDemoPhase('recognizing');
-
-    const demoR1Id = 'demo-r1-'+Date.now();
-    const demoR2Id = 'demo-r2-'+Date.now();
-    const demoR3Id = 'demo-r3-'+Date.now();
-    demoIdsRef.current = [demoR1Id, demoR2Id, demoR3Id];
-
-    const DEMO_TEXT = '昨天下午来了姨妈，来之前，上午就开始头痛。';
-
-    // 阶段 2：识别中 800ms → 浮层消失
-    setTimeout(()=>{
-      setDemoPhase(null);
-
-      // 阶段 3：插入记录 1、2 到 5-17 block（200ms 后）
-      setTimeout(()=>{
-        const r1 = {
-          kind:'record-group', id:demoR1Id, isNew:true, _demoCard:true,
-          primary:{ id:demoR1Id, time:'10:00', kind:'text',
-            kind:'symptom',
-            symptomLabel:'症状',
-            symptomValue:'头痛',
-            text:'头痛',
-            tags:[{cat:'症状', val:'头痛', icon:'sym'}],
-          },
-        };
-        const r2 = {
-          kind:'record-group', id:demoR2Id, isNew:true, _demoCard:true,
-          primary:{ id:demoR2Id, time:'16:00', kind:'text',
-            kind:'period',
-            periodLabel:'月经来了',
-            text:'月经来了',
-            tags:[{cat:'月经', val:'', icon:'period'}],
-          },
-        };
-        setTimeline(blocks=>{
-          // 动态插入 d-5-17 day block（如果不存在）
-          let next = blocks;
-          if(!next.find(b=>b.id==='d-5-17')){
-            const todayIdx = next.findIndex(b=>b.type==='day'&&b.isToday);
-            const ins = { type:'day', id:'d-5-17', date:'5/17', weekday:'周日', items:[] };
-            next = [...next];
-            next.splice(todayIdx >= 0 ? todayIdx : next.length, 0, ins);
-          }
-          next = window.appendTimelineEntry(next, r1, {dayId:'d-5-17'});
-          next = window.appendTimelineEntry(next, r2, {dayId:'d-5-17'});
-          return next;
-        });
-
-        // 阶段 4：停留 200ms，追加记录 3 占位
-        setTimeout(()=>{
-          const r3 = {
-            kind:'voice-card', id:demoR3Id, isNew:true, _demoCard:true,
-            time:'12:00',
-            body:'',
-            voiceText:'',
-            voice:{ duration:'0:05' },
-            tagLayout:'t5',
-            tags:[],
-            _demoTypewriter: true,
-            _demoFullText: DEMO_TEXT,
-            _demoTags:[
-              {cat:'月经', val:'开始', icon:'period'},
-              {cat:'症状', val:'头痛', icon:'sym'},
-            ],
-          };
-          setTimeline(blocks=>{
-            const todayId = blocks.find(b=>b.type==='day'&&b.isToday)?.id;
-            return window.appendTimelineEntry(blocks, r3, {dayId: todayId});
-          });
-
-          // 滚动到记录 3
-          setTimeout(()=>{
-            const el = document.querySelector('[data-entry-id="'+demoR3Id+'"]');
-            if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
-          }, 80);
-
-          // 阶段 5 由 SegmentedRecordCard 的 TypewriterText 完成回调驱动
-          // 阶段 6：回填来源标签
-          // 通过 window event 监听 typewriter 完成
-          const onTypewriterDone = ()=>{
-            window.removeEventListener('demoTypewriterDone', onTypewriterDone);
-            setTimeout(()=>{
-              setIsDemoRunning(false);
-            }, 900);
-          };
-          window.addEventListener('demoTypewriterDone', onTypewriterDone);
-
-        }, 200); // 阶段 4 delay
-      }, 200); // 阶段 3 delay after float disappears
-    }, 800); // 阶段 2 ASR delay
-  };
-
+  // ====== 按住说话：每次松手都在「今天」新增一条 ======
   const submitVoice = (transcript, durSec)=>{
     const recordScenario = window.readCameraPermissionScenario?.() || 'unauthorized';
     if (window.isDietTextRecordScenario?.(recordScenario)) {
@@ -67965,19 +70956,33 @@ function App(){
     }
 
     markUserRecorded();
-    setDemoPhase('listening');
-    // 清除上一轮演示卡片，然后启动新流程
-    clearDemoCards(()=> runDemoFlow());
+    setDemoPhase(null);
+    setIsDemoRunning(false);
+    const text = (transcript || '').trim();
+    if(!text) return;
 
-    // 真实 ASR 接入时启用以下逻辑：
-    // const text = transcript.trim();
-    // if(!text) return;
-    // const hits = window.extractKeywords(text);
-    // const entry = buildTimelineEntry(text, hits, {
-    //   voice: { duration: window.formatVoiceDur(durSec) },
-    // });
-    // if(recordFeedback && tryStartFirstDrop(entry, text)) return;
-    // pushToTimeline(entry, text);
+    const hits = window.extractKeywords(text);
+    const entry = buildTimelineEntry(text, hits, {
+      voice: { duration: window.formatVoiceDur?.(Math.max(durSec || 0, 3)) || '0:03' },
+    });
+    // 避免同毫秒撞 id；语音一律记到今天，避免文案含「昨天」被分到别的日期
+    entry.id = 'e-voice-'+Date.now()+'-'+Math.random().toString(36).slice(2, 7);
+    const todayId = timeline.find(b=>b.type==='day' && b.isToday)?.id;
+
+    const finish = ()=>{
+      // 语音不走水滴落点，统一用节点高亮+涟漪
+      firstRecordAnimDoneRef.current = true;
+      setTimeline(blocks=>{
+        const dayId = todayId || blocks.find(b=>b.type==='day' && b.isToday)?.id
+          || window.resolveEntryDayId('', blocks);
+        return window.appendTimelineEntry(blocks, entry, { dayId });
+      });
+      requestAnimationFrame(()=>{
+        setTimeout(()=>scrollTimelineToLastItem('smooth'), 80);
+      });
+    };
+    if(demoIdsRef.current.length) clearDemoCards(finish);
+    else finish();
   };
 
   const submitQuickMark = (mark)=>{
@@ -68508,7 +71513,47 @@ function App(){
   const showMe = activeTab === 'me';
   const showFloatNotice = scene.floatNotice.enabled && showAnalysisNotice && activeTab === 'cal';
   const showRecordShell = activeTab === 'note';
+  const showOnboardGuideScheme1 = onboardGuideScheme === '方案一'
+    && showRecordShell
+    && !showRecordEmpty
+    && !showRecordBlank
+    && !voiceTranscribe;
+  const showOnboardGuideScheme2 = onboardGuideScheme === '方案二'
+    && showRecordShell
+    && !showRecordEmpty
+    && !showRecordBlank
+    && !voiceTranscribe;
+  const showOnboardGuideScheme3 = onboardGuideScheme === '方案三'
+    && showRecordShell
+    && !showRecordEmpty
+    && !showRecordBlank
+    && !voiceTranscribe;
+  const showOnboardGuideScheme4 = onboardGuideScheme === '方案四'
+    && showRecordShell
+    && !showRecordEmpty
+    && !showRecordBlank
+    && !voiceTranscribe;
+  const showOnboardGuideOverlayActive = (showOnboardGuideScheme3 || showOnboardGuideScheme4) && !onboardGuideDismissed;
+  const showOnboardGuideOverlayEntry = (showOnboardGuideScheme3 || showOnboardGuideScheme4) && onboardGuideDismissed;
+  const showOnboardGuideScheme3Active = showOnboardGuideScheme3 && !onboardGuideDismissed;
+  const showOnboardGuideScheme4Active = showOnboardGuideScheme4 && !onboardGuideDismissed;
+  const showOnboardGuideScheme3Entry = showOnboardGuideOverlayEntry;
+  const showOnboardGuideMask = (showOnboardGuideScheme1 || showOnboardGuideScheme2) && !onboardGuideDismissed;
+  const showOnboardGuideTimeline = showOnboardGuideScheme1 || showOnboardGuideScheme2;
+  const showOnboardGuidePreview = showOnboardGuideTimeline && !onboardGuideDismissed;
   const showTodayGuide = noteScene.record.todayGuide && !hideTodayGuide;
+
+  useEffect(() => {
+    if (!showOnboardGuideMask) return;
+    const scrollToOnboardPreview = () => {
+      const el = streamRef.current;
+      if (!el) return;
+      el.scrollTop = Math.max(0, el.scrollHeight - el.clientHeight);
+    };
+    requestAnimationFrame(() => {
+      requestAnimationFrame(scrollToOnboardPreview);
+    });
+  }, [showOnboardGuideMask, timeline]);
 
   const I = window.Icon;
   const DemoSceneBar = window.DemoSceneBar;
@@ -68517,6 +71562,8 @@ function App(){
   const DietFeedbackDisplayScenarioBar = window.DietFeedbackDisplayScenarioBar;
   const DietFeedbackComboScenarioBar = window.DietFeedbackComboScenarioBar;
   const RecordEmptyScreen = window.RecordEmptyScreen;
+  const OnboardGuideScheme3Screen = window.OnboardGuideScheme3Screen;
+  const OnboardGuideScheme4Screen = window.OnboardGuideScheme4Screen;
   const RecordBlankStream = window.RecordBlankStream;
   const EmptyPreviewGuideLayer = window.EmptyPreviewGuideLayer;
   const StreamSearchOverlay = window.StreamSearchOverlay;
@@ -68524,6 +71571,11 @@ function App(){
   const ReviewPage = window.ReviewPage;
   const HomePage = window.HomePage;
   const MePage = window.MePage;
+  const OnboardGuideBody = showOnboardGuideScheme2
+    ? window.EmptyOnboardScheme2Body
+    : showOnboardGuideScheme1
+      ? window.EmptyOnboardScheme1Body
+      : null;
   const VoiceTranscribeInputLayer = window.VoiceTranscribeInputLayer;
 
   const toggleSearchPage = ()=>{
@@ -68684,7 +71736,7 @@ function App(){
   }, [searchCriteria, restoreSearchCloseScroll]);
 
   const [homeDetailOpen, setHomeDetailOpen] = React.useState(false);
-  const showBottomTabBar = !homeDetailOpen;
+  const showBottomTabBar = !homeDetailOpen && !showOnboardGuideOverlayActive;
   const showScheme3Bubble = isScheme3 && showBlankEmpty
     && window.shouldShowScheme3Bubble?.();
   const highlightScheme3Input = isScheme3 && showBlankEmpty
@@ -68699,9 +71751,11 @@ function App(){
   const showPeriodQuickStrip = showRecordShell
     && !showRecordEmpty
     && !showRecordBlank
+    && !showOnboardGuideScheme2
     && recordLifeMode === '经期'
     && !isSearchActive
     && !voiceTranscribe;
+  const showOnboardGuideShell = showOnboardGuidePreview;
   const showDockQuickStrip = showBabyFeedingQuickStrip || showPeriodQuickStrip;
   const showBabyFeedingHeader = showRecordShell
     && !showRecordEmpty
@@ -68709,6 +71763,96 @@ function App(){
     && recordLifeMode === '育儿'
     && !voiceTranscribe;
   const showStreamHeader = showBabyFeedingHeader ? true : !showSearchPage;
+  const headerAtmosphereReady = showRecordShell
+    && !showBabyFeedingHeader
+    && !showRecordEmpty
+    && !showRecordBlank
+    && !showOnboardGuideOverlayActive
+    && !voiceTranscribe
+    && !isSearchActive;
+  const useHeaderAtmosphereScheme1 = headerAtmosphereScheme === '方案一' && headerAtmosphereReady && !showOnboardGuidePreview;
+  const useHeaderAtmosphereScheme2 = headerAtmosphereScheme === '方案二' && headerAtmosphereReady;
+  const useHeaderAtmosphereScheme3 = headerAtmosphereScheme === '方案三' && headerAtmosphereReady;
+  // 方案四：仅居中标题「记录」；Tab 改为 日历 / 记录（仅本方案）
+  const useHeaderAtmosphereScheme4 = headerAtmosphereScheme === '方案四';
+  const useHeaderAtmosphereCollapse = useHeaderAtmosphereScheme1 || useHeaderAtmosphereScheme2;
+
+  React.useEffect(()=>{
+    if(!useHeaderAtmosphereScheme3){
+      setScheme3PhraseIndex(0);
+      setScheme3PhraseVisible(true);
+      return undefined;
+    }
+    let fadeTimer = null;
+    const tick = setInterval(()=>{
+      setScheme3PhraseVisible(false);
+      fadeTimer = setTimeout(()=>{
+        setScheme3PhraseIndex((i)=> (i + 1) % HEADER_ATM_SCHEME3_PHRASES.length);
+        setScheme3PhraseVisible(true);
+      }, 280);
+    }, 3200);
+    return ()=>{
+      clearInterval(tick);
+      if(fadeTimer) clearTimeout(fadeTimer);
+    };
+  }, [useHeaderAtmosphereScheme3]);
+
+  React.useEffect(()=>{
+    if(!useHeaderAtmosphereCollapse){
+      setHeaderCollapseProgress(0);
+      return undefined;
+    }
+    const el = streamRef.current;
+    if(!el) return undefined;
+    const COLLAPSE_DISTANCE = 72;
+    const onScroll = ()=>{
+      let next = 0;
+      if(useHeaderAtmosphereScheme2){
+        const todayHead = el.querySelector('.tl-day-section-head.is-today');
+        if(!todayHead){
+          next = 1;
+        } else {
+          const heads = Array.from(el.querySelectorAll('.tl-day-section-head[data-day-id]'));
+          const idx = heads.indexOf(todayHead);
+          const nextHead = idx >= 0 ? heads[idx + 1] : null;
+          const streamRect = el.getBoundingClientRect();
+          const viewTop = streamRect.top;
+          const viewBottom = streamRect.bottom;
+          const todayStart = todayHead.getBoundingClientRect().top;
+          const feedEnd = el.querySelector('.tl-feed-end');
+          const todayEnd = nextHead
+            ? nextHead.getBoundingClientRect().top
+            : (feedEnd ? feedEnd.getBoundingClientRect().top : todayHead.getBoundingClientRect().bottom + 320);
+          const overlap = Math.min(todayEnd, viewBottom) - Math.max(todayStart, viewTop);
+          if(overlap >= 48){
+            next = 0;
+          } else if(overlap <= 0){
+            next = 1;
+          } else {
+            next = 1 - overlap / 48;
+          }
+        }
+      } else {
+        next = Math.min(1, Math.max(0, el.scrollTop / COLLAPSE_DISTANCE));
+      }
+      setHeaderCollapseProgress((prev)=> (Math.abs(prev - next) < 0.01 ? prev : next));
+    };
+    onScroll();
+    el.addEventListener('scroll', onScroll, { passive:true });
+    window.addEventListener('resize', onScroll);
+    return ()=>{
+      el.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, [useHeaderAtmosphereCollapse, useHeaderAtmosphereScheme1, useHeaderAtmosphereScheme2, activeTab, showRecordShell, displayTimeline]);
+
+  React.useEffect(()=>{
+    if(!useHeaderAtmosphereScheme2) return undefined;
+    const t1 = setTimeout(()=>scrollTimelineToBottom('auto'), 40);
+    const t2 = setTimeout(()=>scrollTimelineToBottom('auto'), 200);
+    return ()=>{ clearTimeout(t1); clearTimeout(t2); };
+  }, [useHeaderAtmosphereScheme2, activeTab, showRecordShell]);
+
   const babyFeedingDockItems = showBabyFeedingQuickStrip
     ? BABY_FEEDING_QUICK_ITEMS.map(item=>({
         ...item,
@@ -68733,7 +71877,14 @@ function App(){
 
   return (
     <>
-      <div className={'phone' + (homeDetailOpen ? ' is-home-detail-open' : '') + (showDockQuickStrip ? ' is-dock-quick-entry' : '')}>
+      <div className={
+        'phone'
+        + (homeDetailOpen ? ' is-home-detail-open' : '')
+        + (showDockQuickStrip ? ' is-dock-quick-entry' : '')
+        + (demoTheme === '暗黑' ? ' is-theme-dark' : '')
+        + (demoTheme === '暖白' ? ' is-theme-warm' : '')
+        + (demoTheme === '柔粉' ? ' is-theme-soft-pink' : '')
+      }>
         <StatusBar isMember={isMember} onMemberChange={setIsMember} showMemberSwitch={showReview}/>
 
       {showHome && HomePage && (
@@ -68854,7 +72005,7 @@ function App(){
       )}
 
       <div
-        className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordBlank ? ' suiji-shell--blank' : '')+(voiceTranscribe ? ' suiji-shell--voice' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')+(showSearchPage && !showBabyFeedingHeader ? ' is-search-open':'')+(babyFeedingPanelMode === 'all' ? ' is-filter-panel-open':'')+(babyFeedingPanelMode === 'search' ? ' is-xhs-search-open':'')+(isSearchActive?' is-search-filtered':'')}
+        className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showOnboardGuideOverlayActive ? ' suiji-shell--empty suiji-shell--onboard-s3' : '')+(showRecordBlank ? ' suiji-shell--blank' : '')+(showOnboardGuideScheme1 && showOnboardGuidePreview ? ' suiji-shell--onboard-s1' : '')+(showOnboardGuideScheme2 && showOnboardGuidePreview ? ' suiji-shell--onboard-s2' : '')+(showOnboardGuideMask ? ' is-onboard-masked' : '')+(voiceTranscribe ? ' suiji-shell--voice' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')+(showSearchPage && !showBabyFeedingHeader ? ' is-search-open':'')+(babyFeedingPanelMode === 'all' ? ' is-filter-panel-open':'')+(babyFeedingPanelMode === 'search' ? ' is-xhs-search-open':'')+(isSearchActive?' is-search-filtered':'')+(useHeaderAtmosphereScheme2?' is-atm-scheme2':'')}
         aria-hidden={!showRecordShell}
       >
         {showRecordEmpty ? (
@@ -68886,7 +72037,7 @@ function App(){
             onAdvance={advanceEmptyPreviewGuide}
           />
         ) : null}
-        {!voiceTranscribe && (
+        {!voiceTranscribe && !showOnboardGuideOverlayActive && (
         <DockPublisher
           draft={draft}
           onDraft={setDraft}
@@ -68902,7 +72053,7 @@ function App(){
           onPhoto={()=>setShowPhoto(true)}
           onDockExpandedChange={setDockExpanded}
           activeTab={activeTab}
-          defaultInputMode={(showScheme1Hints || emptyPreviewMode) ? 'voice' : 'text'}
+          defaultInputMode={(showScheme1Hints || emptyPreviewMode || showOnboardGuideScheme1) ? 'voice' : 'text'}
           showScheme3Bubble={showScheme3Bubble}
           highlightScheme3Input={highlightScheme3Input}
           demoPhase={demoPhase}
@@ -68917,7 +72068,7 @@ function App(){
         ) : (
         <>
         {showStreamHeader ? (
-        <div className={'stream-header' + (showBabyFeedingHeader ? ' is-baby-feeding-header' : '')}>
+        <div className={'stream-header' + (showBabyFeedingHeader ? ' is-baby-feeding-header' : '') + (useHeaderAtmosphereScheme2 && headerCollapseProgress > 0.45 ? ' is-atm-collapsed' : '')}>
           {showBabyFeedingHeader ? (
             <>
               <div className="stream-actions">
@@ -68957,20 +72108,82 @@ function App(){
                   <I name="search" size={20} stroke={1.7}/>
                 </button>
               </div>
-          <h1 className="stream-title">点滴</h1>
+          <h1
+            className={
+              'stream-title'
+              + (useHeaderAtmosphereCollapse
+                ? (' is-atmosphere-collapse' + (headerCollapseProgress > 0.45 ? ' is-shown' : ''))
+                : '')
+            }
+            aria-hidden={useHeaderAtmosphereCollapse && headerCollapseProgress <= 0.45}
+          >
+            {useHeaderAtmosphereScheme4 ? '记录' : '点滴'}
+          </h1>
+              {showOnboardGuideOverlayEntry ? (
+                <button
+                  type="button"
+                  className="ep-onboard-s3-entry"
+                  aria-label="什么是点滴"
+                  onClick={() => setOnboardGuideDismissed(false)}
+                >
+                  <img
+                    className="ep-onboard-s3-entry-icon"
+                    src="assets/onboard-guide-lightbulb.png"
+                    alt=""
+                    width={20}
+                    height={20}
+                    draggable={false}
+                  />
+                </button>
+              ) : (
               <div className="stream-header-side"/>
+              )}
             </>
           )}
         </div>
+        ) : null}
+        {useHeaderAtmosphereScheme2 ? (
+          <div
+            className="stream-hero-title is-scheme2"
+            style={{
+              opacity: Math.max(0, 1 - headerCollapseProgress * 1.25),
+              maxHeight: `${Math.max(0, (1 - headerCollapseProgress) * 78)}px`,
+              paddingBottom: `${Math.max(0, (1 - headerCollapseProgress) * 12)}px`,
+              transform: `translateY(${-headerCollapseProgress * 8}px)`,
+            }}
+            aria-hidden={headerCollapseProgress > 0.85}
+          >
+            <h2 className="stream-hero-heading">点滴</h2>
+            <p className="stream-hero-sub">在美柚，记一切</p>
+          </div>
         ) : null}
         <div
           className={
             'suiji-stream'
             + (recordLifeMode === '育儿' && !isSearchActive && babyDiscoverVisible && !babyFeedingEntryActive ? ' has-baby-discover' : '')
             + (showDockQuickStrip ? ' has-dock-quick-strip' : '')
+            + (showOnboardGuidePreview ? ' has-onboard-timeline' : '')
+            + (showOnboardGuideMask ? ' is-onboard-masked' : '')
+            + (useHeaderAtmosphereScheme1 ? ' has-hero-title' : '')
+            + (useHeaderAtmosphereScheme2 ? ' has-hero-title-scheme2' : '')
           }
           ref={streamRef}
         >
+
+          {useHeaderAtmosphereScheme1 ? (
+            <div
+              className="stream-hero-title"
+              style={{
+                opacity: Math.max(0, 1 - headerCollapseProgress * 1.35),
+                transform: `translateY(${-headerCollapseProgress * 10}px) scale(${1 - headerCollapseProgress * 0.08})`,
+                transformOrigin: 'left top',
+              }}
+              aria-hidden={headerCollapseProgress > 0.85}
+            >
+              <h2 className="stream-hero-heading">点滴</h2>
+              <p className="stream-hero-sub">在美柚，记一切</p>
+            </div>
+          ) : null}
 
           {scene.record.showHealthCard && (
             <div className="stream-health">
@@ -68987,14 +72200,22 @@ function App(){
               <p className="tl-search-empty-desc">检查拼写或尝试新搜索词。</p>
             </div>
           ) : (
+          <>
           <TimelineStream
+            key={'tl-fb-'+feedbackDisplayScheme}
             blocks={displayTimeline}
             endRef={timelineEndRef}
             sisterPlayAnimation={sisterPlayAnimation}
             sisterCycleDone={sisterCycleDone}
             hideTodayGuide={!showTodayGuide}
             hideBabyFeeding={recordLifeMode === '经期'}
+            hideGapDivider
             onSisterCycleComplete={handleSisterCycleComplete}
+            headerAtmPhrase={useHeaderAtmosphereScheme3 ? {
+              active: true,
+              text: HEADER_ATM_SCHEME3_PHRASES[scheme3PhraseIndex],
+              visible: scheme3PhraseVisible,
+            } : null}
             periodFeelGuide={{
               scheme: periodFeelGuideScheme,
               active: periodFeelGuideActive && !periodFeelRecorded,
@@ -69008,10 +72229,25 @@ function App(){
             onFirstDropLand={recordFeedback ? handleFirstDropLand : undefined}
             onFirstDropComplete={recordFeedback ? handleFirstDropComplete : undefined}
           />
+          {showOnboardGuideMask ? (
+            <>
+              <div className="ep-onboard-gradient-mask" aria-hidden="true"/>
+              <button
+                type="button"
+                className="ep-onboard-gradient-mask-hit"
+                aria-label="点击查看完整时间轴"
+                onClick={() => setOnboardGuideDismissed(true)}
+              />
+              <div className="ep-onboard-dock-layer">
+                {OnboardGuideBody ? <OnboardGuideBody/> : null}
+              </div>
+            </>
+          ) : null}
+          </>
           )}
         </div>
 
-        {!voiceTranscribe && (
+        {!voiceTranscribe && !showOnboardGuideOverlayActive && (
         <DockPublisher
           draft={draft}
           onDraft={setDraft}
@@ -69027,9 +72263,9 @@ function App(){
           onPhoto={()=>setShowPhoto(true)}
           onDockExpandedChange={setDockExpanded}
           activeTab={activeTab}
-          defaultInputMode="voice"
-          hideQuickFan={showBabyFeedingQuickStrip}
-          hideQuickFab={showPeriodQuickStrip}
+          defaultInputMode={(showScheme1Hints || emptyPreviewMode || showOnboardGuideScheme1) ? 'voice' : 'text'}
+          hideQuickFan={showBabyFeedingQuickStrip || showOnboardGuideScheme1}
+          hideQuickFab={showPeriodQuickStrip || showOnboardGuideScheme1}
           feedingQuickItems={dockQuickItems}
           feedingQuickCollapsedCount={showPeriodQuickStrip ? PERIOD_DOCK_PRIMARY_COUNT : 6}
           feedingQuickLabel={showPeriodQuickStrip ? '经期快捷记录' : '宝宝喂养快捷记录'}
@@ -69062,9 +72298,24 @@ function App(){
             onDateSelect={handleTimelineDateSelect}
           />
         ) : null}
+        {feedbackDisplayScheme === '方案三' && (()=>{
+          const FeedbackAnnotationHost = window.FeedbackAnnotationHost;
+          return FeedbackAnnotationHost ? <FeedbackAnnotationHost/> : null;
+        })()}
         </>
         )}
       </div>
+
+      {showOnboardGuideOverlayActive ? (
+        <div className="ep-onboard-fullscreen" aria-hidden={false}>
+          {showOnboardGuideScheme3Active && OnboardGuideScheme3Screen ? (
+            <OnboardGuideScheme3Screen onClose={()=>setOnboardGuideDismissed(true)}/>
+          ) : null}
+          {showOnboardGuideScheme4Active && OnboardGuideScheme4Screen ? (
+            <OnboardGuideScheme4Screen onClose={()=>setOnboardGuideDismissed(true)}/>
+          ) : null}
+        </div>
+      ) : null}
 
       {showRecordShell && !showRecordEmpty && !showRecordBlank && recordLifeMode === '育儿' && !isSearchActive && babyDiscoverVisible && !babyFeedingEntryActive && (
         <BabyFeedingDiscoverCard onClose={closeBabyFeedingDiscoverCard}/>
@@ -69095,7 +72346,8 @@ function App(){
           active={activeTab}
           onChange={handleTabChange}
           noteUnread={noteTabUnread}
-          noteLabel="点滴"
+          noteLabel={useHeaderAtmosphereScheme4 ? '记录' : '点滴'}
+          calLabel={useHeaderAtmosphereScheme4 ? '日历' : '记录'}
           onNoteVoiceStart={recordLifeMode === '育儿' ? startBabyVoiceHold : undefined}
           onNoteVoiceMove={recordLifeMode === '育儿' ? moveBabyVoiceHold : undefined}
           onNoteVoiceEnd={recordLifeMode === '育儿' ? endBabyVoiceHold : undefined}
@@ -69106,19 +72358,114 @@ function App(){
       )}
       </div>
 
-      {!window.__STANDALONE_LOCKED_SCENE && (
-        <div className="demo-controls-stack">
+      <div className="demo-controls-stack">
+        {!window.__STANDALONE_LOCKED_SCENE && (
           <DemoSceneBar
             value={t.demoScene}
             onChange={(v)=>setTweak('demoScene', v)}
             description={scene.description}
           />
-          <div className="demo-scene-dock" role="toolbar" aria-label="经期感受承接引导方案">
-            <div className="demo-scene-dock-label">经期感受引导</div>
-            <div className="demo-scene-dock-options">
+        )}
+        <div className="demo-scene-dock demo-tweaks-dock" role="toolbar" aria-label="Tweaks">
+          <div className="demo-scene-dock-label">Tweaks</div>
+
+          <div className="demo-tweak-section">
+            <div className="demo-tweak-section-label">头部氛围感</div>
+            <div className="demo-scene-dock-options is-row">
+              {['方案一', '方案二', '方案三', '方案四'].map((opt)=>(
+                <button
+                  key={'atm-'+opt}
+                  type="button"
+                  className={'demo-scene-dock-btn'+(headerAtmosphereScheme === opt ? ' active' : '')}
+                  aria-pressed={headerAtmosphereScheme === opt}
+                  onClick={()=>setTweak('headerAtmosphereScheme', opt)}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+            <p className="demo-scene-dock-hint">
+              {headerAtmosphereScheme === '方案一' && '左侧大标题 + 副标题，上滑收缩为顶栏居中标题'}
+              {headerAtmosphereScheme === '方案二' && '看到「今天」时展开；滑走后收成居中小字'}
+              {headerAtmosphereScheme === '方案三' && '顶栏居中「点滴」；「今天」下灰点轮播氛围文案'}
+              {headerAtmosphereScheme === '方案四' && '仅居中标题「记录」；Tab 为 日历 / 记录；无副标题'}
+            </p>
+          </div>
+
+          <div className="demo-tweak-section">
+            <div className="demo-tweak-section-label">主题</div>
+            <div className="demo-scene-dock-options is-row">
+              {['默认', '暖白', '柔粉', '暗黑'].map((opt)=>(
+                <button
+                  key={'theme-'+opt}
+                  type="button"
+                  className={'demo-scene-dock-btn'+(demoTheme === opt ? ' active' : '')}
+                  aria-pressed={demoTheme === opt}
+                  onClick={()=>setTweak('demoTheme', opt)}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+            <p className="demo-scene-dock-hint">
+              {demoTheme === '默认' && '原始浅灰 · #F2F2F5'}
+              {demoTheme === '暖白' && '暖白纯色 · #F6F3F2'}
+              {demoTheme === '柔粉' && '柔粉纯色 · #FAF4F5'}
+              {demoTheme === '暗黑' && '深色背景，夜间浏览'}
+            </p>
+          </div>
+
+          <div className="demo-tweak-section">
+            <div className="demo-tweak-section-label">反馈展示</div>
+            <div className="demo-scene-dock-options is-row">
               {['方案一', '方案二', '方案三'].map((opt)=>(
                 <button
-                  key={opt}
+                  key={'fb-'+opt}
+                  type="button"
+                  className={'demo-scene-dock-btn'+(feedbackDisplayScheme === opt ? ' active' : '')}
+                  aria-pressed={feedbackDisplayScheme === opt}
+                  onClick={()=>setTweak('feedbackDisplayScheme', opt)}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+            <p className="demo-scene-dock-hint">
+              {feedbackDisplayScheme === '方案一' && '小气泡「点滴回应」↔ 点开成大气泡'}
+              {feedbackDisplayScheme === '方案二' && '小气泡直接展示短文案 ↔ 点开成大气泡（含迷你图）'}
+              {feedbackDisplayScheme === '方案三' && '点卡片→记录详情；点角标→浮层；浮层点图表→继续了解'}
+            </p>
+          </div>
+
+          <div className="demo-tweak-section">
+            <div className="demo-tweak-section-label">新手引导</div>
+            <div className="demo-scene-dock-options is-row">
+              {['方案一', '方案二', '方案三', '方案四'].map((opt)=>(
+                <button
+                  key={'onboard-'+opt}
+                  type="button"
+                  className={'demo-scene-dock-btn'+(onboardGuideScheme === opt ? ' active' : '')}
+                  aria-pressed={onboardGuideScheme === opt}
+                  onClick={()=>setTweak('onboardGuideScheme', opt)}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+            <p className="demo-scene-dock-hint">
+              {onboardGuideScheme === '方案一' && '背景示例时间轴 + 底部引导；点击蒙层进入完整时间轴'}
+              {onboardGuideScheme === '方案二' && '居中引导 + 示例气泡 + 文字输入框 + + 号箭头'}
+              {onboardGuideScheme === '方案三' && '进入点滴先展示空值页动画；关闭后收起到右上角灯泡，可再次打开'}
+              {onboardGuideScheme === '方案四' && '实验台方案5：输入→时间轴卡片→体重趋势图循环；关闭后收起到灯泡'}
+            </p>
+          </div>
+
+          <div className="demo-tweak-section">
+            <div className="demo-tweak-section-label">经期感受引导</div>
+            <div className="demo-scene-dock-options is-row">
+              {['方案一', '方案二', '方案三'].map((opt)=>(
+                <button
+                  key={'feel-'+opt}
                   type="button"
                   className={'demo-scene-dock-btn'+(periodFeelGuideScheme === opt ? ' active' : '')}
                   aria-pressed={periodFeelGuideScheme === opt}
@@ -69136,7 +72483,7 @@ function App(){
             </p>
           </div>
         </div>
-      )}
+      </div>
     </>
   );
 }

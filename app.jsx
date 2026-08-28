@@ -385,8 +385,34 @@ function App(){
   const [t, setTweak] = window.useTweaks({...window.__TWEAK_DEFAULTS});
   const [emptyPreviewMode, setEmptyPreviewMode] = useState(null);
   const [emptyPreviewGuideStep, setEmptyPreviewGuideStep] = useState(0);
+  const [onboardGuideDismissed, setOnboardGuideDismissed] = useState(false);
   const scene = window.getDemoScene(t.demoScene);
+  const onboardGuideScheme = ['方案一', '方案二', '方案三', '方案四'].includes(t.onboardGuideScheme)
+    ? t.onboardGuideScheme
+    : '方案一';
   const noteScene = React.useMemo(() => {
+    if (onboardGuideScheme === '方案一' || onboardGuideScheme === '方案二' || onboardGuideScheme === '方案三' || onboardGuideScheme === '方案四') {
+      return {
+        ...scene,
+        record: {
+          ...scene.record,
+          blankState: false,
+          emptyState: false,
+          onboardGuideScheme1: onboardGuideScheme === '方案一',
+          onboardGuideScheme2: onboardGuideScheme === '方案二',
+          onboardGuideScheme3: onboardGuideScheme === '方案三',
+          onboardGuideScheme4: onboardGuideScheme === '方案四',
+          todayGuide: false,
+          recordFeedback: false,
+          showHealthCard: false,
+          sisterAnalysis: {
+            ...(scene.record.sisterAnalysis || {}),
+            trigger: 'none',
+            initialDone: true,
+          },
+        },
+      };
+    }
     if (!emptyPreviewMode) return scene;
     return {
       ...scene,
@@ -401,7 +427,7 @@ function App(){
         todayGuide: false,
       },
     };
-  }, [scene, emptyPreviewMode]);
+  }, [scene, emptyPreviewMode, onboardGuideScheme]);
 
   React.useEffect(() => {
     if (!emptyPreviewMode) {
@@ -696,6 +722,27 @@ function App(){
   useEffect(()=>{
     resetSceneState(t.demoScene);
   }, [t.demoScene]);
+
+  useEffect(() => {
+    if (onboardGuideScheme === '方案一' || onboardGuideScheme === '方案二' || onboardGuideScheme === '方案三' || onboardGuideScheme === '方案四') {
+      setEmptyPreviewMode(null);
+      setEmptyPreviewGuideStep(0);
+      setOnboardGuideDismissed(false);
+      const initial = window.getSceneInitialState(t.demoScene);
+      setTimeline(initial.timeline);
+      setDraft('');
+      setHideTodayGuide(true);
+      setActiveTab('note');
+      setDockExpanded(false);
+      setShowSearchPage(false);
+      setSearchCriteria(null);
+      recordEnterModeRef.current = 'manual';
+      return;
+    }
+    const initial = window.getSceneInitialState(t.demoScene);
+    setTimeline(initial.timeline);
+    setHideTodayGuide(initial.hideTodayGuide);
+  }, [onboardGuideScheme, t.demoScene, ctx]);
 
   const scrollToSisterAnalysis = ()=>{
     const tryScroll = (attempt)=>{
@@ -1750,7 +1797,7 @@ function App(){
 
   const isScheme3 = noteScene.record.blankScheme === 3;
   const isScheme1 = noteScene.record.blankScheme === 1;
-  const showScheme1Hints = isScheme1 && showBlankEmpty && !emptyPreviewMode;
+  const showScheme1Hints = isScheme1 && showBlankEmpty && !emptyPreviewMode && false;
   if(isScheme3 && scheme3FirstVisitRef.current === null){
     scheme3FirstVisitRef.current = !!window.shouldShowScheme3Bubble?.();
   }
@@ -2441,7 +2488,47 @@ function App(){
   const showMe = activeTab === 'me';
   const showFloatNotice = scene.floatNotice.enabled && showAnalysisNotice && activeTab === 'cal';
   const showRecordShell = activeTab === 'note';
+  const showOnboardGuideScheme1 = onboardGuideScheme === '方案一'
+    && showRecordShell
+    && !showRecordEmpty
+    && !showRecordBlank
+    && !voiceTranscribe;
+  const showOnboardGuideScheme2 = onboardGuideScheme === '方案二'
+    && showRecordShell
+    && !showRecordEmpty
+    && !showRecordBlank
+    && !voiceTranscribe;
+  const showOnboardGuideScheme3 = onboardGuideScheme === '方案三'
+    && showRecordShell
+    && !showRecordEmpty
+    && !showRecordBlank
+    && !voiceTranscribe;
+  const showOnboardGuideScheme4 = onboardGuideScheme === '方案四'
+    && showRecordShell
+    && !showRecordEmpty
+    && !showRecordBlank
+    && !voiceTranscribe;
+  const showOnboardGuideOverlayActive = (showOnboardGuideScheme3 || showOnboardGuideScheme4) && !onboardGuideDismissed;
+  const showOnboardGuideOverlayEntry = (showOnboardGuideScheme3 || showOnboardGuideScheme4) && onboardGuideDismissed;
+  const showOnboardGuideScheme3Active = showOnboardGuideScheme3 && !onboardGuideDismissed;
+  const showOnboardGuideScheme4Active = showOnboardGuideScheme4 && !onboardGuideDismissed;
+  const showOnboardGuideScheme3Entry = showOnboardGuideOverlayEntry;
+  const showOnboardGuideMask = (showOnboardGuideScheme1 || showOnboardGuideScheme2) && !onboardGuideDismissed;
+  const showOnboardGuideTimeline = showOnboardGuideScheme1 || showOnboardGuideScheme2;
+  const showOnboardGuidePreview = showOnboardGuideTimeline && !onboardGuideDismissed;
   const showTodayGuide = noteScene.record.todayGuide && !hideTodayGuide;
+
+  useEffect(() => {
+    if (!showOnboardGuideMask) return;
+    const scrollToOnboardPreview = () => {
+      const el = streamRef.current;
+      if (!el) return;
+      el.scrollTop = Math.max(0, el.scrollHeight - el.clientHeight);
+    };
+    requestAnimationFrame(() => {
+      requestAnimationFrame(scrollToOnboardPreview);
+    });
+  }, [showOnboardGuideMask, timeline]);
 
   const I = window.Icon;
   const DemoSceneBar = window.DemoSceneBar;
@@ -2450,6 +2537,8 @@ function App(){
   const DietFeedbackDisplayScenarioBar = window.DietFeedbackDisplayScenarioBar;
   const DietFeedbackComboScenarioBar = window.DietFeedbackComboScenarioBar;
   const RecordEmptyScreen = window.RecordEmptyScreen;
+  const OnboardGuideScheme3Screen = window.OnboardGuideScheme3Screen;
+  const OnboardGuideScheme4Screen = window.OnboardGuideScheme4Screen;
   const RecordBlankStream = window.RecordBlankStream;
   const EmptyPreviewGuideLayer = window.EmptyPreviewGuideLayer;
   const StreamSearchOverlay = window.StreamSearchOverlay;
@@ -2457,6 +2546,11 @@ function App(){
   const ReviewPage = window.ReviewPage;
   const HomePage = window.HomePage;
   const MePage = window.MePage;
+  const OnboardGuideBody = showOnboardGuideScheme2
+    ? window.EmptyOnboardScheme2Body
+    : showOnboardGuideScheme1
+      ? window.EmptyOnboardScheme1Body
+      : null;
   const VoiceTranscribeInputLayer = window.VoiceTranscribeInputLayer;
 
   const toggleSearchPage = ()=>{
@@ -2617,7 +2711,7 @@ function App(){
   }, [searchCriteria, restoreSearchCloseScroll]);
 
   const [homeDetailOpen, setHomeDetailOpen] = React.useState(false);
-  const showBottomTabBar = !homeDetailOpen;
+  const showBottomTabBar = !homeDetailOpen && !showOnboardGuideOverlayActive;
   const showScheme3Bubble = isScheme3 && showBlankEmpty
     && window.shouldShowScheme3Bubble?.();
   const highlightScheme3Input = isScheme3 && showBlankEmpty
@@ -2632,9 +2726,11 @@ function App(){
   const showPeriodQuickStrip = showRecordShell
     && !showRecordEmpty
     && !showRecordBlank
+    && !showOnboardGuideScheme2
     && recordLifeMode === '经期'
     && !isSearchActive
     && !voiceTranscribe;
+  const showOnboardGuideShell = showOnboardGuidePreview;
   const showDockQuickStrip = showBabyFeedingQuickStrip || showPeriodQuickStrip;
   const showBabyFeedingHeader = showRecordShell
     && !showRecordEmpty
@@ -2646,9 +2742,10 @@ function App(){
     && !showBabyFeedingHeader
     && !showRecordEmpty
     && !showRecordBlank
+    && !showOnboardGuideOverlayActive
     && !voiceTranscribe
     && !isSearchActive;
-  const useHeaderAtmosphereScheme1 = headerAtmosphereScheme === '方案一' && headerAtmosphereReady;
+  const useHeaderAtmosphereScheme1 = headerAtmosphereScheme === '方案一' && headerAtmosphereReady && !showOnboardGuidePreview;
   const useHeaderAtmosphereScheme2 = headerAtmosphereScheme === '方案二' && headerAtmosphereReady;
   const useHeaderAtmosphereScheme3 = headerAtmosphereScheme === '方案三' && headerAtmosphereReady;
   // 方案四：仅居中标题「记录」；Tab 改为 日历 / 记录（仅本方案）
@@ -2883,7 +2980,7 @@ function App(){
       )}
 
       <div
-        className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showRecordBlank ? ' suiji-shell--blank' : '')+(voiceTranscribe ? ' suiji-shell--voice' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')+(showSearchPage && !showBabyFeedingHeader ? ' is-search-open':'')+(babyFeedingPanelMode === 'all' ? ' is-filter-panel-open':'')+(babyFeedingPanelMode === 'search' ? ' is-xhs-search-open':'')+(isSearchActive?' is-search-filtered':'')+(useHeaderAtmosphereScheme2?' is-atm-scheme2':'')}
+        className={'suiji-shell suiji-shell--scene'+(showRecordEmpty ? ' suiji-shell--empty' : '')+(showOnboardGuideOverlayActive ? ' suiji-shell--empty suiji-shell--onboard-s3' : '')+(showRecordBlank ? ' suiji-shell--blank' : '')+(showOnboardGuideScheme1 && showOnboardGuidePreview ? ' suiji-shell--onboard-s1' : '')+(showOnboardGuideScheme2 && showOnboardGuidePreview ? ' suiji-shell--onboard-s2' : '')+(showOnboardGuideMask ? ' is-onboard-masked' : '')+(voiceTranscribe ? ' suiji-shell--voice' : '')+(showRecordShell ? '' : ' app-view-hidden')+(dockExpanded?' is-mood-expanded':'')+(showSearchPage && !showBabyFeedingHeader ? ' is-search-open':'')+(babyFeedingPanelMode === 'all' ? ' is-filter-panel-open':'')+(babyFeedingPanelMode === 'search' ? ' is-xhs-search-open':'')+(isSearchActive?' is-search-filtered':'')+(useHeaderAtmosphereScheme2?' is-atm-scheme2':'')}
         aria-hidden={!showRecordShell}
       >
         {showRecordEmpty ? (
@@ -2915,7 +3012,7 @@ function App(){
             onAdvance={advanceEmptyPreviewGuide}
           />
         ) : null}
-        {!voiceTranscribe && (
+        {!voiceTranscribe && !showOnboardGuideOverlayActive && (
         <DockPublisher
           draft={draft}
           onDraft={setDraft}
@@ -2931,7 +3028,7 @@ function App(){
           onPhoto={()=>setShowPhoto(true)}
           onDockExpandedChange={setDockExpanded}
           activeTab={activeTab}
-          defaultInputMode={(showScheme1Hints || emptyPreviewMode) ? 'voice' : 'text'}
+          defaultInputMode={(showScheme1Hints || emptyPreviewMode || showOnboardGuideScheme1) ? 'voice' : 'text'}
           showScheme3Bubble={showScheme3Bubble}
           highlightScheme3Input={highlightScheme3Input}
           demoPhase={demoPhase}
@@ -2997,7 +3094,25 @@ function App(){
           >
             {useHeaderAtmosphereScheme4 ? '记录' : '点滴'}
           </h1>
+              {showOnboardGuideOverlayEntry ? (
+                <button
+                  type="button"
+                  className="ep-onboard-s3-entry"
+                  aria-label="什么是点滴"
+                  onClick={() => setOnboardGuideDismissed(false)}
+                >
+                  <img
+                    className="ep-onboard-s3-entry-icon"
+                    src="assets/onboard-guide-lightbulb.png"
+                    alt=""
+                    width={20}
+                    height={20}
+                    draggable={false}
+                  />
+                </button>
+              ) : (
               <div className="stream-header-side"/>
+              )}
             </>
           )}
         </div>
@@ -3022,6 +3137,8 @@ function App(){
             'suiji-stream'
             + (recordLifeMode === '育儿' && !isSearchActive && babyDiscoverVisible && !babyFeedingEntryActive ? ' has-baby-discover' : '')
             + (showDockQuickStrip ? ' has-dock-quick-strip' : '')
+            + (showOnboardGuidePreview ? ' has-onboard-timeline' : '')
+            + (showOnboardGuideMask ? ' is-onboard-masked' : '')
             + (useHeaderAtmosphereScheme1 ? ' has-hero-title' : '')
             + (useHeaderAtmosphereScheme2 ? ' has-hero-title-scheme2' : '')
           }
@@ -3058,6 +3175,7 @@ function App(){
               <p className="tl-search-empty-desc">检查拼写或尝试新搜索词。</p>
             </div>
           ) : (
+          <>
           <TimelineStream
             key={'tl-fb-'+feedbackDisplayScheme}
             blocks={displayTimeline}
@@ -3086,10 +3204,25 @@ function App(){
             onFirstDropLand={recordFeedback ? handleFirstDropLand : undefined}
             onFirstDropComplete={recordFeedback ? handleFirstDropComplete : undefined}
           />
+          {showOnboardGuideMask ? (
+            <>
+              <div className="ep-onboard-gradient-mask" aria-hidden="true"/>
+              <button
+                type="button"
+                className="ep-onboard-gradient-mask-hit"
+                aria-label="点击查看完整时间轴"
+                onClick={() => setOnboardGuideDismissed(true)}
+              />
+              <div className="ep-onboard-dock-layer">
+                {OnboardGuideBody ? <OnboardGuideBody/> : null}
+              </div>
+            </>
+          ) : null}
+          </>
           )}
         </div>
 
-        {!voiceTranscribe && (
+        {!voiceTranscribe && !showOnboardGuideOverlayActive && (
         <DockPublisher
           draft={draft}
           onDraft={setDraft}
@@ -3105,9 +3238,9 @@ function App(){
           onPhoto={()=>setShowPhoto(true)}
           onDockExpandedChange={setDockExpanded}
           activeTab={activeTab}
-          defaultInputMode="voice"
-          hideQuickFan={showBabyFeedingQuickStrip}
-          hideQuickFab={showPeriodQuickStrip}
+          defaultInputMode={(showScheme1Hints || emptyPreviewMode || showOnboardGuideScheme1) ? 'voice' : 'text'}
+          hideQuickFan={showBabyFeedingQuickStrip || showOnboardGuideScheme1}
+          hideQuickFab={showPeriodQuickStrip || showOnboardGuideScheme1}
           feedingQuickItems={dockQuickItems}
           feedingQuickCollapsedCount={showPeriodQuickStrip ? PERIOD_DOCK_PRIMARY_COUNT : 6}
           feedingQuickLabel={showPeriodQuickStrip ? '经期快捷记录' : '宝宝喂养快捷记录'}
@@ -3147,6 +3280,17 @@ function App(){
         </>
         )}
       </div>
+
+      {showOnboardGuideOverlayActive ? (
+        <div className="ep-onboard-fullscreen" aria-hidden={false}>
+          {showOnboardGuideScheme3Active && OnboardGuideScheme3Screen ? (
+            <OnboardGuideScheme3Screen onClose={()=>setOnboardGuideDismissed(true)}/>
+          ) : null}
+          {showOnboardGuideScheme4Active && OnboardGuideScheme4Screen ? (
+            <OnboardGuideScheme4Screen onClose={()=>setOnboardGuideDismissed(true)}/>
+          ) : null}
+        </div>
+      ) : null}
 
       {showRecordShell && !showRecordEmpty && !showRecordBlank && recordLifeMode === '育儿' && !isSearchActive && babyDiscoverVisible && !babyFeedingEntryActive && (
         <BabyFeedingDiscoverCard onClose={closeBabyFeedingDiscoverCard}/>
@@ -3265,6 +3409,29 @@ function App(){
               {feedbackDisplayScheme === '方案一' && '小气泡「点滴回应」↔ 点开成大气泡'}
               {feedbackDisplayScheme === '方案二' && '小气泡直接展示短文案 ↔ 点开成大气泡（含迷你图）'}
               {feedbackDisplayScheme === '方案三' && '点卡片→记录详情；点角标→浮层；浮层点图表→继续了解'}
+            </p>
+          </div>
+
+          <div className="demo-tweak-section">
+            <div className="demo-tweak-section-label">新手引导</div>
+            <div className="demo-scene-dock-options is-row">
+              {['方案一', '方案二', '方案三', '方案四'].map((opt)=>(
+                <button
+                  key={'onboard-'+opt}
+                  type="button"
+                  className={'demo-scene-dock-btn'+(onboardGuideScheme === opt ? ' active' : '')}
+                  aria-pressed={onboardGuideScheme === opt}
+                  onClick={()=>setTweak('onboardGuideScheme', opt)}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+            <p className="demo-scene-dock-hint">
+              {onboardGuideScheme === '方案一' && '背景示例时间轴 + 底部引导；点击蒙层进入完整时间轴'}
+              {onboardGuideScheme === '方案二' && '居中引导 + 示例气泡 + 文字输入框 + + 号箭头'}
+              {onboardGuideScheme === '方案三' && '进入点滴先展示空值页动画；关闭后收起到右上角灯泡，可再次打开'}
+              {onboardGuideScheme === '方案四' && '实验台方案5：输入→时间轴卡片→体重趋势图循环；关闭后收起到灯泡'}
             </p>
           </div>
 

@@ -81,7 +81,9 @@ const scriptFiles = [
   'timeline-modules.jsx',
   'timeline.jsx',
   'record-empty.jsx',
+  'record-empty-onboard-scheme4.jsx',
   'record-blank.jsx',
+  'record-blank-onboard-scheme1.jsx',
   'record-blank-scheme3.jsx',
   'record-blank-scheme1-ceremony.jsx',
   'search-filter.jsx',
@@ -353,7 +355,8 @@ const TWEAK_DEFAULTS = {
   "periodFeelGuideScheme": "方案一",
   "headerAtmosphereScheme": "方案一",
   "demoTheme": "默认",
-  "feedbackDisplayScheme": "方案一"
+  "feedbackDisplayScheme": "方案一",
+  "onboardGuideScheme": "方案一"
 };
 window.__TWEAK_DEFAULTS = TWEAK_DEFAULTS;
 ${lockedScript}

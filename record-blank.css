@@ -1794,3 +1794,383 @@
 .record-blank-stream.is-post-ceremony .tl-day-section-head{
   padding-top:0;
 }
+
+/* ============ 新手引导 · 方案一（嵌入正常时间轴骨架） ============ */
+
+.suiji-shell--onboard-s1 .stream-hero-title,
+.suiji-shell--onboard-s1 .stream-hero-title.is-scheme2{
+  display:none;
+}
+
+.suiji-shell--onboard-s1 .suiji-stream{
+  position:relative;
+  display:block;
+  min-height:0;
+  max-height:calc(100dvh - 44px);
+  padding-bottom:calc(200px + var(--my-safe-bottom));
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+
+.suiji-stream.has-onboard-timeline{
+  position:relative;
+  padding-bottom:calc(var(--my-dock-float-b, 180px) + 24px);
+}
+
+.suiji-stream.has-onboard-timeline.is-onboard-masked{
+  overflow-y:auto;
+  touch-action:auto;
+  -webkit-overflow-scrolling:touch;
+}
+
+.suiji-stream.has-onboard-timeline:not(.is-onboard-masked){
+  overflow-y:auto;
+  touch-action:auto;
+  -webkit-overflow-scrolling:touch;
+}
+
+.suiji-shell.is-onboard-revealed .suiji-stream.has-onboard-timeline{
+  overflow-y:auto;
+  touch-action:auto;
+  -webkit-overflow-scrolling:touch;
+  max-height:calc(100dvh - 44px);
+  min-height:0;
+}
+
+.ep-onboard-gradient-mask{
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:390px;
+  top:44px;
+  bottom:var(--my-tabbar-h);
+  z-index:12;
+  margin:0;
+  padding:0;
+  pointer-events:none;
+  background:linear-gradient(
+    to top,
+    var(--my-bg) 0%,
+    var(--my-bg) 14%,
+    color-mix(in srgb, var(--my-bg) 92%, transparent) 28%,
+    color-mix(in srgb, var(--my-bg) 70%, transparent) 46%,
+    color-mix(in srgb, var(--my-bg) 40%, transparent) 64%,
+    color-mix(in srgb, var(--my-bg) 14%, transparent) 82%,
+    transparent 100%
+  );
+}
+
+.ep-onboard-gradient-mask-hit{
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:390px;
+  top:auto;
+  bottom:var(--my-tabbar-h);
+  height:min(320px, 52vh);
+  z-index:13;
+  border:0;
+  margin:0;
+  padding:0;
+  cursor:pointer;
+  appearance:none;
+  -webkit-appearance:none;
+  background:transparent;
+}
+
+.ep-onboard-dock-layer{
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:390px;
+  z-index:20;
+  pointer-events:none;
+}
+
+.suiji-shell--onboard-s1:not(.suiji-shell--onboard-s2) .ep-onboard-dock-layer{
+  /* 灰色 dock 卡片内、快捷按钮行上方 */
+  bottom:calc(var(--my-tabbar-h) + var(--my-dock-path-h, 76px) + 68px + 32px);
+  z-index:92;
+}
+
+.suiji-shell--onboard-s1:not(.suiji-shell--onboard-s2) .ep-onboard-dock-layer .ep-onboard-stage.is-guide-s1{
+  position:relative;
+  bottom:auto;
+  padding:0 22px;
+}
+
+.ep-onboard-dock-layer .ep-onboard-stage{
+  position:relative;
+  bottom:auto;
+  left:auto;
+  right:auto;
+  padding:0 22px;
+}
+
+.ep-onboard-dock-layer .ep-s1-fab-arrow.is-editable{
+  pointer-events:auto;
+}
+
+.record-blank-stream.is-onboard-scheme1{
+  min-height:calc(100dvh - 44px - var(--my-dock-float-b, 180px));
+}
+
+.ep-onboard-stage{
+  position:absolute;
+  left:0;
+  right:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  padding:0 22px;
+  overflow:visible;
+  pointer-events:none;
+}
+
+.suiji-shell--onboard-s1:not(.suiji-shell--onboard-s2) .ep-onboard-dock-layer .ep-onboard-stage.is-guide-s1 .ep-s1-center{
+  margin-bottom:8px;
+}
+
+.suiji-shell--onboard-s1:not(.suiji-shell--onboard-s2) .ep-onboard-dock-layer .ep-onboard-stage.is-guide-s1 .ep-s1-voice-title{
+  margin-bottom:0;
+}
+
+.ep-onboard-stage.is-guide-s1 .ep-s1-center{
+  margin-bottom:12px;
+}
+
+.ep-onboard-stage.is-guide-s1 .ep-s1-voice-title{
+  margin-bottom:0;
+}
+
+.suiji-shell--onboard-s1:not(.suiji-shell--onboard-s2) .ep-s1-guide-stack{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+}
+
+.suiji-shell--onboard-s1:not(.suiji-shell--onboard-s2) .ep-s1-guide-stack .ep-s1-center{
+  margin:0 0 8px;
+}
+
+.suiji-shell--onboard-s1:not(.suiji-shell--onboard-s2) .ep-s1-guide-stack .ep-s1-voice-title{
+  margin:0;
+  text-align:center;
+}
+
+.suiji-shell--onboard-s2 .ep-onboard-dock-layer{
+  /* 引导区底边在 + 号上方，贴近参考图 */
+  bottom:calc(var(--my-tabbar-h) + 67px + 56px + 8px);
+}
+
+.suiji-shell--onboard-s2 .ep-onboard-dock-layer .ep-onboard-stage.is-guide-s2{
+  padding:0 22px;
+}
+
+.suiji-shell--onboard-s2 .ep-s2-guide-stack{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+}
+
+.suiji-shell--onboard-s2 .ep-s2-voice-title{
+  margin:0 0 12px;
+  padding:0;
+  color:#9a9aa3;
+  font-size:15px;
+  line-height:1.35;
+  font-weight:500;
+  text-align:center;
+  width:100%;
+}
+
+.suiji-shell--onboard-s2 .ep-s1-voice-hints.ep-s2-voice-hints{
+  width:100%;
+  max-width:100%;
+  margin:0;
+  padding:0 72px 0 0;
+  box-sizing:border-box;
+}
+
+.suiji-shell--onboard-s2 .ep-s2-voice-hints .ep-s1-voice-chip{
+  max-width:calc(100% - 4px);
+}
+
+.suiji-shell--onboard-s2 .ep-s2-voice-hints .ep-s1-voice-chip.is-right{
+  margin-left:auto;
+  margin-right:0;
+  max-width:min(100%, calc(100% - 8px));
+}
+
+.suiji-shell--onboard-s2 .ep-s1-fab-arrow.is-editable:not([style*="left"]){
+  right:70px;
+  bottom:calc(var(--my-tabbar-h) + 67px + 56px + 88px);
+}
+
+.ep-s1-center{
+  position:relative;
+  left:auto;
+  right:auto;
+  top:auto;
+  margin:0 0 16px;
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  text-align:center;
+  opacity:0;
+  transform:translateY(8px);
+  animation:epFadeUp .3s cubic-bezier(0,0,.2,1) .3s both;
+}
+
+.ep-s1-spark{
+  display:none;
+}
+
+.ep-s1-prefix{
+  color:#111;
+  font-size:20px;
+  line-height:32px;
+  font-weight:500;
+  white-space:nowrap;
+}
+
+.ep-s1-keyword-window{
+  height:32px;
+  overflow:hidden;
+  color:#ff4d88;
+  font-size:20px;
+  line-height:32px;
+  font-weight:500;
+  width:auto;
+  flex:0 0 auto;
+}
+
+.ep-s1-keyword{
+  display:inline-block;
+  white-space:nowrap;
+  animation:epKeywordSingle .34s cubic-bezier(0,0,.2,1) both;
+}
+
+.ep-s1-voice-hints{
+  position:relative;
+  left:auto;
+  bottom:auto;
+  transform:none;
+  width:100%;
+  max-width:360px;
+  margin:0 auto;
+  z-index:1;
+  pointer-events:none;
+}
+
+.ep-s1-voice-title{
+  margin:0 0 12px;
+  color:#9a9aa3;
+  font-size:15px;
+  line-height:1.35;
+  font-weight:500;
+  text-align:center;
+}
+
+.ep-s1-voice-chip{
+  width:max-content;
+  max-width:86%;
+  padding:11px 15px;
+  border-radius:16px;
+  border:1px solid rgba(255,77,136,.22);
+  background:rgba(255,255,255,.94);
+  color:#2f3034;
+  font-size:15px;
+  line-height:1.35;
+  font-weight:500;
+  box-shadow:0 12px 28px rgba(255,77,136,.08);
+}
+
+.ep-s1-voice-chip + .ep-s1-voice-chip{
+  margin-top:14px;
+}
+
+.ep-s1-voice-chip.is-right{
+  margin-left:auto;
+}
+
+@keyframes epFadeUp{
+  to{opacity:1;transform:translateY(0)}
+}
+
+@keyframes epKeywordSingle{
+  from{opacity:0;transform:translateY(18px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+@media (prefers-reduced-motion: reduce){
+  .ep-onboard-stage *{
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition:none;
+  }
+}
+
+/* 方案二 · 曲线箭头指向 + 号 */
+.ep-s1-fab-arrow{
+  position:absolute;
+  right:68px;
+  bottom:198px;
+  width:96px;
+  height:96px;
+  color:#4b4b50;
+  opacity:0;
+  transform:translateY(6px);
+  animation:epFadeUp .34s ease-out .9s both;
+  z-index:21;
+  pointer-events:none;
+}
+
+.ep-s1-fab-arrow.is-hidden{
+  animation:epS1ArrowOut .24s cubic-bezier(.4,0,1,1) both;
+}
+
+.ep-s1-fab-arrow.is-editable{
+  position:fixed;
+  left:auto;
+  top:auto;
+  pointer-events:auto;
+  cursor:grab;
+  touch-action:none;
+  z-index:98;
+}
+
+.ep-s1-fab-arrow.is-editable:active{
+  cursor:grabbing;
+}
+
+.ep-s1-fab-arrow .ep-curve-arrow-svg{
+  width:100%;
+  height:100%;
+  overflow:visible;
+  transform:rotate(24deg) scaleX(-1);
+  transform-origin:50% 50%;
+}
+
+.ep-s1-fab-arrow .ep-curve-arrow-svg path{
+  fill:currentColor;
+}
+
+.suiji-shell--onboard-s2 .dock-feeding-quick{
+  display:none;
+}
+
+.suiji-shell--onboard-s2 .dock-camera-btn{
+  display:none;
+}
+
+@keyframes epS1ArrowOut{
+  to{opacity:0;transform:translateY(-8px)}
+}

@@ -1556,7 +1556,7 @@ function normalizeV3Entry(raw){
   };
 }
 
-function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = false, entryId}){
+function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = false, entryId, forceInlineAi = false}){
   const cardRef = React.useRef(null);
   const aiPanelRef = React.useRef(null);
   const [revealStep, setRevealStep] = React.useState(() => (staggerReveal && isNew ? 0 : 2));
@@ -1798,6 +1798,53 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
         const DietAiCollapsibleSection = window.DietAiCollapsibleSection;
         const TypewriterText = window.TypewriterText;
         const streamNote = isNew && a.chartType === 'symptomDots' && a.note && TypewriterText;
+        const renderInlineAiPanel = () => (
+          <div className="v3-ai-stagger-in">
+            <div style={{borderTop:`0.5px dashed ${TL_HAIR}`, marginInline:-12}}/>
+            <button
+              type="button"
+              onClick={()=>setOpen(v=>!v)}
+              style={{
+                width:'100%', background:'transparent', border:0,
+                display:'flex', alignItems:'center', gap:6,
+                padding:'10px 0', cursor:'pointer', fontFamily:'inherit',
+              }}
+              aria-expanded={open}
+            >
+              <span className="v3-card-ai-badge">
+                <span className="tl-period-analysis-spark" aria-hidden="true"/>
+              </span>
+              <span className="v3-card-ai-title">{a.title}</span>
+              <V3Chevron open={open}/>
+            </button>
+            {open && (
+              <div ref={aiPanelRef} className="v3-ai-panel-in" style={{paddingBottom:12}}>
+                {a.chartType && (
+                  <TLChart
+                    type={a.chartType}
+                    data={a.chartData}
+                    weightUnit={a.weightUnit}
+                    note={a.note}
+                  />
+                )}
+                {a.chartType !== 'caloriePanel' && (a.noteParts || a.note) && (
+                  streamNote ? (
+                    <div className="v3-weight-curve-note">
+                      <TypewriterText text={a.note} active followScroll/>
+                    </div>
+                  ) : (
+                    <WeightAnalysisNote noteParts={a.noteParts} note={a.note}/>
+                  )
+                )}
+                {!forceInlineAi && a.chartType === 'weightTrend' ? <WeightTrendReviewEntry/> : null}
+                {!forceInlineAi && a.chartType === 'caloriePanel' ? <DietCalorieReviewEntry/> : null}
+              </div>
+            )}
+          </div>
+        );
+        if (forceInlineAi) {
+          return <div ref={aiPanelRef}>{renderInlineAiPanel()}</div>;
+        }
         if (DietAiCollapsibleSection) {
           return (
             <div ref={aiPanelRef}>
@@ -1841,50 +1888,7 @@ function V3v2Card({primary, ai, aiDefaultOpen = false, isNew, staggerReveal = fa
             </div>
           );
         }
-        return (
-          <div className="v3-ai-stagger-in">
-            <div style={{borderTop:`0.5px dashed ${TL_HAIR}`, marginInline:-12}}/>
-            <button
-              type="button"
-              onClick={()=>setOpen(v=>!v)}
-              style={{
-                width:'100%', background:'transparent', border:0,
-                display:'flex', alignItems:'center', gap:6,
-                padding:'10px 0', cursor:'pointer', fontFamily:'inherit',
-              }}
-              aria-expanded={open}
-            >
-              <span className="v3-card-ai-badge">
-                <span className="tl-period-analysis-spark" aria-hidden="true"/>
-              </span>
-              <span className="v3-card-ai-title">{a.title}</span>
-              <V3Chevron open={open}/>
-            </button>
-            {open && (
-              <div ref={aiPanelRef} className="v3-ai-panel-in" style={{paddingBottom:12}}>
-                {a.chartType && (
-                  <TLChart
-                    type={a.chartType}
-                    data={a.chartData}
-                    weightUnit={a.weightUnit}
-                    note={a.note}
-                  />
-                )}
-                {a.chartType !== 'caloriePanel' && (a.noteParts || a.note) && (
-                  streamNote ? (
-                    <div className="v3-weight-curve-note">
-                      <TypewriterText text={a.note} active followScroll/>
-                    </div>
-                  ) : (
-                    <WeightAnalysisNote noteParts={a.noteParts} note={a.note}/>
-                  )
-                )}
-                {a.chartType === 'weightTrend' ? <WeightTrendReviewEntry/> : null}
-                {a.chartType === 'caloriePanel' ? <DietCalorieReviewEntry/> : null}
-              </div>
-            )}
-          </div>
-        );
+        return renderInlineAiPanel();
       })()}
     </div>
   );
@@ -1906,6 +1910,7 @@ function V3RecordGroupCard({group, isNew}){
       aiDefaultOpen={group.aiDefaultOpen}
       isNew={isNew}
       staggerReveal={!!group.staggerReveal}
+      forceInlineAi={!!group.onboardInlineAi}
       entryId={group.primary?.id || group.id}
     />
   );

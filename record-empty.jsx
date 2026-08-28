@@ -4,6 +4,29 @@ const { useState, useEffect, useRef } = React;
 
 const EMPTY_LOOP_SEC = 4.6;
 const EMPTY_DEMO_ACTIVE_SEC = 3.6;
+const ONBOARD_S3_CARD_END = 0.25;
+const ONBOARD_S3_VOICE_BEGIN = 0.3;
+const ONBOARD_S3_VOICE_IN_END = 0.5;
+const ONBOARD_S3_TEXT_BEGIN = 0.55;
+const ONBOARD_S3_TEXT_END = 1.25;
+const ONBOARD_S3_TAGS_DELAY = 0.5;
+const ONBOARD_S3_TAGS_BEGIN = ONBOARD_S3_TEXT_END + ONBOARD_S3_TAGS_DELAY;
+const ONBOARD_S3_TAG_DURATION = 0.25;
+const ONBOARD_S3_TAG_STAGGER = 0.12;
+const ONBOARD_S3_TAGS_END = ONBOARD_S3_TAGS_BEGIN + ONBOARD_S3_TAG_STAGGER + ONBOARD_S3_TAG_DURATION;
+const ONBOARD_S3_CHART_DELAY = 0.5;
+const ONBOARD_S3_CHART_BEGIN = ONBOARD_S3_TAGS_END + ONBOARD_S3_CHART_DELAY;
+const ONBOARD_S3_CHART_END = ONBOARD_S3_CHART_BEGIN + 0.45;
+const ONBOARD_S3_ANIM_END = ONBOARD_S3_CHART_END;
+const ONBOARD_S3_HOLD_SEC = 3;
+const ONBOARD_S3_LOOP_SEC = ONBOARD_S3_ANIM_END + ONBOARD_S3_HOLD_SEC;
+
+const ONBOARD_S3_DEMO_TRANSCRIPT = '今天有点累，来之前两三天肚子特别胀';
+
+const ONBOARD_S3_TAGS = [
+  { cat: '情绪', val: '疲惫', icon: 'mood' },
+  { cat: '症状', val: '腹胀', icon: 'sym' },
+];
 
 function useLoopTime(duration = EMPTY_LOOP_SEC, speed = 1) {
   const [t, setT] = useState(0);
@@ -79,11 +102,135 @@ function RecordEmptyTagIcon({ name, color }) {
       </svg>
     );
   }
+  if(name === 'weight'){
+    return (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="3" y="15" width="18" height="4" rx="1" stroke={color} strokeWidth="1.6"/>
+        <path d="M12 4v11M8.5 8.5 12 5l3.5 3.5" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    );
+  }
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path d="M4 8h16l-2 11a2 2 0 01-2 2H8a2 2 0 01-2-2L4 8z" stroke={color} strokeWidth="1.6"/>
       <path d="M8 8V5a4 4 0 018 0v3" stroke={color} strokeWidth="1.6"/>
     </svg>
+  );
+}
+
+function OnboardGuideScheme3DemoCard({ t, P }) {
+  const pCard = easeOut(range(t, 0, ONBOARD_S3_CARD_END));
+  const pVoice = easeOut(range(t, ONBOARD_S3_VOICE_BEGIN, ONBOARD_S3_VOICE_IN_END));
+  const pText = range(t, ONBOARD_S3_TEXT_BEGIN, ONBOARD_S3_TEXT_END);
+  const pTags = [
+    range(t, ONBOARD_S3_TAGS_BEGIN, ONBOARD_S3_TAGS_BEGIN + ONBOARD_S3_TAG_DURATION),
+    range(t, ONBOARD_S3_TAGS_BEGIN + ONBOARD_S3_TAG_STAGGER, ONBOARD_S3_TAGS_BEGIN + ONBOARD_S3_TAG_STAGGER + ONBOARD_S3_TAG_DURATION),
+  ];
+  const pChart = easeOut(range(t, ONBOARD_S3_CHART_BEGIN, ONBOARD_S3_CHART_END));
+  const shown = ONBOARD_S3_DEMO_TRANSCRIPT.slice(0, Math.floor(pText * ONBOARD_S3_DEMO_TRANSCRIPT.length));
+
+  return (
+    <div
+      className="record-empty-card"
+      style={{
+        opacity: pCard,
+        transform: `translateY(${(1 - pCard) * 8}px)`,
+      }}
+    >
+      <div className="record-empty-card-hd">
+        <div className="record-empty-card-label">
+          <span
+            className="record-empty-card-dot"
+            style={{ opacity: 0.6 + 0.4 * Math.sin(t * 6) }}
+          />
+          示例
+        </div>
+      </div>
+
+      <RecordEmptyVoiceBubble
+        pIn={pVoice}
+        pText={pText}
+        text={shown}
+        P={P}
+        t={t}
+        variant="left"
+        voiceFreezeAt={ONBOARD_S3_TEXT_END}
+        voiceBeginAt={ONBOARD_S3_VOICE_BEGIN}
+      />
+      <RecordEmptyTagsRow progress={pTags} P={P} items={ONBOARD_S3_TAGS}/>
+      <RecordEmptyMiniChart progress={pChart} P={P}/>
+    </div>
+  );
+}
+
+function OnboardGuideScheme3Screen({ onClose }) {
+  const P = EMPTY_PALETTE;
+  const loopT = useLoopTime(ONBOARD_S3_LOOP_SEC, 1);
+  const t = Math.min(loopT, ONBOARD_S3_ANIM_END);
+  const [pressed, setPressed] = useState(false);
+  const [closing, setClosing] = useState(false);
+
+  const handleClose = () => {
+    if (closing) return;
+    setClosing(true);
+  };
+
+  useEffect(() => {
+    if (!closing) return undefined;
+    const tm = setTimeout(() => onClose?.(), 420);
+    return () => clearTimeout(tm);
+  }, [closing, onClose]);
+
+  return (
+    <div className={'record-empty-root ep-onboard-s3' + (closing ? ' is-collapsing' : '')}>
+      <div
+        className="record-empty-blob record-empty-blob--tr"
+        style={{ background: `radial-gradient(circle, ${P.primarySoft} 0%, transparent 70%)` }}
+        aria-hidden="true"
+      />
+      <div
+        className="record-empty-blob record-empty-blob--bl"
+        style={{ background: `radial-gradient(circle, ${P.primarySoft} 0%, transparent 70%)` }}
+        aria-hidden="true"
+      />
+
+      <div className="ep-onboard-s3-header">
+        <h1 className="ep-onboard-s3-title">点滴</h1>
+        <button
+          type="button"
+          className="ep-onboard-s3-close"
+          aria-label="关闭"
+          onClick={handleClose}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <div className="record-empty-hero ep-onboard-s3-hero">
+        <h2 className="ep-onboard-s3-hero-title">
+          在美柚，<span className="record-empty-accent">记一切</span>
+        </h2>
+        <p className="record-empty-hero-sub">说一句话，情绪 · 症状 · 饮食 自动整理</p>
+      </div>
+
+      <div className="record-empty-demo ep-onboard-s3-demo">
+        <OnboardGuideScheme3DemoCard t={t} P={P}/>
+      </div>
+
+      <div className="record-empty-voice-wrap ep-onboard-s3-voice-wrap">
+        <RecordEmptyVoiceButton
+          P={P}
+          pressed={pressed}
+          onPress={()=>setPressed(true)}
+          onRelease={()=>setPressed(false)}
+        />
+        <p className="record-empty-voice-hint">
+          {pressed ? '松开发送' : '按住说话'}
+        </p>
+      </div>
+    </div>
   );
 }
 
@@ -185,14 +332,30 @@ function RecordEmptyDemoCard({ t, P }) {
   );
 }
 
-function RecordEmptyVoiceBubble({ pIn, pText, text, P, t }) {
+function RecordEmptyVoiceBubble({ pIn, pText, text, P, t, variant, capDurationSec, voiceBeginAt = 0.5, voiceFreezeAt }) {
+  const isLeft = variant === 'left';
   const bars = 22;
+  const capped = capDurationSec != null;
+  const recSec = capped ? Math.min(capDurationSec, Math.max(0, t - voiceBeginAt)) : Math.max(0, t - voiceBeginAt);
+  const frozenByCap = capped && recSec >= capDurationSec;
+  const frozenByTextEnd = voiceFreezeAt != null && (t >= voiceFreezeAt || pText >= 1);
+  const voiceDone = frozenByCap || frozenByTextEnd;
+  const freezeT = voiceFreezeAt != null
+    ? Math.min(t, voiceFreezeAt)
+    : (capped ? voiceBeginAt + capDurationSec : t);
+  const animT = voiceDone ? freezeT : t;
+  const displaySec = voiceDone
+    ? Math.max(0, freezeT - voiceBeginAt)
+    : recSec;
+  const durLabel = (capped || voiceFreezeAt != null)
+    ? `0:${String(Math.floor(displaySec)).padStart(2, '0')}`
+    : `0:0${Math.floor(t * 2) % 10}`;
   return (
     <div
-      className="record-empty-bubble-wrap"
+      className={'record-empty-bubble-wrap' + (isLeft ? ' is-left' : '')}
       style={{
         opacity: pIn,
-        transform: `translateY(${(1 - pIn) * 6}px)`,
+        transform: `translateY(${(1 - pIn) * 6}px)${isLeft ? ` translateX(${(1 - pIn) * -10}px)` : ''}`,
       }}
     >
       <div
@@ -209,13 +372,13 @@ function RecordEmptyVoiceBubble({ pIn, pText, text, P, t }) {
         <div className="record-empty-wave">
           {Array.from({ length: bars }).map((_, i) => {
             const phase = i * 0.45;
-            const a = Math.sin(t * 8 + phase) * 0.45 + Math.sin(t * 14 + phase * 1.7) * 0.3;
-            const env = pText < 1 ? 1 : 0.35;
+            const a = Math.sin(animT * 8 + phase) * 0.45 + Math.sin(animT * 14 + phase * 1.7) * 0.3;
+            const env = voiceDone ? 0.35 : (pText < 1 ? 1 : 0.35);
             const h = 3 + (Math.abs(a) * 12 + 2) * env;
             return <span key={i} style={{ height: h + 'px' }}/>;
           })}
         </div>
-        <span className="record-empty-bubble-dur">0:0{Math.floor(t * 2) % 10}</span>
+        <span className="record-empty-bubble-dur">{durLabel}</span>
       </div>
       {pText > 0 && (
         <div className="record-empty-transcript">
@@ -232,15 +395,15 @@ function RecordEmptyVoiceBubble({ pIn, pText, text, P, t }) {
   );
 }
 
-function RecordEmptyTagsRow({ progress, P }) {
-  const items = [
+function RecordEmptyTagsRow({ progress, P, items }) {
+  const tagItems = items || [
     { cat: '情绪', val: '疲惫', icon: 'mood' },
     { cat: '症状', val: '腹胀', icon: 'sym' },
     { cat: '饮食', val: '三明治', icon: 'food' },
   ];
   return (
     <div className="record-empty-tags">
-      {items.map((it, i) => {
+      {tagItems.map((it, i) => {
         const p = easeOut(progress[i]);
         return (
           <div
@@ -356,6 +519,10 @@ function RecordEmptyVoiceButton({ P, pressed, onPress, onRelease }) {
 
 Object.assign(window, {
   RecordEmptyScreen,
+  OnboardGuideScheme3Screen,
+  RecordEmptyVoiceBubble,
+  RecordEmptyTagsRow,
+  RecordEmptyVoiceButton,
   EMPTY_DEMO_TRANSCRIPT,
   SCENE2_VOICE_TAGS,
   buildScene2VoiceEntry,

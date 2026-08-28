@@ -199,6 +199,34 @@ function getTimelineEmpty(ctx){
   return [buildTodayDayBlock(ctx || SCENE_CONTEXT.period)];
 }
 
+function getTimelineOnboardGuide(ctx){
+  const today = buildTodayDayBlock(ctx || SCENE_CONTEXT.period);
+  return [{
+    ...today,
+    items: [
+      {
+        kind:'record-group', id:'onboard-fit-g',
+        primary:{
+          id:'onboard-fit', time:'18:10', kind:'text',
+          text:'去健身房练了四十分钟，出了一身汗。',
+          tags:[{ cat:'运动', icon:'run' }],
+        },
+      },
+      {
+        kind:'record-group', id:'onboard-baby-sleep-g',
+        primary:{
+          id:'onboard-baby-sleep', time:'19:32', kind:'text',
+          text:'宝宝傍晚闹觉哭了快二十分钟，抱着走了两圈才睡着。',
+          tags:[
+            { cat:'睡眠', icon:'sleep' },
+            { cat:'心情', icon:'mood' },
+          ],
+        },
+      },
+    ],
+  }];
+}
+
 // ---------- Scene context ----------
 const SCENE_CONTEXT = {
   period: {
@@ -552,6 +580,7 @@ window.buildSyncDisplayLabel = buildSyncDisplayLabel;
 window.buildT5TagsFromText = buildT5TagsFromText;
 window.buildTodayDayBlock = buildTodayDayBlock;
 window.getTimelineEmpty = getTimelineEmpty;
+window.getTimelineOnboardGuide = getTimelineOnboardGuide;
 window.formatTodayDateLabel = formatTodayDateLabel;
 window.pickFollowUp = pickFollowUp;
 window.SCENE_CONTEXT = SCENE_CONTEXT;
