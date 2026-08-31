@@ -118,14 +118,6 @@ function RecordEmptyTagIcon({ name, color }) {
   );
 }
 
-const ONBOARD_DOCK_QUICK_ITEMS = [
-  { id: 'weight', label: '体重' },
-  { id: 'symptom', label: '症状' },
-  { id: 'mood', label: '心情' },
-  { id: 'diet', label: '饮食' },
-  { id: 'beverage', label: '喝水' },
-];
-
 function OnboardDockVoiceIco({ size = 26 }) {
   const sw = 3.2;
   return (
@@ -138,33 +130,12 @@ function OnboardDockVoiceIco({ size = 26 }) {
   );
 }
 
-/** 方案三/四新手引导底部：快捷入口 + 记录生活点滴输入栏（与主 Dock 一致） */
+/** 方案三/四新手引导底部：记录生活点滴输入栏（与主 Dock 一致，无快捷入口） */
 function OnboardGuideDockBottom({ className = '' }) {
-  const UnifiedQuickIcon = window.UnifiedQuickIcon;
   return (
     <div className={'ep-onboard-dock-bottom' + (className ? ' ' + className : '')} aria-label="记录入口">
       <div className="dock-panel is-feeding-dock is-path-dock ep-onboard-dock-panel">
-        <div className="dock-bar is-path-dock has-feeding-quick">
-          <div className="dock-feeding-quick" aria-label="快捷记录">
-            <div className="dock-feeding-quick-scroll" data-cols="5">
-              {ONBOARD_DOCK_QUICK_ITEMS.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  className="dock-feeding-quick-item"
-                  tabIndex={-1}
-                  aria-hidden="true"
-                >
-                  <span className="dock-feeding-quick-icon" aria-hidden="true">
-                    {UnifiedQuickIcon ? (
-                      <UnifiedQuickIcon type={item.id === 'beverage' ? 'water' : item.id}/>
-                    ) : null}
-                  </span>
-                  <span className="dock-feeding-quick-label">{item.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
+        <div className="dock-bar is-path-dock">
           <div className="dock-input-row dock-input-pill">
             <button type="button" className="dock-mode-btn" tabIndex={-1} aria-hidden="true">
               <OnboardDockVoiceIco size={26}/>

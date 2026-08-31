@@ -62,7 +62,7 @@
   font-size:inherit;
 }
 .ep-onboard-s3-demo{
-  padding-bottom:196px;
+  padding-bottom:112px;
 }
 .ep-onboard-dock-bottom{
   position:absolute;
@@ -76,16 +76,12 @@
 }
 .ep-onboard-dock-bottom .ep-onboard-dock-panel,
 .ep-onboard-dock-bottom .dock-bar,
-.ep-onboard-dock-bottom .dock-feeding-quick-item,
 .ep-onboard-dock-bottom .dock-mode-btn{
   pointer-events:auto;
 }
-.ep-onboard-dock-bottom .dock-feeding-handle{
-  display:none;
-}
-.ep-onboard-dock-bottom .dock-bar.has-feeding-quick{
-  gap:9px;
-  padding:10px 10px 12px;
+.ep-onboard-dock-bottom .dock-bar{
+  gap:8px;
+  padding:8px 12px 10px;
 }
 .ep-onboard-dock-ph{
   position:static;
@@ -166,7 +162,7 @@
   align-items:center;
   justify-content:flex-start;
   overflow:hidden;
-  padding:20px 16px 196px;
+  padding:20px 16px 112px;
 }
 .ep-onboard-s4-frame{
   flex:0 0 auto;

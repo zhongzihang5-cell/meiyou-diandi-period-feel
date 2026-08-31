@@ -12,7 +12,7 @@
 <title>美柚 · 场景四 · 记录心情反馈</title>
 <!--
   记录心情反馈：首次记录水滴动画 + 心情洞察卡
-  生成日期: 2026-08-28
+  生成日期: 2026-08-31
 
   手机演示：
   1. 把此 HTML 发到手机（AirDrop / 微信 / iCloud / GitHub Pages）
@@ -14312,7 +14312,7 @@ html,body{
   font-size:inherit;
 }
 .ep-onboard-s3-demo{
-  padding-bottom:196px;
+  padding-bottom:112px;
 }
 .ep-onboard-dock-bottom{
   position:absolute;
@@ -14326,16 +14326,12 @@ html,body{
 }
 .ep-onboard-dock-bottom .ep-onboard-dock-panel,
 .ep-onboard-dock-bottom .dock-bar,
-.ep-onboard-dock-bottom .dock-feeding-quick-item,
 .ep-onboard-dock-bottom .dock-mode-btn{
   pointer-events:auto;
 }
-.ep-onboard-dock-bottom .dock-feeding-handle{
-  display:none;
-}
-.ep-onboard-dock-bottom .dock-bar.has-feeding-quick{
-  gap:9px;
-  padding:10px 10px 12px;
+.ep-onboard-dock-bottom .dock-bar{
+  gap:8px;
+  padding:8px 12px 10px;
 }
 .ep-onboard-dock-ph{
   position:static;
@@ -14416,7 +14412,7 @@ html,body{
   align-items:center;
   justify-content:flex-start;
   overflow:hidden;
-  padding:20px 16px 196px;
+  padding:20px 16px 112px;
 }
 .ep-onboard-s4-frame{
   flex:0 0 auto;
@@ -32961,7 +32957,7 @@ const TWEAK_DEFAULTS = {
 };
 window.__TWEAK_DEFAULTS = TWEAK_DEFAULTS;
 window.__FEEDBACK_DISPLAY_SCHEME = '方案二';
-window.__BUILD__ = "2026-08-28-nomask";
+window.__BUILD__ = "2026-08-31-nomask";
 window.__STANDALONE_LOCKED_SCENE = true;
 </script>
 
@@ -44382,14 +44378,6 @@ function RecordEmptyTagIcon({ name, color }) {
   );
 }
 
-const ONBOARD_DOCK_QUICK_ITEMS = [
-  { id: 'weight', label: '体重' },
-  { id: 'symptom', label: '症状' },
-  { id: 'mood', label: '心情' },
-  { id: 'diet', label: '饮食' },
-  { id: 'beverage', label: '喝水' },
-];
-
 function OnboardDockVoiceIco({ size = 26 }) {
   const sw = 3.2;
   return (
@@ -44402,33 +44390,12 @@ function OnboardDockVoiceIco({ size = 26 }) {
   );
 }
 
-/** 方案三/四新手引导底部：快捷入口 + 记录生活点滴输入栏（与主 Dock 一致） */
+/** 方案三/四新手引导底部：记录生活点滴输入栏（与主 Dock 一致，无快捷入口） */
 function OnboardGuideDockBottom({ className = '' }) {
-  const UnifiedQuickIcon = window.UnifiedQuickIcon;
   return (
     <div className={'ep-onboard-dock-bottom' + (className ? ' ' + className : '')} aria-label="记录入口">
       <div className="dock-panel is-feeding-dock is-path-dock ep-onboard-dock-panel">
-        <div className="dock-bar is-path-dock has-feeding-quick">
-          <div className="dock-feeding-quick" aria-label="快捷记录">
-            <div className="dock-feeding-quick-scroll" data-cols="5">
-              {ONBOARD_DOCK_QUICK_ITEMS.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  className="dock-feeding-quick-item"
-                  tabIndex={-1}
-                  aria-hidden="true"
-                >
-                  <span className="dock-feeding-quick-icon" aria-hidden="true">
-                    {UnifiedQuickIcon ? (
-                      <UnifiedQuickIcon type={item.id === 'beverage' ? 'water' : item.id}/>
-                    ) : null}
-                  </span>
-                  <span className="dock-feeding-quick-label">{item.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
+        <div className="dock-bar is-path-dock">
           <div className="dock-input-row dock-input-pill">
             <button type="button" className="dock-mode-btn" tabIndex={-1} aria-hidden="true">
               <OnboardDockVoiceIco size={26}/>
